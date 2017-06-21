@@ -12,7 +12,8 @@ library(ggiraph)
 library(grid)
 
 #read in the data
-precip_dis <- readRDS("precip_stream_data.rds")
+precip_dis <- 
+  readRDS("precip_stream_data.rds")
 
 #Add columns of the natural logarithm of relevant values
 ln_concentration_ueq <- as.data.frame(log(precip_dis$concentration_ueq))
