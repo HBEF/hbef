@@ -1,3 +1,11 @@
+library(ggiraph)
+
+#load in all the data from Camila download
+precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
+#simplify dataset to make Ca graph
+Cadata <- precip_stream_data[precip_stream_data$solute == "Ca",]
+Cadata <- Cadata[Cadata$ws == "6",]
+
 
 # ACID RAIN STORY
 years = reactive(input$acidrain_range)
@@ -49,3 +57,30 @@ output$acidrain_scatterplot = renderPlot({
   abline(mm,lty=3,col="royalblue")
   arrows(newx$so4no3[1], newy[1], newx$so4no3[2], newy[2],lwd=3)
 })
+
+#Devri code for Ca ggiraph
+output$CaTime <- renderggiraph({
+  CaTime <- ggplot(Cadata, aes(x = as.Date(date)))+
+    geom_line(aes(y = concentration_ueq, group = source, color = source))+ 
+    labs(colour = "Source", x = "Year", y = "Ca (ueq/L)")+
+    xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
+    ggtitle("Calcium's acid rain peak in 1970 and subsequent decline")+
+    theme(plot.background = element_rect(fill = 'gray', colour = 'gray'))+
+    theme(panel.background = element_rect(fill = 'black'))
+  
+  my_ggCa <- CaTime +
+    geom_point_interactive(aes(y = concentration_ueq, col = source, tooltip = date, data_id = date), size = 6)+ 
+    labs(colour = "Source", x = "Year", y = "Ca (ueq/L)")+
+    xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
+    theme(axis.title.x =  element_blank(),
+          axis.text.x  =  element_text(angle=0, vjust=0.5, size=30), 
+          axis.title.y = element_text(face="bold", size=35),
+          axis.text.y  = element_text(angle=0.3, vjust=0.5, size=30),
+          legend.title = element_text(size=40, face="bold"),
+          legend.text = element_text(size = 30),
+          plot.title = element_text(face="bold", size=55))
+  
+  ggiraph(code = print(my_ggCa), width = .8, width_svg = 45,
+          height_svg = 15, hover_css = "cursor:pointer;fill:black;stroke:black;")
+})
+
