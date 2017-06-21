@@ -12,7 +12,7 @@ library(ggiraph)
 
 
   # Application title
-fluidPage(
+shinyUI(fluidPage(
   titlePanel("Effects of Deforestation on Streamwater"),
   
   tabsetPanel(
@@ -216,6 +216,6 @@ fluidPage(
              
              
     ))
-)
-    
+ )
+)   
   
