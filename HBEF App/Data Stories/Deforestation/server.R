@@ -185,8 +185,8 @@ plot.formatted.df <- function(df, timescale, date.input, y.lab, title.lab, addpr
   return(p)
 }
 
-#Server function
-shinyServer(function(input, output) {
+
+
   
   #Reactive value for the units, either in
   #concentration or flux
@@ -327,4 +327,3 @@ shinyServer(function(input, output) {
     
   })
   options(warn = -1)
-})

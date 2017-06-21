@@ -1,7 +1,7 @@
 library(plotly)
 
 
-shinyUI(fluidPage(
+fluidPage(
   
   # Application title
   titlePanel("Dilutification of Streamwater"),
@@ -62,4 +62,4 @@ shinyUI(fluidPage(
       plotlyOutput("splot", width = "100%", height = "100%")
     )
   )
-))
+)

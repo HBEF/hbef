@@ -1,7 +1,7 @@
 library(ggiraph)
 
 #load in all the data from Camila download
-precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
+precip_stream_data <- readRDS("precip_stream_data.rds")
 #simplify dataset to make Ca graph
 Cadata <- precip_stream_data[precip_stream_data$solute == "Ca",]
 Cadata <- Cadata[Cadata$ws == "6",]

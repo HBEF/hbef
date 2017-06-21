@@ -158,7 +158,7 @@ df_ggplot <- function(df, timescale, date.input, y.lab, title.lab, addprecip, ws
 }
 
 
-shinyServer(function(input, output) {
+
   
   #a reactive data set for plotting
   solute.data <- reactive({
@@ -234,4 +234,4 @@ shinyServer(function(input, output) {
     ) %>% layout(margin = list(b = 90))
     })
   
-  })
+  

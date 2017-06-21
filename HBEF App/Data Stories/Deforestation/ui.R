@@ -10,8 +10,9 @@ library(plotly)
 library(ggiraph)
 
 
-shinyUI(fluidPage(
+
   # Application title
+fluidPage(
   titlePanel("Effects of Deforestation on Streamwater"),
   
   tabsetPanel(
@@ -214,10 +215,7 @@ shinyUI(fluidPage(
              
              
              
-    )
+    ))
+)
     
-    
-  )
   
-  
-))
