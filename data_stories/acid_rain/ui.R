@@ -1,3 +1,9 @@
+library(magrittr)
+library(timevis)
+library(shiny)
+library(ggplot2)
+library(plotly)
+
 shinyUI(
   fluidPage(theme = "Solar_bootstrap.min.css",
             fluidRow(column(width = 12, offset = 1, h1(strong(em("Acid Rain & HBEF"))))),
@@ -148,4 +154,3 @@ shinyUI(
   )
   
 )
-
