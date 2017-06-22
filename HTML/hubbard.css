@@ -102,7 +102,6 @@ h1 {
 	font-style: normal;
 	letter-spacing: 2px;
 	line-height: 1em;
-	hyphens: auto;
 }
 
 
@@ -134,11 +133,21 @@ p{
 	font-size: 14pt;
 }
 
+
+@media (max-width: 765px) {
+h1{ font-size: 4em;}}
+
+@media (max-width: 550px) {
+h1{ font-size: 2.5em;}}
+
+
 @media (max-width: 375px) {
 h1{ font-size: 2em;}
 h3 {font-size: 1.5em;}
 h4 {font-size: 1em;}
 p{font-size: 12pt;}}
+
+
 
 /*use for ligth fonts */
 .dark_background {
@@ -391,7 +400,9 @@ nav{
 
 
 #acidtitle {
-background: url("images/acidrain_title.jpg");
+background: linear-gradient(
+		rgba(25, 25, 25, 0.45), 
+		rgba(25, 25, 25, 0.45)), url("images/acidrain_title.jpg");
 background-size: cover;
 color: #fafafa;
 }
@@ -452,8 +463,8 @@ color: #fafafa;
 .footer {
 	position:absolute;
   	width:100%;
-  	height:70%;  /* Height of the footer */
- 	background:#222222;
+  	height:60%;  /* Height of the footer */
+ 	background:#333333;
 	text-align: center;
 }
 
