@@ -59,7 +59,30 @@ shinyUI(fluidPage(
     # Show a plot of the concentrations of solutes over time
     #in various watersheds
     mainPanel(
-      plotlyOutput("splot", width = "100%", height = "100%")
+      plotlyOutput("splot", width = "100%", height = "100%"),
+      h3("Summary of Dilutification"),
+      p("Over time, aquatic organisms have physiologically
+        adapted to certain ionic conditions in the 
+        streamwater they inhabit. In these organisms,
+        as in all organisms, an osmotic balance at the
+        cellular level is controlled by ion concentrations.
+        When streamwater ion concentrations change 
+        drastically, therefore, the cellular osmotic 
+        balance is disrupted, causing the cells of aquatic
+        organisms to swell and burst or shrivel and shrink
+        depending on the ionic concentration differential between
+        the cells and the outside environment. Changing ion
+        concentrations in streamwater can thus lead to major
+        die-offs of aquatic organisms."),
+      p("For unknown reasons, the streamwater at Hubbard Brook 
+        is becoming increasingly diluted and deionized. 
+        The concentrations of most nutrients in streamwater
+        are diminishing as time goes on. One can visualize
+        this phenomenon with the data tools in this module.
+        Best-fit lines are added to the data to show the 
+        overall decreasing trend in ion concentration.
+        Select any ion (or solute) and watershed to see how
+        the concentrations are changing.")
     )
   )
 ))
