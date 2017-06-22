@@ -6,8 +6,8 @@ library(ggplot2)
 library(plotly)
 
 #load in all the data from Camila download
-precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
-#precip_stream_data <- load("precip_stream_data.rds")
+#precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
+precip_stream_data <- load("precip_stream_data.rds")
 
 #simplify dataset to make Ca graph
 Cadata <- precip_stream_data[precip_stream_data$solute == "Ca",]
