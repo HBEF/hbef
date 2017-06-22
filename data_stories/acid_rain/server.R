@@ -90,15 +90,15 @@ shinyServer( function(input, output){
   
   #plot of any compound conc (reactively chosen) over rective time
   output$cTime <- renderPlotly({
-    cTime <- ggplot(get(input$selComp), aes(x = as.Date(date)))+
+    cTime <- ggplot(get(input$selComp), aes(x = as.Date(date), 
+                                            text = paste("Concentration:", concentration_ueq, "<br>", "Date:", date)))+
       geom_line(aes(y = concentration_ueq, group = source, color = source))+ 
       labs(colour = "Source", x = "Year", y = "(ueq/L)")+
       xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
       ggtitle(as.character(input$selComp), "affected by acid rain")+
       theme(plot.background = element_rect(fill = 'gray', colour = 'gray'))
     #      theme(panel.background = element_rect(fill = 'black'))
-    
-    ggplotly(cTime)
+    ggplotly(cTime, tooltip = "text")
   })
   
   
