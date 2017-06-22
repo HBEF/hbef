@@ -34,10 +34,8 @@ shinyUI(fluidPage(
                          selected = 1),
       #Dropdown select box for the units for the data to display
       selectInput("units", label = h3("Units"),
-                  choices = list("Eq/ha-yr" = "Eq/ha-yr",
-                                 "ueq/L" = "ueq/L",
-                                 "ln(ueq/L)" = "ln(ueq/L)",
-                                 "ln(Eq/ha-yr)" = "ln(Eq/ha-yr)"),
+                  choices = list("ueq/L" = "ueq/L",
+                                 "ln(ueq/L)" = "ln(ueq/L)"),
                   selected = "ueq/L"),
       #Dropdown select box for the time scale, month or year
       selectInput("scale", label = h3("Time Scale"),

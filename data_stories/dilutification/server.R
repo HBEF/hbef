@@ -53,15 +53,7 @@ format_data <- function(df, watersheds, ion, precipitation,
   }else{
     df4 <- filter(df3, source == "Discharge") 
   }
-  if (c.units == "Eq/ha-yr"){
-    if (t.scale == "year"){
-      df4$value = df4$flux_sum
-      df4$date.st = paste(df4$water_year)
-    }else{
-      df4$value = df4$flux
-      df4$date.st = paste(df4$water_date)
-    }
-  }else if (c.units == "ueq/L"){
+  if (c.units == "ueq/L"){
     if (t.scale == "year"){
       df4$value = df4$ueq_weighted_average
       df4$date.st = paste(df4$water_year)
@@ -69,20 +61,12 @@ format_data <- function(df, watersheds, ion, precipitation,
       df4$value = df4$concentration_ueq
       df4$date.st = paste(df4$water_date)
     }
-  }else if (c.units == "ln(ueq/L)"){
+  }else{
     if (t.scale == "year"){
       df4$value = df4$ln_ueq_weighted_average
       df4$date.st = paste(df4$water_year)
     }else{
       df4$value = df4$ln_concentration_ueq
-      df4$date.st = paste(df4$water_date)
-    }
-  }else{
-    if (t.scale == "year"){
-      df4$value = df4$ln_flux_sum
-      df4$date.st = paste(df4$water_year)
-    }else{
-      df4$value = df4$ln_flux
       df4$date.st = paste(df4$water_date)
     }
   }
@@ -196,32 +180,37 @@ shinyServer(function(input, output) {
     len <- length(input$watershed)
     if (len == 1){
       l = 300
+      w = 500
     }else if (len == 2){
-      l = 300
+      l = 500
+      w = 500
     }else if (len == 3){
-      l = 400
+      l = 600
+      w = 500
     }else if (len == 4){
-      l = 400
+      l = 600
+      w = 500
     }else if (len == 5){
-      l = 600
+      l = 800
+      w = 500
     }else if (len == 6){
-      l = 600
+      l = 800
+      w = 500
     }else if (len == 7){
-      l = 700
+      l = 1200
+      w = 500
     }else if (len == 8){
-      l = 700
+      l = 1200
+      w = 500
     }else{
-      l = 700
+      l = 1200
+      w = 700
     }
     y = input$units
     if (input$units == "ueq/L"){
       title = paste(sol2(), "Concentration", sep = " ")
-    }else if (input$units == "ln(ueq/L)"){
-      title = paste("Natural Log of ", sol2(), "Concentration", sep = " ")
-    }else if (input$units == "Eq/ha-yr"){
-      title = paste(sol2(), "Flux", sep = " ")
     }else{
-      title = paste("Natural Log of", sol2(), "Flux", sep = " ")
+      title = paste("Natural Log of ", sol2(), "Concentration", sep = " ")
     }
     ggplotly(
       df_ggplot(solute.data2(), timescale = input$scale,
@@ -230,7 +219,7 @@ shinyServer(function(input, output) {
                 title.lab = title,
                 addprecip = input$p,
                 ws = input$watershed), tooltip = c("y", "label"),
-      height = l, width = 500
+      height = l, width = w
     ) %>% layout(margin = list(b = 90))
     })
   
