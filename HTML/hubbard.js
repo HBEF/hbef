@@ -38,3 +38,8 @@ function openTab(evt, tabName) {"use strict";
     evt.currentTarget.className += " w3-red";
 }
 
+
+function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+  }
+
