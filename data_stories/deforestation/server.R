@@ -8,30 +8,12 @@ library(dplyr)
 library(shiny)
 library(plotly)
 library(utils)
-library(ggiraph)
 library(grid)
 
 source_shapes <- c("Discharge" = 16, "Precipitation"= 21)
 
 #read in the data
 precip_dis <- readRDS("precip_stream_data_long.rds")
-
-#Add columns of the natural logarithm of relevant values
-ln_concentration_ueq <- as.data.frame(log(precip_dis$concentration_ueq))
-ln_ueq_weighted_average <- as.data.frame(log(precip_dis$ueq_weighted_average))
-ln_flux <- as.data.frame(log(precip_dis$flux))
-ln_flux_sum <- as.data.frame(log(precip_dis$flux_sum))
-
-precip_dis <- cbind(as.data.frame(precip_dis), ln_concentration_ueq,
-                    ln_ueq_weighted_average, ln_flux,
-                    ln_flux_sum)
-colnames(precip_dis) <- c("ws", "date", "water_date", "water_year", "solute",
-                          "concentration_mg", "source", "water_mm_pm", "MW", "z",
-                          "concentration_ueq", "concentration_umol", "flux",
-                          "mg_weighted_average", "umol_weighted_average",
-                          "ueq_weighted_average","flux_sum",
-                          "ln_concentration_ueq", "ln_ueq_weighted_average",
-                          "ln_flux", "ln_flux_sum")
 
 
 #Write a function that converts the Source code from precip and 
@@ -72,12 +54,20 @@ format_data <- function(df, watersheds, ion, precipitation,
         df4$value = df4$concentration_mg
         df4$date.st = paste(df4$water_date)
       }
-    }else{
+    }else if (c.units == "umol/L"){
       if (t.scale == "year"){
         df4$value = df4$umol_weighted_average
         df4$date.st = paste(df4$water_year)
       }else{
         df4$value = df4$concentration_umol
+        df4$date.st = paste(df4$water_date)
+      }
+    }else {
+      if (t.scale == "year"){
+        df4$value = df4$flux_sum
+        df4$date.st = paste(df4$water_year)
+      }else{
+        df4$value = df4$flux
         df4$date.st = paste(df4$water_date)
       }
     }
@@ -98,12 +88,20 @@ format_data <- function(df, watersheds, ion, precipitation,
         df4$value = log(df4$concentration_mg)
         df4$date.st = paste(df4$water_date)
       }
-    }else{
+    }else if (c.units == "umol/L"){
       if (t.scale == "year"){
         df4$value = log(df4$umol_weighted_average)
         df4$date.st = paste(df4$water_year)
       }else{
         df4$value = log(df4$concentration_umol)
+        df4$date.st = paste(df4$water_date)
+      }
+    }else {
+      if (t.scale == "year"){
+        df4$value = log(df4$flux_sum)
+        df4$date.st = paste(df4$water_year)
+      }else{
+        df4$value = log(df4$flux)
         df4$date.st = paste(df4$water_date)
       }
     }
@@ -341,7 +339,9 @@ shinyServer(function(input, output) {
                         timescale = s, sc = c,
                         date.input = input$dates, y.lab = y, 
                         title.lab = title,
-                        addprecip = input$p),tooltip = c("y", "label"))
+                        addprecip = input$p),tooltip = c("y", "label"))%>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE) 
   })
   
   #Plot output for discharge quantity
@@ -374,7 +374,9 @@ shinyServer(function(input, output) {
                         timescale = s2, sc = c("red", "blue"),
                         date.input = input$dates.dis,
                         y.lab = y, title.lab = title,
-                        addprecip = input$p.dis), tooltip = c("y", "label"))
+                        addprecip = input$p.dis), tooltip = c("y", "label"))%>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE) 
     
     
     

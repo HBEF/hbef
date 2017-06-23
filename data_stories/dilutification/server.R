@@ -24,23 +24,6 @@ source_shapes <- c("Discharge" = 16, "Precipitation"= 21)
 #read in the data
 precip_dis <- readRDS("precip_stream_data_long.rds")
 
-#Add columns of the natural logarithm of relevant values
-ln_concentration_ueq <- as.data.frame(log(precip_dis$concentration_ueq))
-ln_ueq_weighted_average <- as.data.frame(log(precip_dis$ueq_weighted_average))
-ln_flux <- as.data.frame(log(precip_dis$flux))
-ln_flux_sum <- as.data.frame(log(precip_dis$flux_sum))
-
-precip_dis <- cbind(as.data.frame(precip_dis), ln_concentration_ueq,
-                    ln_ueq_weighted_average, ln_flux,
-                    ln_flux_sum)
-colnames(precip_dis) <- c("ws", "date", "water_date", "water_year", "solute",
-                          "concentration_mg", "source", "water_mm_pm", "MW", "z",
-                          "concentration_ueq", "concentration_umol", "flux",
-                          "mg_weighted_average", "umol_weighted_average",
-                          "ueq_weighted_average","flux_sum",
-                          "ln_concentration_ueq", "ln_ueq_weighted_average",
-                          "ln_flux", "ln_flux_sum")
-
 
 #Write a function that converts the Source code from precip and 
 #flow to Precipitation and Streamwater Discharge
@@ -308,7 +291,9 @@ shinyServer(function(input, output) {
                   addprecip = input$p,
                   ws = input$watershed), tooltip = c("y", "label"),
         height = l, width = w
-      ) %>% layout(margin = list(b = 90))
+      ) %>% layout(margin = list(b = 90))%>%
+        config(displayModeBar = FALSE) %>%
+        config(showLink = FALSE) 
     }else{
       ggplotly(
         df_ggplot(solute.data2(), timescale = input$scale,
@@ -318,7 +303,9 @@ shinyServer(function(input, output) {
                   addprecip = input$p,
                   ws = input$watershed), tooltip = c("y", "label"),
         height = l, width = w
-      ) %>% layout(margin = list(b = 90))
+      ) %>% layout(margin = list(b = 90))%>%
+        config(displayModeBar = FALSE) %>%
+        config(showLink = FALSE) 
     }
   })
 })
