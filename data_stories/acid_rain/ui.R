@@ -25,7 +25,7 @@ shinyUI(
                               of where they live")),
                      column(1)),
             fluidRow(column(width = 11, offset = 1,
-                            plotlyOutput("pH", height = "auto", width = "100%"))),
+                            plotlyOutput("pHtheme", height = "auto", width = "100%"))),
             fluidRow(column(width = 8, offset = 1,
                             h3("Starting in the early 1950s (soon after Disney first released Cinderella 
                                and Peter Pan) this balance within ecosystems everywhere began to tip.  

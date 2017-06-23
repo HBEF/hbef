@@ -25,14 +25,15 @@ hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
 solute_palette <- c(cation, anion, hydro)
 source_shapes <- c("flow" = 16, "precip"= 21)
 
-ggplot_function <- function(data, x, y, color, facet, ncol = NULL, nrow = NULL){
+ggplot_function <- function(data, x, y, color, title, facet, ncol = NULL, nrow = NULL){
   ggplotly(  
     (ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws)) + my_theme +
        geom_line(size = 1)+ 
        geom_point(size = 1.5, fill = "white", stroke = 0.5) + 
-       facet_wrap(~get(facet) , ncol = ncol)+ 
-       xlim(min(input$timeframe[1]), max(input$timeframe[2]))+ 
-       labs(x = "Water Year", y = units())+ 
+       ggtitle(title) +
+  #     facet_wrap(~get(facet) , ncol = ncol)+ 
+#       xlim(min(input$timeframe[1]), max(input$timeframe[2]))+ 
+ #      labs(x = "Water Year", y = units())+ 
        scale_shape_manual(values = source_shapes) +
        scale_color_manual(values = solute_palette) +
        scale_alpha_discrete(range = c(0.9, 0.5))), 
@@ -120,6 +121,11 @@ shinyServer( function(input, output){
       ggtitle("Precipitation de-acidifying in response to acid rain mitigation")+
       labs(x = "Year", y = "pH")
     ggplotly(pH)
+  })
+  #practice with Camila's theme
+  output$pHtheme <- renderPlotly({
+    ggplot_function(data = pHData_precip, x = "water_year", y = "mg_weighted_average", 
+                    title = "Precipitation de-acidifying in response to acid rain mitigation")
   })
   
   #pH plot with P and Q to show acid in, more neutralized out
