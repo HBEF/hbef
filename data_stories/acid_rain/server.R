@@ -25,6 +25,22 @@ hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
 solute_palette <- c(cation, anion, hydro)
 source_shapes <- c("flow" = 16, "precip"= 21)
 
+ggplot_function <- function(data, x, y, color, facet, ncol = NULL, nrow = NULL){
+  ggplotly(  
+    (ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws)) + my_theme +
+       geom_line(size = 1)+ 
+       geom_point(size = 1.5, fill = "white", stroke = 0.5) + 
+       facet_wrap(~get(facet) , ncol = ncol)+ 
+       xlim(min(input$timeframe[1]), max(input$timeframe[2]))+ 
+       labs(x = "Water Year", y = units())+ 
+       scale_shape_manual(values = source_shapes) +
+       scale_color_manual(values = solute_palette) +
+       scale_alpha_discrete(range = c(0.9, 0.5))), 
+    width = 900) %>%
+    config(displayModeBar = FALSE) %>%
+    config(showLink = FALSE)  
+}
+
 
 #load in all the data from Camila download
 precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
@@ -86,21 +102,52 @@ SiO2Data <- SiO2Data[SiO2Data$ws == "6",]
 HData <- precip_stream_data[precip_stream_data$solute == "H",]
 HData <- HData[HData$ws == "6",]
 
+pHData <- precip_stream_data[precip_stream_data$solute == "pH",]
+pHData <- pHData[pHData$ws == "6",]
+pHData <- pHData[,c(1:4,14,5:13,15:16)]
+
+pHData_precip <- pHData[pHData$source == "precip",]
+
+#make df of SO4 NO3 for graph of mitigation effects
+SO4NO3Data <- precip_stream_data[precip_stream_data$solute == c("SO4", "NO3"),]
+SO4NO3Data <- SO4NO3Data[SO4NO3Data$ws == "6",]
+
 shinyServer( function(input, output){
+  #intro pH plot with only precip
+  output$pH <- renderPlotly({
+    pH <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average)) +
+      geom_line()+
+      ggtitle("Precipitation de-acidifying in response to acid rain mitigation")+
+      labs(x = "Year", y = "pH")
+    ggplotly(pH)
+  })
+  
+  #pH plot with P and Q to show acid in, more neutralized out
+  output$pHPandQ <- renderPlotly({
+    pHPandQ <- ggplot(pHData, aes(x = water_year, y = mg_weighted_average, group = source, color = source))+
+      geom_line()+
+      ggtitle("De-acidification of P and Q in response to reducing SOx and NOx emissions")+
+      labs(colour = "Source", x = "Year", y = "pH")
+    ggplotly(pHPandQ)
+  })
+  #plot of SO4 and NO3 to complement pH increase
+  output$SO4NO3reductions <- renderPlotly({
+    SO4NO3reductions <- ggplot()
+  })
   
   #plot of any compound conc (reactively chosen) over rective time
   output$cTime <- renderPlotly({
-    cTime <- ggplot(get(input$selComp), aes(x = as.Date(date), 
+    cTime <- ggplot(get(input$selComp), aes(x = as.Date(get(input$selDate)),
+                                            group = source, color = source,
                                             text = paste("Concentration:", concentration_ueq, "<br>", "Date:", date)))+
-      geom_line(aes(y = concentration_ueq, group = source, color = source))+ 
+      geom_line(aes(y = concentration_ueq)) +
       labs(colour = "Source", x = "Year", y = "(ueq/L)")+
       xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
-      ggtitle(as.character(input$selComp), "affected by acid rain")+
-      theme(plot.background = element_rect(fill = 'gray', colour = 'gray'))
+      ggtitle(as.character(input$selComp), "affected by acid rain") #possibly rename 'CaData' to be 'Calcium'
+    #  theme(plot.background = element_rect(fill = 'gray', colour = 'gray'))
     #      theme(panel.background = element_rect(fill = 'black'))
     ggplotly(cTime, tooltip = "text")
   })
-  
   
   #output an interactive timeline for the history of acid rain
   output$CAAetc <- renderTimevis({

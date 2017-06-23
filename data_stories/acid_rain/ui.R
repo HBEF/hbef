@@ -24,6 +24,8 @@ shinyUI(
                             p(strong("Ecosystem:"), "a network of animals, plants, and the physical features 
                               of where they live")),
                      column(1)),
+            fluidRow(column(width = 11, offset = 1,
+                            plotlyOutput("pH", height = "auto", width = "100%"))),
             fluidRow(column(width = 8, offset = 1,
                             h3("Starting in the early 1950s (soon after Disney first released Cinderella 
                                and Peter Pan) this balance within ecosystems everywhere began to tip.  
@@ -86,10 +88,11 @@ shinyUI(
                                                     "Al" = "AlData", "NH4" = "NH4Data", 
                                                     "Cl" = "ClData", "PO4" = "PO4Data", 
                                                     "SiO2" = "SiO2Data", "H" = "HData"),
-                                        selected = "Ca")
+                                        selected = "Ca"),
                             #switch between monthly and yearly data
-                            #selectInput("selDate", label = "Timescale granularity",
-                            #            choices = c("Monthly" = "date", "Yearly" = "year"))
+                            selectInput("selDate", label = "Timescale granularity",
+        ###############make an if statement to change x data to avg data when yearly is selected??
+                                        choices = c("Monthly" = "date", "Yearly" = "water_year"))
             )
             ),
             fluidRow(column(width = 11, offset = 1,
@@ -105,6 +108,8 @@ shinyUI(
                                much less so.  Acid is coming in, reacting, and staying.  Sounds like an 
                                unwelcome house guest.")),
                      column(3)),
+        fluidRow(column(width = 11, offset = 1
+                        )),
             fluidRow(column(width = 11, offset = 1,
                             h2(strong("History/Policy")))),
             fluidRow(column(width = 8, offset = 1,
@@ -114,7 +119,11 @@ shinyUI(
                                until this time, the United States government was just beginning to fund 
                                research and small policies around air pollution.  In 1967 they began to 
                                expand their monitoring and control, until the enactment of the Clean Air
-                               Act in 1970."),
+                               Act in 1970.")),
+                     column(3)),
+        fluidRow(column(width = 11, offset = 1,
+                        timevisOutput("CAAetc"))),
+        fluidRow(column(width = 8, offset = 1,
                             h3("The Clean Air Act was made to regulate emissions from both stationary sources 
                                (like power plants) and mobile ones (like cars).  The EPA was also founded in
                                1970 in order to enforce the new act.  There have since been amendments, in 
@@ -125,7 +134,7 @@ shinyUI(
                                and mitigate ecological distress.")),
                      column(3)),
             fluidRow(column(width = 11, offset = 1,
-                            timevisOutput("CAAetc"))),
+                            plotlyOutput("pHPandQ", width = "100%", height = "auto"))),
             fluidRow(column(width = 12, offset = 1,
                             h2(strong("Take Action")))),
             fluidRow(column(width = 8, offset = 1,
