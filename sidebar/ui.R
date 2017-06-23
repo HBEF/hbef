@@ -7,6 +7,14 @@ library(shiny)
 library(plotly)
 library(ggthemes)
 
+
+
+########### IMPORTANTE LISTS #############
+
+
+###  Lists for the sidebar  ###
+#Edit if there are values that do not appear or are not relevant to your data. 
+
 solutes_cations <- list("Potassium (K)" = "K",
                         "Sodium (Na)" = "Na",
                         "Calcium (Ca)" = "Ca",
@@ -22,25 +30,15 @@ solutes_anions <- list("Phosphate (PO4)" = "PO4",
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
 
-watersheds <- list("Watershed 1" = "ws1",
-                   "Watershed 2" = "ws2", 
-                   "Watershed 3" = "ws3",
-                   "Watershed 4" = "ws4",
-                   "Watershed 5" = "ws5",
-                   "Watershed 6" = "ws6",
-                   "Watershed 7" = "ws7",
-                   "Watershed 8" = "ws8",
-                   "Watershed 9" = "ws9")
-
-watersheds2 <- list("1" = "ws1",
-                   "2" = "ws2", 
-                   "3" = "ws3",
-                   "4" = "ws4",
-                   "5" = "ws5",
-                   "6" = "ws6",
-                   "7" = "ws7",
-                   "8" = "ws8",
-                   "9" = "ws9")
+watersheds <- list("Watershed 1" = "1",
+                   "Watershed 2" = "2", 
+                   "Watershed 3" = "3",
+                   "Watershed 4" = "4",
+                   "Watershed 5" = "5",
+                   "Watershed 6" = "6",
+                   "Watershed 7" = "7",
+                   "Watershed 8" = "8",
+                   "Watershed 9" = "9")
 
 water_sources <- list("Precipitation (P)" = "precip",
                      "Discharge (Q)" = "flow")
@@ -51,21 +49,40 @@ granularity <- list("Year" = "year",
 
 units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
 
-  # Application title
-shinyUI(fluidPage(theme = "hubbard.css",
+#######################################################################################
+########### APPLICATION UI ############################################################
+########################################################################################
+
+shinyUI(fluidPage(
+  
+  ########### HEAD - DO NOT EDIT ################################################
+  theme = "hubbard.css",
   tags$head(includeScript(system.file('www', 'ajax.js'))),
   tags$head(includeScript(system.file('www', 'hubbard.js'))),
   tags$head(tags$style(HTML(
     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
+  ###############################################################################
+  
+  ########### BODY ##############################################################
+  
+  ########### QUESTION #1 ####################
   
   fluidRow(
     tags$h3("What happens to discharge when the entire forest is cut?")
   ),
   
+  #############################################
+  
+  ########### GRAPH FOR QUESTION #1 ##########
+  
   fluidRow(
     
     sidebarLayout(
-      ### Side Bar
+      ############## SIDE BAR ################ 
+      #You can edit what the default selected options are. 
+      #You can also delete inputs if you are not allowing 
+      #the user to change that particular input. 
+      
       sidebarPanel(
         
         #Solutes
@@ -92,44 +109,52 @@ shinyUI(fluidPage(theme = "hubbard.css",
                                        choices = solutes_H,
                                        selected = ""))),
         
-        #Watersheds
+        ##Watersheds
         fluidRow(
           column(12, actionLink("select_all_ws", h4("Watersheds")), 
                  selectInput("watersheds", label = "",
                                        choices = watersheds, multiple = TRUE,
                                        selected = "ws6"))),
         
-        #Water Sources
+        ##Water Sources
         fluidRow(
           column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
                                         choices = water_sources,
                                         selected = "precip",
                                         inline = TRUE))),
         
-        #Units  
+        ##Units  
         fluidRow(
           column(12, selectInput("units", label = h4("Units"),
                     choices = units,
                     selected = "mm")),
           column(12, checkboxGroupInput("log", label = h4(""),
                      choices = "ln"))),
-        #Granularity
+        ##Granularity
         fluidRow(
           column(12, selectInput("granularity", label = h4("Granularity"),
                     choices = granularity,
                     selected = "year"))),
         
-        #Date Range
+        ##Date Range
         sliderInput("date_range", label = h4("Date Range"),
                     min = as.Date("1962-01-01"),
                     max = as.Date("2014-01-01"),
                     value = c(as.Date("1965-01-01"), as.Date("2013-01-01")))),
       
-      mainPanel(plotlyOutput("d.plot")), 
+      
+      ############## END OF SIDEBAR #######
+      
+      ############## GRAPH ################ 
+      #Edit the name of the plot based on the name given in the server.R file 
+      mainPanel(plotlyOutput("view1a")), 
       position = "right"
     )
   ),
   
+  ########### END OF GRAPH FOR QUESTION #1 ##########
+  
+  ########### TEXT FOR QUESTION #1 ##################
     fluidRow(
       tags$p("Deforestation, the removal of forest trees,is harmful to the environment for a number of reasons, 
             some of which are less obvious than others.
@@ -156,86 +181,11 @@ shinyUI(fluidPage(theme = "hubbard.css",
              leads to drier climates because less water 
              is transpired, or released into the air, by
              trees. This negatively impacts the water cycle
-             (National Geographic Society 2017)."),
-      tags$p("Using our data set, one can visualize two more
-             consequences of deforestation- leaching 
-             of nutrients from the environment and 
-             increases in water runoff.  Trees prevent 
-             erosion by fixing soil in place with their
-             roots and creating natural dams with fallen
-             leaves and branches. When trees are removed,
-             erosion increases, carrying away the nutrients
-             in the soil. At the same time, deforestation 
-             inhibits water uptake by trees, resulting in
-             heightened runoff and more water moving through
-             the soil, dissolving and washing away more 
-             nutrients. Thus, the concentration of nutrients
-             in streamwater rises following 
-             deforestation (Likens et al. 1970)."),
-      tags$p("At Hubbard Brook, an experiment was conducted 
-             in November and December 1965 in which all the
-             trees in Watershed 2 were cut, left in place,
-             and limbed so that no branches were more that 
-             1.5 meters high. Herbicide was applied 
-             periodically to Watershed 2 for two years 
-             after the deforestation event, so that forest
-             regrowth was prevented. Chemical and quantity
-             measurements of precipitation and streamwater
-             discharge were recorded. At the same time, these
-             measurements were taken at other Hubbard Brook 
-             watersheds, particullarly Watershed 6, which 
-             was left undisturbed (Likens et al. 1970). 
-             These graphs compare data from the deforested
-             Watershed 2 and the undisturbed Watershed 6, 
-             so you can explore the effects of deforestation yourself.")
-    ),
-    
-    
-    fluidRow(
-      tags$h3("What happens to the solutes when the entire forest is cut?")
-    ),
-    
-  fluidRow(
-    sidebarLayout(
-      sidebarPanel(
-        selectInput("solute", label = h4("Solute"),
-                    choices = list("Sodium (Na)" = "Na",
-                                   "Calcium (Ca)" = "Ca",
-                                   "Magnesium (Mg)" = "Mg",
-                                   "Potassium (K)" = "K",
-                                   "Sulfate (SO4)" = "SO4",
-                                   "Nitrate (NO3)" = "NO3",
-                                   "Chlorine (Cl)" = "Cl",
-                                   "Hydrogen Ion (H)" = "H"),
-                    selected = "Na"),
-        
-        selectInput("units", label = h4("Units"),
-                    choices = list("Eq/ha-yr" = "Eq/ha-yr",
-                                   "ueq/L" = "ueq/L",
-                                   "ln(ueq/L)" = "ln(ueq/L)",
-                                   "ln(Eq/ha-yr)" = "ln(Eq/ha-yr)"),
-                    selected = "ueq/L"),
-        selectInput("scale", label = h4("Time Scale"),
-                    choices = list("By month" = "month",
-                                   "By year" = "year"),
-                    selected = "year"),
-        selectInput("p", label = h4("Adding Precipitation"),
-                    choices = list("Without Precipitation" = "noprecip",
-                                   "With Precipitation" = "precip"),
-                    selected = "noprecip"),
-        sliderInput("dates", label = h4("Date Range"),
-                    min = as.Date("1962-01-01"),
-                    max = as.Date("2014-01-01"),
-                    value = c(as.Date("1965-01-01"), as.Date("1971-01-01")))),
-      
-      mainPanel(plotlyOutput("s.plot", width = 500, height = 250)), 
-      position = "right"
+             (National Geographic Society 2017).")
     )
-  )
-  
-  
+  ########### END OF TEXT FOR QUESTION #1 ###############
     
-    
-))
+)#closes FluidPage
+) #closes ShinyUI
 
   
