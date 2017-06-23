@@ -21,7 +21,7 @@ shinyUI(fluidPage(
                                  "Hydrogen Ion" = "H"),
                   selected = "Na"),
       #Group checkbox input for the watersheds to display
-      checkboxGroupInput("watershed", label = h3("Watersheds to Display"),
+      checkboxGroupInput("watershed", label = h3("Watersheds"),
                          choices = list("Watershed 1" = 1,
                                         "Watershed 2" = 2,
                                         "Watershed 3" = 3,
@@ -35,8 +35,13 @@ shinyUI(fluidPage(
       #Dropdown select box for the units for the data to display
       selectInput("units", label = h3("Units"),
                   choices = list("ueq/L" = "ueq/L",
-                                 "ln(ueq/L)" = "ln(ueq/L)"),
+                                 "mg/L" = "mg/L",
+                                 "umol/L" = "umol/L"),
                   selected = "ueq/L"),
+      #checkbox input for selecting whether to apply the logarithm
+      h3("Applying the Natural Logarithm"),
+      checkboxInput("ln", label = "Natural Log",
+                    value = FALSE),
       #Dropdown select box for the time scale, month or year
       selectInput("scale", label = h3("Time Scale"),
                   choices = list("By month" = "month",
