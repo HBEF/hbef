@@ -26,7 +26,7 @@ solute_palette <- c(cation, anion, hydro)
 source_shapes <- c("flow" = 16, "precip"= 21)
 
 ggplot_function <- function(data, x, y, color, title, facet, ncol = NULL, nrow = NULL){
-  ggplotly(  
+#  ggplotly(  
     (ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws)) + my_theme +
        geom_line(size = 1)+ 
        geom_point(size = 1.5, fill = "white", stroke = 0.5) + 
@@ -36,10 +36,10 @@ ggplot_function <- function(data, x, y, color, title, facet, ncol = NULL, nrow =
  #      labs(x = "Water Year", y = units())+ 
        scale_shape_manual(values = source_shapes) +
        scale_color_manual(values = solute_palette) +
-       scale_alpha_discrete(range = c(0.9, 0.5))), 
-    width = 900) %>%
-    config(displayModeBar = FALSE) %>%
-    config(showLink = FALSE)  
+       scale_alpha_discrete(range = c(0.9, 0.5))) 
+#    width = 900) %>%
+ #   config(displayModeBar = FALSE) %>%
+  #  config(showLink = FALSE)  
 }
 
 
@@ -113,20 +113,31 @@ pHData_precip <- pHData[pHData$source == "precip",]
 SO4NO3Data <- precip_stream_data[precip_stream_data$solute == c("SO4", "NO3"),]
 SO4NO3Data <- SO4NO3Data[SO4NO3Data$ws == "6",]
 
-shinyServer( function(input, output){
+shinyServer(function(input, output){
   #intro pH plot with only precip
-  output$pH <- renderPlotly({
-    pH <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average)) +
-      geom_line()+
+  output$pHtheme <- renderPlotly({
+    pH <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average, 
+                                    shape = source, alpha = ws)) + my_theme +
+      geom_line(size = 1)+
+      geom_point(size = 1.5, fill = "white", stroke = 0.5)+
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))+
       ggtitle("Precipitation de-acidifying in response to acid rain mitigation")+
       labs(x = "Year", y = "pH")
-    ggplotly(pH)
+    ggplotly(pH, width = 900)%>%
+      config(displayModeBar = F)%>%
+      config(showLink = F)
+            # tooltip = "text")
   })
   #practice with Camila's theme
-  output$pHtheme <- renderPlotly({
-    ggplot_function(data = pHData_precip, x = "water_year", y = "mg_weighted_average", 
-                    title = "Precipitation de-acidifying in response to acid rain mitigation")
-  })
+  output$pH <- renderPlotly({
+    annotation <- list(yref = 'paper', xref = "x", y = 0.5, x = 1960, text = "annotation")
+    
+    pHtheme <- ggplot_function(data = pHData_precip, x = "water_year", y = "mg_weighted_average")
+  #NOT WORKING           text = paste("Date: ", water_year, "<br>", "pH: ", mg_weighted_average),
+    layout(annotations= list(annotation))
+      })
   
   #pH plot with P and Q to show acid in, more neutralized out
   output$pHPandQ <- renderPlotly({
