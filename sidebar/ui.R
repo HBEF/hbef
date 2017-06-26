@@ -56,7 +56,7 @@ units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
 shinyUI(fluidPage(
   
   ########### HEAD - DO NOT EDIT ################################################
-  theme = "hubbard.css",
+  theme = "app.css",
   tags$head(includeScript(system.file('www', 'ajax.js'))),
   tags$head(includeScript(system.file('www', 'hubbard.js'))),
   tags$head(tags$style(HTML(
@@ -66,14 +66,17 @@ shinyUI(fluidPage(
   ########### BODY ##############################################################
   
   tabsetPanel(id = "top", type = "pills",
-    tabPanel("Causes",
+      
+              
+  ### ------------------------ MAIN TAB 1 -------------------------------####
+      tabPanel("Causes",
     
   
   
   ########### QUESTION #1 ####################
   
   fluidRow(
-    tags$h3("What happens to discharge when the entire forest is cut?")
+    tags$div(class = "container", tags$h3("What happens to discharge when the entire forest is cut?"))
   ),
   
   #############################################
@@ -152,10 +155,14 @@ shinyUI(fluidPage(
       
       ############## GRAPH ################ 
       #Edit the name of the plot based on the name given in the server.R file 
-      mainPanel(tabsetPanel(
-        tabPanel("Plot1",plotlyOutput("plot1a")),
+      mainPanel(tags$div(class="container_graph", tabsetPanel(
+        
+        ### PLOT VIEW 1
+        tabPanel("Plot1", plotlyOutput("plot1a")),
+        
+        ### PLOT VIEW 2
         tabPanel("Plot2",plotlyOutput("plot1b"))
-        )), 
+        ))), 
       position = "right"
     )
     ############## END OF GRAPH ################ 
@@ -164,7 +171,7 @@ shinyUI(fluidPage(
   ########### END OF GRAPH FOR QUESTION #1 ##########
   
   ########### TEXT FOR QUESTION #1 ##################
-    fluidRow(
+  tags$div(class = "container_paragraph", fluidRow(
       tags$p("Deforestation, the removal of forest trees,is harmful to the environment for a number of reasons, 
             some of which are less obvious than others.
              Deforestation results in habitat loss for woodland-
@@ -191,12 +198,25 @@ shinyUI(fluidPage(
              is transpired, or released into the air, by
              trees. This negatively impacts the water cycle
              (National Geographic Society 2017).")
-    )
+    ))
   ########### END OF TEXT FOR QUESTION #1 ###############
-    ), 
+    ),  ### ------------------------ END OF MAIN TAB 1 -------------------------------####
+  
+  
+  
+  
+  
+  
+  
+  ### ------------------------ MAIN TAB 2 -------------------------------####
+  
   tabPanel("Consequences")
   
-  )
+  ### ------------------------ END MAIN TAB 2 -------------------------------####
+  
+  
+  
+  )# Closes Tabset Panel for Main Tabs
   
 )#closes FluidPage
 ) #closes ShinyUI
