@@ -171,10 +171,55 @@ shinyServer(function(input, output){
       config(displayModeBar = F)%>%
       config(showLink = F)
   })
-  #plot of SO4 and NO3 to complement pH increase
+  #plot of SO4 and NO3 to complement pH increase - shows decreasing trend
   output$SO4NO3reductions <- renderPlotly({
-    SO4NO3reductions <- ggplot()
+    SO4NO3reductions <- ggplot(NULL, aes(shape = source, color = solute, alpha = ws))+
+      geom_line(data = NO3Data, aes(x = water_year, y = ueq_weighted_average), size = 1)+
+      geom_point(data = NO3Data, aes(x = water_year, y = ueq_weighted_average,
+                              text = paste("NO3 Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                 size = 1.5, fill = "white", stroke = 0.5)+
+      geom_line(data = SO4Data, aes(x = water_year, y = ueq_weighted_average), size = 1)+
+      geom_point(data = SO4Data, aes(x = water_year, y = ueq_weighted_average,
+                              text = paste("SO4 Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                 size = 1.5, fill = "white", stroke = 0.5)+
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))+
+      ggtitle("SOx and NOx concentrations lowering as policy is implemented")+
+      labs(x = "Year", y = "ueq/L")+ my_theme
+    ggplotly(SO4NO3reductions, tooltip = "text", width = 900)%>%
+      config(displayModeBar = F)%>%
+      config(showLink = F)
   })
+  
+  #base cations trend plot to read next to decreasing so4/no3 and increasing pH
+  output$baseCations <- renderPlotly({
+    baseCations <- ggplot(NULL, aes(shape = source, color = solute, alpha = ws))+ my_theme+
+      geom_line(data = CaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ #alter Camila function to create one more custom to this style? (ie less input based, more to see trend)
+      geom_point(data = CaData, aes(x = water_year, y = ueq_weighted_average,
+                                     text = paste("Ca Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                 size = 1.5, fill = "white", stroke = 0.5)+
+      #NOTE all of these extra geom_line and _point are to graph additional base cations rather than creating yet another df
+      geom_line(data = MgData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ 
+      geom_point(data = MgData, aes(x = water_year, y = ueq_weighted_average,
+                                    text = paste("Mg Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                 size = 1.5, fill = "white", stroke = 0.5)+
+      geom_line(data = KData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ 
+      geom_point(data = KData, aes(x = water_year, y = ueq_weighted_average,
+                                    text = paste("K Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                 size = 1.5, fill = "white", stroke = 0.5)+
+      geom_line(data = NaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ 
+      geom_point(data = NaData, aes(x = water_year, y = ueq_weighted_average,
+                                   text = paste("Na Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                 size = 1.5, fill = "white", stroke = 0.5)+
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))+
+      ggtitle("Decrease in Base cations leaving the soil")+
+      labs(x = "Year", y = "ueq/L")
+    ggplotly(baseCations, tooltip = "text", width = 900)%>%
+      config(displayModeBar = F)%>%
+      config(showLink = F)
+  })################## CHANGE FROM TRIANGLES SOMEHOW
   
   #plot of any compound conc (reactively chosen) over rective time
   output$cTime <- renderPlotly({
