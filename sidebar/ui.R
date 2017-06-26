@@ -9,7 +9,7 @@ library(ggthemes)
 
 
 
-########### IMPORTANTE LISTS #############
+########### IMPORTANT LISTS #############
 
 
 ###  Lists for the sidebar  ###
@@ -87,21 +87,21 @@ shinyUI(fluidPage(
         
         #Solutes
         fluidRow(
-          column(12, actionLink("select_all_ions", h4("Ions"))),
+          column(12, actionLink("select_all_ions", h4("Solutes"))),
          
           #Cations
            column(6,
                     actionLink("select_all_cations", h5("Cations")),
                     checkboxGroupInput("solutes_cations", label = "",
                     choices = solutes_cations,
-                    selected = "Sodium (Na)")),
+                    selected = "Na")),
           
           #Anions
           
           column(6, actionLink("select_all_anions", h5("Anions")),
                     checkboxGroupInput("solutes_anions", label = "",
                     choices = solutes_anions,
-                    selected = "Sulfate (SO4)"))),
+                    selected = "SO4)"))),
           #Hydrogen  
         
         fluidRow(
@@ -114,7 +114,7 @@ shinyUI(fluidPage(
           column(12, actionLink("select_all_ws", h4("Watersheds")), 
                  selectInput("watersheds", label = "",
                                        choices = watersheds, multiple = TRUE,
-                                       selected = "ws6"))),
+                                       selected = "6"))),
         
         ##Water Sources
         fluidRow(
@@ -127,9 +127,9 @@ shinyUI(fluidPage(
         fluidRow(
           column(12, selectInput("units", label = h4("Units"),
                     choices = units,
-                    selected = "mm")),
-          column(12, checkboxGroupInput("log", label = h4(""),
-                     choices = "ln"))),
+                    selected = "mg/L")),
+          column(12, checkboxInput("log", label = ("ln"),
+                                   value = FALSE))),
         ##Granularity
         fluidRow(
           column(12, selectInput("granularity", label = h4("Granularity"),
@@ -150,6 +150,7 @@ shinyUI(fluidPage(
       mainPanel(plotlyOutput("view1a")), 
       position = "right"
     )
+    ############## END OF GRAPH ################ 
   ),
   
   ########### END OF GRAPH FOR QUESTION #1 ##########

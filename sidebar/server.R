@@ -25,7 +25,7 @@ shinyServer(function(session, input, output) {
     theme(rect = element_rect(fill = NA),
           panel.grid.major = element_line(colour = "#dddddd"), 
           text = element_text(family = "Helvetica", size = 12), 
-          legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
+          legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
           strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
           axis.title= element_text(NULL), axis.title.x= element_blank(), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
@@ -72,7 +72,7 @@ shinyServer(function(session, input, output) {
   
   
   ########### SIDEBAR FUNCTIONS ##############################################################
-  ###  allow 'select all' interactivity
+  ###  allow 'select all' interactivity, do not edit
   
   observeEvent(input$select_all_ions, {
     if(input$select_all_ions == 0) {}
@@ -101,7 +101,7 @@ shinyServer(function(session, input, output) {
     else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
   })
   
-  solutes <- reactive({c(input$solutes_cations, input$solutes_anions)})
+  solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
 
@@ -143,24 +143,41 @@ shinyServer(function(session, input, output) {
     else if(input$granularity == "year"& input$units =="flux"){"flux_sum"}
   })
   
+  log_transform <- reactive({
+    if(input$log == "ln"){"transform"}
+    else{"no_transform"}
+  })
+  
   ########### PLOT FUNCTIONS #########################################
   
   ## GGPLOT TIME FUNCTIONS
-  ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL){
+  ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+    
+    if(log) {
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+      labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+    
+    else{
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+      labs(x = "Water Year", y = input$units)} 
+    
+    final <- plot+ my_theme + geom_line(size = 1) + 
+      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                 aes(text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                  "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+      xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))
+    
     ggplotly(  
-      (ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source)) + my_theme +
-         geom_line(size = 1)+ 
-         geom_point(size = 1.5, fill = "white", stroke = 0.5) + 
-         xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
-         labs(x = "Water Year", y = input$units)+ 
-         scale_shape_manual(values = source_shapes) +
-         scale_color_manual(values = solute_palette) +
-         scale_alpha_discrete(range = c(0.9, 0.5))), 
+      final, tooltip = "text",
       width = 900) %>%
       config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)  
+      config(showLink = FALSE)
+    
   }
-  
+
   
   
   #############################################################
@@ -168,13 +185,9 @@ shinyServer(function(session, input, output) {
   #############################################################
   
   output$view1a <- renderPlotly({
-      ggplot_function(reactive_data(), x(), y(),ncol = 1)
+      ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
      })
   
-  
 
-
-  
-  
   
 })
