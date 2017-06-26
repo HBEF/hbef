@@ -150,11 +150,11 @@ shinyServer(function(session, input, output) {
   
   ########### PLOT FUNCTIONS #########################################
   
-  ## GGPLOT TIME FUNCTIONS
+  ## GGPLOT TIME FUNCTION
   ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
     
     if(log) {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), shape = source, alpha = ws))+
       labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
     
     else{
@@ -163,7 +163,7 @@ shinyServer(function(session, input, output) {
     
     final <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes(text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                 aes( color = solute, text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
       scale_shape_manual(values = source_shapes) +
@@ -184,9 +184,13 @@ shinyServer(function(session, input, output) {
   ########### OUTPUTS #########################################
   #############################################################
   
-  output$view1a <- renderPlotly({
-      ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
+  output$plot1a <- renderPlotly({
+    ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
      })
+  
+  output$plot1b <- renderPlotly({
+    ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
+  })
   
 
   
