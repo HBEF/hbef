@@ -9,7 +9,7 @@ library(timevis)
 library(ggthemes)
 
 shinyUI(
-  fluidPage(theme = "Solar_bootstrap.min.css",
+  fluidPage(#theme = "Solar_bootstrap.min.css",
             fluidRow(column(width = 12, offset = 1, h1(strong(em("Acid Rain & HBEF"))))),
             fluidRow(column(width = 10, offset = 1,
                             tags$img(src = "DeadForest.jpg", width = '1270px', height = '650px')),
@@ -25,7 +25,7 @@ shinyUI(
                               of where they live")),
                      column(1)),
             fluidRow(column(width = 11, offset = 1,
-                            plotlyOutput("pHtheme", height = "auto", width = "100%"))),
+                            plotlyOutput("pHtheme", height = "auto", width = "auto"))),
             fluidRow(column(width = 8, offset = 1,
                             h3("Starting in the early 1950s (soon after Disney first released Cinderella 
                                and Peter Pan) this balance within ecosystems everywhere began to tip.  
