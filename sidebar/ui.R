@@ -6,7 +6,7 @@ library(dplyr)
 library(shiny)
 library(plotly)
 library(ggthemes)
-
+library(directlabels)
 
 
 ########### IMPORTANT LISTS #############
@@ -64,6 +64,11 @@ shinyUI(fluidPage(
   ###############################################################################
   
   ########### BODY ##############################################################
+  
+  tabsetPanel(id = "top", type = "pills",
+    tabPanel("Causes",
+    
+  
   
   ########### QUESTION #1 ####################
   
@@ -147,7 +152,10 @@ shinyUI(fluidPage(
       
       ############## GRAPH ################ 
       #Edit the name of the plot based on the name given in the server.R file 
-      mainPanel(plotlyOutput("view1a")), 
+      mainPanel(tabsetPanel(
+        tabPanel("Plot1",plotlyOutput("plot1a")),
+        tabPanel("Plot2",plotlyOutput("plot1b"))
+        )), 
       position = "right"
     )
     ############## END OF GRAPH ################ 
@@ -185,7 +193,11 @@ shinyUI(fluidPage(
              (National Geographic Society 2017).")
     )
   ########### END OF TEXT FOR QUESTION #1 ###############
-    
+    ), 
+  tabPanel("Consequences")
+  
+  )
+  
 )#closes FluidPage
 ) #closes ShinyUI
 
