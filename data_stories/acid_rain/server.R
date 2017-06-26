@@ -26,19 +26,19 @@ solute_palette <- c(cation, anion, hydro)
 source_shapes <- c("flow" = 16, "precip"= 21)
 
 ggplot_function <- function(data, x, y, color, title, facet, ncol = NULL, nrow = NULL){
-#  ggplotly(  
-    (ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws)) + my_theme +
-       geom_line(size = 1)+ 
-       geom_point(size = 1.5, fill = "white", stroke = 0.5) + 
-       ggtitle(title) +
-  #     facet_wrap(~get(facet) , ncol = ncol)+ 
-#       xlim(min(input$timeframe[1]), max(input$timeframe[2]))+ 
- #      labs(x = "Water Year", y = units())+ 
-       scale_shape_manual(values = source_shapes) +
-       scale_color_manual(values = solute_palette) +
-       scale_alpha_discrete(range = c(0.9, 0.5))) 
-#    width = 900) %>%
- #   config(displayModeBar = FALSE) %>%
+  #  ggplotly(  
+  (ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws)) + my_theme +
+     geom_line(size = 1)+ 
+     geom_point(size = 1.5, fill = "white", stroke = 0.5) + 
+     ggtitle(title) +
+     #     facet_wrap(~get(facet) , ncol = ncol)+ 
+     #       xlim(min(input$timeframe[1]), max(input$timeframe[2]))+ 
+     #      labs(x = "Water Year", y = units())+ 
+     scale_shape_manual(values = source_shapes) +
+     scale_color_manual(values = solute_palette) +
+     scale_alpha_discrete(range = c(0.9, 0.5))) 
+  #    width = 900) %>%
+  #   config(displayModeBar = FALSE) %>%
   #  config(showLink = FALSE)  
 }
 
@@ -48,22 +48,30 @@ precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/D
 
 #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
 historyData <- data.frame(
-  id = 1:4,
-  content = c("Majority of HBEF dataset", 
+  id = 1:6,
+  content = c("Majority of HBEF dataset",
+              "The Air Pollution Control Act",
               "EPA founded", 
-              "Clean Air Act", 
+              "Clean Air Act",
+              "Clean Air Act Amendment",
               "Today"),
   title = c("Watershed 6 is displayed in this story, as it is the control",
+            "",
             "The EPA was founded to enforce the Clean Air Act",
             "The Clean Air Act also has important amendments",
+            "Amendment that more specifically addressed acid rain",
             "Today isn't really today"),
-  start = c("1963-06-01", 
+  start = c("1963-06-01",
+            "1955-01-01",
             "1970-12-02", 
-            "1970-06-01", 
+            "1970-06-01",
+            "1990-06-01",
             "2017-06-19"), #FIND THE REAL DATE OF CAA ENACTMENT!
   end = c("2014-05-01",
+          NA,
           NA, 
-          NA, 
+          NA,
+          NA,
           NA)
 )
 #making data frames to use with rb selection of cmpd ##OPTIMIZE
@@ -117,7 +125,9 @@ shinyServer(function(input, output){
   #intro pH plot with only precip
   output$pHtheme <- renderPlotly({
     pHtheme <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average, 
-                                    shape = source, alpha = ws)) + my_theme +
+                                         shape = source)) + my_theme +
+      geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "black", alpha = 0.1)+ #set this as the critical lower bound?
+      geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
       geom_line(size = 1, aes(color = solute))+
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes(color = solute, 
@@ -127,10 +137,11 @@ shinyServer(function(input, output){
       scale_alpha_discrete(range = c(0.9, 0.5))+
       ggtitle("Precipitation de-acidifying in response to acid rain mitigation")+
       labs(x = "Year", y = "pH")+
-      coord_cartesian(xlim = c(as.Date("1963-01-01"), as.Date("2015-01-01")), ylim = c(4, 5.05))+
-      geom_line(size = 0.5, aes(x = as.Date("1970-01-01")))+
-      geom_line(size = 0.5, aes(x = as.Date("1990-01-10")))+
-      geom_point(size = 0.5, aes (y = 5.0))
+      coord_cartesian(ylim = c(4, 5.05))+
+      geom_vline(size = 0.5, xintercept = 1970-01-01)+
+      geom_vline(size = 0.5, xintercept = 1990-01-01)+
+      geom_ribbon(aes(ymin=5,ymax=5.5), fill="blue", alpha=0.3)
+   #   geom_ribbon(aes(xmin=as.Date("1970-01-01"), xmax=as.Date("1990-01-01")), fill="green", alpha=0.1)+ coord_flip()
     ggplotly(pHtheme, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
@@ -141,15 +152,24 @@ shinyServer(function(input, output){
     
     pHtheme <- ggplot_function(data = pHData_precip, x = "water_year", y = "mg_weighted_average")
     layout(annotations= list(annotation))
-      })
+  })
   
   #pH plot with P and Q to show acid in, more neutralized out
   output$pHPandQ <- renderPlotly({
-    pHPandQ <- ggplot(pHData, aes(x = water_year, y = mg_weighted_average, group = source, color = source))+
-      geom_line()+
+    pHPandQ <- ggplot(pHData, aes(x = water_year, y = mg_weighted_average, 
+                                  shape = source, color = solute, alpha = ws))+ my_theme +
+      geom_line(size = 1)+
+      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                 aes(text = paste("pH value: ", mg_weighted_average, "<br>", "Date: ", date)))+
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))+
       ggtitle("De-acidification of P and Q in response to reducing SOx and NOx emissions")+
-      labs(colour = "Source", x = "Year", y = "pH")
-    ggplotly(pHPandQ)
+      labs(x = "Year", y = "pH")+
+      coord_cartesian(ylim = c(4, 5.4))
+    ggplotly(pHPandQ, tooltip = "text", width = 900)%>%
+      config(displayModeBar = F)%>%
+      config(showLink = F)
   })
   #plot of SO4 and NO3 to complement pH increase
   output$SO4NO3reductions <- renderPlotly({
@@ -158,16 +178,21 @@ shinyServer(function(input, output){
   
   #plot of any compound conc (reactively chosen) over rective time
   output$cTime <- renderPlotly({
-    cTime <- ggplot(get(input$selComp), aes(x = as.Date(get(input$selDate)),
-                                            group = source, color = source,
-                                            text = paste("Concentration:", concentration_ueq, "<br>", "Date:", date)))+
-      geom_line(aes(y = concentration_ueq)) +
+    cTime <- ggplot(get(input$selComp), 
+                    aes(x = as.Date(get(input$selDate)), y = ueq_weighted_average,
+                        shape = source, color = solute, alpha = ws))+ my_theme+
+      geom_line(size = 1) +
+      geom_point(size = 1.5, fill = "white", stroke = 0.5,
+                 aes(text = paste("Concentration:", concentration_ueq, "<br>", "Date:", date)))+
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))+
       labs(colour = "Source", x = "Year", y = "(ueq/L)")+
       xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
       ggtitle(as.character(input$selComp), "affected by acid rain") #possibly rename 'CaData' to be 'Calcium'
-    #  theme(plot.background = element_rect(fill = 'gray', colour = 'gray'))
-    #      theme(panel.background = element_rect(fill = 'black'))
-    ggplotly(cTime, tooltip = "text")
+    ggplotly(cTime, tooltip = "text", width = 900)%>%
+      config(displayModeBar = F)%>%
+      config(showLink = F)
   })
   
   #output an interactive timeline for the history of acid rain
