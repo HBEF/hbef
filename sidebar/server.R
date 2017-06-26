@@ -101,7 +101,7 @@ shinyServer(function(session, input, output) {
     else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
   })
   
-  solutes <- reactive({c(input$solutes_cations, input$solutes_anions)})
+  solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
 
