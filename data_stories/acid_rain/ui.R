@@ -9,7 +9,7 @@ library(timevis)
 library(ggthemes)
 
 shinyUI(
-  fluidPage(theme = "Solar_bootstrap.min.css",
+  fluidPage(#theme = "Solar_bootstrap.min.css",
             fluidRow(column(width = 12, offset = 1, h1(strong(em("Acid Rain & HBEF"))))),
             fluidRow(column(width = 10, offset = 1,
                             tags$img(src = "DeadForest.jpg", width = '1270px', height = '650px')),

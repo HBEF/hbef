@@ -116,26 +116,30 @@ SO4NO3Data <- SO4NO3Data[SO4NO3Data$ws == "6",]
 shinyServer(function(input, output){
   #intro pH plot with only precip
   output$pHtheme <- renderPlotly({
-    pH <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average, 
+    pHtheme <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average, 
                                     shape = source, alpha = ws)) + my_theme +
-      geom_line(size = 1)+
-      geom_point(size = 1.5, fill = "white", stroke = 0.5)+
+      geom_line(size = 1, aes(color = solute))+
+      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                 aes(color = solute, 
+                     text = paste("pH value: ", mg_weighted_average, "<br>", "Date: ", date)))+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))+
       ggtitle("Precipitation de-acidifying in response to acid rain mitigation")+
-      labs(x = "Year", y = "pH")
-    ggplotly(pH, width = 900)%>%
+      labs(x = "Year", y = "pH")+
+      coord_cartesian(xlim = c(as.Date("1963-01-01"), as.Date("2015-01-01")), ylim = c(4, 5.05))+
+      geom_line(size = 0.5, aes(x = as.Date("1970-01-01")))+
+      geom_line(size = 0.5, aes(x = as.Date("1990-01-10")))+
+      geom_point(size = 0.5, aes (y = 5.0))
+    ggplotly(pHtheme, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
-            # tooltip = "text")
   })
   #practice with Camila's theme
   output$pH <- renderPlotly({
     annotation <- list(yref = 'paper', xref = "x", y = 0.5, x = 1960, text = "annotation")
     
     pHtheme <- ggplot_function(data = pHData_precip, x = "water_year", y = "mg_weighted_average")
-  #NOT WORKING           text = paste("Date: ", water_year, "<br>", "pH: ", mg_weighted_average),
     layout(annotations= list(annotation))
       })
   
