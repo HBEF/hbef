@@ -92,7 +92,7 @@ shinyUI(
                             #switch between monthly and yearly data
                             selectInput("selDate", label = "Timescale granularity",
         ###############make an if statement to change x data to avg data when yearly is selected??
-                                        choices = c("Monthly" = "date", "Yearly" = "water_year"))
+                                        choices = c("Yearly" = "water_year", "Monthly" = "date"))
             )
             ),
             fluidRow(column(width = 11, offset = 1,
