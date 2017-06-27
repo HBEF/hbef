@@ -462,7 +462,7 @@ color: #fafafa;
 /*///// FOOTER /////*/
 	
 .footer {
-	position:absolute;
+	position:relative;
   	width:100%;
   	height:60%;  /* Height of the footer */
  	background:#333333;
