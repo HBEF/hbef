@@ -23,12 +23,13 @@ input[type='checkbox']:checked:after {
         height: 20px;
         border-radius: 15px;
         position: relative;
-        background-color: #0083CC;
+        background-color: #828282;
         content: '';
         display: inline-block;
         visibility: visible;
         border: 2px solid white;
     }
+
 
 
 /* WATER SOURCES */
@@ -141,7 +142,7 @@ input[value = "Al"]:checked:after {
 
 #top.nav-tabs > li > a:hover, .nav-pills > li> a:hover {
 	background-color: rgba(0,0,0,0);
-	font-weight: 500;
+	font-weight: bold;
 }
 
 #top.nav-tabs, .nav-pills {
@@ -151,7 +152,7 @@ input[value = "Al"]:checked:after {
 #top.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus{
 	background-color: rgba(0,0,0,0);
 	color: #181818;
-	font-weight: 500;
+	font-weight: bold;
 }
 
 

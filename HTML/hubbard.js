@@ -57,3 +57,14 @@ function autoResize(id){"use strict";
       document.getElementById(id).width= (newwidth) + "px";
  }
 
+
+function resize(){"use strict";
+    var body = document.body,
+    html = document.documentElement,
+    height = body.offsetHeight;
+    if(height === 0){
+        height = html.offsetHeight;
+    }
+    parent.postMessage({'action':'RESIZE', 'height':height}, '*');
+}
+
