@@ -186,7 +186,8 @@ shinyServer(function(input, output){
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))+
       ggtitle("SOx and NOx concentrations lowering as policy is implemented")+
-      labs(x = "Year", y = "ueq/L")+ my_theme
+      labs(x = "Year", y = "ueq/L")+ my_theme+
+      coord_cartesian(ylim = c(0, 130))
     ggplotly(SO4NO3reductions, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
@@ -216,11 +217,29 @@ shinyServer(function(input, output){
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))+
       ggtitle("Decrease in Base cations leaving the soil")+
-      labs(x = "Year", y = "ueq/L")
-    ggplotly(baseCations, tooltip = "text", width = 900)%>%
+      labs(x = "Year", y = "ueq/L")+
+      coord_cartesian(ylim = c(0, 130))
+        ggplotly(baseCations, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
-  })################## CHANGE FROM TRIANGLES SOMEHOW
+  })
+  
+  output$Al <- renderPlotly({
+    Al <- ggplot(AlData, aes(x = water_year, y = ueq_weighted_average,
+                             shape = source, color = solute, alpha = ws))+ my_theme+
+      geom_line(size = 1)+
+      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                 aes(text = paste("Al Concentration: ", ueq_weighted_average, "<br>", "Date: ", date)))+
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))+
+      ggtitle("Decrease in toxic Al discharge as SOx and NOx decrease")+
+      labs(x = "Year", y = "ueq/L")+
+      coord_cartesian(ylim = c(0, 130))
+    ggplotly(Al, tooltip = "text", width = 900)%>%
+      config(displayModeBar = F)%>%
+      config(showLink = F)
+  })
   
   #plot of any compound conc (reactively chosen) over rective time
   output$cTime <- renderPlotly({
@@ -234,6 +253,7 @@ shinyServer(function(input, output){
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))+
       labs(colour = "Source", x = "Year", y = "(ueq/L)")+
+      coord_cartesian(ylim = c(0, 130))+
       xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
       ggtitle(as.character(input$selComp), "affected by acid rain") #possibly rename 'CaData' to be 'Calcium'
     ggplotly(cTime, tooltip = "text", width = 900)%>%
