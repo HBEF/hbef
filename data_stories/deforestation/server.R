@@ -123,7 +123,8 @@ quantity_format <- function(df, time.scale, log.q) {
       timely <- df %>%
         select(ws, water_year, water_date, 
                solute, water_mm_pm, source)%>%
-        filter(ws == 6 | ws == 2, solute == "Ca")
+        filter(ws == 6 | ws == 2 | ws == 4 |
+               ws == 5, solute == "Ca")
       timely <- source_change(timely)
       colnames(timely) = c("ws", "water.year", "water.date",
                             "solute", "value", "Source")
@@ -133,7 +134,8 @@ quantity_format <- function(df, time.scale, log.q) {
       timely <- df %>%
         select(ws, water_year, water_date, 
                solute, water_mm_pm, source)%>%
-        filter(ws == 6 | ws == 2, solute == "Ca")
+        filter(ws == 6 | ws == 2 | ws == 4 |
+                 ws == 5, solute == "Ca")
       timely$ln_water_mm_pm <- log(timely$water_mm_pm)
       timely <- source_change(timely)
       colnames(timely) = c("ws", "water.year", "water.date",
@@ -146,7 +148,8 @@ quantity_format <- function(df, time.scale, log.q) {
       timely <- df %>%
         select(ws, water_year, water_date, 
                solute, water_mm_pm, source)%>%
-        filter(ws == 6 | ws == 2, solute == "Ca") %>%
+        filter(ws == 6 | ws == 2 | ws == 4 |
+                 ws == 5, solute == "Ca") %>%
         group_by(ws, source, water_year) %>%
         summarize(value = sum(water_mm_pm))
       timely <- source_change(timely)
@@ -157,7 +160,8 @@ quantity_format <- function(df, time.scale, log.q) {
       timely <- df %>%
         select(ws, water_year, water_date, 
                solute, water_mm_pm, source)%>%
-        filter(ws == 6 | ws == 2, solute == "Ca") %>%
+        filter(ws == 6 | ws == 2 | ws == 4 |
+                 ws == 5, solute == "Ca") %>%
         group_by(ws, source, water_year) %>%
         summarize(value = log(sum(water_mm_pm)))
       timely <- source_change(timely)
@@ -175,7 +179,9 @@ quantity_format <- function(df, time.scale, log.q) {
 #Function to plot the formatted data frame in ggplot2
 plot.formatted.df <- function(df, timescale, sc, date.input, y.lab, title.lab, addprecip){
   m <- max(df$value, na.rm = TRUE)
-  v.line <- data.frame(Event = "WS2 Cutting", vals = -1675)
+  v.line <- data.frame(ws = c("Watershed 2", "Watershed 4",
+                                 "Watershed 5", "Watershed 6"), 
+                       vals = c(-1675, 92, 4926, NA))
   if (addprecip == "precip"){
     p <- ggplot(df,aes(x= get(timescale),y=value, shape =Source, label=date)) +
       geom_line(color = 
@@ -185,7 +191,7 @@ plot.formatted.df <- function(df, timescale, sc, date.input, y.lab, title.lab, a
       geom_vline(data = v.line,
                  aes(xintercept = vals),
                  linetype = 1,
-                 show.legend = F) +
+                 show.legend = T) +
       coord_cartesian(xlim = c(as.Date(date.input[1]), 
                                as.Date(date.input[2])))+
       labs(x = "Date (In Water Years)", 
@@ -202,7 +208,7 @@ plot.formatted.df <- function(df, timescale, sc, date.input, y.lab, title.lab, a
       geom_vline(data = v.line,
                  aes(xintercept = vals),
                  linetype = 1,
-                 show.legend = F) +
+                 show.legend = T) +
       coord_cartesian(xlim = c(as.Date(date.input[1]), 
                                as.Date(date.input[2])))+
       labs(x = "Date (In Water Years)", 
@@ -285,7 +291,7 @@ shinyServer(function(input, output) {
   #by time scale, unit and solute
   solute.data <- reactive({
     format_data(df = precip_dis,
-                watersheds = c(2, 6),
+                watersheds = c(2, 6, 4, 5),
                 ion = input$solute,
                 precipitation = input$p,
                 c.units = input$units,
@@ -339,7 +345,9 @@ shinyServer(function(input, output) {
                         timescale = s, sc = c,
                         date.input = input$dates, y.lab = y, 
                         title.lab = title,
-                        addprecip = input$p),tooltip = c("y", "label"))%>%
+                        addprecip = input$p),tooltip = c("y", "label"),
+      width = 600, height = 600)%>%
+      layout(margin = list(b = 90)) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) 
   })
@@ -374,7 +382,9 @@ shinyServer(function(input, output) {
                         timescale = s2, sc = c("red", "blue"),
                         date.input = input$dates.dis,
                         y.lab = y, title.lab = title,
-                        addprecip = input$p.dis), tooltip = c("y", "label"))%>%
+                        addprecip = input$p.dis), tooltip = c("y", "label"),
+      height = 600, width = 600)%>%
+      layout(margin = list(b = 90)) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) 
     
