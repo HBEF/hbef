@@ -1,10 +1,8 @@
-(function() {
-  'use strict';
+var level = document.location.search.replace(/\?/,'') || 0;
+			$('#nested').attr('href','frame.nested.html?'+(++level));
 
-  var getHeight = function(e) {
-      if (e.data === "getHeight") {
-        e.source.postMessage("getHeight:" + (Number($("body").height()) + (Number($("body").height()) * 0.05)) + 10 + "px", "*");
-      }
-  }
-  window.addEventListener("message", getHeight, false);
-}());
+var iFrameResizer = {
+					messageCallback: function(message){
+						alert(message,parentIFrame.getId());
+					}
+				}

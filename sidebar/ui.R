@@ -58,6 +58,7 @@ shinyUI(fluidPage(
   ########### HEAD - DO NOT EDIT ################################################
   theme = "app.css",
   tags$head(includeScript(system.file('www', 'ajax.js'))),
+  tags$head(includeScript(system.file('www', 'iframeResizer.contentWindow.min.js'))),
   tags$head(includeScript(system.file('www', 'app.js'))),
   tags$head(tags$style(HTML(
     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
