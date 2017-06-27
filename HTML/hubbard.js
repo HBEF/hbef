@@ -40,7 +40,7 @@ function openTab(evt, tabName) {"use strict";
 
  function resizeIframe(obj)
  {
-	 obj.style.height = obj.contentWindow.document.body.clientHeight +  'px';
+	 obj.style.height = obj.contentWindow.document.body.clientHeight + 'px';
  }
 
 
