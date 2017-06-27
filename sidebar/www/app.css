@@ -17,6 +17,7 @@ input[type="checkbox"]:after {
         border: 2px solid white;
 }
 
+
 input[type='checkbox']:checked:after {
         width: 20px;
         height: 20px;
@@ -28,6 +29,88 @@ input[type='checkbox']:checked:after {
         visibility: visible;
         border: 2px solid white;
     }
+
+
+/* WATER SOURCES */
+
+input[value = "precip"]:checked:after {
+    background-color: #EBEBEB;
+	border: 5px solid #3E3D3D;
+    }
+
+input[value = "flow"]:checked:after {
+    background-color: #3E3D3D;
+    }
+
+
+
+/* HYDROGEN */
+
+input[value = "pH"]:checked:after {
+      background-color: #FFC408;
+    }
+
+input[value = "H"]:checked:after {
+      background-color: #FFE79C;
+    }
+
+
+
+/* ANIONS */
+
+input[value = "NO3"]:checked:after {
+      background-color: #BF1616;
+    }
+
+input[value = "SiO2"]:checked:after {
+      background-color: #CC4545;
+    }
+
+input[value = "PO4"]:checked:after {
+      background-color: #600B0B;
+    }
+
+input[value = "SO4"]:checked:after {
+      background-color: #8F1010;
+    }
+
+
+input[value = "Cl"]:checked:after {
+      background-color: #D97373;
+    }
+
+input[value = "HCO3"]:checked:after {
+      background-color: #E5A2A2;
+    }
+
+
+/* CATIONS */
+
+input[value = "K"]:checked:after {
+      background-color: #95AFDD;
+    }
+
+input[value = "Na"]:checked:after {
+      background-color: #7195D2;
+    }
+
+input[value = "NH4"]:checked:after {
+      background-color: #4E7AC7;
+    }
+
+input[value = "Ca"]:checked:after {
+      background-color: #3B5C95;
+    }
+
+input[value = "Mg"]:checked:after {
+      background-color: #273D64;
+    }
+
+input[value = "Al"]:checked:after {
+      background-color: #162338;
+    }
+
+
 
 
 /* /////// top navigation for sections of the story //////*/
