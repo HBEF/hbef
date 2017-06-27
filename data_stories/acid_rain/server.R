@@ -117,9 +117,8 @@ pHData <- pHData[,c(1:4,14,5:13,15:16)]
 
 pHData_precip <- pHData[pHData$source == "precip",]
 
-#make df of SO4 NO3 for graph of mitigation effects
-SO4NO3Data <- precip_stream_data[precip_stream_data$solute == c("SO4", "NO3"),]
-SO4NO3Data <- SO4NO3Data[SO4NO3Data$ws == "6",]
+#watershed 6 dataframe
+precip_stream_data_ws6 <- precip_stream_data[precip_stream_data$ws == "6",]
 
 shinyServer(function(input, output){
   #intro pH plot with only precip
@@ -264,8 +263,9 @@ shinyServer(function(input, output){
   })
   
   #plot of Al flux and acid flux to show acids release Al from the soil ###Not sure how to interpret and/or make faster
+  #also try to make this yearly by creating a yearly flux... but would that defeat the purpose? 
   # output$fluxAlAcids <- renderPlotly({
-  #   fluxAlAcids <- ggplot(subset(precip_stream_data, solute %in% c("Al", "SO4")),####################################################### 
+  #   fluxAlAcids <- ggplot(subset(precip_stream_data_ws6, solute %in% c("Al", "SO4")),#######################################################
   #                         aes(x = date, y = flux,
   #                             shape = source, color = solute, alpha = ws))+ my_theme+
   #     geom_line(size = 1) +

@@ -69,7 +69,9 @@ shinyUI(
                     h3("The acid rain reacts with the base cations in the soil, causing them to be 
                                washed out of the ecosystem.  Try exploring this pattern using the graph 
                                below.  You can see that calcium (Ca) discharge increases even though the Ca 
-                               precipitation remains relatively stable.")),     
+                               precipitation remains relatively stable.  Also note that these plots all 
+                               show data from watershed 6, the biogeochemical reference point, meaning
+                               that there have been no experiments to alter its natural state.")),     
              column(width = 2, 
                     p(strong("Base cations:"), "positively charged elements present in the soil that help
                               neutralize acid rain (ie. Ca, Mg, K)")
@@ -95,8 +97,8 @@ shinyUI(
     )
     ),
     fluidRow(column(width = 11, offset = 1,
-                    plotlyOutput("cTime", height = "auto", width = "100%")
-           #         plotlyOutput("fluxAlAcids", height = "auto")  ###Not sure how to interpret...
+                    plotlyOutput("cTime", height = "auto", width = "100%"),
+                    plotlyOutput("fluxAlAcids", height = "auto")  ###Not sure how to interpret...
     )),
     fluidRow(column(width = 8, offset = 1,
                     h3("One effect of the base cation loss was the poor growth of Sugar Maples, 
