@@ -138,8 +138,8 @@ shinyServer(function(input, output){
       ggtitle("Precipitation de-acidifying in response to acid rain mitigation")+
       labs(x = "Year", y = "pH")+
       coord_cartesian(ylim = c(4, 5.05))+
-      geom_vline(size = 0.5, xintercept = 1970-01-01)+
-      geom_vline(size = 0.5, xintercept = 1990-01-01)+
+      geom_vline(size = 0.5, xintercept = -5)+
+      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)+
       geom_ribbon(aes(ymin=5,ymax=5.5), fill="blue", alpha=0.3)
    #   geom_ribbon(aes(xmin=as.Date("1970-01-01"), xmax=as.Date("1990-01-01")), fill="green", alpha=0.1)+ coord_flip()
     ggplotly(pHtheme, tooltip = "text", width = 900)%>%
@@ -200,18 +200,19 @@ shinyServer(function(input, output){
                                      text = paste("Ca Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
                  size = 1.5, fill = "white", stroke = 0.5)+
       #NOTE all of these extra geom_line and _point are to graph additional base cations rather than creating yet another df
-      geom_line(data = MgData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ 
+      geom_line(data = MgData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
       geom_point(data = MgData, aes(x = water_year, y = ueq_weighted_average,
-                                    text = paste("Mg Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                                    text = paste("Mg Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
                  size = 1.5, fill = "white", stroke = 0.5)+
-      geom_line(data = KData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ 
+      geom_line(data = KData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
       geom_point(data = KData, aes(x = water_year, y = ueq_weighted_average,
-                                    text = paste("K Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                                    text = paste("K Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
                  size = 1.5, fill = "white", stroke = 0.5)+
-      geom_line(data = NaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ 
+      geom_line(data = NaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
       geom_point(data = NaData, aes(x = water_year, y = ueq_weighted_average,
-                                   text = paste("Na Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                                   text = paste("Na Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
                  size = 1.5, fill = "white", stroke = 0.5)+
+      scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))+
       ggtitle("Decrease in Base cations leaving the soil")+
