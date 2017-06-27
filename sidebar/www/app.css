@@ -1,6 +1,8 @@
 @charset "UTF-8";
 
 
+/* /////// top navigation for sections of the story //////*/
+
 #top{
 	margin-bottom: 5%;
 }
@@ -40,6 +42,17 @@
 }
 
 
+/* /////// sidebar //////*/
+/* this gives the sidebar a specified height and enables the scrollbar*/
+
+form.well { 
+	max-height: 700px; 
+	overflow-y: auto;
+	overflow-x:none;
+	background: #EBEBEB;
+	border: none;}
+
+
 /*////// General Settings //////*/
 
 /*/// Framework ///*/
@@ -63,8 +76,9 @@ section{
 }
 
 
-.container {
+.container_question {
 	width: 90%;
+	margin: 5%;
 }
 
 
@@ -94,42 +108,6 @@ section{
 	padding-top: 5%;
 	padding-bottom: 5%;
 }
-}
-
-
-.col_container_subtitle{
-	display: inline-flex; 
-	align-items: center;
-	width: 100%;
-}
-
-.col_container_subtitle h2{
-	min-width: 20%;
-}
-
-.col_container_subtitle p{
-	width: 90%;
-	margin-left: 10%;
-	text-align: right;
-}
-
-.col_container {
-    display: table; /* Make the container element behave like a table */
-	width: 100%;
-	min-height: 80vh;
-}
-
-.col_container_left {
-    display: table; /* Make the container element behave like a table */
-    width: 50%;
-	min-height: 80vh;
-}
-
-
-.col{
-    display: table-cell;/* Make elements inside the container behave like table cells */
-	vertical-align: middle;
-	width: 30%;
 }
 
 

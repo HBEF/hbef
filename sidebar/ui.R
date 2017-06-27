@@ -76,7 +76,7 @@ shinyUI(fluidPage(
   ########### QUESTION #1 ####################
   
   fluidRow(
-    tags$div(class = "container", tags$h3("What happens to discharge when the entire forest is cut?"))
+    tags$div(class = "container_question", tags$h3("What happens to discharge when the entire forest is cut?"))
   ),
   
   #############################################
@@ -148,7 +148,7 @@ shinyUI(fluidPage(
         sliderInput("date_range", label = h4("Date Range"),
                     min = as.Date("1962-01-01"),
                     max = as.Date("2014-01-01"),
-                    value = c(as.Date("1965-01-01"), as.Date("2013-01-01")))),
+                    value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 3),
       
       
       ############## END OF SIDEBAR #######
@@ -162,7 +162,7 @@ shinyUI(fluidPage(
         
         ### PLOT VIEW 2
         tabPanel("Plot2",plotlyOutput("plot1b"))
-        ))), 
+        )), width = 9), 
       position = "right"
     )
     ############## END OF GRAPH ################ 
