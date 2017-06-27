@@ -25,7 +25,7 @@ shinyServer(function(session, input, output) {
     theme(rect = element_rect(fill = NA),
           panel.grid.major = element_line(colour = "#dddddd"), 
           text = element_text(family = "Helvetica", size = 12), 
-          legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
+          legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
           strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
           axis.title= element_text(NULL), axis.title.x= element_blank(), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
@@ -185,11 +185,24 @@ shinyServer(function(session, input, output) {
   #############################################################
   
   output$plot1a <- renderPlotly({
-    ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
+    theplot <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
+    #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
+    theplot$x$layout$width <- NULL
+    theplot$y$layout$height <- NULL
+    theplot$width <- NULL
+    theplot$height <- NULL
+    theplot %>%
+      layout(autosize = TRUE, height = 600)
      })
   
   output$plot1b <- renderPlotly({
-    ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
+    theplot <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
+    theplot$x$layout$width <- NULL
+    theplot$y$layout$height <- NULL
+    theplot$width <- NULL
+    theplot$height <- NULL
+    theplot %>%
+      layout(autosize = TRUE, height = 600)
   })
   
 

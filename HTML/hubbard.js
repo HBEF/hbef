@@ -38,8 +38,22 @@ function openTab(evt, tabName) {"use strict";
     evt.currentTarget.className += " w3-red";
 }
 
+ function resizeIframe(obj)
+ {
+	 obj.style.height = obj.contentWindow.document.body.clientHeight +  'px';
+ }
 
-function resizeIframe(obj) {
-    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+
+function autoResize(id){"use strict";
+  var newheight;
+  var newwidth;
+
+  if(document.getElementById){
+      newheight=document.getElementById(id).contentWindow.document.body.scrollHeight;
+      newwidth=document.getElementById(id).contentWindow.document.body.scrollWidth;
   }
+
+      document.getElementById(id).height= (newheight) + "px";
+      document.getElementById(id).width= (newwidth) + "px";
+ }
 

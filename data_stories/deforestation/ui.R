@@ -50,10 +50,10 @@ shinyUI(fluidPage(
                  sliderInput("dates", label = h3("Date Range"),
                              min = as.Date("1962-01-01"),
                              max = as.Date("2014-01-01"),
-                             value = c(as.Date("1965-01-01"), as.Date("1971-01-01")))),
-               mainPanel(plotlyOutput("s.plot"),
-                         p("*The black horizontal line on the graph represents the date of 
-                           the deforestation of Watershed 2."),
+                             value = c(as.Date("1965-01-01"), as.Date("1985-01-01")))),
+               mainPanel(plotlyOutput("s.plot", width = "100%", height = "100%"),
+                         p("*The black horizontal lines on the graph represent the 
+                           starting date of deforestation at the different watersheds."),
                          h4("Consequences of Deforestation"),
                          p("Deforestation, the removal of forest trees,
                            is harmful to the environment for a number of 
@@ -85,19 +85,17 @@ shinyUI(fluidPage(
                          p("Using our data set, one can visualize two more
                            consequences of deforestation- leaching 
                            of nutrients from the environment and 
-                           increases in water runoff.  Trees prevent 
-                           erosion by fixing soil in place with their
-                           roots and creating natural dams with fallen
-                           leaves and branches. When trees are removed,
-                           erosion increases, carrying away the nutrients
-                           in the soil. At the same time, deforestation 
+                           increases in water runoff. Deforestation 
                            inhibits water uptake by trees, resulting in
                            heightened runoff and more water moving through
-                           the soil, dissolving and washing away more 
+                           the soil, increasingly dissolving and washing away 
                            nutrients. Thus, the concentration of nutrients
-                           in streamwater rises following 
-                           deforestation (Likens et al. 1970)."),
-                         p("At Hubbard Brook, an experiment was conducted 
+                           in streamwater rises following extensive
+                           deforestation, especially when the prevailing 
+                           conditions prevent regrowth (Likens et al. 1970)."),
+                         p("At Hubbard Brook, several deforestation
+                           experiments were implemented at different times.  
+                           One such experiment was conducted 
                            in November and December 1965 in which all the
                            trees in Watershed 2 were cut, left in place,
                            and limbed so that no branches were more that 
@@ -109,15 +107,31 @@ shinyUI(fluidPage(
                            discharge were recorded. At the same time, these
                            measurements were taken at other Hubbard Brook 
                            watersheds, particullarly Watershed 6, which 
-                           was left undisturbed (Likens et al. 1970). 
+                           was left undisturbed (Likens et al. 1970). In
+                           a separate experiment, Watershed 4 was divided 
+                           into 49 strips directed from east to west, each 
+                           25 meters wide. This area was then strip cut according
+                           to the following timeline: in the fall of 1970, every 
+                           third strip was deforested, then in 1972, the second 
+                           set of strips were cut, and finally the last series of strips 
+                           were cut in 1974. Timber of value was removed by logging 
+                           companies, and the watershed was left to regrow.
+                           In a third experiment, Watershed 5 was clear-cut, the 
+                           trees removed, and the watershed was allowed to regrow
+                           (HB Watersheds Tour 2017). Precipitation and discharge data
+                           were taken for all experimental watersheds.
                            These graphs compare data from the deforested
-                           Watershed 2 and the undisturbed Watershed 6, 
+                           Watersheds 2, 4, and 5, and the undisturbed Watershed 6, 
                            so you can explore the effects of deforestation yourself."),
                          h4("References"),
                          p("\"Deforestation and Its Effect on the Planet.\"", 
                            em("National Geographic."), 
                            "National Geographic Society, 24 May 2017. Web. 16 June 2017.
                            <http://www.nationalgeographic.com/environment/global-warming/deforestation/>."),
+                         p("\"HB Watersheds Tour.\"", em("Hubbard Brook."),
+                           "Hubbard Brook Experimental Forest, n.d. Web. 
+                           26 June 2017. 
+                           <http://www.hubbardbrook.org/6-12_education/Introduction/Intro9C.htm>."),
                          p("Likens, Gene E., F. Herbert Bormann, Noye M. Johnson, D. W. Fisher,
                            and Robert S. Pierce. \"Effects of Forest Cutting and Herbicide Treatment 
                            on Nutrient Budgets in the Hubbard Brook Watershed-Ecosystem.\"", 
@@ -143,11 +157,11 @@ shinyUI(fluidPage(
                  sliderInput("dates.dis", label = h3("Date Range"),
                              min = as.Date("1962-01-01"),
                              max = as.Date("2014-01-01"),
-                             value = c(as.Date("1965-01-01"), as.Date("1971-01-01")))),
+                             value = c(as.Date("1965-01-01"), as.Date("1985-01-01")))),
                
-               mainPanel(plotlyOutput("d.plot"),
-                         p("*The black horizontal line on the graph represents the date of 
-                           the deforestation of Watershed 2."),
+               mainPanel(plotlyOutput("d.plot", width = "100%", height = "100%"),
+                         p("*The black horizontal lines on the graph represent the 
+                           starting date of deforestation at the different watersheds."),
                          h4("Consequences of Deforestation"),
                          p("Deforestation, the removal of forest trees,
                            is harmful to the environment for a number of 
@@ -179,19 +193,17 @@ shinyUI(fluidPage(
                          p("Using our data set, one can visualize two more
                            consequences of deforestation- leaching 
                            of nutrients from the environment and 
-                           increases in water runoff.  Trees prevent 
-                           erosion by fixing soil in place with their
-                           roots and creating natural dams with fallen
-                           leaves and branches. When trees are removed,
-                           erosion increases, carrying away the nutrients
-                           in the soil. At the same time, deforestation 
+                           increases in water runoff. Deforestation 
                            inhibits water uptake by trees, resulting in
                            heightened runoff and more water moving through
-                           the soil, dissolving and washing away more 
+                           the soil, increasingly dissolving and washing away 
                            nutrients. Thus, the concentration of nutrients
-                           in streamwater rises following 
-                           deforestation (Likens et al. 1970)."),
-                         p("At Hubbard Brook, an experiment was conducted 
+                           in streamwater rises following extensive
+                           deforestation, especially when the prevailing 
+                           conditions prevent regrowth (Likens et al. 1970)."),
+                         p("At Hubbard Brook, several deforestation
+                           experiments were implemented at different times.  
+                           One such experiment was conducted 
                            in November and December 1965 in which all the
                            trees in Watershed 2 were cut, left in place,
                            and limbed so that no branches were more that 
@@ -203,15 +215,31 @@ shinyUI(fluidPage(
                            discharge were recorded. At the same time, these
                            measurements were taken at other Hubbard Brook 
                            watersheds, particullarly Watershed 6, which 
-                           was left undisturbed (Likens et al. 1970). 
+                           was left undisturbed (Likens et al. 1970). In
+                           a separate experiment, Watershed 4 was divided 
+                           into 49 strips directed from east to west, each 
+                           25 meters wide. This area was then strip cut according
+                           to the following timeline: in the fall of 1970, every 
+                           third strip was deforested, then in 1972, the second 
+                           set of strips were cut, and finally the last series of strips 
+                           were cut in 1974. Timber of value was removed by logging 
+                           companies, and the watershed was left to regrow.
+                           In a third experiment, Watershed 5 was clear-cut, the 
+                           trees removed, and the watershed was allowed to regrow
+                           (HB Watersheds Tour 2017). Precipitation and discharge data
+                           were taken for all experimental watersheds.
                            These graphs compare data from the deforested
-                           Watershed 2 and the undisturbed Watershed 6, 
+                           Watersheds 2, 4, and 5, and the undisturbed Watershed 6, 
                            so you can explore the effects of deforestation yourself."),
                          h4("References"),
                          p("\"Deforestation and Its Effect on the Planet.\"", 
                            em("National Geographic."), 
                            "National Geographic Society, 24 May 2017. Web. 16 June 2017.
                            <http://www.nationalgeographic.com/environment/global-warming/deforestation/>."),
+                         p("\"HB Watersheds Tour.\"", em("Hubbard Brook."),
+                          "Hubbard Brook Experimental Forest, n.d. Web. 
+                           26 June 2017. 
+                          <http://www.hubbardbrook.org/6-12_education/Introduction/Intro9C.htm>."),
                          p("Likens, Gene E., F. Herbert Bormann, Noye M. Johnson, D. W. Fisher, 
                            and Robert S. Pierce. \"Effects of Forest Cutting and Herbicide Treatment 
                            on Nutrient Budgets in the Hubbard Brook Watershed-Ecosystem.\"", 
