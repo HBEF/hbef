@@ -86,8 +86,7 @@ shinyUI(
                                 choices = c("Ca" = "CaData", "Mg" = "MgData", "K" = "KData", 
                                             "Na" = "NaData", "SO4" = "SO4Data", "NO3" = "NO3Data", 
                                             "Al" = "AlData", "NH4" = "NH4Data", 
-                                            "Cl" = "ClData", "PO4" = "PO4Data", 
-                                            "SiO2" = "SiO2Data", "H" = "HData"),
+                                            "Cl" = "ClData", "H" = "HData"),
                                 selected = "Ca"),
                     #switch between monthly and yearly data
                     selectInput("selDate", label = "Timescale granularity",
@@ -135,12 +134,14 @@ shinyUI(
              column(3)),
     fluidRow(column(width = 11, offset = 1,
                     tabsetPanel(
-                      tabPanel(title = "pH",
-                        plotlyOutput("pHPandQ", width = "100%", height = "auto")),
                       tabPanel(title = "SO4 & NO3",
-                        plotlyOutput("SO4NO3reductions", height = "auto")),
+                               plotlyOutput("SO4NO3reductions", height = "auto")),
                       tabPanel(title = "Base Cations",
-                        plotlyOutput("baseCations", height = "auto"))
+                        plotlyOutput("baseCations", height = "auto")),
+                      tabPanel(title = "Al",
+                               plotlyOutput("Al", height = "auto")),
+                      tabPanel(title = "pH",
+                               plotlyOutput("pHPandQ", width = "100%", height = "auto"))
                     ))
     ),
     fluidRow(column(width = 12, offset = 1,
