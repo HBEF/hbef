@@ -302,6 +302,13 @@ shinyServer(function(session, input, output) {
       geom_vline(size = 0.5, xintercept = -5)+
       geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)+
       geom_ribbon(aes(ymin=5,ymax=5.5), fill="blue", alpha=0.3)
+    # pHtheme$x$layout$width <- NULL
+    # pHtheme$y$layout$height <- NULL
+    # pHtheme$width <- NULL
+    # pHtheme$height <- NULL
+    # pHtheme %>%
+    #   layout(autosize = TRUE, height = 600)
+    
     #   geom_ribbon(aes(xmin=as.Date("1970-01-01"), xmax=as.Date("1990-01-01")), fill="green", alpha=0.1)+ coord_flip()
     ggplotly(pHtheme, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
@@ -310,7 +317,7 @@ shinyServer(function(session, input, output) {
   
   #pH plot with P and Q to show acid in, more neutralized out
   output$pHPandQ <- renderPlotly({
-    pHPandQ <- ggplot(pHData, aes(x = water_year, y = mg_weighted_average, 
+    pHPandQ <- ggplot(pHData, aes(x = get(x()), y = get(y()), 
                                   shape = source, color = solute, alpha = ws))+ my_theme +
       geom_line(size = 1)+
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 

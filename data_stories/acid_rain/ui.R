@@ -160,7 +160,7 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab1",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("pH", plotlyOutput("pHtheme", height = "auto"))
+                                                                                   tabPanel("pH", plotlyOutput("pHtheme"))
                            )), width = 8), 
                            position = "right"
                          )
@@ -265,13 +265,6 @@ shinyUI(fluidPage(
                                column(12, checkboxGroupInput("solutes_H", label = h4(""),
                                                              choices = solutes_H,
                                                              selected = ""))),
-                             
-                             ##Watersheds
-                             fluidRow(
-                               column(12, actionLink("select_all_ws", h4("Watersheds")), 
-                                      selectInput("watersheds", label = "",
-                                                  choices = watersheds, multiple = TRUE,
-                                                  selected = "6"))),
                              
                              ##Water Sources
                              fluidRow(
@@ -407,30 +400,6 @@ shinyUI(fluidPage(
                            #the user to change that particular input. 
                            
                            sidebarPanel(
-                             
-                             #Solutes
-                             fluidRow(
-                               column(12, actionLink("select_all_ions", h4("Solutes"))),
-                               
-                               #Cations
-                               column(6,
-                                      actionLink("select_all_cations", h5("Cations")),
-                                      checkboxGroupInput("solutes_cations", label = "",
-                                                         choices = solutes_cations,
-                                                         selected = "Na")),
-                               
-                               #Anions
-                               
-                               column(6, actionLink("select_all_anions", h5("Anions")),
-                                      checkboxGroupInput("solutes_anions", label = "",
-                                                         choices = solutes_anions,
-                                                         selected = "SO4)"))),
-                             #Hydrogen  
-                             
-                             fluidRow(
-                               column(12, checkboxGroupInput("solutes_H", label = h4(""),
-                                                             choices = solutes_H,
-                                                             selected = ""))),
                              
                              ##Watersheds
                              fluidRow(
