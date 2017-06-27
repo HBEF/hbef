@@ -1,126 +1,288 @@
+library(ggplot2)
+library(lubridate)
+library(gridExtra)
+library(readr)
+library(tidyr)
+library(dplyr)
+library(shiny)
+library(plotly)
+library(utils)
+library(grid)
+library(ggthemes)
 library(magrittr)
 library(timevis)
-library(shiny)
-library(readr)
-library(ggplot2)
-library(plotly)
-library(ggthemes)
-
-#DATA and themes
-imported_data <- readRDS("precip_stream_data_long.rds")
-
-my_theme <- theme_fivethirtyeight() + 
-  theme(rect = element_rect(fill = NA),
-        panel.grid.major = element_line(colour = "#dddddd"), 
-        text = element_text(family = "Helvetica", size = 12), 
-        legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
-        strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
-        axis.title= element_text(NULL), axis.title.x= element_blank(), 
-        axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
-
-cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
-anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
-hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
-
-solute_palette <- c(cation, anion, hydro)
-source_shapes <- c("flow" = 16, "precip"= 21)
-
-ggplot_function <- function(data, x, y, color, title, facet, ncol = NULL, nrow = NULL){
-  #  ggplotly(  
-  (ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws)) + my_theme +
-     geom_line(size = 1)+ 
-     geom_point(size = 1.5, fill = "white", stroke = 0.5) + 
-     ggtitle(title) +
-     #     facet_wrap(~get(facet) , ncol = ncol)+ 
-     #       xlim(min(input$timeframe[1]), max(input$timeframe[2]))+ 
-     #      labs(x = "Water Year", y = units())+ 
-     scale_shape_manual(values = source_shapes) +
-     scale_color_manual(values = solute_palette) +
-     scale_alpha_discrete(range = c(0.9, 0.5))) 
-  #    width = 900) %>%
-  #   config(displayModeBar = FALSE) %>%
-  #  config(showLink = FALSE)  
-}
 
 
-#load in all the data from Camila download
-precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
+#######################################################################################
+########### SHINY SERVER ##############################################################
+#######################################################################################
 
-#make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
-historyData <- data.frame(
-  id = 1:6,
-  content = c("Majority of HBEF dataset",
-              "The Air Pollution Control Act",
-              "EPA founded", 
-              "Clean Air Act",
-              "Clean Air Act Amendment",
-              "Today"),
-  title = c("Watershed 6 is displayed in this story, as it is the control",
-            "",
-            "The EPA was founded to enforce the Clean Air Act",
-            "The Clean Air Act also has important amendments",
-            "Amendment that more specifically addressed acid rain",
-            "Today isn't really today"),
-  start = c("1963-06-01",
-            "1955-01-01",
-            "1970-12-02", 
-            "1970-06-01",
-            "1990-06-01",
-            "2017-06-19"), #FIND THE REAL DATE OF CAA ENACTMENT!
-  end = c("2014-05-01",
-          NA,
-          NA, 
-          NA,
-          NA,
-          NA)
-)
-#making data frames to use with rb selection of cmpd ##OPTIMIZE
-CaData <- precip_stream_data[precip_stream_data$solute == "Ca",]
-CaData <- CaData[CaData$ws == "6",]
 
-SO4Data <- precip_stream_data[precip_stream_data$solute == "SO4",]
-SO4Data <- SO4Data[SO4Data$ws == "6",]
-
-MgData <- precip_stream_data[precip_stream_data$solute == "Mg",]
-MgData <- MgData[MgData$ws == "6",]
-
-KData <- precip_stream_data[precip_stream_data$solute == "K",]
-KData <- KData[KData$ws == "6",]
-
-NaData <- precip_stream_data[precip_stream_data$solute == "Na",]
-NaData <- NaData[NaData$ws == "6",]
-
-AlData <- precip_stream_data[precip_stream_data$solute == "Al",]
-AlData <- AlData[AlData$ws == "6",]
-
-ClData <- precip_stream_data[precip_stream_data$solute == "Cl",]
-ClData <- ClData[ClData$ws == "6",]
-
-NH4Data <- precip_stream_data[precip_stream_data$solute == "NH4",]
-NH4Data <- NH4Data[NH4Data$ws == "6",]
-
-NO3Data <- precip_stream_data[precip_stream_data$solute == "NO3",]
-NO3Data <- NO3Data[NO3Data$ws == "6",]
-
-PO4Data <- precip_stream_data[precip_stream_data$solute == "PO4",]
-PO4Data <- PO4Data[PO4Data$ws == "6",]
-
-SiO2Data <- precip_stream_data[precip_stream_data$solute == "SiO2",]
-SiO2Data <- SiO2Data[SiO2Data$ws == "6",]
-
-HData <- precip_stream_data[precip_stream_data$solute == "H",]
-HData <- HData[HData$ws == "6",]
-
-pHData <- precip_stream_data[precip_stream_data$solute == "pH",]
-pHData <- pHData[pHData$ws == "6",]
-pHData <- pHData[,c(1:4,14,5:13,15:16)]
-
-pHData_precip <- pHData[pHData$source == "precip",]
-
-#watershed 6 dataframe
-precip_stream_data_ws6 <- precip_stream_data[precip_stream_data$ws == "6",]
-
-shinyServer(function(input, output){
+shinyServer(function(session, input, output) {
+  
+  ########### IMPORTANT PRELIMINARY INFO #############################################
+  
+  ###  Theme  ################
+  my_theme <- theme_fivethirtyeight() + 
+    theme(rect = element_rect(fill = NA),
+          panel.grid.major = element_line(colour = "#dddddd"), 
+          text = element_text(family = "Helvetica", size = 12), 
+          legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
+          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
+          axis.title= element_text(NULL), axis.title.x= element_blank(), 
+          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
+  
+  color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
+  color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
+  color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
+  
+  solute_palette <- c(color_cation, color_anion, color_hydro)
+  source_shapes <- c("flow" = 16, "precip"= 21)
+  
+  ### End of Theme ################
+  
+  ###  Lists for the sidebar  ######
+  #Edit if there are values that do not appear or are not relevant to your data. 
+  #Should be the same as the lists in the UI file.
+  
+  watersheds <- list("Watershed 1" = "1",
+                     "Watershed 2" = "2", 
+                     "Watershed 3" = "3",
+                     "Watershed 4" = "4",
+                     "Watershed 5" = "5",
+                     "Watershed 6" = "6",
+                     "Watershed 7" = "7",
+                     "Watershed 8" = "8",
+                     "Watershed 9" = "9")
+  
+  solutes_cations <- list("Potassium (K)" = "K",
+                          "Sodium (Na)" = "Na",
+                          "Calcium (Ca)" = "Ca",
+                          "Magnesium (Mg)" = "Mg",
+                          "Aluminum (Al)" = "Al")
+  
+  solutes_anions <- list("Phosphate (PO4)" = "PO4",
+                         "Sulfate (SO4)" = "SO4",
+                         "Nitrate (NO3)" = "NO3",
+                         "Silicon Dioxide (SiO2)" = "SiO2",
+                         "Chlorine (Cl)" = "Cl",
+                         "Bicarbonate (HCO3)" = "HCO3")
+  
+  ########### END OF IMPORTANT PRELIMINARY INFO #############################################
+  
+  
+  
+  
+  ########### SIDEBAR FUNCTIONS ##############################################################
+  ###  allow 'select all' interactivity, do not edit
+  
+  observeEvent(input$select_all_ions, {
+    if(input$select_all_ions == 0) {}
+    else if (input$select_all_ions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")
+      updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
+    else{
+      updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
+      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
+  })
+  
+  observeEvent(input$select_all_anions, {
+    if(input$select_all_anions == 0) {}
+    else if (input$select_all_anions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")}
+    else{updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)}
+  })
+  
+  observeEvent(input$select_all_cations, {
+    if(input$select_all_cations == 0) {}
+    else if (input$select_all_cations%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
+    else{updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
+  })
+  
+  observeEvent(input$select_all_ws, {
+    if(input$select_all_ws == 0) {updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
+    else if (input$select_all_ws%%2 == 0){updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
+    else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
+  })
+  
+  solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
+  
+  ########### END OF SIDEBAR FUNCTIONS ####################################################
+  
+  
+  
+  
+  ########### DATA IMPORT ####################################################
+  
+  imported_data <- readRDS("precip_stream_data_long.rds")
+  #load in all the data from Camila download.. fix so the imported_data will actually load
+  precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
+  
+  #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
+  historyData <- data.frame(
+    id = 1:6,
+    content = c("Majority of HBEF dataset",
+                "The Air Pollution Control Act",
+                "EPA founded", 
+                "Clean Air Act",
+                "Clean Air Act Amendment",
+                "Today"),
+    title = c("Watershed 6 is displayed in this story, as it is the control",
+              "",
+              "The EPA was founded to enforce the Clean Air Act",
+              "The Clean Air Act also has important amendments",
+              "Amendment that more specifically addressed acid rain",
+              "Today isn't really today"),
+    start = c("1963-06-01",
+              "1955-01-01",
+              "1970-12-02", 
+              "1970-06-01",
+              "1990-06-01",
+              "2017-06-19"), #FIND THE REAL DATE OF CAA ENACTMENT!
+    end = c("2014-05-01",
+            NA,
+            NA, 
+            NA,
+            NA,
+            NA)
+  )
+  #making data frames to use with rb selection of cmpd ##OPTIMIZE
+  CaData <- precip_stream_data[precip_stream_data$solute == "Ca",]
+  CaData <- CaData[CaData$ws == "6",]
+  
+  SO4Data <- precip_stream_data[precip_stream_data$solute == "SO4",]
+  SO4Data <- SO4Data[SO4Data$ws == "6",]
+  
+  MgData <- precip_stream_data[precip_stream_data$solute == "Mg",]
+  MgData <- MgData[MgData$ws == "6",]
+  
+  KData <- precip_stream_data[precip_stream_data$solute == "K",]
+  KData <- KData[KData$ws == "6",]
+  
+  NaData <- precip_stream_data[precip_stream_data$solute == "Na",]
+  NaData <- NaData[NaData$ws == "6",]
+  
+  AlData <- precip_stream_data[precip_stream_data$solute == "Al",]
+  AlData <- AlData[AlData$ws == "6",]
+  
+  ClData <- precip_stream_data[precip_stream_data$solute == "Cl",]
+  ClData <- ClData[ClData$ws == "6",]
+  
+  NH4Data <- precip_stream_data[precip_stream_data$solute == "NH4",]
+  NH4Data <- NH4Data[NH4Data$ws == "6",]
+  
+  NO3Data <- precip_stream_data[precip_stream_data$solute == "NO3",]
+  NO3Data <- NO3Data[NO3Data$ws == "6",]
+  
+  PO4Data <- precip_stream_data[precip_stream_data$solute == "PO4",]
+  PO4Data <- PO4Data[PO4Data$ws == "6",]
+  
+  SiO2Data <- precip_stream_data[precip_stream_data$solute == "SiO2",]
+  SiO2Data <- SiO2Data[SiO2Data$ws == "6",]
+  
+  HData <- precip_stream_data[precip_stream_data$solute == "H",]
+  HData <- HData[HData$ws == "6",]
+  
+  pHData <- precip_stream_data[precip_stream_data$solute == "pH",]
+  pHData <- pHData[pHData$ws == "6",]
+  pHData <- pHData[,c(1:4,14,5:13,15:16)]
+  
+  pHData_precip <- pHData[pHData$source == "precip",]
+  
+  #watershed 6 dataframe
+  precip_stream_data_ws6 <- precip_stream_data[precip_stream_data$ws == "6",]
+  
+  ########### END OF DATA IMPORT #############################################
+  
+  
+  ########### REACTIVE DATA AND X Y  #########################################
+  #Reactive Data Normal
+  
+  reactive_data <- reactive({
+    data <- imported_data
+    data <- data[data$source %in% input$water_sources,]
+    data <- data[data$solute %in% solutes(),] 
+    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
+    data <- data[data$ws %in% input$watersheds,]
+  })
+  
+  
+  x <- reactive({
+    if(input$granularity == "month"){"water_date"}
+    else if(input$granularity == "year"){"water_year"}
+  })
+  
+  y <- reactive({
+    if(input$granularity == "month" & input$units =="uMg/L"){"concentration_mg"}
+    else if(input$granularity == "year" & input$units =="uMg/L"){"mg_weighted_average"}
+    else if(input$granularity == "month" & input$units =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$granularity == "year" & input$units =="uEquivalent/L"){"ueq_weighted_average"}
+    else if(input$granularity == "month"& input$units =="uMole/L"){"concentration_umol"}
+    else if(input$granularity == "year"& input$units =="uMole/L"){"umol_weighted_average"}
+    else if(input$granularity == "month"& input$units =="flux"){"flux"}
+    else if(input$granularity == "year"& input$units =="flux"){"flux_sum"}
+  })
+  
+  log_transform <- reactive({
+    if(input$log == "ln"){"transform"}
+    else{"no_transform"}
+  })
+  
+  ########### PLOT FUNCTIONS #########################################
+  
+  ## GGPLOT TIME FUNCTION
+  ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+    
+    if(log) {
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+        labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+    
+    else{
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+        labs(x = "Water Year", y = input$units)}
+    
+    final <- plot+ my_theme + geom_line(size = 1) + 
+      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+      xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))
+    
+    ggplotly(  
+      final, tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+  }
+  
+  
+  
+  #############################################################
+  ########### OUTPUTS #########################################
+  #############################################################
+  
+  output$plot1a <- renderPlotly({
+    theplot <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
+    #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
+    theplot$x$layout$width <- NULL
+    theplot$y$layout$height <- NULL
+    theplot$width <- NULL
+    theplot$height <- NULL
+    theplot %>%
+      layout(autosize = TRUE, height = 600)
+  })
+  
+  output$plot1b <- renderPlotly({
+    theplot <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
+    theplot$x$layout$width <- NULL
+    theplot$y$layout$height <- NULL
+    theplot$width <- NULL
+    theplot$height <- NULL
+    theplot %>%
+      layout(autosize = TRUE, height = 600)
+  })
+  
   #intro pH plot with only precip
   output$pHtheme <- renderPlotly({
     pHtheme <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average, 
@@ -140,17 +302,10 @@ shinyServer(function(input, output){
       geom_vline(size = 0.5, xintercept = -5)+
       geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)+
       geom_ribbon(aes(ymin=5,ymax=5.5), fill="blue", alpha=0.3)
-   #   geom_ribbon(aes(xmin=as.Date("1970-01-01"), xmax=as.Date("1990-01-01")), fill="green", alpha=0.1)+ coord_flip()
+    #   geom_ribbon(aes(xmin=as.Date("1970-01-01"), xmax=as.Date("1990-01-01")), fill="green", alpha=0.1)+ coord_flip()
     ggplotly(pHtheme, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
-  })
-  #practice with Camila's theme.. ###Probs should delete this
-  output$pH <- renderPlotly({
-    annotation <- list(yref = 'paper', xref = "x", y = 0.5, x = 1960, text = "annotation")
-    
-    pHtheme <- ggplot_function(data = pHData_precip, x = "water_year", y = "mg_weighted_average")
-    layout(annotations= list(annotation))
   })
   
   #pH plot with P and Q to show acid in, more neutralized out
@@ -170,16 +325,17 @@ shinyServer(function(input, output){
       config(displayModeBar = F)%>%
       config(showLink = F)
   })
+  
   #plot of SO4 and NO3 to complement pH increase - shows decreasing trend
   output$SO4NO3reductions <- renderPlotly({
     SO4NO3reductions <- ggplot(NULL, aes(shape = source, color = solute, alpha = ws))+
       geom_line(data = NO3Data, aes(x = water_year, y = ueq_weighted_average), size = 1)+
       geom_point(data = NO3Data, aes(x = water_year, y = ueq_weighted_average,
-                              text = paste("NO3 Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                                     text = paste("NO3 Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
                  size = 1.5, fill = "white", stroke = 0.5)+
       geom_line(data = SO4Data, aes(x = water_year, y = ueq_weighted_average), size = 1)+
       geom_point(data = SO4Data, aes(x = water_year, y = ueq_weighted_average,
-                              text = paste("SO4 Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                                     text = paste("SO4 Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
                  size = 1.5, fill = "white", stroke = 0.5)+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
@@ -197,7 +353,7 @@ shinyServer(function(input, output){
     baseCations <- ggplot(NULL, aes(shape = source, color = solute, alpha = ws))+ my_theme+
       geom_line(data = CaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ #alter Camila function to create one more custom to this style? (ie less input based, more to see trend)
       geom_point(data = CaData, aes(x = water_year, y = ueq_weighted_average,
-                                     text = paste("Ca Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
+                                    text = paste("Ca Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
                  size = 1.5, fill = "white", stroke = 0.5)+
       #NOTE all of these extra geom_line and _point are to graph additional base cations rather than creating yet another df
       geom_line(data = MgData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
@@ -206,11 +362,11 @@ shinyServer(function(input, output){
                  size = 1.5, fill = "white", stroke = 0.5)+
       geom_line(data = KData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
       geom_point(data = KData, aes(x = water_year, y = ueq_weighted_average,
-                                    text = paste("K Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
+                                   text = paste("K Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
                  size = 1.5, fill = "white", stroke = 0.5)+
       geom_line(data = NaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
       geom_point(data = NaData, aes(x = water_year, y = ueq_weighted_average,
-                                   text = paste("Na Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
+                                    text = paste("Na Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
                  size = 1.5, fill = "white", stroke = 0.5)+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
@@ -218,7 +374,7 @@ shinyServer(function(input, output){
       ggtitle("Decrease in Base cations leaving the soil")+
       labs(x = "Year", y = "ueq/L")+
       coord_cartesian(ylim = c(0, 130))
-        ggplotly(baseCations, tooltip = "text", width = 900)%>%
+    ggplotly(baseCations, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
   })
@@ -226,7 +382,7 @@ shinyServer(function(input, output){
   #Al plot to show decrease in acids mean less Al released from soil
   output$Al <- renderPlotly({
     Al <- ggplot(subset(precip_stream_data[precip_stream_data$ws == 6,], solute %in% "Al"), aes(x = water_year, y = ueq_weighted_average,
-                             shape = source, color = solute, alpha = ws))+ my_theme+
+                                                                                                shape = source, color = solute, alpha = ws))+ my_theme+
       geom_line(size = 1)+
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes(text = paste("Al Concentration: ", ueq_weighted_average, "<br>", "Date: ", date)))+
@@ -236,7 +392,7 @@ shinyServer(function(input, output){
       ggtitle("Decrease in toxic Al discharge as SOx and NOx decrease")+
       labs(x = "Year", y = "ueq/L")+
       coord_cartesian(ylim = c(0, 130))
-
+    
     ggplotly(Al, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
@@ -288,4 +444,6 @@ shinyServer(function(input, output){
     timevis(historyData) #possibly use groups in order to contextualize (ie disney movie years)
   })
   
+  
 })
+
