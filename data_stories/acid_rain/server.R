@@ -146,7 +146,7 @@ shinyServer(function(input, output){
       config(displayModeBar = F)%>%
       config(showLink = F)
   })
-  #practice with Camila's theme
+  #practice with Camila's theme.. ###Probs should delete this
   output$pH <- renderPlotly({
     annotation <- list(yref = 'paper', xref = "x", y = 0.5, x = 1960, text = "annotation")
     
@@ -198,7 +198,7 @@ shinyServer(function(input, output){
     baseCations <- ggplot(NULL, aes(shape = source, color = solute, alpha = ws))+ my_theme+
       geom_line(data = CaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ #alter Camila function to create one more custom to this style? (ie less input based, more to see trend)
       geom_point(data = CaData, aes(x = water_year, y = ueq_weighted_average,
-                                     text = paste("Ca Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
+                                     text = paste("Ca Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
                  size = 1.5, fill = "white", stroke = 0.5)+
       #NOTE all of these extra geom_line and _point are to graph additional base cations rather than creating yet another df
       geom_line(data = MgData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
@@ -224,8 +224,9 @@ shinyServer(function(input, output){
       config(showLink = F)
   })
   
+  #Al plot to show decrease in acids mean less Al released from soil
   output$Al <- renderPlotly({
-    Al <- ggplot(AlData, aes(x = water_year, y = ueq_weighted_average,
+    Al <- ggplot(subset(precip_stream_data[precip_stream_data$ws == 6,], solute %in% "Al"), aes(x = water_year, y = ueq_weighted_average,
                              shape = source, color = solute, alpha = ws))+ my_theme+
       geom_line(size = 1)+
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
@@ -236,6 +237,7 @@ shinyServer(function(input, output){
       ggtitle("Decrease in toxic Al discharge as SOx and NOx decrease")+
       labs(x = "Year", y = "ueq/L")+
       coord_cartesian(ylim = c(0, 130))
+
     ggplotly(Al, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
@@ -260,6 +262,26 @@ shinyServer(function(input, output){
       config(displayModeBar = F)%>%
       config(showLink = F)
   })
+  
+  #plot of Al flux and acid flux to show acids release Al from the soil ###Not sure how to interpret and/or make faster
+  # output$fluxAlAcids <- renderPlotly({
+  #   fluxAlAcids <- ggplot(subset(precip_stream_data, solute %in% c("Al", "SO4")),####################################################### 
+  #                         aes(x = date, y = flux,
+  #                             shape = source, color = solute, alpha = ws))+ my_theme+
+  #     geom_line(size = 1) +
+  #     geom_point(size = 1.5, fill = "white", stroke = 0.5,
+  #                aes(text = paste("Solute: ", solute, "<br>", "Flux in ___ units:", flux, "<br>", "Date:", date)))+
+  #     scale_shape_manual(values = source_shapes) +
+  #     scale_color_manual(values = solute_palette) +
+  #     scale_alpha_discrete(range = c(0.9, 0.5))+
+  #     labs(colour = "Source", x = "Year", y = "(units)")+
+  #     coord_cartesian(ylim = c(0, 130))+
+  #     xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
+  #     ggtitle("Increasing acid inflow increases Aluminum outflow")
+  #   ggplotly(fluxAlAcids, tooltip = "text", width = 1900)%>%
+  #     config(displayModeBar = F)%>%
+  #     config(showLink = F)
+  # })
   
   #output an interactive timeline for the history of acid rain
   output$CAAetc <- renderTimevis({

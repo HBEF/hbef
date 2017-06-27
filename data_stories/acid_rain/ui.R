@@ -96,6 +96,7 @@ shinyUI(
     ),
     fluidRow(column(width = 11, offset = 1,
                     plotlyOutput("cTime", height = "auto", width = "100%")
+           #         plotlyOutput("fluxAlAcids", height = "auto")  ###Not sure how to interpret...
     )),
     fluidRow(column(width = 8, offset = 1,
                     h3("One effect of the base cation loss was the poor growth of Sugar Maples, 
