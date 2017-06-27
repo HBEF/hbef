@@ -5,6 +5,13 @@
 /*/// Framework ///*/
 
 
+iframe {
+    display: block;       /* iframes are inline by default */
+    border: none;         /* Reset default border */ 
+    width: 100vw;
+}
+
+
 body {
 	margin-top: 0px;
 	margin-right: 0px;
@@ -467,7 +474,7 @@ color: #fafafa;
   	height:60%;  /* Height of the footer */
  	background:#333333;
 	text-align: center;
-	margin-top: 
+	margin-top: 10%;
 }
 
 .footer h3{
