@@ -30,7 +30,7 @@ shinyServer(function(session, input, output) {
           axis.title= element_text(NULL), axis.title.x= element_blank(), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
   
-  color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
+  color_cation <- c("Al" = "#162338", "Mg" = "#273D64", "Ca" = "#3B5C95", "NH4" = "#4E7AC7" , "Na" = "#7195D2", "K" = "#95AFDD")
   color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
@@ -53,11 +53,11 @@ shinyServer(function(session, input, output) {
                      "Watershed 8" = "8",
                      "Watershed 9" = "9")
   
-  solutes_cations <- list("Potassium (K)" = "K",
-                          "Sodium (Na)" = "Na",
-                          "Calcium (Ca)" = "Ca",
+  solutes_cations <- list("Aluminum (Al)" = "Al",
                           "Magnesium (Mg)" = "Mg",
-                          "Aluminum (Al)" = "Al")
+                          "Calcium (Ca)" = "Ca",
+                          "Sodium (Na)" = "Na",
+                          "Potassium (K)" = "K")
   
   solutes_anions <- list("Phosphate (PO4)" = "PO4",
                          "Sulfate (SO4)" = "SO4",
@@ -65,6 +65,11 @@ shinyServer(function(session, input, output) {
                          "Silicon Dioxide (SiO2)" = "SiO2",
                          "Chlorine (Cl)" = "Cl",
                          "Bicarbonate (HCO3)" = "HCO3")
+  
+  solutes_H <- list("Hydrogen (H)" = "H",
+                    "pH" = "pH")
+  
+  all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
 
   ########### END OF IMPORTANT PRELIMINARY INFO #############################################
   
@@ -99,6 +104,12 @@ shinyServer(function(session, input, output) {
     if(input$select_all_ws == 0) {updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
     else if (input$select_all_ws%%2 == 0){updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
     else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
+  })
+  
+  observeEvent(input$select_all_ws2, {
+    if(input$select_all_ws2 == 0) {updateCheckboxGroupInput(session, "watersheds2", selected = "ws1")}
+    else if (input$select_all_ws2%%2 == 0){updateCheckboxGroupInput(session, "watersheds2", selected = "ws1")}
+    else{updateCheckboxGroupInput(session, "watersheds2", selected = watersheds)}
   })
   
   solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
