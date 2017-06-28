@@ -88,7 +88,7 @@ shinyUI(fluidPage(
                        fluidRow(
                          
                          sidebarLayout(
-                           ############## SIDE BAR ################ 
+                           ############## SIDE BAR 1 ################ 
                            #You can edit what the default selected options are. 
                            #You can also delete inputs if you are not allowing 
                            #the user to change that particular input. 
@@ -96,18 +96,18 @@ shinyUI(fluidPage(
                            sidebarPanel(
                              ##Granularity
                              fluidRow(
-                               column(12, selectInput("granularity", label = h4("Granularity"),
+                               column(12, selectInput("granularity1", label = h4("Granularity"),
                                                       choices = granularity,
                                                       selected = "year"))),
                              
                              ##Date Range
-                             sliderInput("date_range", label = h4("Date Range"),
+                             sliderInput("date_range1", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
                                          value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
                            
                            
-                           ############## END OF SIDEBAR #######
+                           ############## END OF SIDEBAR 1 #######
                            
                            ############## GRAPH ################ 
                            #Edit the name of the plot based on the name given in the server.R file 
@@ -189,7 +189,7 @@ shinyUI(fluidPage(
                        fluidRow(
                          
                          sidebarLayout(
-                           ############## SIDE BAR ################ 
+                           ############## SIDE BAR 2 ################ 
                            #You can edit what the default selected options are. 
                            #You can also delete inputs if you are not allowing 
                            #the user to change that particular input. 
@@ -198,56 +198,56 @@ shinyUI(fluidPage(
                              
                              #Solutes
                              fluidRow(
-                               column(12, actionLink("select_all_ions", h4("Solutes"))),
+                               column(12, actionLink("select_all_ions2", h4("Solutes"))),
                                
                                #Cations
                                column(6,
-                                      actionLink("select_all_cations", h5("Cations")),
-                                      checkboxGroupInput("solutes_cations", label = "",
+                                      actionLink("select_all_cations2", h5("Cations")),
+                                      checkboxGroupInput("solutes_cations2", label = "",
                                                          choices = solutes_cations,
                                                          selected = "Na")),
                                
                                #Anions
                                
-                               column(6, actionLink("select_all_anions", h5("Anions")),
-                                      checkboxGroupInput("solutes_anions", label = "",
+                               column(6, actionLink("select_all_anions2", h5("Anions")),
+                                      checkboxGroupInput("solutes_anions2", label = "",
                                                          choices = solutes_anions,
                                                          selected = "SO4)"))),
                              #Hydrogen  
                              
                              fluidRow(
-                               column(12, checkboxGroupInput("solutes_H", label = h4(""),
+                               column(12, checkboxGroupInput("solutes_H2", label = h4(""),
                                                              choices = solutes_H,
                                                              selected = ""))),
                              
                              ##Water Sources
                              fluidRow(
-                               column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
+                               column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
                                                              choices = water_sources,
                                                              selected = "precip",
                                                              inline = TRUE))),
                              
                              ##Units  
                              fluidRow(
-                               column(12, selectInput("units", label = h4("Units"),
+                               column(12, selectInput("units2", label = h4("Units"),
                                                       choices = units,
                                                       selected = "mg/L")),
-                               column(12, checkboxInput("log", label = ("ln"),
+                               column(12, checkboxInput("log2", label = ("ln"),
                                                         value = FALSE))),
                              ##Granularity
                              fluidRow(
-                               column(12, selectInput("granularity", label = h4("Granularity"),
+                               column(12, selectInput("granularity2", label = h4("Granularity"),
                                                       choices = granularity,
                                                       selected = "year"))),
                              
                              ##Date Range
-                             sliderInput("date_range", label = h4("Date Range"),
+                             sliderInput("date_range2", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
                                          value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
                            
                            
-                           ############## END OF SIDEBAR #######
+                           ############## END OF SIDEBAR 2 #######
                            
                            ############## GRAPH ################ 
                            #Edit the name of the plot based on the name given in the server.R file 
@@ -348,7 +348,7 @@ shinyUI(fluidPage(
                        fluidRow(
                          
                          sidebarLayout(
-                           ############## SIDE BAR ################ 
+                           ############## SIDE BAR 3 ################ 
                            #You can edit what the default selected options are. 
                            #You can also delete inputs if you are not allowing 
                            #the user to change that particular input. 
@@ -357,39 +357,39 @@ shinyUI(fluidPage(
                              
                              ##Watersheds
                              fluidRow(
-                               column(12, actionLink("select_all_ws", h4("Watersheds")), 
-                                      selectInput("watersheds", label = "",
+                               column(12, actionLink("select_all_ws3", h4("Watersheds")), 
+                                      selectInput("watersheds3", label = "",
                                                   choices = watersheds, multiple = TRUE,
                                                   selected = "6"))),
                              
                              ##Water Sources
                              fluidRow(
-                               column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
+                               column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
                                                              choices = water_sources,
                                                              selected = "precip",
                                                              inline = TRUE))),
                              
                              ##Units  
                              fluidRow(
-                               column(12, selectInput("units", label = h4("Units"),
+                               column(12, selectInput("units3", label = h4("Units"),
                                                       choices = units,
                                                       selected = "mg/L")),
-                               column(12, checkboxInput("log", label = ("ln"),
+                               column(12, checkboxInput("log3", label = ("ln"),
                                                         value = FALSE))),
                              ##Granularity
                              fluidRow(
-                               column(12, selectInput("granularity", label = h4("Granularity"),
+                               column(12, selectInput("granularity3", label = h4("Granularity"),
                                                       choices = granularity,
                                                       selected = "year"))),
                              
                              ##Date Range
-                             sliderInput("date_range", label = h4("Date Range"),
+                             sliderInput("date_range3", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
                                          value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
                            
                            
-                           ############## END OF SIDEBAR #######
+                           ############## END OF SIDEBAR 3 #######
                            
                            ############## GRAPH ################ 
                            #Edit the name of the plot based on the name given in the server.R file 
@@ -463,7 +463,7 @@ shinyUI(fluidPage(
                        fluidRow(
                          
                          sidebarLayout(
-                           ############## SIDE BAR ################ 
+                           ############## SIDE BAR 4 ################ 
                            #You can edit what the default selected options are. 
                            #You can also delete inputs if you are not allowing 
                            #the user to change that particular input. 
@@ -472,70 +472,70 @@ shinyUI(fluidPage(
                              
                              #Solutes
                              fluidRow(
-                               column(12, actionLink("select_all_ions", h4("Solutes"))),
+                               column(12, actionLink("select_all_ions4", h4("Solutes"))),
                                
                                #Cations
                                column(6,
-                                      actionLink("select_all_cations", h5("Cations")),
-                                      checkboxGroupInput("solutes_cations", label = "",
+                                      actionLink("select_all_cations4", h5("Cations")),
+                                      checkboxGroupInput("solutes_cations4", label = "",
                                                          choices = solutes_cations,
                                                          selected = "Na")),
                                
                                #Anions
                                
-                               column(6, actionLink("select_all_anions", h5("Anions")),
-                                      checkboxGroupInput("solutes_anions", label = "",
+                               column(6, actionLink("select_all_anions4", h5("Anions")),
+                                      checkboxGroupInput("solutes_anions4", label = "",
                                                          choices = solutes_anions,
                                                          selected = "SO4)"))),
                              #Hydrogen  
                              
                              fluidRow(
-                               column(12, checkboxGroupInput("solutes_H", label = h4(""),
+                               column(12, checkboxGroupInput("solutes_H4", label = h4(""),
                                                              choices = solutes_H,
                                                              selected = ""))),
                              
                              ##Watersheds
                              fluidRow(
-                               column(12, actionLink("select_all_ws", h4("Watersheds")), 
-                                      selectInput("watersheds", label = "",
+                               column(12, actionLink("select_all_ws4", h4("Watersheds")), 
+                                      selectInput("watersheds4", label = "",
                                                   choices = watersheds, multiple = TRUE,
                                                   selected = "6"))),
                              
                              ##Water Sources
                              fluidRow(
-                               column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
+                               column(12, checkboxGroupInput("water_sources4", label = h4("Water Sources"),
                                                              choices = water_sources,
                                                              selected = "precip",
                                                              inline = TRUE))),
                              
                              ##Units  
                              fluidRow(
-                               column(12, selectInput("units", label = h4("Units"),
+                               column(12, selectInput("units4", label = h4("Units"),
                                                       choices = units,
                                                       selected = "mg/L")),
-                               column(12, checkboxInput("log", label = ("ln"),
+                               column(12, checkboxInput("log4", label = ("ln"),
                                                         value = FALSE))),
                              ##Granularity
                              fluidRow(
-                               column(12, selectInput("granularity", label = h4("Granularity"),
+                               column(12, selectInput("granularity4", label = h4("Granularity"),
                                                       choices = granularity,
                                                       selected = "year"))),
                              
                              ##Date Range
-                             sliderInput("date_range", label = h4("Date Range"),
+                             sliderInput("date_range4", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
                                          value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
                            
                            
-                           ############## END OF SIDEBAR #######
+                           ############## END OF SIDEBAR 4 #######
                            
                            ############## GRAPH ################ 
                            #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab4"
+                           mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab4",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                  # tabPanel()
+                                                                                   tabPanel("practice", plotlyOutput("function_practice"))
                            )), width = 8), 
                            position = "right"
                          )

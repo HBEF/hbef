@@ -76,31 +76,31 @@ shinyServer(function(session, input, output) {
   ########### SIDEBAR FUNCTIONS ##############################################################
   ###  allow 'select all' interactivity, do not edit
   
-  observeEvent(input$select_all_ions, {
-    if(input$select_all_ions == 0) {}
-    else if (input$select_all_ions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")
-      updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
+  observeEvent(input$select_all_ions4, {
+    if(input$select_all_ions4 == 0) {}
+    else if (input$select_all_ions4%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions4", selected = "PO4")
+      updateCheckboxGroupInput(session, "solutes_cations4", selected = "K")}
     else{
-      updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
-      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
+      updateCheckboxGroupInput(session, "solutes_anions4", selected = solutes_anions)
+      updateCheckboxGroupInput(session, "solutes_cations4", selected = solutes_cations)}
   })
   
-  observeEvent(input$select_all_anions, {
-    if(input$select_all_anions == 0) {}
-    else if (input$select_all_anions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")}
-    else{updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)}
+  observeEvent(input$select_all_anions4, {
+    if(input$select_all_anions4 == 0) {}
+    else if (input$select_all_anions4%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions4", selected = "PO4")}
+    else{updateCheckboxGroupInput(session, "solutes_anions4", selected = solutes_anions)}
   })
   
-  observeEvent(input$select_all_cations, {
-    if(input$select_all_cations == 0) {}
-    else if (input$select_all_cations%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
-    else{updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
+  observeEvent(input$select_all_cations4, {
+    if(input$select_all_cations4 == 0) {}
+    else if (input$select_all_cations4%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations4", selected = "K")}
+    else{updateCheckboxGroupInput(session, "solutes_cations4", selected = solutes_cations)}
   })
   
-  observeEvent(input$select_all_ws, {
-    if(input$select_all_ws == 0) {updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
-    else if (input$select_all_ws%%2 == 0){updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
-    else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
+  observeEvent(input$select_all_ws4, {
+    if(input$select_all_ws4 == 0) {updateCheckboxGroupInput(session, "watersheds4", selected = "ws1")}
+    else if (input$select_all_ws4%%2 == 0){updateCheckboxGroupInput(session, "watersheds4", selected = "ws1")}
+    else{updateCheckboxGroupInput(session, "watersheds4", selected = watersheds)}
   })
   
   solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
@@ -198,31 +198,31 @@ shinyServer(function(session, input, output) {
   
   reactive_data <- reactive({
     data <- imported_data
-    data <- data[data$source %in% input$water_sources,]
+    data <- data[data$source %in% input$water_sources4,]
     data <- data[data$solute %in% solutes(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-    data <- data[data$ws %in% input$watersheds,]
+    data <- data[data$ws %in% input$watersheds4,]
   })
   
   
   x <- reactive({
-    if(input$granularity == "month"){"water_date"}
-    else if(input$granularity == "year"){"water_year"}
+    if(input$granularity4 == "month"){"water_date"}
+    else if(input$granularity4 == "year"){"water_year"}
   })
   
   y <- reactive({
-    if(input$granularity == "month" & input$units =="uMg/L"){"concentration_mg"}
-    else if(input$granularity == "year" & input$units =="uMg/L"){"mg_weighted_average"}
-    else if(input$granularity == "month" & input$units =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity == "year" & input$units =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity == "month"& input$units =="uMole/L"){"concentration_umol"}
-    else if(input$granularity == "year"& input$units =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity == "month"& input$units =="flux"){"flux"}
-    else if(input$granularity == "year"& input$units =="flux"){"flux_sum"}
+    if(input$granularity4 == "month" & input$units =="uMg/L"){"concentration_mg"}
+    else if(input$granularity4 == "year" & input$units =="uMg/L"){"mg_weighted_average"}
+    else if(input$granularity4 == "month" & input$units =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$granularity4 == "year" & input$units =="uEquivalent/L"){"ueq_weighted_average"}
+    else if(input$granularity4 == "month"& input$units =="uMole/L"){"concentration_umol"}
+    else if(input$granularity4 == "year"& input$units =="uMole/L"){"umol_weighted_average"}
+    else if(input$granularity4 == "month"& input$units =="flux"){"flux"}
+    else if(input$granularity4 == "year"& input$units =="flux"){"flux_sum"}
   })
   
   log_transform <- reactive({
-    if(input$log == "ln"){"transform"}
+    if(input$log4 == "ln"){"transform"}
     else{"no_transform"}
   })
   
@@ -233,17 +233,17 @@ shinyServer(function(session, input, output) {
     
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+        labs(x = "Water Year", y = paste("log", "(",input$units4, ")"))}
     
     else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = input$units)}
+        labs(x = "Water Year", y = input$units4)}
     
     final <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
+      xlim(min(input$date_range4[1]), max(input$date_range4[2]))+ 
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -448,13 +448,24 @@ shinyServer(function(session, input, output) {
   #   ggplotly(fluxAlAcids, tooltip = "text", width = 1900)%>%
   #     config(displayModeBar = F)%>%
   #     config(showLink = F)
-  # })
+  # }) ################################
   
   #output an interactive timeline for the history of acid rain
   output$CAAetc <- renderTimevis({
     timevis(historyData) #possibly use groups in order to contextualize (ie disney movie years)
   })
   
+  #output all compounds plot using the ggplot_function (possibly new sidebar in each tab and delete all compound options except desired)
+  output$function_practice <- renderPlotly({
+    function_practice <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log4)
+    function_practice$x$layout$width <- NULL
+    function_practice$y$layout$height <- NULL
+    function_practice$width <- NULL
+    function_practice$height <- NULL
+    function_practice %>%
+      layout(autosize = TRUE, height = 600)
+  })
   
 })
+
 
