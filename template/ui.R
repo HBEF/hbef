@@ -9,7 +9,7 @@ library(ggthemes)
 library(directlabels)
 
 
-########### IMPORTANT LISTS #############
+########### IMPORTANT LISTS ############
 
 
 ###  Lists for the sidebar  ###
