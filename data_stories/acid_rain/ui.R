@@ -94,52 +94,6 @@ shinyUI(fluidPage(
                            #the user to change that particular input. 
                            
                            sidebarPanel(
-                             
-                             #Solutes
-                             fluidRow(
-                               column(12, actionLink("select_all_ions", h4("Solutes"))),
-                               
-                               #Cations
-                               column(6,
-                                      actionLink("select_all_cations", h5("Cations")),
-                                      checkboxGroupInput("solutes_cations", label = "",
-                                                         choices = solutes_cations,
-                                                         selected = "Na")),
-                               
-                               #Anions
-                               
-                               column(6, actionLink("select_all_anions", h5("Anions")),
-                                      checkboxGroupInput("solutes_anions", label = "",
-                                                         choices = solutes_anions,
-                                                         selected = "SO4)"))),
-                             #Hydrogen  
-                             
-                             fluidRow(
-                               column(12, checkboxGroupInput("solutes_H", label = h4(""),
-                                                             choices = solutes_H,
-                                                             selected = ""))),
-                             
-                             ##Watersheds
-                             fluidRow(
-                               column(12, actionLink("select_all_ws", h4("Watersheds")), 
-                                      selectInput("watersheds", label = "",
-                                                  choices = watersheds, multiple = TRUE,
-                                                  selected = "6"))),
-                             
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = "precip",
-                                                             inline = TRUE))),
-                             
-                             ##Units  
-                             fluidRow(
-                               column(12, selectInput("units", label = h4("Units"),
-                                                      choices = units,
-                                                      selected = "mg/L")),
-                               column(12, checkboxInput("log", label = ("ln"),
-                                                        value = FALSE))),
                              ##Granularity
                              fluidRow(
                                column(12, selectInput("granularity", label = h4("Granularity"),
@@ -160,7 +114,7 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab1",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("pH", plotlyOutput("pHtheme"))
+                                                                                   tabPanel("pH", plotlyOutput("pHtheme", height = "auto", width = "auto"))
                            )), width = 8), 
                            position = "right"
                          )
@@ -172,7 +126,7 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #1 ##################
                        tags$div(class = "container_paragraph",
                          fluidRow(column(width = 8, offset = 1,
-                                         h3("Experiencing nature for many people means traveling to see awe-inspiring 
+                                         p("Experiencing nature for many people means traveling to see awe-inspiring 
                                             views and wildlife in national parks or forests. Perhaps the place pictured above used to be one of
                                             those nature hubs. These national sites, as well as anywhere in nature, are composed of many diverse 
                                             ecosystems that maintain an important balance.")),
@@ -181,17 +135,17 @@ shinyUI(fluidPage(
                                            of where they live")),
                                   column(1)),
                          fluidRow(column(width = 8, offset = 1,
-                                         h3("Starting in the early 1950s (soon after Disney first released Cinderella 
+                                         p("Starting in the early 1950s (soon after Disney first released Cinderella 
                                             and Peter Pan) this balance within ecosystems everywhere began to tip.  
                                             What caused this shift in so many ecosystems?  Well, the weather did 
                                             believe it or not.  More specifically, the precipitation that fell 
                                             on the ecosystems."),
-                                         h3('“But don’t plants and animals need the rain and snowmelt to survive” you 
+                                         p('“But don’t plants and animals need the rain and snowmelt to survive” you 
                                             ask?  Yes, point for you.  Though the precipitation at this time was 
                                             acid rain, and had become polluted to a point of concern.  Many 
                                             plants and aquatic creatures specifically were harmed by the increasing 
                                             acidity of the water, which began to disrupt the flow of the ecosystems.'),
-                                         h3('Acid rain hasn’t always been around to harm ecosystems though.  It became 
+                                         p('Acid rain hasn’t always been around to harm ecosystems though.  It became 
                                             an issue as humans increasingly emitted sulfur dioxide (SO2) and 
                                             nitrogen oxides (NOx).  These chemicals came mostly from burning 
                                             fossil fuels (namely coal) to produce electricity, and from car 
@@ -201,7 +155,7 @@ shinyUI(fluidPage(
                                   column(3)),
                          fluidRow(column(width = 8, offset = 1,
                                          #insert widget that links to a quizlet or something here
-                                         h3("Let's see how much you know offhand about acid rain... Click", 
+                                         h4("Let's see how much you know offhand about acid rain... Click", 
                                             tags$a(href = "https://www.surveymonkey.com/r/RGNNTMH", "here"),
                                             "to take the acid rain quiz.")
                          ),
@@ -442,20 +396,16 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab3",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("SO4 & NO3",
-                                                                                            plotlyOutput("SO4NO3reductions", height = "auto")),
+                                                                                   tabPanel("SO4 & NO3", plotlyOutput("SO4NO3reductions", height = "auto")),
                                                                                    
                                                                                    ## PLOT VIEW 2
-                                                                                   tabPanel("Base Cations",
-                                                                                            plotlyOutput("baseCations", height = "auto")),
+                                                                                   tabPanel("Base Cations", plotlyOutput("baseCations", height = "auto")),
                                                                                    
                                                                                    ## PLOT VIEW 3
-                                                                                   tabPanel("Al",
-                                                                                            plotlyOutput("Al", height = "auto")),
+                                                                                   tabPanel("Al", plotlyOutput("Al", height = "auto")),
                                                                                    
                                                                                    ## PLOT VIEW 4
-                                                                                   tabPanel("pH",
-                                                                                            plotlyOutput("pHPandQ", height = "auto"))
+                                                                                   tabPanel("pH", plotlyOutput("pHPandQ", height = "auto"))
                            
                                                                                    
                            )), width = 8), 
