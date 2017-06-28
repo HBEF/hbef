@@ -112,9 +112,9 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  imported_data <- readRDS("precip_stream_data_long.rds")
+  imported_data1 <- readRDS("precip_stream_data_long.rds")
   #load in all the data from Camila download.. fix so the imported_data will actually load
-  precip_stream_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
+  imported_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
   
   #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
   historyData <- data.frame(
@@ -145,50 +145,50 @@ shinyServer(function(session, input, output) {
             NA)
   )
   #making data frames to use with rb selection of cmpd ##OPTIMIZE
-  CaData <- precip_stream_data[precip_stream_data$solute == "Ca",]
+  CaData <- imported_data[imported_data$solute == "Ca",]
   CaData <- CaData[CaData$ws == "6",]
   
-  SO4Data <- precip_stream_data[precip_stream_data$solute == "SO4",]
+  SO4Data <- imported_data[imported_data$solute == "SO4",]
   SO4Data <- SO4Data[SO4Data$ws == "6",]
   
-  MgData <- precip_stream_data[precip_stream_data$solute == "Mg",]
+  MgData <- imported_data[imported_data$solute == "Mg",]
   MgData <- MgData[MgData$ws == "6",]
   
-  KData <- precip_stream_data[precip_stream_data$solute == "K",]
+  KData <- imported_data[imported_data$solute == "K",]
   KData <- KData[KData$ws == "6",]
   
-  NaData <- precip_stream_data[precip_stream_data$solute == "Na",]
+  NaData <- imported_data[imported_data$solute == "Na",]
   NaData <- NaData[NaData$ws == "6",]
   
-  AlData <- precip_stream_data[precip_stream_data$solute == "Al",]
+  AlData <- imported_data[imported_data$solute == "Al",]
   AlData <- AlData[AlData$ws == "6",]
   
-  ClData <- precip_stream_data[precip_stream_data$solute == "Cl",]
+  ClData <- imported_data[imported_data$solute == "Cl",]
   ClData <- ClData[ClData$ws == "6",]
   
-  NH4Data <- precip_stream_data[precip_stream_data$solute == "NH4",]
+  NH4Data <- imported_data[imported_data$solute == "NH4",]
   NH4Data <- NH4Data[NH4Data$ws == "6",]
   
-  NO3Data <- precip_stream_data[precip_stream_data$solute == "NO3",]
+  NO3Data <- imported_data[imported_data$solute == "NO3",]
   NO3Data <- NO3Data[NO3Data$ws == "6",]
   
-  PO4Data <- precip_stream_data[precip_stream_data$solute == "PO4",]
+  PO4Data <- imported_data[imported_data$solute == "PO4",]
   PO4Data <- PO4Data[PO4Data$ws == "6",]
   
-  SiO2Data <- precip_stream_data[precip_stream_data$solute == "SiO2",]
+  SiO2Data <- imported_data[imported_data$solute == "SiO2",]
   SiO2Data <- SiO2Data[SiO2Data$ws == "6",]
   
-  HData <- precip_stream_data[precip_stream_data$solute == "H",]
+  HData <- imported_data[imported_data$solute == "H",]
   HData <- HData[HData$ws == "6",]
   
-  pHData <- precip_stream_data[precip_stream_data$solute == "pH",]
+  pHData <- imported_data[imported_data$solute == "pH",]
   pHData <- pHData[pHData$ws == "6",]
   pHData <- pHData[,c(1:4,14,5:13,15:16)]
   
   pHData_precip <- pHData[pHData$source == "precip",]
   
   #watershed 6 dataframe
-  precip_stream_data_ws6 <- precip_stream_data[precip_stream_data$ws == "6",]
+  imported_data_ws6 <- imported_data[imported_data$ws == "6",]
   
   ########### END OF DATA IMPORT #############################################
   
@@ -287,7 +287,7 @@ shinyServer(function(session, input, output) {
   output$pHtheme <- renderPlotly({
     pHtheme <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average, 
                                          shape = source)) + my_theme +
-      geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "black", alpha = 0.1)+ #set this as the critical lower bound?
+      geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+ #set this as the critical lower bound?
       geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
       geom_line(size = 1, aes(color = solute))+
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
@@ -302,14 +302,13 @@ shinyServer(function(session, input, output) {
       geom_vline(size = 0.5, xintercept = -5)+
       geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)+
       geom_ribbon(aes(ymin=5,ymax=5.5), fill="blue", alpha=0.3)
-    # pHtheme$x$layout$width <- NULL
-    # pHtheme$y$layout$height <- NULL
-    # pHtheme$width <- NULL
-    # pHtheme$height <- NULL
-    # pHtheme %>%
-    #   layout(autosize = TRUE, height = 600)
-    
-    #   geom_ribbon(aes(xmin=as.Date("1970-01-01"), xmax=as.Date("1990-01-01")), fill="green", alpha=0.1)+ coord_flip()
+     # pHtheme$x$layout$width <- NULL
+     # pHtheme$y$layout$height <- NULL
+     # pHtheme$width <- NULL
+     # pHtheme$height <- NULL
+     #   pHtheme %>%
+     #     layout(autosize = TRUE, height = 600)
+
     ggplotly(pHtheme, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
@@ -317,8 +316,11 @@ shinyServer(function(session, input, output) {
   
   #pH plot with P and Q to show acid in, more neutralized out
   output$pHPandQ <- renderPlotly({
-    pHPandQ <- ggplot(pHData, aes(x = get(x()), y = get(y()), 
+    pHPandQ <- ggplot(pHData, aes(x = water_year, y = mg_weighted_average, 
                                   shape = source, color = solute, alpha = ws))+ my_theme +
+      geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+ #set this as the critical lower bound?
+      geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
+      geom_ribbon(aes(ymin=5,ymax=5.5), fill="blue", alpha=0.3)+
       geom_line(size = 1)+
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes(text = paste("pH value: ", mg_weighted_average, "<br>", "Date: ", date)))+
@@ -327,7 +329,9 @@ shinyServer(function(session, input, output) {
       scale_alpha_discrete(range = c(0.9, 0.5))+
       ggtitle("De-acidification of P and Q in response to reducing SOx and NOx emissions")+
       labs(x = "Year", y = "pH")+
-      coord_cartesian(ylim = c(4, 5.4))
+      coord_cartesian(ylim = c(4, 5.4))+
+      geom_vline(size = 0.5, xintercept = -5)+
+      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)
     ggplotly(pHPandQ, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
@@ -388,7 +392,7 @@ shinyServer(function(session, input, output) {
   
   #Al plot to show decrease in acids mean less Al released from soil
   output$Al <- renderPlotly({
-    Al <- ggplot(subset(precip_stream_data[precip_stream_data$ws == 6,], solute %in% "Al"), aes(x = water_year, y = ueq_weighted_average,
+    Al <- ggplot(subset(imported_data[imported_data$ws == 6,], solute %in% "Al"), aes(x = water_year, y = ueq_weighted_average,
                                                                                                 shape = source, color = solute, alpha = ws))+ my_theme+
       geom_line(size = 1)+
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
@@ -428,7 +432,7 @@ shinyServer(function(session, input, output) {
   #plot of Al flux and acid flux to show acids release Al from the soil ###Not sure how to interpret and/or make faster
   #also try to make this yearly by creating a yearly flux... but would that defeat the purpose? 
   # output$fluxAlAcids <- renderPlotly({
-  #   fluxAlAcids <- ggplot(subset(precip_stream_data_ws6, solute %in% c("Al", "SO4")),#######################################################
+  #   fluxAlAcids <- ggplot(subset(imported_data_ws6, solute %in% c("Al", "SO4")),#######################################################
   #                         aes(x = date, y = flux,
   #                             shape = source, color = solute, alpha = ws))+ my_theme+
   #     geom_line(size = 1) +
