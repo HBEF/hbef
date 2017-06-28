@@ -422,7 +422,7 @@ shinyServer(function(session, input, output) {
       scale_alpha_discrete(range = c(0.9, 0.5))+
       labs(colour = "Source", x = "Year", y = "(ueq/L)")+
       coord_cartesian(ylim = c(0, 130))+
-      xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
+      xlim(min(input$date_range2[1]), max(input$date_range2[2]))+
       ggtitle(as.character(input$selComp), "affected by acid rain") #possibly rename 'CaData' to be 'Calcium'
     ggplotly(cTime, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%

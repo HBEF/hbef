@@ -244,7 +244,8 @@ shinyUI(fluidPage(
                              sliderInput("date_range2", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
+                                         value = c(as.Date("1965-01-01"), as.Date("2013-01-01")),
+                                         timeFormat = "%b %Y"), width = 4),
                            
                            
                            ############## END OF SIDEBAR 2 #######
@@ -273,7 +274,7 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #2 ##################
                        tags$div(class = "container_paragraph",
                        fluidRow(column(width = 8, offset = 1,
-                                       h3(" Though sulfur dioxide and nitrogen oxides have different effects on their 
+                                       p(" Though sulfur dioxide and nitrogen oxides have different effects on their 
                                           own, when combined in acid rain they do a number on nature.  One way they harm 
                                           ecosystems is by wearing down the natural soil buffer.")),
                                 column(width = 2, #make a text box
@@ -283,7 +284,7 @@ shinyUI(fluidPage(
                                 column(1)
                                        ),
                        fluidRow(column(width = 8, offset = 1,
-                                       h3("The acid rain reacts with the base cations in the soil, causing them to be 
+                                       p("The acid rain reacts with the base cations in the soil, causing them to be 
                                           washed out of the ecosystem.  Try exploring this pattern using the graph 
                                           below.  You can see that calcium (Ca) discharge increases even though the Ca 
                                           precipitation remains relatively stable.  Also note that these plots all 
@@ -296,13 +297,7 @@ shinyUI(fluidPage(
                                 column(1)),
                        #adapt the graphs to work with sidebar inputs, then delete this
                        fluidRow(column(width = 10, offset = 2,
-                                       #use slider to view data in specific time ranges
-                                       sliderInput("dateSlide", label = "Input date range",
-                                                   min = as.Date("1963/06/01"), 
-                                                   max = as.Date("2013/06/01"),
-                                                   value = c(as.Date("1963/06/01"), as.Date("2013/06/01")),
-                                                   timeFormat="%b %Y"),
-                                       selectInput("selComp", label = "Choose a compound to graph",
+                                                   selectInput("selComp", label = "Choose a compound to graph",
                                                    choices = c("Ca" = "CaData", "Mg" = "MgData", "K" = "KData", 
                                                                "Na" = "NaData", "SO4" = "SO4Data", "NO3" = "NO3Data", 
                                                                "Al" = "AlData", "NH4" = "NH4Data", 
@@ -314,7 +309,7 @@ shinyUI(fluidPage(
                                                    choices = c("Yearly" = "water_year", "Monthly" = "date"))
                        )),
                        fluidRow(column(width = 8, offset = 1,
-                                       h3("One effect of the base cation loss was the poor growth of Sugar Maples, 
+                                       p("One effect of the base cation loss was the poor growth of Sugar Maples, 
                                which rely heavily on Ca to grow.  Another danger to the ecosystem balance 
                                was caused by acid rain reacting to release aluminum from the soil.  Aluminum 
                                is toxic once released from its stable soil state, and makes it hard for trees 
@@ -405,8 +400,10 @@ shinyUI(fluidPage(
                                                                                    tabPanel("Al", plotlyOutput("Al", height = "auto")),
                                                                                    
                                                                                    ## PLOT VIEW 4
-                                                                                   tabPanel("pH", plotlyOutput("pHPandQ", height = "auto"))
-                           
+                                                                                   tabPanel("pH", plotlyOutput("pHPandQ", height = "auto")),
+                                                                                   fluidRow(column(width = 11, offset = 1,
+                                                                                                   timevisOutput("CAAetc")))
+                                                                                   
                                                                                    
                            )), width = 8), 
                            position = "right"
@@ -419,7 +416,7 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #3 ##################
                        tags$div(class = "container_paragraph",
                        fluidRow(column(width = 8, offset = 1,
-                                       h3("The hydrologic dataset doesn’t begin until 1963 (which was after the onset 
+                                       p("The hydrologic dataset doesn’t begin until 1963 (which was after the onset 
                                of acid rain) but it still captures the story of an increasing dilemma, 
                                actions taken to mitigate it, and the rebalancing of the ecosystem.  Up 
                                until this time, the United States government was just beginning to fund 
@@ -427,10 +424,8 @@ shinyUI(fluidPage(
                                expand their monitoring and control, until the enactment of the Clean Air
                                Act in 1970.")),
                                 column(3)),
-                       fluidRow(column(width = 11, offset = 1,
-                                       timevisOutput("CAAetc"))),
                        fluidRow(column(width = 8, offset = 1,
-                                       h3("The Clean Air Act was made to regulate emissions from both stationary sources 
+                                       p("The Clean Air Act was made to regulate emissions from both stationary sources 
                                (like power plants) and mobile ones (like cars).  The EPA was also founded in
                                1970 in order to enforce the new act.  There have since been amendments, in 
                                1977 and 1990, with the 1990 ones specifically addressing the control of acid
@@ -547,7 +542,7 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #4 ##################
                        tags$div(class = "container_paragraph",
                        fluidRow(column(width = 8, offset = 1,
-                                       h3("	Feeling stressed about nature?  Slightly overwhelmed?  If you’re a farmer, 
+                                       p("	Feeling stressed about nature?  Slightly overwhelmed?  If you’re a farmer, 
                                           you can reduce your nitrogen oxide in a number of ways, like timing the 
                                           nitrogen fertilization to crop demand.  For the rest of us?  The overemphasized
                                           carpooling, biking, or walking actually does help to reduce both nitrogen oxide
