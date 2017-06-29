@@ -283,19 +283,6 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 800)
      })
 
-  output$plot1b <- renderPlotly({
-   theplot <- ggplotly(ggplot(data = reactive_data_PQ(), aes(x = get(x()), y= get(y_PQ())))+ my_theme+
-      geom_bar(stat = "identity"))
-   theplot$x$layout$width <- NULL
-   theplot$y$layout$height <- NULL
-   theplot$width <- NULL
-   theplot$height <- NULL
-   theplot %>%
-     layout(autosize = TRUE, height = 200)
-  })
-
-  
-  
   output$plot1c <- renderPlotly({
     theplot <- ggplot_diff_function(reactive_data2(), x(), y(), ncol = 1)
     theplot$x$layout$width <- NULL
