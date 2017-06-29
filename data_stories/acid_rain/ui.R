@@ -48,8 +48,12 @@ water_sources <- list("Precipitation (P)" = "precip",
 granularity <- list("Year" = "year",
                     "Month" = "month",
                     "Week" = "week")
+granularity1 <- list("Year" = "year",
+                    "Month" = "month")
 
 units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
+units1 <- list("uMg/L")
+
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
@@ -94,10 +98,24 @@ shinyUI(fluidPage(
                            #the user to change that particular input. 
                            
                            sidebarPanel(
+                             
+                             # ##Watersheds
+                             # fluidRow(
+                             #   column(12, actionLink("select_all_ws1", h4("Watersheds")), 
+                             #          selectInput("watersheds1", label = "",
+                             #                      choices = watersheds, multiple = TRUE,
+                             #                      selected = "6"))),
+                             
+                             ##Units  
+                             fluidRow(
+                               column(12, selectInput("units1", label = h4("Units"),
+                                                      choices = units1,
+                                                      selected = "mg/L"))),
+
                              ##Granularity
                              fluidRow(
                                column(12, selectInput("granularity1", label = h4("Granularity"),
-                                                      choices = granularity,
+                                                      choices = granularity1,
                                                       selected = "year"))),
                              
                              ##Date Range
@@ -109,16 +127,17 @@ shinyUI(fluidPage(
                            
                            ############## END OF SIDEBAR 1 #######
                            
-                           ############## GRAPH ################ 
+                           ############## GRAPH 1 ################ 
                            #Edit the name of the plot based on the name given in the server.R file 
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab1",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("pH", plotlyOutput("pHtheme", height = "auto", width = "auto"))
+                                                                                   tabPanel("pH", plotlyOutput("pH_intro", height = "auto"),
+                                                                                            plotlyOutput("pHtheme", height = "auto", width = "auto"))
                            )), width = 8), 
                            position = "right"
                          )
-                         ############## END OF GRAPH ################ 
+                         ############## END OF GRAPH 1 ################ 
                        ),
                        
                        ########### END OF GRAPH FOR QUESTION #1 ##########
@@ -258,7 +277,7 @@ shinyUI(fluidPage(
                            
                            ############## END OF SIDEBAR 2 #######
                            
-                           ############## GRAPH ################ 
+                           ############## GRAPH 2 ################ 
                            #Edit the name of the plot based on the name given in the server.R file 
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab2",
                                                                                    
@@ -274,7 +293,7 @@ shinyUI(fluidPage(
                            )), width = 8), 
                            position = "right"
                          )
-                         ############## END OF GRAPH ################ 
+                         ############## END OF GRAPH 2 ################ 
                        ),
                        
                        ########### END OF GRAPH FOR QUESTION #2 ##########
@@ -388,7 +407,7 @@ shinyUI(fluidPage(
                            
                            ############## END OF SIDEBAR 3 #######
                            
-                           ############## GRAPH ################ 
+                           ############## GRAPH 3 ################ 
                            #Edit the name of the plot based on the name given in the server.R file 
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab3",
                                                                                    
@@ -410,7 +429,7 @@ shinyUI(fluidPage(
                            )), width = 8), 
                            position = "right"
                          )
-                         ############## END OF GRAPH ################ 
+                         ############## END OF GRAPH 3 ################ 
                        ),
                        
                        ########### END OF GRAPH FOR QUESTION #3 ##########
