@@ -9,6 +9,8 @@ library(plotly)
 library(utils)
 library(grid)
 library(ggthemes)
+library(lattice)
+library(directlabels)
 
 
 #######################################################################################
@@ -24,9 +26,9 @@ shinyServer(function(session, input, output) {
   my_theme <- theme_fivethirtyeight() + 
     theme(rect = element_rect(fill = NA),
           panel.grid.major = element_line(colour = "#dddddd"), 
-          text = element_text(family = "Helvetica", size = 12), 
+          text = element_text(family = "Helvetica", size = 14), 
           legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
-          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
+          strip.text = element_text(hjust = 1, size = 12, face = "bold"), 
           axis.title= element_text(NULL), axis.title.x= element_blank(), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
   
@@ -36,6 +38,7 @@ shinyServer(function(session, input, output) {
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
   source_shapes <- c("flow" = 16, "precip"= 21)
+  source_color <- c("flow" = "#505050", "precip"= "#CCCDD9")
   
   ### End of Theme ################
   
@@ -121,9 +124,10 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  imported_data <- readRDS("precip_stream_data_long.rds")
-  imported_data2 <- readRDS("precip_stream_diff_data_long.rds")
-
+  load("precip_stream_dfs.RData")
+  
+  imported_data <- precip_stream_data
+  imported_data2 <- precip_stream_diff_data_long
   
   ########### END OF DATA IMPORT #############################################
   
@@ -149,6 +153,19 @@ shinyServer(function(session, input, output) {
     else{data}
   })
   
+  reactive_data_PQ <- reactive({
+    data <- imported_data
+    if(input$granularity == "year"){
+      data <- data[!duplicated(data[,c("water_year","ws", "source")]),]
+      data <- data[data$ws %in% input$watersheds,]
+      data <- data[data$source %in% input$water_sources,]}
+    else{
+      data <- data[!duplicated(data[,c("water_date","ws", "source")]),]
+      data <- data[data$ws %in% input$watersheds,]
+      data <- data[data$source %in% input$water_sources,]
+    }
+  })
+  
   
   x <- reactive({
     if(input$granularity == "month"){"water_date"}
@@ -166,6 +183,12 @@ shinyServer(function(session, input, output) {
     else if(input$granularity == "year"& input$units =="flux"){"flux_sum"}
   })
   
+  
+  y_PQ <- reactive({
+    if(input$granularity == "month"){"water_mm_pm"}
+    else if(input$granularity == "year"){"water_mm_py"}
+  })
+  
   log_transform <- reactive({
     if(input$log == "ln"){"transform"}
     else{"no_transform"}
@@ -176,6 +199,7 @@ shinyServer(function(session, input, output) {
   ## GGPLOT TIME FUNCTION
   ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
     
+  
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
       labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
@@ -184,7 +208,7 @@ shinyServer(function(session, input, output) {
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
       labs(x = "Water Year", y = input$units)}
     
-    final <- plot+ my_theme + geom_line(size = 1) + 
+      plot <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes(text = paste("Solute: ", solute, "<br>", 
                                    "Water Source: ", source, "<br>", 
@@ -196,11 +220,28 @@ shinyServer(function(session, input, output) {
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
     
-    ggplotly(  
-      final, tooltip = "text",
+    plot1 <- ggplotly(plot, tooltip = "text",
       width = 900) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
+    
+    plot2 <- ggplot(data = reactive_data_PQ(), aes(x = get(x()), y = get(y_PQ()))) + my_theme+
+      geom_bar(aes(alpha = ws, fill = source),stat = "identity", position="dodge")+
+      labs(x = "Water Year", y = "mm")+
+      facet_grid(source ~.)+
+      xlim(min(input$date_range[1]), max(input$date_range[2]))+
+      scale_fill_manual(values = source_color)+
+      scale_alpha_discrete(range = c(0.9, 0.5))
+        
+    
+    plot2 <- ggplotly(  
+      plot2,
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+    
+    subplot(plot1, plot2, nrows = 2, shareX = TRUE, heights = c(0.8, 0.2), titleY = TRUE)
     
   }
   
@@ -239,12 +280,9 @@ shinyServer(function(session, input, output) {
     theplot$width <- NULL
     theplot$height <- NULL
     theplot %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE, height = 800)
      })
-  
 
-  
-  
   output$plot1c <- renderPlotly({
     theplot <- ggplot_diff_function(reactive_data2(), x(), y(), ncol = 1)
     theplot$x$layout$width <- NULL

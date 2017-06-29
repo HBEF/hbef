@@ -211,7 +211,7 @@ input[value = "Al"]:checked:after {
 /* this gives the sidebar a specified height and enables the scrollbar*/
 
 form.well { 
-	max-height: 700px; 
+	max-height: 800px; 
 	overflow-y: auto;
 	overflow-x:none;
 	background: #EBEBEB;

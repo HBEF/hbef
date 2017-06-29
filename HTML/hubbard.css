@@ -415,6 +415,13 @@ background-size: cover;
 color: #fafafa;
 }
 
+#explore_time {
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.45), 
+		rgba(25, 25, 25, 0.45)), url("images/explore_time.png");
+	background-size: cover;
+	color: #fafafa;
+}
 
 /* Stories Images */
 .acidrain {
