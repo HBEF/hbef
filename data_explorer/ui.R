@@ -161,7 +161,7 @@ shinyUI(fluidPage(
       mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
         
         ### PLOT VIEW 1
-        tabPanel("Concentration", plotlyOutput("plot1a"), plotlyOutput("plot1b")),
+        tabPanel("Concentration", plotlyOutput("plot1a")),
         
         ### PLOT VIEW 2
         tabPanel("P - Q",plotlyOutput("plot1c"))
