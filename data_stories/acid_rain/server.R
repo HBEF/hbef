@@ -103,7 +103,7 @@ shinyServer(function(session, input, output) {
     else{updateCheckboxGroupInput(session, "watersheds4", selected = watersheds)}
   })
   
-  solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
+  solutes4 <- reactive({c(input$solutes_cations4, input$solutes_anions4, input$solutes_H4)})
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
   
@@ -195,11 +195,11 @@ shinyServer(function(session, input, output) {
   
   ########### REACTIVE DATA AND X Y  #########################################
   #Reactive Data Normal
-  
+                    ##sidebar_number_function <- function(number){  #try this out later on for optimization purposes
   reactive_data <- reactive({
     data <- imported_data
     data <- data[data$source %in% input$water_sources4,]
-    data <- data[data$solute %in% solutes(),] 
+    data <- data[data$solute %in% solutes4(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds4,]
   })
@@ -211,14 +211,14 @@ shinyServer(function(session, input, output) {
   })
   
   y <- reactive({
-    if(input$granularity4 == "month" & input$units =="uMg/L"){"concentration_mg"}
-    else if(input$granularity4 == "year" & input$units =="uMg/L"){"mg_weighted_average"}
-    else if(input$granularity4 == "month" & input$units =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity4 == "year" & input$units =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity4 == "month"& input$units =="uMole/L"){"concentration_umol"}
-    else if(input$granularity4 == "year"& input$units =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity4 == "month"& input$units =="flux"){"flux"}
-    else if(input$granularity4 == "year"& input$units =="flux"){"flux_sum"}
+    if(input$granularity4 == "month" & input$units4 =="uMg/L"){"concentration_mg"}
+    else if(input$granularity4 == "year" & input$units4 =="uMg/L"){"mg_weighted_average"}
+    else if(input$granularity4 == "month" & input$units4 =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$granularity4 == "year" & input$units4 =="uEquivalent/L"){"ueq_weighted_average"}
+    else if(input$granularity4 == "month"& input$units4 =="uMole/L"){"concentration_umol"}
+    else if(input$granularity4 == "year"& input$units4 =="uMole/L"){"umol_weighted_average"}
+    else if(input$granularity4 == "month"& input$units4 =="flux"){"flux"}
+    else if(input$granularity4 == "year"& input$units4 =="flux"){"flux_sum"}
   })
   
   log_transform <- reactive({
@@ -256,7 +256,7 @@ shinyServer(function(session, input, output) {
     
   }
   
-  
+ ## }#end sidebar number function
   
   #############################################################
   ########### OUTPUTS #########################################
@@ -456,13 +456,13 @@ shinyServer(function(session, input, output) {
   })
   
   #output all compounds plot using the ggplot_function (possibly new sidebar in each tab and delete all compound options except desired)
-  output$function_practice <- renderPlotly({
-    function_practice <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log4)
-    function_practice$x$layout$width <- NULL
-    function_practice$y$layout$height <- NULL
-    function_practice$width <- NULL
-    function_practice$height <- NULL
-    function_practice %>%
+  output$practice <- renderPlotly({
+    practice <- ggplot_function(reactive_data(), x(), y(), ncol = 1, nrow = NULL, log = input$log4)
+    practice$x$layout$width <- NULL
+    practice$y$layout$height <- NULL
+    practice$width <- NULL
+    practice$height <- NULL
+    practice %>%
       layout(autosize = TRUE, height = 600)
   })
   
