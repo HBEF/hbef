@@ -124,8 +124,8 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  load("precip_stream_data_long.RData")
   load("precip_stream_diff_data_long.RData")
+  load("precip_stream_data_long.RData")
   imported_data <- precip_stream_data
   imported_data2 <- precip_stream_diff_data_long
   
