@@ -196,6 +196,14 @@ shinyUI(fluidPage(
                            
                            sidebarPanel(
                              
+                             #Temporary Solute selector
+                             selectInput("selComp", label = "Choose a compound to graph",
+                                         choices = c("Ca" = "CaData", "Mg" = "MgData", "K" = "KData", 
+                                                     "Na" = "NaData", "SO4" = "SO4Data", "NO3" = "NO3Data", 
+                                                     "Al" = "AlData", "NH4" = "NH4Data", 
+                                                     "Cl" = "ClData", "H" = "HData"),
+                                         selected = "Ca"),
+                             
                              #Solutes
                              fluidRow(
                                column(12, actionLink("select_all_ions2", h4("Solutes"))),
@@ -297,12 +305,6 @@ shinyUI(fluidPage(
                                 column(1)),
                        #adapt the graphs to work with sidebar inputs, then delete this
                        fluidRow(column(width = 10, offset = 2,
-                                                   selectInput("selComp", label = "Choose a compound to graph",
-                                                   choices = c("Ca" = "CaData", "Mg" = "MgData", "K" = "KData", 
-                                                               "Na" = "NaData", "SO4" = "SO4Data", "NO3" = "NO3Data", 
-                                                               "Al" = "AlData", "NH4" = "NH4Data", 
-                                                               "Cl" = "ClData", "H" = "HData"),
-                                                   selected = "Ca"),
                                        #switch between monthly and yearly data
                                        selectInput("selDate", label = "Timescale granularity",
                                                    ###############make an if statement to change x data to avg data when yearly is selected??
@@ -530,7 +532,7 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab4",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("practice", plotlyOutput("function_practice"))
+                                                                                   tabPanel("practice", plotlyOutput("practice"))
                            )), width = 8), 
                            position = "right"
                          )
