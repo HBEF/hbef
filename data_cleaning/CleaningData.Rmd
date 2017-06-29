@@ -276,11 +276,14 @@ precip_stream_data %<>% group_by(ws, water_year, source, solute) %>%
   mutate(mg_weighted_average = weighted.mean(concentration_mg, water_mm_pm)) %>%
   mutate(umol_weighted_average = weighted.mean(concentration_umol, water_mm_pm)) %>%
   mutate(ueq_weighted_average = weighted.mean(concentration_ueq, water_mm_pm)) %>%
-  mutate(flux_sum = sum(flux))
+  mutate(flux_sum = sum(flux)) %>%
+  mutate(water_mm_py = sum(water_mm_pm))
+
+precip_stream_data %>% 
+  filter(ws == "6") %>% 
+  select(water_year, ws, water_mm_pm, water_mm_py)
 
 precip_stream_data$ws <- as.factor(precip_stream_data$ws)
-
-
 
 ```
 
@@ -293,6 +296,8 @@ precip_stream_data$ws <- as.factor(precip_stream_data$ws)
 precip_stream_data %>% 
   saveRDS(file = "precip_stream_data_long.rds")
 
+
+
 ```
 
 
@@ -303,7 +308,7 @@ precip_stream_data %>%
 long <- readRDS(file = "precip_stream_data_long.rds")
 drop <- c("z", "MW")
 df <- long[, !(names(long) %in% drop)]
-fixed <- c("ws","date","water_date","water_year", "source", "water_mm_pm", "solute")
+fixed <- c("ws","date","water_date","water_year", "source", "water_mm_pm", "water_mm_py", "solute")
 values <- colnames(df[, !(names(df) %in% fixed)])
 
 precip_stream_data_wide <- data.table::dcast(data.table::setDT(df), ws + date + water_date + water_year + source + water_mm_pm ~ solute, value.var = values)
@@ -337,5 +342,14 @@ precip_stream_diff_data_long <- do.call("rbind", list(diff_ws1, diff_ws2, diff_w
 precip_stream_diff_data_long %>% 
   saveRDS(file = "precip_stream_diff_data_long.rds")
 
+
+```
+
+
+
+```{r}
+save(precip_stream_data, file = "precip_stream_data_long.Rdata")
+save(precip_stream_data_wide, file = "precip_stream_data_wide.Rdata")
+save(precip_stream_diff_data_long, file = "precip_stream_diff_data_long.Rdata")
 ```
 
