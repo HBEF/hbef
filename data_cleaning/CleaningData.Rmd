@@ -351,5 +351,12 @@ precip_stream_diff_data_long %>%
 save(precip_stream_data, file = "precip_stream_data_long.Rdata")
 save(precip_stream_data_wide, file = "precip_stream_data_wide.Rdata")
 save(precip_stream_diff_data_long, file = "precip_stream_diff_data_long.Rdata")
+
+
+load("precip_stream_diff_data_long.RData")
+  load("precip_stream_data_long.RData")
+  load("precip_stream_data_wide.RData")
+
+  save(list = ls(all.names = TRUE), file = "precip_stream_dfs.RData", envir = .GlobalEnv)
 ```
 
