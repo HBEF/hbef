@@ -77,37 +77,74 @@ shinyServer(function(session, input, output) {
   ########### END OF SIDEBAR FUNCTIONS 1 ####################################################
   
   
+  ########### SIDEBAR FUNCTIONS 2 ##############################################################
+  ###  allow 'select all' interactivity, do not edit
+  
+  observeEvent(input$select_all_ions2, {
+    if(input$select_all_ions2 == 0) {}
+    else if (input$select_all_ions2%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions2", selected = "PO4")
+      updateCheckboxGroupInput(session, "solutes_cations2", selected = "K")}
+    else{
+      updateCheckboxGroupInput(session, "solutes_anions2", selected = solutes_anions)
+      updateCheckboxGroupInput(session, "solutes_cations2", selected = solutes_cations)}
+  })
+  
+  observeEvent(input$select_all_anions2, {
+    if(input$select_all_anions2 == 0) {}
+    else if (input$select_all_anions2%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions2", selected = "PO4")}
+    else{updateCheckboxGroupInput(session, "solutes_anions2", selected = solutes_anions)}
+  })
+  
+  observeEvent(input$select_all_cations2, {
+    if(input$select_all_cations2 == 0) {}
+    else if (input$select_all_cations2%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations2", selected = "K")}
+    else{updateCheckboxGroupInput(session, "solutes_cations2", selected = solutes_cations)}
+  })
+  
+  observeEvent(input$select_all_ws2, {
+    if(input$select_all_ws2 == 0) {updateCheckboxGroupInput(session, "watersheds2", selected = "ws1")}
+    else if (input$select_all_ws2%%2 == 0){updateCheckboxGroupInput(session, "watersheds2", selected = "ws1")}
+    else{updateCheckboxGroupInput(session, "watersheds2", selected = watersheds)}
+  })
+  
+  solutes2 <- reactive({c(input$solutes_cations2, input$solutes_anions2, input$solutes_H2)})
+  
+  ########### END OF SIDEBAR FUNCTIONS 2 ####################################################
+  
+  
   ########### SIDEBAR FUNCTIONS 3 ##############################################################
   ###  allow 'select all' interactivity, do not edit
   
-  observeEvent(input$select_all_ions3, {
-    if(input$select_all_ions3 == 0) {}
-    else if (input$select_all_ions3%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions3", selected = "PO4")
-      updateCheckboxGroupInput(session, "solutes_cations3", selected = "K")}
-    else{
-      updateCheckboxGroupInput(session, "solutes_anions3", selected = solutes_anions)
-      updateCheckboxGroupInput(session, "solutes_cations3", selected = solutes_cations)}
-  })
-  
+  # observeEvent(input$select_all_ions3, {
+  #   if(input$select_all_ions3 == 0) {}
+  #   else if (input$select_all_ions3%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions3", selected = "PO4")
+  #     updateCheckboxGroupInput(session, "solutes_cations3", selected = "K")}
+  #   else{
+  #     updateCheckboxGroupInput(session, "solutes_anions3", selected = solutes_anions)
+  #     updateCheckboxGroupInput(session, "solutes_cations3", selected = solutes_cations)}
+  # })
+
   observeEvent(input$select_all_anions3, {
     if(input$select_all_anions3 == 0) {}
     else if (input$select_all_anions3%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions3", selected = "PO4")}
     else{updateCheckboxGroupInput(session, "solutes_anions3", selected = solutes_anions)}
   })
-  
+
   observeEvent(input$select_all_cations3, {
     if(input$select_all_cations3 == 0) {}
     else if (input$select_all_cations3%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations3", selected = "K")}
     else{updateCheckboxGroupInput(session, "solutes_cations3", selected = solutes_cations)}
   })
-  
+
   observeEvent(input$select_all_ws3, {
     if(input$select_all_ws3 == 0) {updateCheckboxGroupInput(session, "watersheds3", selected = "ws1")}
     else if (input$select_all_ws3%%2 == 0){updateCheckboxGroupInput(session, "watersheds3", selected = "ws1")}
     else{updateCheckboxGroupInput(session, "watersheds3", selected = watersheds)}
   })
-  
-  solutes3 <- reactive({c(input$solutes_cations3, input$solutes_anions3, input$solutes_H3)})
+
+   solutes3 <- reactive({c(input$solutes_cations3, input$solutes_anions3)})
+   
+   anions3 <- reactive({input$solutes_anions3})
   
   ########### END OF SIDEBAR FUNCTIONS 3 ####################################################
   
@@ -255,14 +292,20 @@ shinyServer(function(session, input, output) {
   ## GGPLOT TIME FUNCTION
   ggplot_function1 <- function(data, x, y, ncol = NULL, nrow = NULL){
     
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
+        geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+ #set this as the critical lower bound?
+        geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
         labs(x = "Water Year", y = input$units1)
     
-    final <- plot+ my_theme + geom_line(size = 1) + 
+    final <- plot+ my_theme + 
+      geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range1[1]), max(input$date_range1[2]))+ 
+      geom_vline(size = 0.5, xintercept = -5)+
+      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)+
+      geom_ribbon(aes(ymin=5,ymax=5.1), fill="blue", alpha=0.3)+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -278,17 +321,94 @@ shinyServer(function(session, input, output) {
   ########### END PLOT FUNCTIONS 1 #########################################
   
   
-  ########### REACTIVE DATA AND X Y 3 #########################################
+  ########### REACTIVE DATA AND X Y 2 #########################################
   #Reactive Data Normal
   ##sidebar_number_function <- function(number){  #try this out later on for optimization purposes
-  reactive_data3 <- reactive({
+  reactive_data2 <- reactive({
     data <- imported_data
+    data <- data[data$source %in% input$water_sources2,]
+    data <- data[data$solute %in% solutes2(),] 
+    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
+    data <- data[data$ws %in% input$watersheds2,]
+  })
+  
+  
+  x2 <- reactive({
+    if(input$granularity2 == "month"){"water_date"}
+    else if(input$granularity2 == "year"){"water_year"}
+  })
+  
+  y2 <- reactive({
+    if(input$granularity2 == "month" & input$units2 =="uMg/L"){"concentration_mg"}
+    else if(input$granularity2 == "year" & input$units2 =="uMg/L"){"mg_weighted_average"}
+    else if(input$granularity2 == "month" & input$units2 =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$granularity2 == "year" & input$units2 =="uEquivalent/L"){"ueq_weighted_average"}
+    else if(input$granularity2 == "month"& input$units2 =="uMole/L"){"concentration_umol"}
+    else if(input$granularity2 == "year"& input$units2 =="uMole/L"){"umol_weighted_average"}
+    else if(input$granularity2 == "month"& input$units2 =="flux"){"flux"}
+    else if(input$granularity2 == "year"& input$units2 =="flux"){"flux_sum"}
+  })
+  
+  log_transform2 <- reactive({
+    if(input$log2 == "ln"){"transform"}
+    else{"no_transform"}
+  })
+  
+  ########### END REACTIVE DATA AND X Y 2 #########################################
+  
+  
+  ########### PLOT FUNCTIONS 2 #########################################
+  
+  ## GGPLOT TIME FUNCTION
+  ggplot_function2 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+    
+    if(log) {
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+        labs(x = "Water Year", y = paste("log", "(",input$units2, ")"))}
+    
+    else{
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+        labs(x = "Water Year", y = input$units2)}
+    
+    final <- plot+ my_theme + geom_line(size = 1) + 
+      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+      xlim(min(input$date_range2[1]), max(input$date_range2[2]))+ 
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))
+    
+    ggplotly(  
+      final, tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+  }
+  
+  ## }#end sidebar number function
+  
+  ########### END PLOT FUNCTIONS 2 #########################################
+  
+  
+  ########### REACTIVE DATA AND X Y 3 #########################################
+  #Reactive Data Normal
+  reactive_data3_Al <- reactive({
+    data <- subset(imported_data[imported_data$ws == 6,], solute %in% "Al")
     data <- data[data$source %in% input$water_sources3,]
-    data <- data[data$solute %in% solutes3(),] 
+   # data <- data[data$solute %in% solutes3(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds3,]
   })
   
+  reactive_data3 <- reactive({
+    data <- imported_data
+    data <- data[data$source %in% input$water_sources3,]
+    data <- data[data$solute %in% anions3(),] 
+    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
+    data <- data[data$ws %in% input$watersheds3,]
+  })
   
   x3 <- reactive({
     if(input$granularity3 == "month"){"water_date"}
@@ -343,8 +463,6 @@ shinyServer(function(session, input, output) {
       config(showLink = FALSE)
     
   }
-  
-  ## }#end sidebar number function
   
   ########### END PLOT FUNCTIONS 3 #########################################
   
@@ -445,7 +563,7 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
   })
   
-  #intro pH plot with only precip
+  #successfully interactive/integrated intro pH plot with only precip
   output$pH_intro <- renderPlotly({
     pH_intro <- ggplot_function1(reactive_data1(), x1(), y1(), ncol = 1, nrow = NULL)
     pH_intro$x$layout$width <- NULL
@@ -456,6 +574,7 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
     })
   
+  #pH aes reference plot.. delete eventually
   output$pHtheme <- renderPlotly({
     pHtheme <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average, 
                                          shape = source)) + my_theme +
@@ -501,6 +620,17 @@ shinyServer(function(session, input, output) {
     ggplotly(pHPandQ, tooltip = "text", width = 900)%>%
       config(displayModeBar = F)%>%
       config(showLink = F)
+  })
+  
+  #in progress interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
+  output$policy_SO4_NO3 <- renderPlotly({
+    policy_SO4_NO3 <- ggplot_function3(reactive_data3(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
+    policy_SO4_NO3$x$layout$width <- NULL
+    policy_SO4_NO3$y$layout$height <- NULL
+    policy_SO4_NO3$width <- NULL
+    policy_SO4_NO3$height <- NULL
+    policy_SO4_NO3%>%
+      layout(autosize = TRUE, height = 600)
   })
   
   #plot of SO4 and NO3 to complement pH increase - shows decreasing trend
@@ -556,10 +686,21 @@ shinyServer(function(session, input, output) {
       config(showLink = F)
   })
   
-  #Al plot to show decrease in acids mean less Al released from soil
+  #Successfully interactive/integrated Al plot to show decrease in acids mean less Al released from soil
+  output$policy_Al <- renderPlotly({
+    policy_Al <- ggplot_function3(reactive_data3_Al(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
+    policy_Al$x$layout$width <- NULL
+    policy_Al$y$layout$height <- NULL
+    policy_Al$width <- NULL
+    policy_Al$height <- NULL
+    policy_Al%>%
+      layout(autosize = TRUE, height = 600)
+    })
+  
+  #Al plot ...delete eventually
   output$Al <- renderPlotly({
     Al <- ggplot(subset(imported_data[imported_data$ws == 6,], solute %in% "Al"), aes(x = water_year, y = ueq_weighted_average,
-                                                                                                shape = source, color = solute, alpha = ws))+ my_theme+
+                                                                                      shape = source, color = solute, alpha = ws))+ my_theme+
       geom_line(size = 1)+
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes(text = paste("Al Concentration: ", ueq_weighted_average, "<br>", "Date: ", date)))+
