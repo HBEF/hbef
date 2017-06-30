@@ -37,8 +37,8 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("flow" = 16, "precip"= 21)
-  source_color <- c("flow" = "#505050", "precip"= "#CCCDD9")
+  source_shapes <- c("discharge" = 16, "precipitation"= 21)
+  source_color <- c("discharge" = "#505050", "precipitation"= "#CCCDD9")
   
   ### End of Theme ################
   
@@ -124,10 +124,10 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  load("precip_stream_dfs.RData")
+  load("precip_discharge_dfs.RData")
   
-  imported_data <- precip_stream_data
-  imported_data2 <- precip_stream_diff_data_long
+  imported_data <- precip_discharge_data_long
+  imported_data2 <- precip_discharge_diff_data_long
   
   ########### END OF DATA IMPORT #############################################
   
@@ -173,14 +173,14 @@ shinyServer(function(session, input, output) {
   })
   
   y <- reactive({
-    if(input$granularity == "month" & input$units =="uMg/L"){"concentration_mg"}
-    else if(input$granularity == "year" & input$units =="uMg/L"){"mg_weighted_average"}
-    else if(input$granularity == "month" & input$units =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity == "year" & input$units =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity == "month"& input$units =="uMole/L"){"concentration_umol"}
-    else if(input$granularity == "year"& input$units =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity == "month"& input$units =="flux"){"flux"}
-    else if(input$granularity == "year"& input$units =="flux"){"flux_sum"}
+    if(input$granularity == "month" & input$units =="uMg/L"){"concentration_mg_month"}
+    else if(input$granularity == "year" & input$units =="uMg/L"){"concentration_mg_year"}
+    else if(input$granularity == "month" & input$units =="uEquivalent/L"){"concentration_ueq_month"}
+    else if(input$granularity == "year" & input$units =="uEquivalent/L"){"concentration_ueq_year"}
+    else if(input$granularity == "month"& input$units =="uMole/L"){"concentration_umol_month"}
+    else if(input$granularity == "year"& input$units =="uMole/L"){"concentration_umol_month_year"}
+    else if(input$granularity == "month"& input$units =="flux"){"flux_month"}
+    else if(input$granularity == "year"& input$units =="flux"){"flux_year"}
   })
   
   

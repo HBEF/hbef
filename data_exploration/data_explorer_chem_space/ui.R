@@ -49,7 +49,11 @@ granularity <- list("Year" = "year",
                     "Month" = "month",
                     "Week" = "week")
 
-units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
+units <- list("uEquivalent/L" = "^concentration_ueq_",
+              "uMole/L" = "^concentration_umol_", 
+              "uMg/L" = "^concentration_mg_", 
+              "flux" = "^flux_")
+
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
@@ -89,68 +93,6 @@ shinyUI(fluidPage(
       
       sidebarPanel(
         
-        #Solutes
-        fluidRow(
-          column(12, actionLink("select_all_ions", h4("Solutes"))),
-         
-          #Cations
-           column(6,
-                    actionLink("select_all_cations", h5("Cations")),
-                    checkboxGroupInput("solutes_cations", label = "",
-                    choices = solutes_cations,
-                    selected = "Na")),
-          
-          #Anions
-          
-          column(6, actionLink("select_all_anions", h5("Anions")),
-                    checkboxGroupInput("solutes_anions", label = "",
-                    choices = solutes_anions,
-                    selected = "SO4)"))),
-          #Hydrogen  
-        
-        fluidRow(
-          column(12, checkboxGroupInput("solutes_H", label = h4(""),
-                                       choices = solutes_H,
-                                       selected = ""))),
-
-        
-        
-        
-        
-        
-        #Solutes
-        fluidRow(
-          column(12, actionLink("select_all_ions2", h4("Solutes"))),
-          
-          #Cations
-          column(6,
-                 actionLink("select_all_cations2", h5("Cations")),
-                 checkboxGroupInput("solutes_cations2", label = "",
-                                    choices = solutes_cations,
-                                    selected = "Na")),
-          
-          #Anions
-          
-          column(6, actionLink("select_all_anions2", h5("Anions")),
-                 checkboxGroupInput("solutes_anions2", label = "",
-                                    choices = solutes_anions,
-                                    selected = "SO4)"))),
-        #Hydrogen  
-        
-        fluidRow(
-          column(12, checkboxGroupInput("solutes_H2", label = h4(""),
-                                        choices = solutes_H,
-                                        selected = ""))),
-        
-        
-        
-        
-        
-        
-        
-                
-        
-        
         ##Watersheds
         fluidRow(
           column(12, actionLink("select_all_ws", h4("Watersheds")), 
@@ -169,7 +111,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(12, selectInput("units", label = h4("Units"),
                     choices = units,
-                    selected = "mg/L")),
+                    selected = "uEquivalent/L")),
           column(12, checkboxInput("log", label = ("ln"),
                                    value = FALSE))),
         ##Granularity
@@ -192,10 +134,28 @@ shinyUI(fluidPage(
       mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
         
         ### PLOT VIEW 1
-        tabPanel("Concentration", plotlyOutput("plot1a")),
+        tabPanel("Concentration", 
+                 
+                 #Solutes y
+                 fluidRow(
+                   column(12,
+                          selectInput("solutesy", label = "",
+                                      choices = all_solutes,
+                                      selected = "Na"))),
+                 
+                 
+                 fluidRow(div(style = "height:500px", plotlyOutput("bubblePlot"))),
+                
+                 #Solutes X
+                 fluidRow(div(style = "margin-left:30%;", 
+                   column(12,
+                          selectInput("solutesx", label = "",
+                                      choices = all_solutes,
+                                      selected = "Na"))))
+                 )
         
         ### PLOT VIEW 2
-        tabPanel("P - Q",plotlyOutput("plot1c"))
+
         )), width = 8), 
       position = "right"
     )
