@@ -188,80 +188,40 @@ shinyServer(function(session, input, output) {
   ########### DATA IMPORT ####################################################
   
   imported_data <- readRDS("precip_stream_data_long.rds")
-  #load in all the data from Camila download.. fix so the imported_data will actually load
-  #imported_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
-  
+
   #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
   historyData <- data.frame(
-    id = 1:6,
+    id = 1:7,
     content = c("Majority of HBEF dataset",
-                "The Air Pollution Control Act",
+                "Air Pollution Control Act",
+                "Clean Air Act of 1963",
                 "EPA founded", 
                 "Clean Air Act",
                 "Clean Air Act Amendment",
                 "Today"),
     title = c("Watershed 6 is displayed in this story, as it is the control",
-              "",
+              "Research funding, first federal legislation on air pollution",
+              "Research developing, national program made",
               "The EPA was founded to enforce the Clean Air Act",
               "The Clean Air Act also has important amendments",
               "Amendment that more specifically addressed acid rain",
               "Today isn't really today"),
     start = c("1963-06-01",
               "1955-01-01",
+              "1963-01-01",
               "1970-12-02", 
               "1970-06-01",
               "1990-06-01",
               "2017-06-19"), #FIND THE REAL DATE OF CAA ENACTMENT!
     end = c("2014-05-01",
             NA,
+            NA,
             NA, 
             NA,
             NA,
             NA)
   )
-  #making data frames to use with rb selection of cmpd ##OPTIMIZE
-  CaData <- imported_data[imported_data$solute == "Ca",]
-  CaData <- CaData[CaData$ws == "6",]
-  
-  SO4Data <- imported_data[imported_data$solute == "SO4",]
-  SO4Data <- SO4Data[SO4Data$ws == "6",]
-  
-  MgData <- imported_data[imported_data$solute == "Mg",]
-  MgData <- MgData[MgData$ws == "6",]
-  
-  KData <- imported_data[imported_data$solute == "K",]
-  KData <- KData[KData$ws == "6",]
-  
-  NaData <- imported_data[imported_data$solute == "Na",]
-  NaData <- NaData[NaData$ws == "6",]
-  
-  AlData <- imported_data[imported_data$solute == "Al",]
-  AlData <- AlData[AlData$ws == "6",]
-  
-  ClData <- imported_data[imported_data$solute == "Cl",]
-  ClData <- ClData[ClData$ws == "6",]
-  
-  NH4Data <- imported_data[imported_data$solute == "NH4",]
-  NH4Data <- NH4Data[NH4Data$ws == "6",]
-  
-  NO3Data <- imported_data[imported_data$solute == "NO3",]
-  NO3Data <- NO3Data[NO3Data$ws == "6",]
-  
-  PO4Data <- imported_data[imported_data$solute == "PO4",]
-  PO4Data <- PO4Data[PO4Data$ws == "6",]
-  
-  SiO2Data <- imported_data[imported_data$solute == "SiO2",]
-  SiO2Data <- SiO2Data[SiO2Data$ws == "6",]
-  
-  HData <- imported_data[imported_data$solute == "H",]
-  HData <- HData[HData$ws == "6",]
-  
-  pHData <- imported_data[imported_data$solute == "pH",]
-  pHData <- pHData[pHData$ws == "6",]
-  pHData <- pHData[,c(1:4,14,5:13,15:16)]
-  
-  pHData_precip <- pHData[pHData$source == "precip",]
-  
+
   #watershed 6 dataframe
   imported_data_ws6 <- imported_data[imported_data$ws == "6",]
   
@@ -271,7 +231,7 @@ shinyServer(function(session, input, output) {
   ########### REACTIVE DATA AND X Y 1 #########################################
   #Reactive Data Normal
   reactive_data1 <- reactive({
-    data <- pHData
+    data <- subset(imported_data[imported_data$ws == 6,], solute %in% "pH")
     data <- data[data$source %in% input$water_sources1,]
     })
   
@@ -306,8 +266,12 @@ shinyServer(function(session, input, output) {
                  aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range1[1]), max(input$date_range1[2]))+ 
-      geom_vline(size = 0.5, xintercept = -5)+
-      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)+
+      geom_vline(size = 0.5, xintercept = -5, alpha = 0.5)+
+      annotate("text", label = "Clean Air Act", 
+               x = as.Date("1970-01-01"), y = 4.02, color = "black")+
+      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.5)+
+      annotate("text", label = "Clean Air Act Amendment  ", 
+               x = as.Date("1990-01-01"), y = 4.02, color = "black")+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -571,24 +535,15 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
     })
   
-  #plot of any compound conc (reactively chosen) over rective time
-  output$cTime <- renderPlotly({
-    cTime <- ggplot(get(input$selComp), 
-                    aes(x = as.Date(get(input$selDate)), y = ueq_weighted_average,
-                        shape = source, color = solute, alpha = ws))+ my_theme+
-      geom_line(size = 1) +
-      geom_point(size = 1.5, fill = "white", stroke = 0.5,
-                 aes(text = paste("Concentration:", concentration_ueq, "<br>", "Date:", date)))+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))+
-      labs(colour = "Source", x = "Year", y = "(ueq/L)")+
-      coord_cartesian(ylim = c(0, 130))+
-      xlim(min(input$date_range2[1]), max(input$date_range2[2]))+
-      ggtitle(as.character(input$selComp), "affected by acid rain") #possibly rename 'CaData' to be 'Calcium'
-    ggplotly(cTime, tooltip = "text", width = 900)%>%
-      config(displayModeBar = F)%>%
-      config(showLink = F)
+  #Successfully interactive/integrated plot of any compound conc
+  output$chemistry <- renderPlotly({
+    chemistry <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
+    chemistry$x$layout$width <- NULL
+    chemistry$y$layout$height <- NULL
+    chemistry$width <- NULL
+    chemistry$height <- NULL
+    chemistry %>%
+      layout(autosize = TRUE, height = 600)
   })
   
   #Successfully interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
@@ -650,7 +605,7 @@ shinyServer(function(session, input, output) {
     timevis(historyData) #possibly use groups in order to contextualize (ie disney movie years)
   })
   
-  #output all compounds plot using the ggplot_function (possibly new sidebar in each tab and delete all compound options except desired)
+  #template to output all compounds plot using the ggplot_function
   output$practice <- renderPlotly({
     practice <- ggplot_function4(reactive_data4(), x4(), y4(), ncol = 1, nrow = NULL, log = input$log4)
     practice$x$layout$width <- NULL
