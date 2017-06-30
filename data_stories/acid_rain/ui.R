@@ -298,7 +298,7 @@ shinyUI(fluidPage(
                                                           
                                                           # ### PLOT VIEW 2
                                                           # tabPanel("Flux chemistry",
-                                                          #          plotlyOutput("fluxAlAcids", height = "auto")  ###Not showing since not sure how to interpret...
+                                                          #          #   plotlyOutput("fluxAlAcids", height = "auto")  ###Not showing since not sure how to interpret...
                                                           # )
                                               )), width = 8), 
                            position = "right"
@@ -444,12 +444,14 @@ shinyUI(fluidPage(
                                                           # tabPanel("pH", plotlyOutput("pHPandQ", height = "auto"),
                                                           #          plotlyOutput("policy_pH"), height = "auto")
                                                           # 
-                                              ),
-                                              fluidRow(column(width = 11, offset = 1,
-                                                              timevisOutput("CAAetc")))
+                                              )
                                               ), width = 8), 
                            position = "right"
-                         )
+                         ),
+                         
+                         fluidRow(column(width = 11, offset = 1,
+                                         timevisOutput("timeline")))
+                         
                          ############## END OF GRAPH 3 ################ 
                        ),
                        
@@ -587,8 +589,8 @@ shinyUI(fluidPage(
                                                 p("	Feeling stressed about nature?  Slightly overwhelmed?  If you’re a farmer, 
                                           you can reduce your nitrogen oxide in a number of ways, like timing the 
                                           nitrogen fertilization to crop demand.  For the rest of us?  The overemphasized
-                                          carpooling, biking, or walking actually does help to reduce both nitrogen oxide
-                                          and sulfur dioxide emissions from your vehicle.  Even switching over to more 
+                                          carpooling, biking, or walking actually does help to reduce your nitrogen oxide
+                                          and sulfur dioxide emissions.  Even switching over to more 
                                           energy efficient lightbulbs and appliances helps, because electricity is 
                                           produced in large part by burning fossil fuels.  If you’re feeling super 
                                           energized, you could even get a solar panel to produce some of your own 
