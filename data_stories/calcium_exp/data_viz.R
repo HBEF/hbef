@@ -40,3 +40,6 @@ species.div = sapply(unique(w1.1996$Species), count.species, df = w1.1996)
 species.div = t(species.div)
 species.div = as.data.frame(species.div)
 colnames(species.div) = c("Species", "Count")
+species.div$Count = as.numeric(species.div$Count)
+diversity.1996 = (sum((species.div$Count)*((species.div$Count) - 1))/
+                    (sum(species.div$Count)*(sum(species.div$Count) - 1)))
