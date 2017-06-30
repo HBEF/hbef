@@ -187,9 +187,9 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  imported_data1 <- readRDS("precip_stream_data_long.rds")
+  imported_data <- readRDS("precip_stream_data_long.rds")
   #load in all the data from Camila download.. fix so the imported_data will actually load
-  imported_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
+  #imported_data <- readRDS("D:/Duke/Work(Environ)/Programming/AcidRainStory/DataCleaning/precip_stream_data.rds")
   
   #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
   historyData <- data.frame(

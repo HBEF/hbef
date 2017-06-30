@@ -142,7 +142,7 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab1",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("pH interactive", 
+                                                                                   tabPanel("pH improvement", 
                                                                                             h4("De-acidification in response to acid rain mitigation"),
                                                                                             plotlyOutput("pH_intro", height = "auto"))
                            )), width = 8), 
