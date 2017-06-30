@@ -37,7 +37,7 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("flow" = 16, "precip"= 21)
+  source_shapes <- c("discharge" = 16, "precipitation"= 21)
   source_color <- c("flow" = "#505050", "precip"= "#CCCDD9")
   
   ### End of Theme ################
@@ -79,7 +79,21 @@ shinyServer(function(session, input, output) {
                 "uMg/L" = "^concentration_mg_", 
                 "flux" = "^flux_")
 
-  ########### END OF IMPORTANT PRELIMINARY INFO #############################################
+  ############
+  
+  ###### function #######
+  
+  accumulate_by <- function(dat, var) {
+    var <- lazyeval::f_eval(var, dat)
+    lvls <- plotly:::getLevels(var)
+    dats <- lapply(seq_along(lvls), function(x) {
+      cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+    })
+    dplyr::bind_rows(dats)
+  }
+    
+  
+   ########### END OF IMPORTANT PRELIMINARY INFO #############################################
   
   
   
@@ -100,9 +114,9 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  load("precip_stream_dfs.RData")
+  load("precip_discharge_dfs.RData")
   
-  imported_data <- precip_stream_data_wide
+  imported_data <- precip_discharge_data_wide
   
   ########### END OF DATA IMPORT #############################################
   
@@ -114,28 +128,33 @@ shinyServer(function(session, input, output) {
     data <- imported_data
     data <- data[data$ws %in% input$watersheds,]
     data <- data[data$source %in% input$water_sources,]
+    data <- data[data$date >= input$date_range[1] & data$date <= input$date_range[2]]
+    
+
+    
     unit_columns <- colnames(imported_data[,(grep(input$units, colnames(data))), with = FALSE])
-    basic_columns <- c("ws","date","water_date","water_year","source","water_mm_pm")
-    needed_columns <- c(unit_columns, basic_columns)
-    data <- data[,needed_columns, with = FALSE]
-    
-    
-    
-    data <- imported_data
-    data <- data[data$ws %in% c("6"),]
-    data <- data[data$source %in% c("precip"),]
-    str(data)
-    unit_columns <- colnames(imported_data[,(grep("^concentration_ueq_", colnames(data))), with = FALSE])
-    basic_columns <- c("ws","date","water_date","water_year","source","water_mm_pm")
-    needed_columns <- c(unit_columns, basic_columns)
-    data <- data[,needed_columns, with = FALSE]
-    
-    
-    
-    
-    #data <- data[water_date %between% c(input$timeframe[1], input$timeframe[2])]
-  })
+
+    if(input$granularity == "month"){
+      date_range_columns <- colnames(data[,(grep("month", colnames(data))), with = FALSE])
+      final_columns <-intersect(unit_columns, date_range_columns)
+      }
+    else{
+      date_range_columns <- colnames(data[,(grep("year", colnames(data))), with = FALSE])
+      final_columns <-intersect(unit_columns, date_range_columns)
+    }
   
+    basic_columns <- c("ws","date","water_date","water_year","source","water_mm_pm", "water_mm_py", "framey")
+    needed_columns <- c(final_columns, basic_columns)
+    data <- data[,needed_columns, with = FALSE]
+    
+    if(input$granularity == "year"){
+      data <- data[!duplicated(data[,c("water_year","source", "ws", "framey")]),]}
+  
+    else{data}
+    
+    data <- accumulate_by(data, ~framey)
+    
+  })
   
   x <- reactive({
     colnames(reactive_data()[,grep(input$solutesx, names(reactive_data())), with = FALSE])
@@ -143,6 +162,11 @@ shinyServer(function(session, input, output) {
   
   y <- reactive({
     colnames(reactive_data()[,grep(input$solutesy, names(reactive_data())), with = FALSE])
+  })
+  
+  size <- reactive({
+    if(input$granularity == "year"){"water_mm_py"}
+    else{"water_mm_pm"}
   })
   
   log_transform <- reactive({
@@ -155,14 +179,17 @@ shinyServer(function(session, input, output) {
   ggplot_bubble_function <- function(data, x, y, ncol = NULL, nrow = NULL){
     plot <- ggplot(data=data) + my_theme + 
       geom_point(aes(x = get(x), y = get(y), shape = source, 
-                     size = water_mm_pm, color = water_year), stroke= 1, alpha = 0.8) +
-      scale_shape_manual(values= c(1, 16))
+                     size = get(size()), color = water_year, frame = frame), stroke= 1, alpha = 0.8) +
+      scale_shape_manual(values= source_shapes)
     ggplotly(plot, tooltip = "text",
              width = 900) %>%
       config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE) 
+      config(showLink = FALSE) %>% 
+      animation_opts(frame = 50, transition = 0, redraw = FALSE)
   }
   
+  
+
   
   #############################################################
   ########### OUTPUTS #########################################
