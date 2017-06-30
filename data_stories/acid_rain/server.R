@@ -114,15 +114,6 @@ shinyServer(function(session, input, output) {
   ########### SIDEBAR FUNCTIONS 3 ##############################################################
   ###  allow 'select all' interactivity, do not edit
   
-  # observeEvent(input$select_all_ions3, {
-  #   if(input$select_all_ions3 == 0) {}
-  #   else if (input$select_all_ions3%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions3", selected = "PO4")
-  #     updateCheckboxGroupInput(session, "solutes_cations3", selected = "K")}
-  #   else{
-  #     updateCheckboxGroupInput(session, "solutes_anions3", selected = solutes_anions)
-  #     updateCheckboxGroupInput(session, "solutes_cations3", selected = solutes_cations)}
-  # })
-
   observeEvent(input$select_all_anions3, {
     if(input$select_all_anions3 == 0) {}
     else if (input$select_all_anions3%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions3", selected = "PO4")}
@@ -255,8 +246,10 @@ shinyServer(function(session, input, output) {
   ggplot_function1 <- function(data, x, y, ncol = NULL, nrow = NULL){
     
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
-        geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+ #set this as the critical lower bound?
+        geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+
+        annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.21, alpha = 0.7, color = "black")+
         geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
+        annotate("text", label = "Normal (clean) rain pH", x = as.Date("1979-01-01"), y = 5.01, alpha = 0.7, color = "black")+
         geom_ribbon(aes(ymin=5,ymax=5.4), fill="blue", alpha=0.3)+
         labs(x = "Water Year", y = input$units1)
     
@@ -267,11 +260,9 @@ shinyServer(function(session, input, output) {
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range1[1]), max(input$date_range1[2]))+ 
       geom_vline(size = 0.5, xintercept = -5, alpha = 0.5)+
-      annotate("text", label = "Clean Air Act", 
-               x = as.Date("1970-01-01"), y = 4.02, color = "black")+
+      annotate("text", label = "Clean Air Act", x = as.Date("1970-01-01"), y = 4.02, color = "black")+
       geom_vline(size = 0.5, xintercept = 7300, alpha = 0.5)+
-      annotate("text", label = "Clean Air Act Amendment  ", 
-               x = as.Date("1990-01-01"), y = 4.02, color = "black")+
+      annotate("text", label = "Clean Air Act Amendment  ", x = as.Date("1990-01-01"), y = 4.02, color = "black")+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -581,6 +572,7 @@ shinyServer(function(session, input, output) {
   
   #plot of Al flux and acid flux to show acids release Al from the soil ###Not sure how to interpret and/or make faster
   #also try to make this yearly by creating a yearly flux... but would that defeat the purpose? 
+  #flux units: "eq/ ha/yr" - Annie
   # output$fluxAlAcids <- renderPlotly({
   #   fluxAlAcids <- ggplot(subset(imported_data_ws6, solute %in% c("Al", "SO4")),#######################################################
   #                         aes(x = date, y = flux,
@@ -600,8 +592,20 @@ shinyServer(function(session, input, output) {
   #     config(showLink = F)
   # }) ################################
   
+  #in progress plot of Al and acid flux and conc... shoudl be on seperate tab so has a diff sidebar!
+  output$chemistry_flux <- renderPlotly({
+    chemistry_flux <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
+    chemistry_flux$x$layout$width <- NULL
+    chemistry_flux$y$layout$height <- NULL
+    chemistry_flux$width <- NULL
+    chemistry_flux$height <- NULL
+    chemistry_flux %>%
+      layout(autosize = TRUE, height = 600)
+    
+  })
+  
   #output an interactive timeline for the history of acid rain
-  output$CAAetc <- renderTimevis({
+  output$timeline <- renderTimevis({
     timevis(historyData) #possibly use groups in order to contextualize (ie disney movie years)
   })
   
