@@ -23,6 +23,11 @@ solutes_cations <- list("Potassium (K)" = "K",
                         "Magnesium (Mg)" = "Mg",
                         "Aluminum (Al)" = "Al")
 
+solutes_base_cations <- list("Potassium (K)" = "K",
+                        "Sodium (Na)" = "Na",
+                        "Calcium (Ca)" = "Ca",
+                        "Magnesium (Mg)" = "Mg")
+
 solutes_anions <- list("Phosphate (PO4)" = "PO4",
                        "Sulfate (SO4)" = "SO4",
                        "Nitrate (NO3)" = "NO3",
@@ -45,6 +50,8 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
+watersheds6 <- list("Watershed 6" = "6")
+                   
 water_sources <- list("Precipitation (P)" = "precip",
                       "Discharge (Q)" = "flow")
 
@@ -102,12 +109,12 @@ shinyUI(fluidPage(
                            
                            sidebarPanel(
                              
-                             # ##Watersheds
-                             # fluidRow(
-                             #   column(12, actionLink("select_all_ws1", h4("Watersheds")), 
-                             #          selectInput("watersheds1", label = "",
-                             #                      choices = watersheds, multiple = TRUE,
-                             #                      selected = "6"))),
+                             ##Water Sources
+                             fluidRow(
+                               column(12, checkboxGroupInput("water_sources1", label = h4("Water Sources"),
+                                                             choices = water_sources,
+                                                             selected = "precip",
+                                                             inline = TRUE))),
                              
                              ##Units  
                              fluidRow(
@@ -135,8 +142,9 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab1",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("pH interactive", plotlyOutput("pH_intro", height = "auto")),
-                                                                                   tabPanel("Desired pH aes", plotlyOutput("pHtheme", height = "auto", width = "auto"))
+                                                                                   tabPanel("pH interactive", 
+                                                                                            h4("De-acidification in response to acid rain mitigation"),
+                                                                                            plotlyOutput("pH_intro", height = "auto"))
                            )), width = 8), 
                            position = "right"
                          )
@@ -373,9 +381,9 @@ shinyUI(fluidPage(
                              
                              ##Watersheds
                              fluidRow(
-                               column(12, actionLink("select_all_ws3", h4("Watersheds")), 
+                               column(12, h4("Watersheds"), 
                                       selectInput("watersheds3", label = "",
-                                                  choices = watersheds, multiple = TRUE,
+                                                  choices = watersheds6,
                                                   selected = "6"))),
                              
                              ##Water Sources
@@ -413,8 +421,9 @@ shinyUI(fluidPage(
                                               tabsetPanel(id = "plot_tab3",
                                                           
                                                           ### PLOT VIEW 1
-                                                          tabPanel("SO4 & NO3", plotlyOutput("SO4NO3reductions", height = "auto"),
-                                                                   
+                                                          tabPanel("SO4 & NO3", 
+                                                                   h4("SOx and NOx concentrations lowering as policies are implemented"),
+
                                                                    #Anions
                                                                    checkboxGroupInput("solutes_anions3", label = "",
                                                                                       choices = solutes_anions3,
@@ -423,26 +432,29 @@ shinyUI(fluidPage(
                                                           ),
                                                           
                                                           ## PLOT VIEW 2
-                                                          tabPanel("Base Cations", plotlyOutput("baseCations", height = "auto"),
+                                                          tabPanel("Base Cations",
+                                                                   h4("Decrease in Base cations leaving the soil (that's good!)"),
                                                                    #Cations
-                                                                   actionLink("select_all_cations3", h5("Cations")),
+                                                                   actionLink("select_all_cations3", h5("Base Cations")),
                                                                    checkboxGroupInput("solutes_cations3", label = "",
-                                                                                      choices = solutes_cations,
-                                                                                      selected = "Na")
+                                                                                      choices = solutes_base_cations,
+                                                                                      selected = c("K", "Na", "Ca", "Mg")),
+                                                                   plotlyOutput("policy_base_cations", height = "auto")
                                                           ),
                                                           
                                                           ## PLOT VIEW 3
-                                                          tabPanel("Al", plotlyOutput("Al", height = "auto"),
+                                                          tabPanel("Al",
                                                                    h4("Decrease in toxic Al discharge as SOx and NOx decrease"),
-                                                                   plotlyOutput("policy_Al", height = "auto")),
+                                                                   plotlyOutput("policy_Al", height = "auto"))
                                                           
-                                                          ## PLOT VIEW 4
-                                                          tabPanel("pH", plotlyOutput("pHPandQ", height = "auto")),
-                                                          fluidRow(column(width = 11, offset = 1,
-                                                                          timevisOutput("CAAetc")))
-                                                          
-                                                          
-                                              )), width = 8), 
+                                                          # ## PLOT VIEW 4
+                                                          # tabPanel("pH", plotlyOutput("pHPandQ", height = "auto"),
+                                                          #          plotlyOutput("policy_pH"), height = "auto")
+                                                          # 
+                                              ),
+                                              fluidRow(column(width = 11, offset = 1,
+                                                              timevisOutput("CAAetc")))
+                                              ), width = 8), 
                            position = "right"
                          )
                          ############## END OF GRAPH 3 ################ 

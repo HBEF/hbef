@@ -73,7 +73,6 @@ shinyServer(function(session, input, output) {
   ########### SIDEBAR FUNCTIONS 1 ##############################################################
   ###  allow 'select all' interactivity, do not edit
   
-
   ########### END OF SIDEBAR FUNCTIONS 1 ####################################################
   
   
@@ -145,6 +144,8 @@ shinyServer(function(session, input, output) {
    solutes3 <- reactive({c(input$solutes_cations3, input$solutes_anions3)})
    
    anions3 <- reactive({input$solutes_anions3})
+   
+   cations3 <- reactive({input$solutes_cations3})
   
   ########### END OF SIDEBAR FUNCTIONS 3 ####################################################
   
@@ -270,8 +271,9 @@ shinyServer(function(session, input, output) {
   ########### REACTIVE DATA AND X Y 1 #########################################
   #Reactive Data Normal
   reactive_data1 <- reactive({
-    data <- pHData_precip
-  })
+    data <- pHData
+    data <- data[data$source %in% input$water_sources1,]
+    })
   
   
   x1 <- reactive({
@@ -295,6 +297,7 @@ shinyServer(function(session, input, output) {
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
         geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+ #set this as the critical lower bound?
         geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
+        geom_ribbon(aes(ymin=5,ymax=5.4), fill="blue", alpha=0.3)+
         labs(x = "Water Year", y = input$units1)
     
     final <- plot+ my_theme + 
@@ -305,7 +308,6 @@ shinyServer(function(session, input, output) {
       xlim(min(input$date_range1[1]), max(input$date_range1[2]))+ 
       geom_vline(size = 0.5, xintercept = -5)+
       geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)+
-      geom_ribbon(aes(ymin=5,ymax=5.1), fill="blue", alpha=0.3)+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -397,20 +399,25 @@ shinyServer(function(session, input, output) {
   reactive_data3_Al <- reactive({
     data <- subset(imported_data[imported_data$ws == 6,], solute %in% "Al")
     data <- data[data$source %in% input$water_sources3,]
-   # data <- data[data$solute %in% solutes3(),] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-    data <- data[data$ws %in% input$watersheds3,]
   })
   
-  reactive_data3 <- reactive({
+  reactive_data3_anions <- reactive({
     data <- imported_data
     data <- data[data$source %in% input$water_sources3,]
     data <- data[data$solute %in% anions3(),] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
+    #note that anions is a function, that's because the inputs come from input$anions
     data <- data[data$ws %in% input$watersheds3,]
   })
   
-  x3 <- reactive({
+  reactive_data3_cations <- reactive({
+    data <- imported_data
+    data <- data[data$source %in% input$water_sources3,]
+    data <- data[data$solute %in% cations3(),] 
+    #note that cations is a function, that's because the inputs come from input$cations
+    data <- data[data$ws %in% input$watersheds3,]
+  })
+  
+    x3 <- reactive({
     if(input$granularity3 == "month"){"water_date"}
     else if(input$granularity3 == "year"){"water_year"}
   })
@@ -552,18 +559,8 @@ shinyServer(function(session, input, output) {
     theplot %>%
       layout(autosize = TRUE, height = 600)
   })
-  
-  output$plot1b <- renderPlotly({
-    theplot <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
-    theplot$x$layout$width <- NULL
-    theplot$y$layout$height <- NULL
-    theplot$width <- NULL
-    theplot$height <- NULL
-    theplot %>%
-      layout(autosize = TRUE, height = 600)
-  })
-  
-  #successfully interactive/integrated intro pH plot with only precip
+
+  #successfully interactive/integrated intro pH plot
   output$pH_intro <- renderPlotly({
     pH_intro <- ggplot_function1(reactive_data1(), x1(), y1(), ncol = 1, nrow = NULL)
     pH_intro$x$layout$width <- NULL
@@ -573,148 +570,6 @@ shinyServer(function(session, input, output) {
     pH_intro %>%
       layout(autosize = TRUE, height = 600)
     })
-  
-  #pH aes reference plot.. delete eventually
-  output$pHtheme <- renderPlotly({
-    pHtheme <- ggplot(pHData_precip, aes(x = water_year, y = mg_weighted_average, 
-                                         shape = source)) + my_theme +
-      geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+ #set this as the critical lower bound?
-      geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
-      geom_line(size = 1, aes(color = solute))+
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes(color = solute, 
-                     text = paste("pH value: ", mg_weighted_average, "<br>", "Date: ", date)))+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))+
-      ggtitle("Precipitation de-acidifying in response to acid rain mitigation")+
-      labs(x = "Year", y = "pH")+
-      coord_cartesian(ylim = c(4, 5.05))+
-      geom_vline(size = 0.5, xintercept = -5)+
-      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)+
-      geom_ribbon(aes(ymin=5,ymax=5.5), fill="blue", alpha=0.3)
-
-    ggplotly(pHtheme, tooltip = "text", width = 900)%>%
-      config(displayModeBar = F)%>%
-      config(showLink = F)
-  })
-  
-  #pH plot with P and Q to show acid in, more neutralized out
-  output$pHPandQ <- renderPlotly({
-    pHPandQ <- ggplot(pHData, aes(x = water_year, y = mg_weighted_average, 
-                                  shape = source, color = solute, alpha = ws))+ my_theme +
-      geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+ #set this as the critical lower bound?
-      geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
-      geom_ribbon(aes(ymin=5,ymax=5.5), fill="blue", alpha=0.3)+
-      geom_line(size = 1)+
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes(text = paste("pH value: ", mg_weighted_average, "<br>", "Date: ", date)))+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))+
-      ggtitle("De-acidification of P and Q in response to reducing SOx and NOx emissions")+
-      labs(x = "Year", y = "pH")+
-      coord_cartesian(ylim = c(4, 5.4))+
-      geom_vline(size = 0.5, xintercept = -5)+
-      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.7)
-    ggplotly(pHPandQ, tooltip = "text", width = 900)%>%
-      config(displayModeBar = F)%>%
-      config(showLink = F)
-  })
-  
-  #in progress interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
-  output$policy_SO4_NO3 <- renderPlotly({
-    policy_SO4_NO3 <- ggplot_function3(reactive_data3(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
-    policy_SO4_NO3$x$layout$width <- NULL
-    policy_SO4_NO3$y$layout$height <- NULL
-    policy_SO4_NO3$width <- NULL
-    policy_SO4_NO3$height <- NULL
-    policy_SO4_NO3%>%
-      layout(autosize = TRUE, height = 600)
-  })
-  
-  #plot of SO4 and NO3 to complement pH increase - shows decreasing trend
-  output$SO4NO3reductions <- renderPlotly({
-    SO4NO3reductions <- ggplot(NULL, aes(shape = source, color = solute, alpha = ws))+
-      geom_line(data = NO3Data, aes(x = water_year, y = ueq_weighted_average), size = 1)+
-      geom_point(data = NO3Data, aes(x = water_year, y = ueq_weighted_average,
-                                     text = paste("NO3 Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
-                 size = 1.5, fill = "white", stroke = 0.5)+
-      geom_line(data = SO4Data, aes(x = water_year, y = ueq_weighted_average), size = 1)+
-      geom_point(data = SO4Data, aes(x = water_year, y = ueq_weighted_average,
-                                     text = paste("SO4 Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)), 
-                 size = 1.5, fill = "white", stroke = 0.5)+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))+
-      ggtitle("SOx and NOx concentrations lowering as policy is implemented")+
-      labs(x = "Year", y = "ueq/L")+ my_theme+
-      coord_cartesian(ylim = c(0, 130))
-    ggplotly(SO4NO3reductions, tooltip = "text", width = 900)%>%
-      config(displayModeBar = F)%>%
-      config(showLink = F)
-  })
-  
-  #base cations trend plot to read next to decreasing so4/no3 and increasing pH
-  output$baseCations <- renderPlotly({
-    baseCations <- ggplot(NULL, aes(shape = source, color = solute, alpha = ws))+ my_theme+
-      geom_line(data = CaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+ #alter Camila function to create one more custom to this style? (ie less input based, more to see trend)
-      geom_point(data = CaData, aes(x = water_year, y = ueq_weighted_average,
-                                    text = paste("Ca Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
-                 size = 1.5, fill = "white", stroke = 0.5)+
-      #NOTE all of these extra geom_line and _point are to graph additional base cations rather than creating yet another df
-      geom_line(data = MgData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
-      geom_point(data = MgData, aes(x = water_year, y = ueq_weighted_average,
-                                    text = paste("Mg Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
-                 size = 1.5, fill = "white", stroke = 0.5)+
-      geom_line(data = KData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
-      geom_point(data = KData, aes(x = water_year, y = ueq_weighted_average,
-                                   text = paste("K Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
-                 size = 1.5, fill = "white", stroke = 0.5)+
-      geom_line(data = NaData, aes(x = water_year, y = ueq_weighted_average), size = 1)+
-      geom_point(data = NaData, aes(x = water_year, y = ueq_weighted_average,
-                                    text = paste("Na Concentration: ", ueq_weighted_average, "<br>", "Date: ", water_year)),
-                 size = 1.5, fill = "white", stroke = 0.5)+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))+
-      ggtitle("Decrease in Base cations leaving the soil")+
-      labs(x = "Year", y = "ueq/L")+
-      coord_cartesian(ylim = c(0, 130))
-    ggplotly(baseCations, tooltip = "text", width = 900)%>%
-      config(displayModeBar = F)%>%
-      config(showLink = F)
-  })
-  
-  #Successfully interactive/integrated Al plot to show decrease in acids mean less Al released from soil
-  output$policy_Al <- renderPlotly({
-    policy_Al <- ggplot_function3(reactive_data3_Al(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
-    policy_Al$x$layout$width <- NULL
-    policy_Al$y$layout$height <- NULL
-    policy_Al$width <- NULL
-    policy_Al$height <- NULL
-    policy_Al%>%
-      layout(autosize = TRUE, height = 600)
-    })
-  
-  #Al plot ...delete eventually
-  output$Al <- renderPlotly({
-    Al <- ggplot(subset(imported_data[imported_data$ws == 6,], solute %in% "Al"), aes(x = water_year, y = ueq_weighted_average,
-                                                                                      shape = source, color = solute, alpha = ws))+ my_theme+
-      geom_line(size = 1)+
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes(text = paste("Al Concentration: ", ueq_weighted_average, "<br>", "Date: ", date)))+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))+
-      ggtitle("Decrease in toxic Al discharge as SOx and NOx decrease")+
-      labs(x = "Year", y = "ueq/L")+
-      coord_cartesian(ylim = c(0, 130))
-    
-    ggplotly(Al, tooltip = "text", width = 900)%>%
-      config(displayModeBar = F)%>%
-      config(showLink = F)
-  })
   
   #plot of any compound conc (reactively chosen) over rective time
   output$cTime <- renderPlotly({
@@ -735,6 +590,39 @@ shinyServer(function(session, input, output) {
       config(displayModeBar = F)%>%
       config(showLink = F)
   })
+  
+  #Successfully interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
+  output$policy_SO4_NO3 <- renderPlotly({
+    policy_SO4_NO3 <- ggplot_function3(reactive_data3_anions(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
+    policy_SO4_NO3$x$layout$width <- NULL
+    policy_SO4_NO3$y$layout$height <- NULL
+    policy_SO4_NO3$width <- NULL
+    policy_SO4_NO3$height <- NULL
+    policy_SO4_NO3%>%
+      layout(autosize = TRUE, height = 600)
+  })
+  
+  #Successfully interactive/integrated base cation trends plot 
+  output$policy_base_cations <- renderPlotly({
+    policy_base_cations <- ggplot_function3(reactive_data3_cations(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
+    policy_base_cations$x$layout$width <- NULL
+    policy_base_cations$y$layout$height <- NULL
+    policy_base_cations$width <- NULL
+    policy_base_cations$height <- NULL
+    policy_base_cations%>%
+      layout(autosize = TRUE, height = 600)
+  })
+  
+  #Successfully interactive/integrated Al plot to show decrease in acids mean less Al released from soil
+  output$policy_Al <- renderPlotly({
+    policy_Al <- ggplot_function3(reactive_data3_Al(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
+    policy_Al$x$layout$width <- NULL
+    policy_Al$y$layout$height <- NULL
+    policy_Al$width <- NULL
+    policy_Al$height <- NULL
+    policy_Al%>%
+      layout(autosize = TRUE, height = 600)
+    })
   
   #plot of Al flux and acid flux to show acids release Al from the soil ###Not sure how to interpret and/or make faster
   #also try to make this yearly by creating a yearly flux... but would that defeat the purpose? 
