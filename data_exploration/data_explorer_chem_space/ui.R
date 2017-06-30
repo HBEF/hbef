@@ -112,6 +112,44 @@ shinyUI(fluidPage(
           column(12, checkboxGroupInput("solutes_H", label = h4(""),
                                        choices = solutes_H,
                                        selected = ""))),
+
+        
+        
+        
+        
+        
+        #Solutes
+        fluidRow(
+          column(12, actionLink("select_all_ions2", h4("Solutes"))),
+          
+          #Cations
+          column(6,
+                 actionLink("select_all_cations2", h5("Cations")),
+                 checkboxGroupInput("solutes_cations2", label = "",
+                                    choices = solutes_cations,
+                                    selected = "Na")),
+          
+          #Anions
+          
+          column(6, actionLink("select_all_anions2", h5("Anions")),
+                 checkboxGroupInput("solutes_anions2", label = "",
+                                    choices = solutes_anions,
+                                    selected = "SO4)"))),
+        #Hydrogen  
+        
+        fluidRow(
+          column(12, checkboxGroupInput("solutes_H2", label = h4(""),
+                                        choices = solutes_H,
+                                        selected = ""))),
+        
+        
+        
+        
+        
+        
+        
+                
+        
         
         ##Watersheds
         fluidRow(

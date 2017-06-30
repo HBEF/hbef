@@ -116,6 +116,7 @@ shinyServer(function(session, input, output) {
   })
   
   solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
+  solutes2 <- reactive({c(input$solutes_cations2, input$solutes_anions2, input$solutes_H2)})
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
 
@@ -126,8 +127,7 @@ shinyServer(function(session, input, output) {
   
   load("precip_stream_dfs.RData")
   
-  imported_data <- precip_stream_data
-  imported_data2 <- precip_stream_diff_data_long
+  imported_data <- precip_stream_data_wide
   
   ########### END OF DATA IMPORT #############################################
   
@@ -137,56 +137,22 @@ shinyServer(function(session, input, output) {
   
   reactive_data <- reactive({
     data <- imported_data
-      data <- data[data$source %in% input$water_sources,]
-      data <- data[data$solute %in% solutes(),] 
-      #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-      data <- data[data$ws %in% input$watersheds,]
-  })
-  
-  reactive_data2 <- reactive({
-    data <- imported_data2
-    data <- data[data$solute %in% solutes(),] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-    data <- data[data$ws %in% input$watersheds,]
-    if(input$granularity == "year"){
-      data <- data[!duplicated(data[,c("water_year","solute", "ws")]),]}
-    else{data}
-  })
-  
-  reactive_data_PQ <- reactive({
-    data <- imported_data
-    if(input$granularity == "year"){
-      data <- data[!duplicated(data[,c("water_year","ws", "source")]),]
-      data <- data[data$ws %in% input$watersheds,]
-      data <- data[data$source %in% input$water_sources,]}
-    else{
-      data <- data[!duplicated(data[,c("water_date","ws", "source")]),]
-      data <- data[data$ws %in% input$watersheds,]
-      data <- data[data$source %in% input$water_sources,]
-    }
+      data <- data[data$ws %in% input$ws,]
+      data <- data[data$source %in% input$source,]
+      unit_columns <-colnames(imported_data[,(grep(input$units, colnames(data))), with = FALSE])
+      basic_columns <- c("ws","date","water_date","water_year","source","water_mm_pm")
+      needed_columns <- c(unit_columns,basic_columns)
+      data <- data[,needed_columns, with = FALSE]
+      #data <- data[water_date %between% c(input$timeframe[1], input$timeframe[2])]
   })
   
   
   x <- reactive({
-    if(input$granularity == "month"){"water_date"}
-    else if(input$granularity == "year"){"water_year"}
+    colnames(reactive_data()[,grep(solutes(), names(reactive_data())), with = FALSE])
   })
   
   y <- reactive({
-    if(input$granularity == "month" & input$units =="uMg/L"){"concentration_mg"}
-    else if(input$granularity == "year" & input$units =="uMg/L"){"mg_weighted_average"}
-    else if(input$granularity == "month" & input$units =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity == "year" & input$units =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity == "month"& input$units =="uMole/L"){"concentration_umol"}
-    else if(input$granularity == "year"& input$units =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity == "month"& input$units =="flux"){"flux"}
-    else if(input$granularity == "year"& input$units =="flux"){"flux_sum"}
-  })
-  
-  
-  y_PQ <- reactive({
-    if(input$granularity == "month"){"water_mm_pm"}
-    else if(input$granularity == "year"){"water_mm_py"}
+    colnames(reactive_data()[,grep(solutes2(), names(reactive_data())), with = FALSE])
   })
   
   log_transform <- reactive({
@@ -272,26 +238,13 @@ shinyServer(function(session, input, output) {
   ########### OUTPUTS #########################################
   #############################################################
   
-  output$plot1a <- renderPlotly({
-    theplot <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
-    #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
-    theplot$x$layout$width <- NULL
-    theplot$y$layout$height <- NULL
-    theplot$width <- NULL
-    theplot$height <- NULL
-    theplot %>%
-      layout(autosize = TRUE, height = 800)
+  output$plot1a <- renderPlot({
+    ggplot(data=reactive_data()) + 
+      geom_point(aes(x = get(x()), y = get(y()), shape = source, size = water_mm_pm, color = ws), stroke = 2)+
+      scale_shape_manual(values= c(1, 16))
      })
 
-  output$plot1c <- renderPlotly({
-    theplot <- ggplot_diff_function(reactive_data2(), x(), y(), ncol = 1)
-    theplot$x$layout$width <- NULL
-    theplot$y$layout$height <- NULL
-    theplot$width <- NULL
-    theplot$height <- NULL
-    theplot %>%
-      layout(autosize = TRUE, height = 600)
-  })
+
   
   
   
