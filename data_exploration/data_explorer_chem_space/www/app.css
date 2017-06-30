@@ -50,12 +50,12 @@ input[type='checkbox']:checked:after {
 
 /* WATER SOURCES */
 
-input[value = "precip"]:checked:after {
+input[value = "precipitation"]:checked:after {
     background-color: #EBEBEB;
 	border: 5px solid #3E3D3D;
     }
 
-input[value = "flow"]:checked:after {
+input[value = "discharge"]:checked:after {
     background-color: #3E3D3D;
     }
 
