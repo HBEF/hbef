@@ -183,7 +183,7 @@ shinyServer(function(session, input, output) {
   #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
   historyData <- data.frame(
     id = 1:7,
-    content = c("Majority of HBEF dataset",
+    content = c("Span of HBEF dataset",
                 "Air Pollution Control Act",
                 "Clean Air Act of 1963",
                 "EPA founded", 
@@ -197,13 +197,13 @@ shinyServer(function(session, input, output) {
               "The Clean Air Act also has important amendments",
               "Amendment that more specifically addressed acid rain",
               "Today isn't really today"),
-    start = c("1963-06-01",
+    start = c("1957-06-01",
               "1955-01-01",
               "1963-01-01",
               "1970-12-02", 
               "1970-06-01",
               "1990-06-01",
-              "2017-06-19"), #FIND THE REAL DATE OF CAA ENACTMENT!
+              "2017-06-19"), #FIND THE REAL DAY OF CAA ENACTMENT!
     end = c("2014-05-01",
             NA,
             NA,
@@ -213,8 +213,8 @@ shinyServer(function(session, input, output) {
             NA)
   )
 
-  #watershed 6 dataframe
-  imported_data_ws6 <- imported_data[imported_data$ws == "6",]
+  #watershed 6 dataframe for flux...
+ # imported_data_ws6 <- imported_data[imported_data$ws == "6",]
   
   ########### END OF DATA IMPORT #############################################
   
