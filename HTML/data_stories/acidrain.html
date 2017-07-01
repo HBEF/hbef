@@ -7,12 +7,9 @@
 
 <script type = "text/javascript" src="../hubbard.js"></script>
 
-
 <title>Home</title>
 <link href="../hubbard.css" rel="stylesheet" type="text/css">
 <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-
-
 
 </head>
 <body>
@@ -20,9 +17,9 @@
  	<nav>
   		<div class="primary_header" id="menu">
 		  <ul>
-		  	<li><a href="../hubbard.html">HOME</a></li>
-			<li><a href="../hubbard.html#datastories">DATA STORIES</a></li>
-			<li><a href="../hubbard.html#exploratory">EXPLORATORY TOOLS</a>
+		  	<li><a href="../index.html">HOME</a></li>
+			<li><a href="../index.html#datastories">DATA STORIES</a></li>
+			<li><a href="../index.html#exploratory">EXPLORATORY TOOLS</a>
 			</li>
 			<li><a href="">ABOUT US</a></li>
 		  </ul>
@@ -31,86 +28,50 @@
   <div class = "container">
 <div class= "title_container">
 	
+
+	
+		
+				
+<!----- EDIT ZONE #1 ---------------------------------------------------------->
+	
+	
 	<div class="col">
-	<h1>understanding acid rain.</h1>
-    <h4> using long-term ecological research data to make the fascinating and complex ecosystem dynamics fun to understand.</h4>
+	<h1>understanding <br><strong> [insert your topic here] </strong></h1>
+    <h4> [insert a brief description of your topic here . Write between 2 and 4 sentences about why it is meaningful, relevant, important.]</h4>
 	</div>  
 
-  </div>
+<!----- END OF EDIT ZONE #1 --------------------------------------------------->
+ 
+   </div>
 	
 </div>
 
 </header>
 
+<section class = "shiny_app_container">
 
-<section id="hubbard"> 
-<div class = "container">
-<div class= "col_container_left">
-	
-	<div class="dark_background col">
-	<h3>Hubbard Brook</h3>
-    <p>We are excited to announce that we have been selected to participate in the Data+ REU Program We will mentor a team of three undergraduate data scientists in a ten-week summer program to expand this data visualization platform. Stay tuned for exciting new data visualizations from the longest continuous record of stream and precipitation chemistry in the world!</p>
-	</div>  
-
-  </div>
-	
-</div>
+<!----- EDIT ZONE #2 ---------------------------
+WHERE IT SAYS (src =) insert beteen quotes the URL where your app is hosted. ---------------->
  
+  <iframe id="form-iframe" src="http://colab-sbx-106.oit.duke.edu:3838/data_stories/acid_rain/" style="margin:0; width:100%; height:150px; border:none; overflow:hidden;" scrolling="no" onload="AdjustIframeHeightOnLoad()"></iframe>
+
+<!----- EDIT ZONE #2 ---------------------------------------------------------->
+
+
+
+
+
+
+<script type="text/javascript">
+function AdjustIframeHeightOnLoad() { document.getElementById("form-iframe").style.height = document.getElementById("form-iframe").contentWindow.document.body.scrollHeight * 1.1 + "px"; }
+function AdjustIframeHeight(i) { document.getElementById("form-iframe").style.height = parseInt(i) + "px"; }
+</script>
 </section>
 
-<section class = "blue">
-<div class="container"> 
-<div class = "col_container_subtitle">
-  <h2>data stories</h2>
-  <p> data stories are a series of projects that combine text, static and interactive graphs along with some textual references and other media content to explore the </p></div>
-	
-</div>
-
-</section>
-
-<section>
-
-<div class="w3-bar w3-black">
-  <button class="w3-bar-item w3-button tablink w3-red" onclick="openTab(event, 'Causes')">Causes</button>
-  
-  <button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'Consequences')">Consequences</button>
-  
-  <button class="w3-bar-item w3-button tablink" onclick="openTab(event, 'Responses')">Responses</button>
-</div>
-
-
-<div id="Causes" class="tab container">
-  <h2>Causes</h2>
-  <p>These are the causes</p>
-  <div style="position:relative;height:0;padding-bottom:56.25%"><iframe src="https://www.youtube.com/embed/Nf8cuvl62Vc?ecver=2" width="640" height="360" frameborder="0" style="position:absolute;width:100%;height:100%;left:0" allowfullscreen></iframe>
-  
-  </div>
-  
-  
-</div>
-
-<div id="Consequences" class="tab" style="display:none">
- <div class="container">
-  <h2>Consequences</h2>
-  <p>Paris is the capital of France.</p> </div>
-  <iframe src="http://colab-sbx-106.oit.duke.edu:3838/" style="border: none; width: 100%; height: 500px"></iframe>
-</div>
-
-<div id="Responses" class="tab container" style="display:none">
-  <h2>Responses</h2>
-  <p>Tokyo is the capital of Japan.</p>
-</div>
-
-</section>
-
-
-
-
-
-<section>
+<section id = "footer">
 
   <div class="footer dark_background">&nbsp;
-	  <h3> contact@contact.com</h3>
+	
 	  <div class = "footer_menu">
 			<ul>
 			  <li><a href="hubbard.html">HOME</a></li>
@@ -119,9 +80,14 @@
 		  </li>
 			  <li><a href="">ABOUT US</a></li>
 			</ul>	
-	</div>	
+		</div>	
+	
+	<h3> contact@contact.com</h3>
 	 
 	</div>
 </section>
+
+
+
 </body>
 </html>
