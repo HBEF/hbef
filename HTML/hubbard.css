@@ -432,6 +432,20 @@ color: #fafafa;
 	color: #fafafa;
 }
 
+#story_dilutification{
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.45), 
+		rgba(25, 25, 25, 0.45)), url("images/dilutification.jpg");
+	background-size: cover;
+	color: #fafafa;}
+
+#story_deforestation {
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.45), 
+		rgba(25, 25, 25, 0.45)), url("images/deforestation.jpg");
+	background-size: cover;
+	color: #fafafa;}
+
 
 /* Stories Images */
 .acidrain {
