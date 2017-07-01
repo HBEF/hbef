@@ -133,7 +133,7 @@ input[value = "Al"]:checked:after {
 /* /////// top navigation for sections of the story //////*/
 
 #top{
-	margin-bottom: 5%;
+	margin-bottom: -20px;
 }
 
 
