@@ -140,8 +140,10 @@ shinyUI(fluidPage(
                  fluidRow(
                    column(12,
                           selectInput("solutesy", label = "",
-                                      choices = all_solutes,
-                                      selected = "Na"))),
+                                      choices = list("Cations" = solutes_cations, "Anions" = solutes_anions, "Hydrogen" = solutes_H),
+                                      selected = "Na", 
+                                      multiple = TRUE, 
+                                      selectize = TRUE))),
                  
                  
                  fluidRow(div(style = "height:500px", plotlyOutput("bubblePlot"))),
@@ -150,8 +152,10 @@ shinyUI(fluidPage(
                  fluidRow(div(style = "margin-left:30%;", 
                    column(12,
                           selectInput("solutesx", label = "",
-                                      choices = all_solutes,
-                                      selected = "Na"))))
+                                      choices = list("Cations" = solutes_cations, "Anions" = solutes_anions, "Hydrogen" = solutes_H),
+                                      selected = "Mg", 
+                                      multiple = TRUE, 
+                                      selectize = TRUE))))
                  )
         
         ### PLOT VIEW 2

@@ -14,7 +14,7 @@ library(directlabels)
 
 
 #######################################################################################
-########### SHINY SERVER ##############################################################
+########### SHINY SERVER FOR EXPLORATORY IN CHEMICAL SPACE ############################
 #######################################################################################
 
 
@@ -129,9 +129,6 @@ shinyServer(function(session, input, output) {
     data <- data[data$ws %in% input$watersheds,]
     data <- data[data$source %in% input$water_sources,]
     data <- data[data$date >= input$date_range[1] & data$date <= input$date_range[2]]
-    
-
-    
     unit_columns <- colnames(imported_data[,(grep(input$units, colnames(data))), with = FALSE])
 
     if(input$granularity == "month"){
@@ -152,16 +149,30 @@ shinyServer(function(session, input, output) {
   
     else{data}
     
-    data <- accumulate_by(data, ~framey)
+    if(length(input$solutesx) == 1){data}
+    else{ solutes_to_add <- colnames(data[,grep(paste(input$solutesx, collapse="|"), names(data)), with = FALSE])
+    data$sum_temporary_x = rowSums(data[,  solutes_to_add, with = FALSE], na.rm=TRUE)
+    }
     
+    if(length(input$solutesy) == 1){data}
+    else{ solutes_to_add <- colnames(data[,grep(paste(input$solutesy, collapse="|"), names(data)), with = FALSE])
+    data$sum_temporary_y = rowSums(data[,  solutes_to_add, with = FALSE], na.rm=TRUE)
+    }
+    
+    data <- accumulate_by(data, ~framey)
+  
   })
   
   x <- reactive({
-    colnames(reactive_data()[,grep(input$solutesx, names(reactive_data())), with = FALSE])
+    if(length(input$solutesx) == 1) {colnames(reactive_data()[,grep(input$solutesx, names(reactive_data())), with = FALSE])}
+    else{
+      "sum_temporary_x"
+    }
   })
   
   y <- reactive({
-    colnames(reactive_data()[,grep(input$solutesy, names(reactive_data())), with = FALSE])
+    if(length(input$solutesy) == 1) {colnames(reactive_data()[,grep(input$solutesy, names(reactive_data())), with = FALSE])}
+    else{"sum_temporary_y"}
   })
   
   size <- reactive({
@@ -180,7 +191,8 @@ shinyServer(function(session, input, output) {
     plot <- ggplot(data=data) + my_theme + 
       geom_point(aes(x = get(x), y = get(y), shape = source, 
                      size = get(size()), color = water_year, frame = frame), stroke= 1, alpha = 0.8) +
-      scale_shape_manual(values= source_shapes)
+      scale_shape_manual(values= source_shapes)+ 
+      labs(y = "")
     ggplotly(plot, tooltip = "text",
              width = 900) %>%
       config(displayModeBar = FALSE) %>%
