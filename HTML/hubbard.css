@@ -423,6 +423,16 @@ color: #fafafa;
 	color: #fafafa;
 }
 
+
+#explore_space {
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.45), 
+		rgba(25, 25, 25, 0.45)), url("images/explore_space.png");
+	background-size: cover;
+	color: #fafafa;
+}
+
+
 /* Stories Images */
 .acidrain {
 	background: linear-gradient(
