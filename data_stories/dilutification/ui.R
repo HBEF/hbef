@@ -161,25 +161,25 @@ shinyUI(fluidPage(
                           sidebarPanel(
                             #Solutes
                             fluidRow(
-                              column(12, actionLink("select_all_ions2", h4("Solutes"))),
+                              column(12, actionLink("select_all_ions", h4("Solutes"))),
                               
                               #Cations
                               column(6,
-                                     actionLink("select_all_cations2", h5("Cations")),
-                                     checkboxGroupInput("solutes_cations2", label = "",
+                                     actionLink("select_all_cations", h5("Cations")),
+                                     checkboxGroupInput("solutes_cations", label = "",
                                                         choices = solutes_cations,
                                                         selected = "Na")),
                               
                               #Anions
                               
-                              column(6, actionLink("select_all_anions2", h5("Anions")),
-                                     checkboxGroupInput("solutes_anions2", label = "",
+                              column(6, actionLink("select_all_anions", h5("Anions")),
+                                     checkboxGroupInput("solutes_anions", label = "",
                                                         choices = solutes_anions,
                                                         selected = "SO4)"))),
                             #Hydrogen  
                             
                             fluidRow(
-                              column(12, checkboxGroupInput("solutes_H2", 
+                              column(12, checkboxGroupInput("solutes_H", 
                                                             label = h5("Hydrogen"),
                                                             choices = solutes_H,
                                                             selected = ""))),

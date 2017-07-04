@@ -23,6 +23,26 @@ watershed_change <- function(df){
   return(df)
 }
 
+#Write a function that converts the solute labels to their full written name
+solute_change <- function(df){
+  df[df$solute == "K", "solute"] = "Potassium"
+  df[df$solute == "Na", "solute"] = "Sodium"
+  df[df$solute == "Ca", "solute"] = "Calcium"
+  df[df$solute == "Mg", "solute"] = "Magnesium"
+  df[df$solute == "Al", "solute"] = "Aluminum"
+  df[df$solute == "SO4", "solute"] = "Sulfate"
+  df[df$solute == "NO3", "solute"] = "Nitrate"
+  df[df$solute == "Cl", "solute"] = "Chlorine"
+  df[df$solute == "H", "solute"] = "Hydrogen"
+  return(df)
+  
+}
+
+source_change <- function(df){
+  df[df$source == "flow", "source"] = "Discharge (Q)"
+  df[df$source == "precip", "source"] = "Precipitation (P)"
+  return(df)
+}
 
 shinyServer(function(session, input, output) {
   
@@ -34,9 +54,10 @@ shinyServer(function(session, input, output) {
           strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
   
-  color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
-  color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
-  color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
+  color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", "Calcium" = "#3B5C95",
+                    "Magnesium" = "#273D64", "Aluminum" = "#162338")
+  color_anion <- c("Sulfate" = "#8F1010", "Nitrate" = "#BF1616", "Chlorine" = "#D97373")
+  color_hydro <- c("Hydrogen" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
   source_shapes <- c("flow" = 16, "precip"= 21)
@@ -75,47 +96,36 @@ shinyServer(function(session, input, output) {
   ########### SIDEBAR FUNCTIONS ##############################################################
   ###  allow 'select all' interactivity, do not edit
   
-  observeEvent(input$select_all_ions2, {
-    if(input$select_all_ions2 == 0) {
-    }else if (input$select_all_ions2%%2 == 0){
-      updateCheckboxGroupInput(session, "solutes_anions2", selected = "PO4")
-      updateCheckboxGroupInput(session, "solutes_cations2", selected = "K")
-    }else{
-      updateCheckboxGroupInput(session, "solutes_anions2", selected = solutes_anions2)
-      updateCheckboxGroupInput(session, "solutes_cations2", selected = solutes_cations2)
-    }
+  observeEvent(input$select_all_ions, {
+    if(input$select_all_ions == 0) {}
+    else if (input$select_all_ions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")
+      updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
+    else{
+      updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
+      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
   })
   
-  observeEvent(input$select_all_anions2, {
-    if(input$select_all_anions2 == 0) {
-    }else if (input$select_all_anions2%%2 == 0){
-      updateCheckboxGroupInput(session, "solutes_anions2", selected = "PO4")
-    }else{
-      updateCheckboxGroupInput(session, "solutes_anions2", selected = solutes_anions2)
-    }
+  observeEvent(input$select_all_anions, {
+    if(input$select_all_anions == 0) {}
+    else if (input$select_all_anions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")}
+    else{updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)}
   })
   
-  observeEvent(input$select_all_cations2, {
-    if(input$select_all_cations2 == 0) {
-    }else if (input$select_all_cations2%%2 == 0){
-      updateCheckboxGroupInput(session, "solutes_cations2", selected = "K")
-    }else{
-      updateCheckboxGroupInput(session, "solutes_cations2", selected = solutes_cations2)
-    }
+  observeEvent(input$select_all_cations, {
+    if(input$select_all_cations == 0) {}
+    else if (input$select_all_cations%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
+    else{updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
   })
   
   observeEvent(input$select_all_ws, {
-    if(input$select_all_ws == 0) {
-      updateCheckboxGroupInput(session, "watersheds", selected = "ws1")
-    }else if (input$select_all_ws%%2 == 0){
-      updateCheckboxGroupInput(session, "watersheds", selected = "ws1")
-    }else{
-      updateCheckboxGroupInput(session, "watersheds", selected = watersheds)
-    }
+    if(input$select_all_ws == 0) {updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
+    else if (input$select_all_ws%%2 == 0){updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
+    else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
   })
   
   
-  solutes2 <- reactive({c(input$solutes_cations2, input$solutes_anions2, input$solutes_H2)})
+  
+  solutes2 <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
   
@@ -155,6 +165,8 @@ shinyServer(function(session, input, output) {
     data <- data[data$solute %in% input$sol,] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds,]
+    data <- solute_change(data)
+    data <- source_change(data)
   })
   
   reactive_data2 <- reactive({
@@ -163,6 +175,8 @@ shinyServer(function(session, input, output) {
     data <- data[data$solute %in% solutes2(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds2,]
+    data <- solute_change(data)
+    data <- source_change(data)
   })
   
   x <- reactive({
@@ -217,19 +231,19 @@ shinyServer(function(session, input, output) {
         h = 400
       }else if (length(w.s) == 5){
         col1 = 1
-        h = 500
+        h = 600
       }else if (length(w.s) == 6){
         col1 = 2
-        h = 500
+        h = 600
       }else if (length(w.s) == 7){
         col1 = 1
-        h = 600
+        h = 800
       }else if (length(w.s) == 8){
         col1 = 2
-        h = 600
+        h = 800
       }else if (length(w.s) == 9){
         col1 = 3
-        h = 600
+        h = 800
       }
     }
     if (length(w.s) == 1){
@@ -241,27 +255,34 @@ shinyServer(function(session, input, output) {
         h = 400
       }else if (length(ion) == 5){
         col2 = 1
-        h = 500
+        h = 600
       }else if (length(ion) == 6){
         col2 = 2
-        h = 500
+        h = 600
+      }else if (length(ion) == 7){
+        col2 = 1
+        h = 800
+      }else if (length(ion) == 8){
+        col2 = 2
+        h = 800
+      }else if (length(ion) == 9){
+        col2 = 3
+        h = 800
       }else{
         col2 = 1
-        h = 500
+        h = 800
       }
     }
     
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), 
-                                   shape = source, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",units, ")", sep = ""),
-             title = "Solute Concentrations")}
+                                   shape = source))+
+        labs(x = "Water Year", y = paste("log", "(",units, ")", sep = ""))
     
-    else{
+    }else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), 
-                                    shape = source, alpha = ws))+
-        labs(x = "Water Year", y = units,
-             title = "Solute Concentrations")}
+                                    shape = source))+
+        labs(x = "Water Year", y = units)}
     
     if (facet == "w.s"){
       if (length(w.s) <= 1) {
@@ -271,6 +292,7 @@ shinyServer(function(session, input, output) {
                        text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                        "Value:", round(get(y), 2), "<br>", "Date: ", get(x)))) + 
           geom_smooth(method = "lm", color = "green", se = FALSE) +
+          labs(title = paste(data$solute, "Concentration", sep = " ")) +
           xlim(min(date_range[1]), max(date_range[2]))+ 
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
@@ -286,6 +308,7 @@ shinyServer(function(session, input, output) {
           xlim(min(date_range[1]), max(date_range[2]))+ 
           geom_smooth(method = "lm", color = "green", se = FALSE) +
           facet_wrap(~ws2, ncol = col1) +
+          labs(title = paste(data$solute, "Concentrations", sep = " ")) +
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5))+
@@ -300,6 +323,7 @@ shinyServer(function(session, input, output) {
                          text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                       "Value:", round(get(y), 2), "<br>", "Date: ", get(x)))) +
           xlim(min(date_range[1]), max(date_range[2]))+ 
+          labs(title = paste(data$solute, "Concentration", sep = " ")) +
           geom_smooth(method = "lm", color = "green", se = FALSE) +
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
@@ -313,7 +337,8 @@ shinyServer(function(session, input, output) {
                                       "Value:", round(get(y), 2), "<br>", "Date: ", get(x)))) + 
           geom_smooth(method = "lm", color = "green", se = FALSE) +
           xlim(min(date_range[1]), max(date_range[2]))+ 
-          facet_wrap(~solute, ncol = col2) +
+          labs(title = "Solute Concentrations") +
+          facet_wrap(~solute, ncol = col2, scales = "free_y") +
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5))+
@@ -323,7 +348,7 @@ shinyServer(function(session, input, output) {
     
     p = hide_guides(ggplotly(  
       final, tooltip = "text",
-      width = 900, height = h) %>%
+      width = 1000, height = h) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE))
   
