@@ -353,6 +353,11 @@ precip_discharge_data_wide <- data.table::dcast(data.table::setDT(df), ws + date
 precip_discharge_data_wide$ws <- as.factor(precip_discharge_data_wide$ws)
 precip_discharge_data_wide$source <- as.factor(precip_discharge_data_wide$source)
 
+precip_discharge_data_wide$frame <- precip_discharge_data_wide$water_date
+precip_discharge_data_wide %<>% 
+  separate("frame", c("framey") )
+
+
 precip_discharge_data_wide %>% 
   saveRDS(file = "precip_discharge_data_wide.rds")
 

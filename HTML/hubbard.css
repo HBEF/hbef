@@ -262,7 +262,7 @@ p{font-size: 12pt;}}
 
 header {
 	min-height: 100vh;
-	margin-bottom: 5%;
+	margin-bottom: 20px;
 }
 
 nav{
@@ -422,6 +422,30 @@ color: #fafafa;
 	background-size: cover;
 	color: #fafafa;
 }
+
+
+#explore_space {
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.45), 
+		rgba(25, 25, 25, 0.45)), url("images/explore_space.png");
+	background-size: cover;
+	color: #fafafa;
+}
+
+#story_dilutification{
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.45), 
+		rgba(25, 25, 25, 0.45)), url("images/dilutification.jpg");
+	background-size: cover;
+	color: #fafafa;}
+
+#story_deforestation {
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.45), 
+		rgba(25, 25, 25, 0.45)), url("images/deforestation.jpg");
+	background-size: cover;
+	color: #fafafa;}
+
 
 /* Stories Images */
 .acidrain {

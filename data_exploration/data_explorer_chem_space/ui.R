@@ -42,8 +42,8 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
-water_sources <- list("Precipitation (P)" = "precip",
-                     "Discharge (Q)" = "flow")
+water_sources <- list("Precipitation (P)" = "precipitation",
+                     "Discharge (Q)" = "discharge")
 
 granularity <- list("Year" = "year",
                     "Month" = "month",
@@ -72,7 +72,7 @@ shinyUI(fluidPage(
   
   ########### BODY ##############################################################
   
-  tabsetPanel(id = "top", type = "pills",
+
       
               
   ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
@@ -104,7 +104,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
                                         choices = water_sources,
-                                        selected = "precip",
+                                        selected = "precipitation",
                                         inline = TRUE))),
         
         ##Units  
@@ -140,18 +140,22 @@ shinyUI(fluidPage(
                  fluidRow(
                    column(12,
                           selectInput("solutesy", label = "",
-                                      choices = all_solutes,
-                                      selected = "Na"))),
+                                      choices = list("Cations" = solutes_cations, "Anions" = solutes_anions, "Hydrogen" = solutes_H),
+                                      selected = "Na", 
+                                      multiple = TRUE, 
+                                      selectize = TRUE))),
                  
                  
-                 fluidRow(div(style = "height:500px", plotlyOutput("bubblePlot"))),
+                 fluidRow(div(style = "height:450px", plotlyOutput("bubblePlot"))),
                 
                  #Solutes X
                  fluidRow(div(style = "margin-left:30%;", 
                    column(12,
                           selectInput("solutesx", label = "",
-                                      choices = all_solutes,
-                                      selected = "Na"))))
+                                      choices = list("Cations" = solutes_cations, "Anions" = solutes_anions, "Hydrogen" = solutes_H),
+                                      selected = "Mg", 
+                                      multiple = TRUE, 
+                                      selectize = TRUE))))
                  )
         
         ### PLOT VIEW 2
@@ -171,7 +175,7 @@ shinyUI(fluidPage(
 ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
 
   
-  )# Closes Tabset Panel for Main Tabs
+
   
 )#closes FluidPage
 ) #closes ShinyUI

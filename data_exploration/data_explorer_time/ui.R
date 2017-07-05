@@ -68,7 +68,7 @@ shinyUI(fluidPage(
   
   ########### BODY ##############################################################
   
-  tabsetPanel(id = "top", type = "pills",
+
       
               
   ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
@@ -173,7 +173,7 @@ shinyUI(fluidPage(
 ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
 
   
-  )# Closes Tabset Panel for Main Tabs
+
   
 )#closes FluidPage
 ) #closes ShinyUI
