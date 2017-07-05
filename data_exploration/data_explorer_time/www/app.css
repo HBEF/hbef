@@ -1,4 +1,4 @@
-@charset "UTF-8";
+s@charset "UTF-8";
 
 
 
@@ -50,12 +50,12 @@ input[type='checkbox']:checked:after {
 
 /* WATER SOURCES */
 
-input[value = "precipitation"]:checked:after {
+input[value = "precip"]:checked:after {
     background-color: #EBEBEB;
 	border: 5px solid #3E3D3D;
     }
 
-input[value = "discharge"]:checked:after {
+input[value = "flow"]:checked:after {
     background-color: #3E3D3D;
     }
 
@@ -211,7 +211,7 @@ input[value = "Al"]:checked:after {
 /* this gives the sidebar a specified height and enables the scrollbar*/
 
 form.well { 
-	max-height: 800px; 
+	max-height: 900px; 
 	overflow-y: auto;
 	overflow-x:none;
 	background: #EBEBEB;
@@ -321,7 +321,7 @@ h3 {
 
 
 h4 {
-	font-size: 1.5em;
+	font-size: 1em;
 	font-weight: 200;
 	font-family: 'Montserrat', sans-serif;
 	text-align: left;
