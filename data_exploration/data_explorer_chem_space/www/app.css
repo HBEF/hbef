@@ -1,4 +1,4 @@
-@charset "UTF-8";
+s@charset "UTF-8";
 
 
 
@@ -50,12 +50,12 @@ input[type='checkbox']:checked:after {
 
 /* WATER SOURCES */
 
-input[value = "precipitation"]:checked:after {
+input[value = "precip"]:checked:after {
     background-color: #EBEBEB;
 	border: 5px solid #3E3D3D;
     }
 
-input[value = "discharge"]:checked:after {
+input[value = "flow"]:checked:after {
     background-color: #3E3D3D;
     }
 
@@ -133,7 +133,7 @@ input[value = "Al"]:checked:after {
 /* /////// top navigation for sections of the story //////*/
 
 #top{
-	margin-bottom: -20px;
+	margin-bottom: 5%;
 }
 
 
@@ -211,7 +211,7 @@ input[value = "Al"]:checked:after {
 /* this gives the sidebar a specified height and enables the scrollbar*/
 
 form.well { 
-	max-height: 800px; 
+	max-height: 900px; 
 	overflow-y: auto;
 	overflow-x:none;
 	background: #EBEBEB;
@@ -322,7 +322,7 @@ h3 {
 
 h4 {
 	font-size: 1.2em;
-	font-weight: 200;
+	font-weight: 400;
 	font-family: 'Montserrat', sans-serif;
 	text-align: left;
 	letter-spacing: 2px;
@@ -330,7 +330,7 @@ h4 {
 }
 
 p{
-	font-size: 14pt;
+	font-size: 12pt;
 	font-family: Gotham, 'Helvetica Neue', Helvetica, Arial, 'sans-serif';
 	text-align: justify;
 }
