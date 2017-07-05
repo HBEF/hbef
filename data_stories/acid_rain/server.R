@@ -136,6 +136,8 @@ shinyServer(function(session, input, output) {
    
    anions3 <- reactive({input$solutes_anions3})
    
+   Al_anions3 <- reactive({input$solutes_Al_anions3})
+   
    cations3 <- reactive({input$solutes_cations3})
   
   ########### END OF SIDEBAR FUNCTIONS 3 ####################################################
@@ -352,8 +354,11 @@ shinyServer(function(session, input, output) {
   ########### REACTIVE DATA AND X Y 3 #########################################
   #Reactive Data Normal
   reactive_data3_Al <- reactive({
-    data <- subset(imported_data[imported_data$ws == 6,], solute %in% "Al")
+#    data <- subset(imported_data[imported_data$ws == 6,], solute %in% "Al")
+    data <- imported_data
     data <- data[data$source %in% input$water_sources3,]
+    data <- data[data$solute %in% Al_anions3(),] 
+    data <- data[data$ws %in% input$watersheds3,]
   })
   
   reactive_data3_anions <- reactive({
