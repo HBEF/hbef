@@ -262,7 +262,7 @@ p{font-size: 12pt;}}
 
 header {
 	min-height: 100vh;
-	margin-bottom: 5%;
+	margin-bottom: 20px;
 }
 
 nav{
@@ -322,7 +322,6 @@ nav{
 .title_container {
     display: table; /* Make the container element behave like a table */
 	width: 100%;
-	min-height: 70vh;
 }
 
 
