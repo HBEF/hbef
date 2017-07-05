@@ -80,7 +80,7 @@ shinyUI(fluidPage(
                        ########################### QUESTION #1 ###################################
                        
                        fluidRow(
-                         tags$div(class = "container_question", tags$h3("What happens to discharge when the entire forest is cut?"))
+                         tags$div(class = "container_question", tags$h3("Framework for Ice Storm... still in progress!"))
                        ),
                        
                        
@@ -177,32 +177,9 @@ shinyUI(fluidPage(
                        #--------- TEXT QUESTION #1 ----------------------------#
                        
                        tags$div(class = "container_paragraph", fluidRow(
-                         tags$p("Deforestation, the removal of forest trees,is harmful to the environment for a number of reasons, 
-                                some of which are less obvious than others.
-                                Deforestation results in habitat loss for woodland-
-                                dwelling species, causing die-offs and concurrent declines
-                                in biodiversity. Around eighty percent of land animals
-                                and plants on Earth reside in forests (National Geographic Society
-                                2017). It follows that the impact of widespread deforestation
-                                on wildlife is not insignificant. Deforestation also 
-                                accelerates climate change, as the loss of forests
-                                that absorb carbon dioxide tips the balance 
-                                so that more of this greenhouse gas enters 
-                                that atmosphere, causing global warming. On
-                                the smaller scale, deforestation can trigger
-                                regional climate change because the ground 
-                                cover from the trees is eliminated, allowing sun
-                                rays to penetrate where they were previously 
-                                blocked. This causes soils to dry out, which can
-                                transform once forested land into deserts. 
-                                Without canopy cover to block sunlight during
-                                the day and retain heat during the night, 
-                                temperature fluctuations become more severe
-                                and harmful to wildlife. Deforestation also
-                                leads to drier climates because less water 
-                                is transpired, or released into the air, by
-                                trees. This negatively impacts the water cycle
-                                (National Geographic Society 2017).")
+                         tags$p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+                                that damaged the experimental watersheds.  Some effects of the 
+                                storm can be tracked by the NO3 streamflow data.")
                          ))
                        #--------- END OF TEXT QUESTION #1 ----------------------------#
                        
@@ -230,7 +207,8 @@ shinyUI(fluidPage(
                        ########################### QUESTION #1 ###################################
                        
                        fluidRow(
-                         tags$div(class = "container_question", tags$h3("What happens if you need to filter by only one?"))
+                         tags$div(class = "container_question", tags$h3("What happens if you need more time to finish this story..?
+                                                                        (Obviously still in progress...)"))
                        ),
                        
                        

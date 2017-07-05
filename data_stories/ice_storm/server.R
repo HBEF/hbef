@@ -216,6 +216,13 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
   })
   
-  
+  #make a plot of nitrates like in the 2003 paper
+  #(moles/ha-yr vs water year, faceted into output (excess) for ws1,6 and diff for ws2,4,5)
+  output$NO3_output <- renderPlotly({
+    
+  })
+  output$NO3_difference <- renderPlotly({
+    
+  })
   
 })
