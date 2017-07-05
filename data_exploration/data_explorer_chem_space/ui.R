@@ -72,7 +72,7 @@ shinyUI(fluidPage(
   
   ########### BODY ##############################################################
   
-  tabsetPanel(id = "top", type = "pills",
+
       
               
   ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
@@ -146,7 +146,7 @@ shinyUI(fluidPage(
                                       selectize = TRUE))),
                  
                  
-                 fluidRow(div(style = "height:500px", plotlyOutput("bubblePlot"))),
+                 fluidRow(div(style = "height:450px", plotlyOutput("bubblePlot"))),
                 
                  #Solutes X
                  fluidRow(div(style = "margin-left:30%;", 
@@ -175,7 +175,7 @@ shinyUI(fluidPage(
 ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
 
   
-  )# Closes Tabset Panel for Main Tabs
+
   
 )#closes FluidPage
 ) #closes ShinyUI
