@@ -159,38 +159,40 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #1 ##################
                        tags$div(class = "container_paragraph",
                                 fluidRow(column(width = 9,
-                                                p("Experiencing nature for many people means traveling to see awe-inspiring 
-                                            views and wildlife in national parks or forests. Perhaps the place pictured above used to be one of
-                                            those nature hubs. These national sites, as well as anywhere in nature, are composed of many diverse 
-                                            ecosystems that maintain an important balance.")),
-                                         column(width = 3,
-                                                h5(strong("Ecosystem:"), "a network of animals, plants, and the physical features 
-                                           of where they live"))),
-                                fluidRow(column(width = 9,
-                                                p("Starting in the early 1950s (soon after Disney first released Cinderella 
-                                            and Peter Pan) this balance within ecosystems everywhere began to tip.  
-                                            What caused this shift in so many ecosystems?  Well, the weather did 
-                                            believe it or not.  More specifically, the precipitation that fell 
-                                            on the ecosystems."),
-                                                p('“But don’t plants and animals need the rain and snowmelt to survive” you 
-                                            ask?  Yes, point for you.  Though the precipitation at this time was 
-                                            acid rain, and had become polluted to a point of concern.  Many 
-                                            plants and aquatic creatures specifically were harmed by the increasing 
-                                            acidity of the water, which began to disrupt the flow of the ecosystems.'),
-                                                p('Acid rain hasn’t always been around to harm ecosystems though.  It became 
-                                            an issue as humans increasingly emitted sulfur dioxide (SO2) and 
-                                            nitrogen oxides (NOx).  These chemicals came mostly from burning 
-                                            fossil fuels (namely coal) to produce electricity, and from car 
-                                            emissions.  They then rise into the atmosphere to react with water, 
-                                            oxygen, etc. and are carried quite far from where they originated.  
-                                            When they fall back to earth, in rain, snow, or even fog, it is called acid rain.')),
-                                         column(3)),
-                                fluidRow(column(width = 9,
-                                                #insert widget that links to a quizlet or something here
-                                                h4("Let's see how much you know offhand about acid rain... Click", 
-                                                   tags$a(href = "https://www.surveymonkey.com/r/RGNNTMH", "here"),
-                                                   "to take the acid rain quiz.")
-                                ),
+                                                p("Placeholder text...")),
+                                # fluidRow(column(width = 9,
+                                #                 p("Experiencing nature for many people means traveling to see awe-inspiring 
+                                #             views and wildlife in national parks or forests. Perhaps the place pictured above used to be one of
+                                #             those nature hubs. These national sites, as well as anywhere in nature, are composed of many diverse 
+                                #             ecosystems that maintain an important balance.")),
+                                #          column(width = 3,
+                                #                 h5(strong("Ecosystem:"), "a network of animals, plants, and the physical features 
+                                #            of where they live"))),
+                                # fluidRow(column(width = 9,
+                                #                 p("Starting in the early 1950s (soon after Disney first released Cinderella 
+                                #             and Peter Pan) this balance within ecosystems everywhere began to tip.  
+                                #             What caused this shift in so many ecosystems?  Well, the weather did 
+                                #             believe it or not.  More specifically, the precipitation that fell 
+                                #             on the ecosystems."),
+                                #                 p('“But don’t plants and animals need the rain and snowmelt to survive” you 
+                                #             ask?  Yes, point for you.  Though the precipitation at this time was 
+                                #             acid rain, and had become polluted to a point of concern.  Many 
+                                #             plants and aquatic creatures specifically were harmed by the increasing 
+                                #             acidity of the water, which began to disrupt the flow of the ecosystems.'),
+                                #                 p('Acid rain hasn’t always been around to harm ecosystems though.  It became 
+                                #             an issue as humans increasingly emitted sulfur dioxide (SO2) and 
+                                #             nitrogen oxides (NOx).  These chemicals came mostly from burning 
+                                #             fossil fuels (namely coal) to produce electricity, and from car 
+                                #             emissions.  They then rise into the atmosphere to react with water, 
+                                #             oxygen, etc. and are carried quite far from where they originated.  
+                                #             When they fall back to earth, in rain, snow, or even fog, it is called acid rain.')),
+                                #          column(3)),
+                                # fluidRow(column(width = 9,
+                                #                 #insert widget that links to a quizlet or something here
+                                #                 h4("Let's see how much you know offhand about acid rain... Click", 
+                                #                    tags$a(href = "https://www.surveymonkey.com/r/RGNNTMH", "here"),
+                                #                    "to take the acid rain quiz.")
+                                # ),
                                 column(3))
                        )
                        ########### END OF TEXT FOR QUESTION #1 ###############
