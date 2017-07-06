@@ -43,3 +43,4 @@ colnames(species.div) = c("Species", "Count")
 species.div$Count = as.numeric(species.div$Count)
 diversity.1996 = (sum((species.div$Count)*((species.div$Count) - 1))/
                     (sum(species.div$Count)*(sum(species.div$Count) - 1)))
+w6_coords <- read_csv("w6_coords.txt")

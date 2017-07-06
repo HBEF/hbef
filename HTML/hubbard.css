@@ -35,6 +35,7 @@ section{
 	margin-right: auto;
 	padding-top: 10vh;
 	padding-bottom: 10vh;
+	margin-bottom: 0;
 }
 
 @media (max-width: 375px){
@@ -68,6 +69,8 @@ section{
     display: table; /* Make the container element behave like a table */
 	width: 100%;
 	min-height: 80vh;
+	margin:0;
+	padding:0;
 }
 
 .col_container_left {
@@ -329,13 +332,18 @@ nav{
 /*//// Picture Menus/////*/
 
 
-.explore_menu {
-	width: 50%;
-	display: inline-flex;
-    align-items: center;
-	min-height: inherit;
+.row {
+	display: flex;
+	width: 100%;
+	margin: 0;
+	padding: 0;
 }
 
+.column{
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
 
 @media (max-width: 768px){
 .explore_menu {
@@ -347,12 +355,14 @@ nav{
 }
 
 .box_text {
-	margin: 10%;
-	min-height: 30vh;
+	padding:10%;
+	min-height: 60vh;
 }
 
+
+
 .stories_menu_link {
-	width: 25%;
+	width: 50%;
 	display: inline-block;
 	margin: 0%;}
 
@@ -365,21 +375,15 @@ nav{
 
 .stories_menu_image {
 	color: #fafafa;
-	min-height: 80vh;
+	min-height: 40vh;
 	text-align: center;
-	margin: 0%;
+	margin: 0;
 }
 
 .stories_menu_image h3{
-	line-height: 1em;
 	text-align: center;
-	position:relative;
-	top: 40vh;
-	left: -10px;
 	margin: 0;
-	-ms-transform: rotate(7deg); /* IE 9 */
-    -webkit-transform: rotate(-90deg); /* Chrome, Safari, Opera */
-    transform: rotate(-90deg);
+	line-height: 40vh;
 }
 .stories_menu_image p{
 	opacity: 0;
@@ -410,7 +414,7 @@ nav{
 #acidtitle {
 background: linear-gradient(
 		rgba(25, 25, 25, 0.45), 
-		rgba(25, 25, 25, 0.45)), url("images/acidrain_title.jpg");
+		rgba(25, 25, 25, 0.45)), url("images/acidrain.jpg");
 background-size: cover;
 color: #fafafa;
 }
@@ -452,7 +456,7 @@ color: #fafafa;
 	background: linear-gradient(
 		rgba(25, 25, 25, 0.15), 
 		rgba(25, 25, 25, 0.15)), 
-		url("images/acidrain.gif");
+		url("images/acidrain.jpg");
 	background-size: cover;
 }
 
@@ -460,7 +464,7 @@ color: #fafafa;
 	background: linear-gradient(
 		rgba(25, 25, 25, 0.15), 
 		rgba(25, 25, 25, 0.15)), 
-		url("images/deforestation.gif");
+		url("images/deforestation.jpg");
 	background-size: cover;	
 }
 
@@ -468,7 +472,7 @@ color: #fafafa;
 	background: linear-gradient(
 		rgba(25, 25, 25, 0.35), 
 		rgba(25, 25, 25, 0.35)), 
-		url("images/icestorm.gif");
+		url("images/icestorm.jpg");
 	background-size: cover;
 }
 
@@ -476,7 +480,7 @@ color: #fafafa;
 	background: linear-gradient(
 		rgba(25, 25, 25, 0.15), 
 		rgba(25, 25, 25, 0.15)), 
-		url("images/dilutification.gif");
+		url("images/dilutification.jpg");
 	background-size: cover;
 }
 

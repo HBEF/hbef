@@ -1,6 +1,5 @@
 library(ggplot2)
 library(lubridate)
-library(readr)
 library(tidyr)
 library(dplyr)
 library(shiny)
@@ -104,7 +103,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
                                         choices = water_sources,
-                                        selected = "precipitation",
+                                        selected = "discharge",
                                         inline = TRUE))),
         
         ##Units  
@@ -121,10 +120,29 @@ shinyUI(fluidPage(
                     selected = "year"))),
         
         ##Date Range
-        sliderInput("date_range", label = h4("Date Range"),
-                    min = as.Date("1962-01-01"),
-                    max = as.Date("2014-01-01"),
-                    value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
+        fluidRow(
+          column(12, sliderInput("date_range", label = h4("Date Range"),
+                                 min = as.Date("1962-01-01"),
+                                 max = as.Date("2014-01-01"),
+                                 value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))))), 
+        
+        ##Leave trace
+        fluidRow(
+          column(12, checkboxInput("trace", label = ("Leave Trace"),
+                                   value = TRUE))),
+        
+        ##Leave trace
+        fluidRow(
+          column(12, sliderInput("animation_speed", label = h4("Speed"),
+                                 min = 0.25,
+                                 max = 2, 
+                                 step = 0.25,
+                                 post = "x",
+                                 value = 1)))
+        
+        ), #Closes Sidebar
+      
+      
       
       
       ############## END OF SIDEBAR #######
@@ -134,7 +152,7 @@ shinyUI(fluidPage(
       mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
         
         ### PLOT VIEW 1
-        tabPanel("Concentration", 
+        tabPanel("Solute Concentration", 
                  
                  #Solutes y
                  fluidRow(
