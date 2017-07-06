@@ -112,7 +112,7 @@ shinyServer(function(session, input, output) {
     else{updateCheckboxGroupInput(session, "watersheds2", selected = watersheds)}
   })
   
-  solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
+  solutes_NO3 <- reactive({c(input$solutes_NO3)})
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
   
@@ -134,12 +134,12 @@ shinyServer(function(session, input, output) {
   ########### REACTIVE DATA AND X Y  #########################################
   #Reactive Data Normal
   
-  reactive_data <- reactive({
+  reactive_data2 <- reactive({
     data <- imported_data
-    data <- data[data$source %in% input$water_sources,]
-    data <- data[data$solute %in% solutes(),] 
+    data <- data[data$source %in% input$water_sources2,]
+    data <- data[data$solute %in% solutes_NO3(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-    data <- data[data$ws %in% input$watersheds,]
+    data <- data[data$ws %in% input$watersheds2,]
   })
   
   
@@ -181,7 +181,7 @@ shinyServer(function(session, input, output) {
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
+      xlim(min(input$date_range2[1]), max(input$date_range2[2]))+ 
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -230,44 +230,36 @@ shinyServer(function(session, input, output) {
     
   })
 
-  #ggplotly for ws6 that shows most plots increase in lai following the ice storm
-  output$ws6_lai_plot <- renderPlotly({
-    ws6_lai_plot <- ggplot(lai_data[lai_data$WS == 6,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
+  #ggplotly that shows most plots increase in lai following the ice storm
+  output$lai_plot <- renderPlotly({
+    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
       facet_wrap(~PLOT)
     
-    ws6_lai_plot <- ggplotly(ws6_lai_plot, tooltip = "text",
+    lai_plot <- ggplotly(lai_plot, tooltip = "text",
       width = 900) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
-    ws6_lai_plot$x$layout$width <- NULL
-    ws6_lai_plot$y$layout$height <- NULL
-    ws6_lai_plot$width <- NULL
-    ws6_lai_plot$height <- NULL
-    ws6_lai_plot %>%
-      layout(autosize = TRUE, height = 600)
-  })
-
-  #ggplotly for ws1 that shows most plots increase in lai following the ice storm
-  output$ws1_lai_plot <- renderPlotly({
-    ws1_lai_plot <- ggplot(subset(lai_data[lai_data$WS == "1",]), aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
-      geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
-      geom_smooth(method = "lm", se = F, size = 0.5)+
-      facet_wrap(~PLOT)
-    
-    ws1_lai_plot <- ggplotly(ws1_lai_plot, tooltip = "text",
-                             width = 900) %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-    ws1_lai_plot$x$layout$width <- NULL
-    ws1_lai_plot$y$layout$height <- NULL
-    ws1_lai_plot$width <- NULL
-    ws1_lai_plot$height <- NULL
-    ws1_lai_plot %>%
+    lai_plot$x$layout$width <- NULL
+    lai_plot$y$layout$height <- NULL
+    lai_plot$width <- NULL
+    lai_plot$height <- NULL
+    lai_plot %>%
       layout(autosize = TRUE, height = 600)
   })
   
+  #plot to generally show how the ice storm affected NO3 (conc or flux?)
+  output$NO3_plot <- renderPlotly({
+    NO3_plot <- ggplot_function(reactive_data2(), x(), y(), ncol = 1, log = input$log) #probs should use Camila's theme
+      
+    NO3_plot$x$layout$width <- NULL
+    NO3_plot$y$layout$height <- NULL
+    NO3_plot$width <- NULL
+    NO3_plot$height <- NULL
+    NO3_plot %>%
+      layout(autosize = TRUE, height = 600)
+  })
+
 })
