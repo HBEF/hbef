@@ -121,10 +121,19 @@ shinyUI(fluidPage(
                     selected = "year"))),
         
         ##Date Range
-        sliderInput("date_range", label = h4("Date Range"),
-                    min = as.Date("1962-01-01"),
-                    max = as.Date("2014-01-01"),
-                    value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
+        fluidRow(
+          column(12, sliderInput("date_range", label = h4("Date Range"),
+                                 min = as.Date("1962-01-01"),
+                                 max = as.Date("2014-01-01"),
+                                 value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))))), 
+        
+        fluidRow(
+          column(12, checkboxInput("trace", label = ("Leave Trace"),
+                                   value = TRUE)))
+        
+        ), #Closes Sidebar
+      
+      
       
       
       ############## END OF SIDEBAR #######
@@ -134,7 +143,7 @@ shinyUI(fluidPage(
       mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
         
         ### PLOT VIEW 1
-        tabPanel("Concentration", 
+        tabPanel("Solute Concentration", 
                  
                  #Solutes y
                  fluidRow(

@@ -1,0 +1,92 @@
+---
+title: "To do"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## General features
+
+- [ ] fix issue with pH and others not showing up in specific units (SiO2)
+- [ ] fix issue with pH. How do they use it?
+- [ ] create interactive tables. 
+- [ ] Instantaneous Flow Log10(L/sec) ? Pg. 37 book. 
+- [ ] Percent of Total Ionic Charge.
+- [ ] FIX IFRAMES - FIREFOX. 
+
+
+#data frame
+
+- [ ] Change discharge to streamflow
+- [ ] Enlongate for monthly, yearly, weekly. 
+
+## Features to add to chemical graph
+
+- [ ] add summing feature using stringr. 
+- [ ] add option to see trace or just to see the current dot -- in animation. 
+- [ ] add options for animation speed.
+- [ ] add options to animate by month. 
+- [ ] add aesthetic options -- people can make color be somethign else. 
+- [ ] add tooltip. 
+
+
+## Features to add to time graph
+- [ ] faceting by different options
+- [ ] fix precipitation and P-Q issue on website -- Change name to flux. 
+- [ ] rearrange boxes for selecting variables (next to axis)
+- [ ] add animation. 
+- [ ] add options for animation speed.
+- [ ] add standard deviations from the mean: 1 standard deviation from mean of monthly precipitation (pg. 23 Lichens book)
+- [ ] fix date issues: make sure the date in the selection vs. in the tooltip etc are the same (water year is different from calendar year)
+
+- [ ] Net ecosystem retention. 
+- [ ] Let them see the precip, the flux. 
+
+
+
+### THINGS TO DO: 
+
+
+[ ] 1. The scientists we spoke to thought the title "Understanding the dynamics..." was perhaps too grandiose. Let's provisionally change it to "Hubbard Brook Interactive (Alpha)" until we can decide on something better.
+
+
+[ ] 2. The bottoms of the words for the Data Stories are cut off when you click the link, so we need to consolidate the text/images to fit on one screen.
+
+[ ] 3. Same problem with Explorer.
+
+[ ] 4. When you click on the data explorer apps, the windows where the graphs display are WAAAAY too small... you can't see anything.
+
+[ ] 5. Let's get the weekly data added in too... I'll supply that to y'all.
+
+[ ] 6. Let's get those Q plots on the bottom up and working.
+ 
+[ ] 7. I like the "Concentration" and "P-Q" tabs, but let's call "P-Q" "Flux" instead, and then you can have checkboxes to select if you want to look at P, Q, or the difference "Net Ecosystem Retention"
+
+[ ] 8. For ecology-friendliness, let's change mentions of "discharge" to "streamflow"
+
+[ ] 9. Hydrologists love to combine precip and Q into plots that look like these: https://stackoverflow.com/questions/42057832/how-to-draw-rainfall-runoff-graph-in-r-using-ggplot If we can get those in the app that would be SWEET
+
+
+#Sandbox code
+
+```{r}
+%>%
+        config(displayModeBar = FALSE) %>%
+        config(showLink = FALSE)
+```
+
+
+```{r}
+data <- imported_data
+    data <- data[data$ws %in% c("6"),]
+    data <- data[data$source %in% c("precipitation"),]
+    unit_columns <- colnames(imported_data[,(grep("^concentration_ueq_", colnames(data))), with = FALSE])
+    date_range_columns <- colnames(data[,(grep("year", colnames(data))), with = FALSE])
+    final_columns <-intersect(unit_columns, date_range_columns)
+    basic_columns <- c("ws","date","water_date","water_year","source","water_mm_pm", "water_mm_py", "framey")
+    needed_columns <- c(final_columns, basic_columns)
+    data <- data[,needed_columns, with = FALSE]
+```
+
