@@ -163,7 +163,6 @@ shinyServer(function(session, input, output) {
     data <- imported_data
     data <- data[data$source %in% add_precip(),]
     data <- data[data$solute %in% input$sol,] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds,]
     data <- solute_change(data)
     data <- source_change(data)
@@ -173,7 +172,7 @@ shinyServer(function(session, input, output) {
     data <- imported_data
     data <- data[data$source %in% add_precip2(),]
     data <- data[data$solute %in% solutes2(),] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
+    #note that solutes2 is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds2,]
     data <- solute_change(data)
     data <- source_change(data)
@@ -338,7 +337,7 @@ shinyServer(function(session, input, output) {
           geom_smooth(method = "lm", color = "green", se = FALSE) +
           xlim(min(date_range[1]), max(date_range[2]))+ 
           labs(title = "Solute Concentrations") +
-          facet_wrap(~solute, ncol = col2, scales = "free_y") +
+          facet_wrap(~solute, ncol = col2) +
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5))+

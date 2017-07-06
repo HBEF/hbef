@@ -114,7 +114,7 @@ shinyUI(fluidPage(
                            
                          mainPanel(fluidRow(
                            column(8, plotlyOutput("plot1", width = "100%", height = "100%")),
-                           column(4, img(src = "legend.png", height = 200, width = 200))))
+                           column(4, img(src = "source.png", height = 150, width = 200))))
             ),#End of sidebarLayout
                           
                         
@@ -224,8 +224,8 @@ shinyUI(fluidPage(
                           mainPanel(
                             fluidRow(
                               column(8, plotlyOutput("plot2", width = "100%", height = "100%")),
-                              column(4, img(src = "legend.png",
-                                            height = 200, width = 200)))
+                              column(4, img(src = "source.png",
+                                            height = 150, width = 200)))
                           
                             
                             
