@@ -35,6 +35,7 @@ section{
 	margin-right: auto;
 	padding-top: 10vh;
 	padding-bottom: 10vh;
+	margin-bottom: 0;
 }
 
 @media (max-width: 375px){
@@ -329,13 +330,18 @@ nav{
 /*//// Picture Menus/////*/
 
 
-.explore_menu {
-	width: 50%;
-	display: inline-flex;
-    align-items: center;
-	min-height: inherit;
+.row {
+	display: flex;
+	width: 100%;
+	margin: 0;
+	padding: 0;
 }
 
+.column{
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
 
 @media (max-width: 768px){
 .explore_menu {
