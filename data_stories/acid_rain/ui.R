@@ -316,34 +316,36 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #2 ##################
                        tags$div(class = "container_paragraph",
                                 fluidRow(column(width = 9,
-                                                p(" Though sulfur dioxide and nitrogen oxides have different effects on their 
-                                          own, when combined in acid rain they do a number on nature.  One way they harm 
-                                          ecosystems is by wearing down the natural soil buffer.")),
-                                         column(width = 3, #make a text box
-                                                h5(strong("Soil buffer:"), "chemicals naturally present in the soil, which neutralize the 
-                                         strong acidity of acid rain at the expense of losing base cations in the 
-                                         neutralizing reactions"))
-                                ),
-                                fluidRow(column(width = 9,
-                                                p("The acid rain reacts with the base cations in the soil, causing them to be 
-                                          washed out of the ecosystem.  Try exploring this pattern for each compound using the graph 
-                                          above.  You can see that calcium (Ca) discharge increases even though the Ca 
-                                          precipitation remains relatively stable.  Also note that these plots all 
-                                          show data from watershed 6, the biogeochemical reference point, meaning
-                                          that there have been no experiments to alter its natural state.")),     
-                                         column(width = 3, 
-                                                h5(strong("Base cations:"), "positively charged elements present in the soil that help
-                                         neutralize acid rain (ie. Ca, Mg, K)")
-                                         )),
-                                fluidRow(column(width = 9,
-                                                p("One effect of the base cation loss was the poor growth of Sugar Maples, 
-                               which rely heavily on Ca to grow.  Another danger to the ecosystem balance 
-                               was caused by acid rain reacting to release aluminum from the soil.  Aluminum 
-                               is toxic once released from its stable soil state, and makes it hard for trees 
-                               to take up water.  Taking the pH of the precipitation and streamflow also show 
-                               these effects of acid rain, because the inflow is acidic when the outflow is 
-                               much less so.  Acid is coming in, reacting, and staying.  Sounds like an 
-                               unwelcome house guest.")),
+                                                p("More placeholder text...")),
+                               #  fluidRow(column(width = 9,
+                               #                  p(" Though sulfur dioxide and nitrogen oxides have different effects on their 
+                               #            own, when combined in acid rain they do a number on nature.  One way they harm 
+                               #            ecosystems is by wearing down the natural soil buffer.")),
+                               #           column(width = 3, #make a text box
+                               #                  h5(strong("Soil buffer:"), "chemicals naturally present in the soil, which neutralize the 
+                               #           strong acidity of acid rain at the expense of losing base cations in the 
+                               #           neutralizing reactions"))
+                               #  ),
+                               #  fluidRow(column(width = 9,
+                               #                  p("The acid rain reacts with the base cations in the soil, causing them to be 
+                               #            washed out of the ecosystem.  Try exploring this pattern for each compound using the graph 
+                               #            above.  You can see that calcium (Ca) discharge increases even though the Ca 
+                               #            precipitation remains relatively stable.  Also note that these plots all 
+                               #            show data from watershed 6, the biogeochemical reference point, meaning
+                               #            that there have been no experiments to alter its natural state.")),     
+                               #           column(width = 3, 
+                               #                  h5(strong("Base cations:"), "positively charged elements present in the soil that help
+                               #           neutralize acid rain (ie. Ca, Mg, K)")
+                               #           )),
+                               #  fluidRow(column(width = 9,
+                               #                  p("One effect of the base cation loss was the poor growth of Sugar Maples, 
+                               # which rely heavily on Ca to grow.  Another danger to the ecosystem balance 
+                               # was caused by acid rain reacting to release aluminum from the soil.  Aluminum 
+                               # is toxic once released from its stable soil state, and makes it hard for trees 
+                               # to take up water.  Taking the pH of the precipitation and streamflow also show 
+                               # these effects of acid rain, because the inflow is acidic when the outflow is 
+                               # much less so.  Acid is coming in, reacting, and staying.  Sounds like an 
+                               # unwelcome house guest.")),
                                          column(3))
                        )
                        ########### END OF TEXT FOR QUESTION #2 ###############
@@ -458,23 +460,25 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #3 ##################
                        tags$div(class = "container_paragraph",
                                 fluidRow(column(width = 9,
-                                                p("The hydrologic dataset doesn’t begin until 1963 (which was after the onset 
-                               of acid rain) but it still captures the story of an increasing dilemma, 
-                               actions taken to mitigate it, and the rebalancing of the ecosystem.  Up 
-                               until this time, the United States government was just beginning to fund 
-                               research and small policies around air pollution.  In 1967 they began to 
-                               expand their monitoring and control, until the enactment of the Clean Air
-                               Act in 1970.")),
-                                         column(3)),
-                                fluidRow(column(width = 9,
-                                                p("The Clean Air Act was made to regulate emissions from both stationary sources 
-                               (like power plants) and mobile ones (like cars).  The EPA was also founded in
-                               1970 in order to enforce the new act.  There have since been amendments, in 
-                               1977 and 1990, with the 1990 ones specifically addressing the control of acid
-                               rain.  Since then, SO2 emissions have been declining because of mandatory 
-                               reductions, though NOx has been tougher to reduce.  Ecosystems aren’t 
-                               recovering as quickly as hoped, and efforts continue to both reduce emissions
-                               and mitigate ecological distress.")),
+                                                p("Even more of this lovely placeholder text...")),
+                               #  fluidRow(column(width = 9,
+                               #                  p("The hydrologic dataset doesn’t begin until 1963 (which was after the onset 
+                               # of acid rain) but it still captures the story of an increasing dilemma, 
+                               # actions taken to mitigate it, and the rebalancing of the ecosystem.  Up 
+                               # until this time, the United States government was just beginning to fund 
+                               # research and small policies around air pollution.  In 1967 they began to 
+                               # expand their monitoring and control, until the enactment of the Clean Air
+                               # Act in 1970.")),
+                               #           column(3)),
+                               #  fluidRow(column(width = 9,
+                               #                  p("The Clean Air Act was made to regulate emissions from both stationary sources 
+                               # (like power plants) and mobile ones (like cars).  The EPA was also founded in
+                               # 1970 in order to enforce the new act.  There have since been amendments, in 
+                               # 1977 and 1990, with the 1990 ones specifically addressing the control of acid
+                               # rain.  Since then, SO2 emissions have been declining because of mandatory 
+                               # reductions, though NOx has been tougher to reduce.  Ecosystems aren’t 
+                               # recovering as quickly as hoped, and efforts continue to both reduce emissions
+                               # and mitigate ecological distress.")),
                                          column(3))
                        )
                        ########### END OF TEXT FOR QUESTION #3 ###############
