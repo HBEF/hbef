@@ -122,7 +122,12 @@ shinyServer(function(session, input, output) {
   ########### DATA IMPORT ####################################################
   
   imported_data <- readRDS("precip_stream_data_long.rds")
-  
+#  lai_data <- read.csv("lai.txt")
+  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
+
+  # lai_data[lai_data=="6"]<-"six"
+  # lai_data[lai_data=="1"]<-"one"
+
   ########### END OF DATA IMPORT #############################################
   
   
@@ -223,6 +228,46 @@ shinyServer(function(session, input, output) {
   })
   output$NO3_difference <- renderPlotly({
     
+  })
+
+  #ggplotly for ws6 that shows most plots increase in lai following the ice storm
+  output$ws6_lai_plot <- renderPlotly({
+    ws6_lai_plot <- ggplot(lai_data[lai_data$WS == 6,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
+      geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
+      geom_smooth(method = "lm", se = F, size = 0.5)+
+      facet_wrap(~PLOT)
+    
+    ws6_lai_plot <- ggplotly(ws6_lai_plot, tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+    ws6_lai_plot$x$layout$width <- NULL
+    ws6_lai_plot$y$layout$height <- NULL
+    ws6_lai_plot$width <- NULL
+    ws6_lai_plot$height <- NULL
+    ws6_lai_plot %>%
+      layout(autosize = TRUE, height = 600)
+  })
+
+  #ggplotly for ws1 that shows most plots increase in lai following the ice storm
+  output$ws1_lai_plot <- renderPlotly({
+    ws1_lai_plot <- ggplot(subset(lai_data[lai_data$WS == "1",]), aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
+      geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
+      geom_smooth(method = "lm", se = F, size = 0.5)+
+      facet_wrap(~PLOT)
+    
+    ws1_lai_plot <- ggplotly(ws1_lai_plot, tooltip = "text",
+                             width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+    ws1_lai_plot$x$layout$width <- NULL
+    ws1_lai_plot$y$layout$height <- NULL
+    ws1_lai_plot$width <- NULL
+    ws1_lai_plot$height <- NULL
+    ws1_lai_plot %>%
+      layout(autosize = TRUE, height = 600)
   })
   
 })

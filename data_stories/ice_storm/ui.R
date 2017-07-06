@@ -89,36 +89,12 @@ shinyUI(fluidPage(
                        fluidRow(
                          
                          sidebarLayout(
-                           ############## SIDE BAR ################ 
+                           ############## SIDE BAR 1 ################ 
                            #You can edit what the default selected options are. 
                            #You can also delete inputs if you are not allowing 
                            #the user to change that particular input. 
                            
                            sidebarPanel(
-                             
-                             #Solutes
-                             fluidRow(
-                               column(12, actionLink("select_all_ions", h4("Solutes"))),
-                               
-                               #Cations
-                               column(6,
-                                      actionLink("select_all_cations", h5("Cations")),
-                                      checkboxGroupInput("solutes_cations", label = "",
-                                                         choices = solutes_cations,
-                                                         selected = "Na")),
-                               
-                               #Anions
-                               
-                               column(6, actionLink("select_all_anions", h5("Anions")),
-                                      checkboxGroupInput("solutes_anions", label = "",
-                                                         choices = solutes_anions,
-                                                         selected = "SO4)"))),
-                             #Hydrogen  
-                             
-                             fluidRow(
-                               column(12, checkboxGroupInput("solutes_H", label = h4(""),
-                                                             choices = solutes_H,
-                                                             selected = ""))),
                              
                              ##Watersheds
                              fluidRow(
@@ -127,13 +103,6 @@ shinyUI(fluidPage(
                                                   choices = watersheds, multiple = TRUE,
                                                   selected = "6"))),
                              
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = "flow",
-                                                             inline = TRUE))),
-                             
                              ##Units  
                              fluidRow(
                                column(12, selectInput("units", label = h4("Units"),
@@ -141,12 +110,7 @@ shinyUI(fluidPage(
                                                       selected = "mg/L")),
                                column(12, checkboxInput("log", label = ("ln"),
                                                         value = FALSE))),
-                             ##Granularity
-                             fluidRow(
-                               column(12, selectInput("granularity", label = h4("Granularity"),
-                                                      choices = granularity,
-                                                      selected = "year"))),
-                             
+
                              ##Date Range
                              sliderInput("date_range", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
@@ -154,21 +118,22 @@ shinyUI(fluidPage(
                                          value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
                            
                            
-                           ############## END OF SIDEBAR #######
+                           ############## END OF SIDEBAR 1 #######
                            
-                           ############## GRAPH #################### 
+                           ############## GRAPH 1 #################### 
                            #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
-                                                                                   
-                                                                                   ### PLOT VIEW 1
-                                                                                   tabPanel("Plot1", plotlyOutput("plot1a")),
-                                                                                   
-                                                                                   ### PLOT VIEW 2
-                                                                                   tabPanel("Plot2",plotlyOutput("plot1b"))
-                           )), width = 8), 
+                           mainPanel(tags$div(class="container_graph", 
+                                              tabsetPanel(id = "plot_tab",
+                                                          
+                                                          ### PLOT VIEW 1
+                                                          tabPanel("Watershed 1", plotlyOutput("ws1_lai_plot", height = "auto")),
+                                                          
+                                                          ### PLOT VIEW 2
+                                                          tabPanel("Watershed 6", plotlyOutput("ws6_lai_plot", height = "auto"))
+                                              )), width = 8), 
                            position = "right"
                          )
-                         ############## END OF GRAPH ################ 
+                         ############## END OF GRAPH 1 ################ 
                        ),
                        
                        #---------END OF VISUALIZATION FOR QUESTION #1 ---------#
@@ -204,7 +169,7 @@ shinyUI(fluidPage(
                        
                        
                        
-                       ########################### QUESTION #1 ###################################
+                       ########################### QUESTION #2 ###################################
                        
                        fluidRow(
                          tags$div(class = "container_question", tags$h3("What happens if you need more time to finish this story..?
@@ -217,7 +182,7 @@ shinyUI(fluidPage(
                        fluidRow(
                          
                          sidebarLayout(
-                           ############## SIDE BAR ################ 
+                           ############## SIDE BAR 2 ################ 
                            #You can edit what the default selected options are. 
                            #You can also delete inputs if you are not allowing 
                            #the user to change that particular input. 
@@ -266,21 +231,21 @@ shinyUI(fluidPage(
                                          value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
                            
                            
-                           ############## END OF SIDEBAR #######
+                           ############## END OF SIDEBAR 2 #######
                            
-                           ############## GRAPH #################### 
+                           ############## GRAPH 2 #################### 
                            #Edit the name of the plot based on the name given in the server.R file 
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("Plot1", plotlyOutput("")),
+                                                                                   tabPanel("Plot1",plotlyOutput("")),
                                                                                    
                                                                                    ### PLOT VIEW 2
                                                                                    tabPanel("Plot2",plotlyOutput(""))
                            )), width = 8), 
                            position = "right"
                          )
-                         ############## END OF GRAPH ################ 
+                         ############## END OF GRAPH 2 ################ 
                        ),
                        
                        #---------END OF VISUALIZATION FOR QUESTION #1 ---------#
@@ -318,7 +283,7 @@ shinyUI(fluidPage(
                          ))
                        #--------- END OF TEXT QUESTION #1 ----------------------------#
                        
-                       ########################### END OF QUESTION #1 ###################################
+                       ########################### END OF QUESTION #2 ###################################
                        
                        
                          ) ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
