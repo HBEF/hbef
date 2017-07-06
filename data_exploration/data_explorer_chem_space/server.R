@@ -159,7 +159,8 @@ shinyServer(function(session, input, output) {
     data$sum_temporary_y = rowSums(data[,  solutes_to_add, with = FALSE], na.rm=TRUE)
     }
     
-    data <- accumulate_by(data, ~framey)
+    if(input$trace){data <- accumulate_by(data, ~framey)}
+    else{data}
   
   })
   
@@ -193,6 +194,7 @@ shinyServer(function(session, input, output) {
                      size = get(size()), color = water_year, frame = frame), stroke= 1, alpha = 0.8) +
       scale_shape_manual(values= source_shapes)+ 
       labs(y = "")
+    
     ggplotly(plot, tooltip = "text",
              width = 900) %>%
       config(displayModeBar = FALSE) %>%
@@ -200,7 +202,7 @@ shinyServer(function(session, input, output) {
       animation_opts(frame = 50, transition = 0, redraw = FALSE)
   }
   
-  
+  #framey
 
   
   #############################################################
