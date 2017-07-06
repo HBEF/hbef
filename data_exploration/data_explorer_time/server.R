@@ -154,6 +154,7 @@ shinyServer(function(session, input, output) {
   })
   
   reactive_data_PQ <- reactive({
+    data <- imported_data
     if(input$granularity == "year"){
       data <- data[!duplicated(data[,c("water_year","ws", "source")]),]
       data <- data[data$ws %in% input$watersheds,]
@@ -224,10 +225,10 @@ shinyServer(function(session, input, output) {
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
-    plot2 <- ggplot(data = reactive_data_PQ(), aes(x = get(x()), y = water_mm_pm)) + my_theme+
-      geom_bar(aes(alpha = ws, fill = source), stat = "identity")+
-      labs(x = "Water Year", y = "mm")+
-      facet_grid(source ~.)+
+    plot2 <- ggplot(data = reactive_data_PQ(), aes(x = get(x), y = get(y_PQ()))) + my_theme +
+      geom_bar(aes(alpha = ws, fill = source), stat = "identity") +
+      labs(x = "Water Year", y = "mm") +
+      facet_grid(~source)+
       xlim(min(input$date_range[1]), max(input$date_range[2]))+
       scale_fill_manual(values = source_color)+
       scale_alpha_discrete(range = c(0.9, 0.5))
