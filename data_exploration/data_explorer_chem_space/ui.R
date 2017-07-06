@@ -103,7 +103,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
                                         choices = water_sources,
-                                        selected = "precipitation",
+                                        selected = "discharge",
                                         inline = TRUE))),
         
         ##Units  
@@ -126,9 +126,19 @@ shinyUI(fluidPage(
                                  max = as.Date("2014-01-01"),
                                  value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))))), 
         
+        ##Leave trace
         fluidRow(
           column(12, checkboxInput("trace", label = ("Leave Trace"),
-                                   value = TRUE)))
+                                   value = TRUE))),
+        
+        ##Leave trace
+        fluidRow(
+          column(12, sliderInput("animation_speed", label = h4("Speed"),
+                                 min = 0.25,
+                                 max = 2, 
+                                 step = 0.25,
+                                 post = "x",
+                                 value = 1)))
         
         ), #Closes Sidebar
       
