@@ -32,6 +32,8 @@ solutes_H <- list("Hydrogen (H)" = "H",
 
 all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
 
+solutes_NO3 <- list("Nitrate (NO3)" = "NO3")
+                       
 watersheds <- list("Watershed 1" = "1",
                    "Watershed 2" = "2", 
                    "Watershed 3" = "3",
@@ -42,6 +44,9 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
+watersheds1 <- list("Watershed 1" = "1",
+                   "Watershed 6" = "6")
+
 water_sources <- list("Precipitation (P)" = "precip",
                       "Discharge (Q)" = "flow")
 
@@ -50,6 +55,8 @@ granularity <- list("Year" = "year",
                     "Week" = "week")
 
 units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
+
+units_lai <- list("meterSquaredPerMeterSquared")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
@@ -73,7 +80,7 @@ shinyUI(fluidPage(
               
               ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
               
-              tabPanel("Causes",
+              tabPanel("LAI",
                        
                        
                        
@@ -89,64 +96,28 @@ shinyUI(fluidPage(
                        fluidRow(
                          
                          sidebarLayout(
-                           ############## SIDE BAR ################ 
+                           ############## SIDE BAR 1 ################ 
                            #You can edit what the default selected options are. 
                            #You can also delete inputs if you are not allowing 
                            #the user to change that particular input. 
                            
                            sidebarPanel(
                              
-                             #Solutes
-                             fluidRow(
-                               column(12, actionLink("select_all_ions", h4("Solutes"))),
-                               
-                               #Cations
-                               column(6,
-                                      actionLink("select_all_cations", h5("Cations")),
-                                      checkboxGroupInput("solutes_cations", label = "",
-                                                         choices = solutes_cations,
-                                                         selected = "Na")),
-                               
-                               #Anions
-                               
-                               column(6, actionLink("select_all_anions", h5("Anions")),
-                                      checkboxGroupInput("solutes_anions", label = "",
-                                                         choices = solutes_anions,
-                                                         selected = "SO4)"))),
-                             #Hydrogen  
-                             
-                             fluidRow(
-                               column(12, checkboxGroupInput("solutes_H", label = h4(""),
-                                                             choices = solutes_H,
-                                                             selected = ""))),
-                             
                              ##Watersheds
                              fluidRow(
-                               column(12, actionLink("select_all_ws", h4("Watersheds")), 
-                                      selectInput("watersheds", label = "",
-                                                  choices = watersheds, multiple = TRUE,
-                                                  selected = "6"))),
-                             
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = "flow",
-                                                             inline = TRUE))),
+                               column(12, h4("Watersheds"), 
+                                      selectInput("watersheds1", label = "",
+                                                  choices = watersheds1,
+                                                  selected = "1"))),
                              
                              ##Units  
                              fluidRow(
-                               column(12, selectInput("units", label = h4("Units"),
-                                                      choices = units,
+                               column(12, selectInput("units_lai1", label = h4("Units"),
+                                                      choices = units_lai,
                                                       selected = "mg/L")),
                                column(12, checkboxInput("log", label = ("ln"),
                                                         value = FALSE))),
-                             ##Granularity
-                             fluidRow(
-                               column(12, selectInput("granularity", label = h4("Granularity"),
-                                                      choices = granularity,
-                                                      selected = "year"))),
-                             
+
                              ##Date Range
                              sliderInput("date_range", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
@@ -154,21 +125,19 @@ shinyUI(fluidPage(
                                          value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
                            
                            
-                           ############## END OF SIDEBAR #######
+                           ############## END OF SIDEBAR 1 #######
                            
-                           ############## GRAPH #################### 
+                           ############## GRAPH 1 #################### 
                            #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
-                                                                                   
-                                                                                   ### PLOT VIEW 1
-                                                                                   tabPanel("Plot1", plotlyOutput("plot1a")),
-                                                                                   
-                                                                                   ### PLOT VIEW 2
-                                                                                   tabPanel("Plot2",plotlyOutput("plot1b"))
-                           )), width = 8), 
+                           mainPanel(tags$div(class="container_graph", 
+                                              tabsetPanel(id = "plot_tab",
+                                                          
+                                                          ### PLOT VIEW 1
+                                                          tabPanel("LAI by plot", plotlyOutput("lai_plot", height = "auto"))
+                                              )), width = 8), 
                            position = "right"
                          )
-                         ############## END OF GRAPH ################ 
+                         ############## END OF GRAPH 1 ################ 
                        ),
                        
                        #---------END OF VISUALIZATION FOR QUESTION #1 ---------#
@@ -178,8 +147,8 @@ shinyUI(fluidPage(
                        
                        tags$div(class = "container_paragraph", fluidRow(
                          tags$p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
-                                that damaged the experimental watersheds.  Some effects of the 
-                                storm can be tracked by the NO3 streamflow data.")
+                                that damaged the experimental watersheds.  The leaf area index
+                                (LAI) is one way to track the regrowth of the canopy.")
                          ))
                        #--------- END OF TEXT QUESTION #1 ----------------------------#
                        
@@ -200,24 +169,23 @@ shinyUI(fluidPage(
               
               ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
               
-              tabPanel("Alternative Sidebar",
+              tabPanel("NO3",
                        
                        
                        
-                       ########################### QUESTION #1 ###################################
+                       ########################### QUESTION #2 ###################################
                        
                        fluidRow(
-                         tags$div(class = "container_question", tags$h3("What happens if you need more time to finish this story..?
-                                                                        (Obviously still in progress...)"))
+                         tags$div(class = "container_question", tags$h3("Post-ice storm NO3 behaviour"))
                        ),
                        
                        
-                       #---------VISUALIZATION FOR QUESTION #1 ---------#
+                       #---------VISUALIZATION FOR QUESTION #2 ---------#
                        
                        fluidRow(
                          
                          sidebarLayout(
-                           ############## SIDE BAR ################ 
+                           ############## SIDE BAR 2 ################ 
                            #You can edit what the default selected options are. 
                            #You can also delete inputs if you are not allowing 
                            #the user to change that particular input. 
@@ -226,11 +194,10 @@ shinyUI(fluidPage(
                              
                              #Solutes
                              fluidRow(
-                               column(12, actionLink("select_all_ions", h4("Solutes"))),
+                               column(12, h4("Solutes"))),
                                column(12,
-                                      selectInput("solutes", label = "",
-                                                  choices = all_solutes,
-                                                  selected = "Na"))),
+                                      selectInput("solutes_NO3", label = "",
+                                                  choices = solutes_NO3)),
                              
                              ##Watersheds
                              fluidRow(
@@ -243,7 +210,7 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
                                                              choices = water_sources,
-                                                             selected = "precip",
+                                                             selected = "flow",
                                                              inline = TRUE))),
                              
                              ##Units  
@@ -260,65 +227,42 @@ shinyUI(fluidPage(
                                                       selected = "year"))),
                              
                              ##Date Range
-                             sliderInput("date_range", label = h4("Date Range"),
+                             sliderInput("date_range2", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))), width = 4),
+                                         value = c(as.Date("1996-01-01"), as.Date("2001-01-01"))), width = 4),
                            
                            
-                           ############## END OF SIDEBAR #######
+                           ############## END OF SIDEBAR 2 #######
                            
-                           ############## GRAPH #################### 
+                           ############## GRAPH 2 #################### 
                            #Edit the name of the plot based on the name given in the server.R file 
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("Plot1", plotlyOutput("")),
+                                                                                   tabPanel("Plot1",plotlyOutput("NO3_plot")),
                                                                                    
                                                                                    ### PLOT VIEW 2
                                                                                    tabPanel("Plot2",plotlyOutput(""))
                            )), width = 8), 
                            position = "right"
                          )
-                         ############## END OF GRAPH ################ 
+                         ############## END OF GRAPH 2 ################ 
                        ),
                        
-                       #---------END OF VISUALIZATION FOR QUESTION #1 ---------#
+                       #---------END OF VISUALIZATION FOR QUESTION #2 ---------#
                        
                        
-                       #--------- TEXT QUESTION #1 ----------------------------#
+                       #--------- TEXT QUESTION #2 ----------------------------#
                        
                        tags$div(class = "container_paragraph", fluidRow(
-                         tags$p("Deforestation, the removal of forest trees,is harmful to the environment for a number of reasons, 
-                                some of which are less obvious than others.
-                                Deforestation results in habitat loss for woodland-
-                                dwelling species, causing die-offs and concurrent declines
-                                in biodiversity. Around eighty percent of land animals
-                                and plants on Earth reside in forests (National Geographic Society
-                                2017). It follows that the impact of widespread deforestation
-                                on wildlife is not insignificant. Deforestation also 
-                                accelerates climate change, as the loss of forests
-                                that absorb carbon dioxide tips the balance 
-                                so that more of this greenhouse gas enters 
-                                that atmosphere, causing global warming. On
-                                the smaller scale, deforestation can trigger
-                                regional climate change because the ground 
-                                cover from the trees is eliminated, allowing sun
-                                rays to penetrate where they were previously 
-                                blocked. This causes soils to dry out, which can
-                                transform once forested land into deserts. 
-                                Without canopy cover to block sunlight during
-                                the day and retain heat during the night, 
-                                temperature fluctuations become more severe
-                                and harmful to wildlife. Deforestation also
-                                leads to drier climates because less water 
-                                is transpired, or released into the air, by
-                                trees. This negatively impacts the water cycle
-                                (National Geographic Society 2017).")
+                         tags$p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+                                that damaged the experimental watersheds.  Some effects of the 
+                                storm can be tracked by the NO3 streamflow data.")
                          ))
-                       #--------- END OF TEXT QUESTION #1 ----------------------------#
+                       #--------- END OF TEXT QUESTION #2 ----------------------------#
                        
-                       ########################### END OF QUESTION #1 ###################################
+                       ########################### END OF QUESTION #2 ###################################
                        
                        
                          ) ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
