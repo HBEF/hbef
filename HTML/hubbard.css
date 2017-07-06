@@ -69,6 +69,8 @@ section{
     display: table; /* Make the container element behave like a table */
 	width: 100%;
 	min-height: 80vh;
+	margin:0;
+	padding:0;
 }
 
 .col_container_left {
@@ -353,12 +355,14 @@ nav{
 }
 
 .box_text {
-	margin: 10%;
-	min-height: 30vh;
+	padding:10%;
+	min-height: 60vh;
 }
 
+
+
 .stories_menu_link {
-	width: 25%;
+	width: 50%;
 	display: inline-block;
 	margin: 0%;}
 
@@ -371,21 +375,15 @@ nav{
 
 .stories_menu_image {
 	color: #fafafa;
-	min-height: 80vh;
+	min-height: 40vh;
 	text-align: center;
-	margin: 0%;
+	margin: 0;
 }
 
 .stories_menu_image h3{
-	line-height: 1em;
 	text-align: center;
-	position:relative;
-	top: 40vh;
-	left: -10px;
 	margin: 0;
-	-ms-transform: rotate(7deg); /* IE 9 */
-    -webkit-transform: rotate(-90deg); /* Chrome, Safari, Opera */
-    transform: rotate(-90deg);
+	line-height: 40vh;
 }
 .stories_menu_image p{
 	opacity: 0;
