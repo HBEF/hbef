@@ -200,9 +200,9 @@ renamecolf(precipitation_weekly, "site", "ws")
 precipitation_weekly$ws <- recodef(precipitation_weekly$ws, "S", 1)
 precipitation_weekly$ws <- recodef(precipitation_weekly$ws, "N", 7)
 
-
-streamflow_weekly %>% 
-  filter(ws =="1", datetime > as.Date("2012-06-13"))
+#eliminate duplicates
+streamflow_weekly <- streamflow_weekly[!duplicated(streamflow_weekly[,c("ws", "date")]),]
+precipitation_weekly <- precipitation_weekly[!duplicated(precipitation_weekly[,c("ws", "date")]),]
 
 ```
 
@@ -215,6 +215,9 @@ streamflow_weekly %>%
 
 get_water_date(streamflow_weekly, 152)
 get_water_date(precipitation_weekly, 152)
+
+create_water_year_date(streamflow_weekly, water_year_start = 06)
+create_water_year_date(precipitation_weekly, water_year_start = 06)
 
 ```
 
@@ -274,6 +277,8 @@ precip_streamflow_weekly_data_long %<>%
 
 ```
 
+
+
 #Enlongate df. 
 
 After creating the new variables that find yearly data from month data, we are going to elongate the df so that granularity is a column that specifies if value is for year or month. 
@@ -282,16 +287,14 @@ After creating the new variables that find yearly data from month data, we are g
 
 #Gather for it to be long and then extract the granularity (month or year) from the column value
 
-precip_streamflow_weekly_data_long[43353,]
-precip_streamflow_weekly_data_long[43354,]
-
 precip_streamflow_weekly_data_long <- precip_streamflow_weekly_data_long %>%
   gather(key, value, concentration_mg_week, water_mm_week, concentration_ueq_week,
-         concentration_umol_week, flux_week)
-
-%>%
+         concentration_umol_week, flux_week) %>%
   tidyr::extract(key, c('unit', 'granularity'), "(.*)_(.*)") %>% 
   spread(unit, value)
+
+precip_streamflow_weekly_data_long[c("ws", "date", "water_date", "water_year", "solute", "source", "MW", "z", "granularity", "concentration_mg", "concentration_ueq", "flux", "water_mm")]
+
 
 ```
 
