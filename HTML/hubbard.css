@@ -414,7 +414,7 @@ nav{
 #acidtitle {
 background: linear-gradient(
 		rgba(25, 25, 25, 0.45), 
-		rgba(25, 25, 25, 0.45)), url("images/acidrain_title.jpg");
+		rgba(25, 25, 25, 0.45)), url("images/acidrain.jpg");
 background-size: cover;
 color: #fafafa;
 }
@@ -456,7 +456,7 @@ color: #fafafa;
 	background: linear-gradient(
 		rgba(25, 25, 25, 0.15), 
 		rgba(25, 25, 25, 0.15)), 
-		url("images/acidrain.gif");
+		url("images/acidrain.jpg");
 	background-size: cover;
 }
 
@@ -464,7 +464,7 @@ color: #fafafa;
 	background: linear-gradient(
 		rgba(25, 25, 25, 0.15), 
 		rgba(25, 25, 25, 0.15)), 
-		url("images/deforestation.gif");
+		url("images/deforestation.jpg");
 	background-size: cover;	
 }
 
@@ -472,7 +472,7 @@ color: #fafafa;
 	background: linear-gradient(
 		rgba(25, 25, 25, 0.35), 
 		rgba(25, 25, 25, 0.35)), 
-		url("images/icestorm.gif");
+		url("images/icestorm.jpg");
 	background-size: cover;
 }
 
@@ -480,7 +480,7 @@ color: #fafafa;
 	background: linear-gradient(
 		rgba(25, 25, 25, 0.15), 
 		rgba(25, 25, 25, 0.15)), 
-		url("images/dilutification.gif");
+		url("images/dilutification.jpg");
 	background-size: cover;
 }
 
