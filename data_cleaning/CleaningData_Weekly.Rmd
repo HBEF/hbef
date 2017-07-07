@@ -137,13 +137,21 @@ gather_source <- function(df){
 
 #Function that filters by watershed and then finds the difference in each variable between Q and P (P-Q). 
 
-get_differencef<- function(df, wsfilter){
+get_differencef<- function(df, wsfilter, granularityfilter){
 df %>% 
   filter(ws == wsfilter)%>% 
-  group_by(ws, water_year, water_date, solute) %>%
-  arrange(source) %>%
-  summarise_each(funs(diff), concentration_mg_month, concentration_ueq_month,concentration_umol_month,flux_month,
-                  concentration_mg_year, concentration_ueq_year,concentration_umol_year,flux_year)}
+  filter(granularity == granularityfilter)%>% 
+  group_by(ws, water_year, water_date, granularity, solute) %>%
+  arrange(desc(source)) %>%
+  summarise_each(funs(diff), concentration_mg, concentration_ueq,concentration_umol,flux)}
+
+
+precip_streamflow_weekly_data_long %>%
+  filter(ws == "1")%>%
+  filter(granularity == "week")%>%
+  group_by(ws, water_year, water_date, granularity, solute) %>%
+  arrange(desc(source)) %>%
+  summarise(n=n())
 
 
 ```
@@ -157,6 +165,7 @@ df %>%
 
 streamflow_weekly <- read_csv("data_original/HBEF_stream_chemistry_1963-2013.csv")
 precipitation_weekly <- read_csv("data_original/HBEF_precipitation_chemistry_1963-2013.csv")
+
 
 load("public_data.Rdata", envir = parent.frame(), verbose = FALSE)
 
@@ -182,19 +191,22 @@ MW.data <- rbind(MW.data, newrow)
 ```{r}
 
 
-#Change colnames to streamflow and precipitation --> this is important because we are trying to unify names. 
 
+#remove columns that will not be used yet. 
 precipitation_weekly %<>% 
-  select(-X1)
+  select(-X1, -sp.cond, -note)
+
 
 streamflow_weekly %<>% 
-  select(-X1)
+  select(-X1, -sp.cond, -temp, -hydro.limb, -note, -ANC, -DIC)
 
 
+#Change colnames to streamflow and precipitation --> this is important because we are trying to unify names. 
+#rename columns
 renamecolf(streamflow_weekly, "Q", "streamflow")
 renamecolf(precipitation_weekly, "precip", "precipitation")
 
-renamecolf(streamflow_weekly, "ANC", "anc")
+#renamecolf(streamflow_weekly, "ANC", "anc")
 renamecolf(precipitation_weekly, "site", "ws")
 
 precipitation_weekly$ws <- recodef(precipitation_weekly$ws, "S", 1)
@@ -293,13 +305,33 @@ precip_streamflow_weekly_data_long <- precip_streamflow_weekly_data_long %>%
   tidyr::extract(key, c('unit', 'granularity'), "(.*)_(.*)") %>% 
   spread(unit, value)
 
-precip_streamflow_weekly_data_long[c("ws", "date", "water_date", "water_year", "solute", "source", "MW", "z", "granularity", "concentration_mg", "concentration_ueq", "flux", "water_mm")]
-
-
 ```
 
 
+#Duplicate so each ws has a row
 
+```{r}
+
+for(x in seq(2,6)){
+  nam <- paste("precip_ws_",x, sep = "")
+  df <- precip_streamflow_weekly_data_long %>%
+  filter(source == "precipitation") %>% 
+  filter(ws =="1")
+  df[,"ws"] <- x 
+  assign(nam, df)}
+
+
+for(x in seq(8,9)){
+  nam <- paste("precip_ws_",x, sep = "")
+  df <- precip_streamflow_weekly_data_long %>%
+  filter(source == "precipitation") %>% 
+  filter(ws =="7")
+  df[,"ws"] <- x 
+  assign(nam, df)}
+
+precip_streamflow_weekly_data_long <- do.call("rbind", list(precip_ws_2, precip_ws_3, precip_ws_4, precip_ws_5, precip_ws_6,precip_ws_8, precip_ws_9,precip_streamflow_weekly_data_long))
+
+```
 
 
 
@@ -309,10 +341,10 @@ precip_streamflow_weekly_data_long[c("ws", "date", "water_date", "water_year", "
 
 #Export File
 
-precip_streamflow_data_long %>% 
-  saveRDS(file = "precip_streamflow_data_long.rds")
+precip_streamflow_weekly_data_long %>% 
+  saveRDS(file = "precip_streamflow_weekly_data_long.rds")
 
-save(precip_streamflow_data_long, file = "precip_streamflow_data_long.Rdata")
+save(precip_streamflow_weekly_data_long, file = "precip_streamflow_weekly_data_long.Rdata")
 
 
 ```
@@ -322,26 +354,29 @@ save(precip_streamflow_data_long, file = "precip_streamflow_data_long.Rdata")
 
 ```{r}
 
-long <- precip_streamflow_data_long
+long <- precip_streamflow_weekly_data_long
 drop <- c("z", "MW")
 df <- long[, !(names(long) %in% drop)]
-fixed <- c("ws","date","water_date","water_year", "source", "water_mm_month", "water_mm_year", "solute")
+fixed <- c("ws","date","water_date","water_year", "source", "water_mm", "granularity", "solute", "datetime", "canonical")
 values <- colnames(df[, !(names(df) %in% fixed)])
 
-precip_streamflow_data_wide <- data.table::dcast(data.table::setDT(df), ws + date + water_date + water_year + source + water_mm_month + water_mm_year ~ solute, value.var = values)
+precip_streamflow_weekly_data_wide <- data.table::dcast(data.table::setDT(df), ws + date + water_date + water_year + source + water_mm + granularity ~ solute, value.var = values)
 
-precip_streamflow_data_wide$ws <- as.factor(precip_streamflow_data_wide$ws)
-precip_streamflow_data_wide$source <- as.factor(precip_streamflow_data_wide$source)
+precip_streamflow_weekly_data_wide$ws <- as.factor(precip_streamflow_weekly_data_wide$ws)
+precip_streamflow_weekly_data_wide$source <- as.factor(precip_streamflow_weekly_data_wide$source)
 
-precip_streamflow_data_wide$frame <- precip_streamflow_data_wide$water_date
-precip_streamflow_data_wide %<>% 
+
+#add column with just year to be able to animate by frames
+
+precip_streamflow_weekly_data_wide$frame <- precip_streamflow_weekly_data_wide$water_date
+precip_streamflow_weekly_data_wide %<>% 
   separate("frame", c("framey") )
 
 
-precip_streamflow_data_wide %>% 
-  saveRDS(file = "precip_streamflow_data_wide.rds")
+precip_streamflow_weekly_data_wide %>% 
+  saveRDS(file = "precip_streamflow_weekly_data_wide.rds")
 
-save(precip_streamflow_data_wide, file = "precip_streamflow_data_wide.Rdata")
+save(precip_streamflow_weekly_data_wide, file = "precip_streamflow_weekly_data_wide.Rdata")
 
 ```
 
@@ -350,22 +385,24 @@ save(precip_streamflow_data_wide, file = "precip_streamflow_data_wide.Rdata")
 
 ```{r}
 
-diff_ws1 <- get_differencef(precip_streamflow_data_long, "1")
-diff_ws2 <- get_differencef(precip_streamflow_data_long, "2")
-diff_ws3 <- get_differencef(precip_streamflow_data_long, "3")
-diff_ws4 <- get_differencef(precip_streamflow_data_long, "4")
-diff_ws5 <- get_differencef(precip_streamflow_data_long, "5")
-diff_ws6 <- get_differencef(precip_streamflow_data_long, "6")
-diff_ws7 <- get_differencef(precip_streamflow_data_long, "7")
-diff_ws8 <- get_differencef(precip_streamflow_data_long, "8")
-diff_ws9 <- get_differencef(precip_streamflow_data_long, "9")
 
-precip_streamflow_diff_data_long <- do.call("rbind", list(diff_ws1, diff_ws2, diff_ws3, diff_ws4, diff_ws5, diff_ws6, diff_ws7, diff_ws8, diff_ws9))
+diff_ws1_w <- get_differencef(precip_streamflow_weekly_data_long, "1", "week")
+diff_ws2_w <- get_differencef(precip_streamflow_weekly_data_long, "2", "week")
+diff_ws3_w <- get_differencef(precip_streamflow_weekly_data_long, "3", "week")
+diff_ws4_w <- get_differencef(precip_streamflow_weekly_data_long, "4", "week")
+diff_ws5_w <- get_differencef(precip_streamflow_weekly_data_long, "5", "week")
+diff_ws6_w <- get_differencef(precip_streamflow_weekly_data_long, "6", "week")
+diff_ws7_w <- get_differencef(precip_streamflow_weekly_data_long, "7", "week")
+diff_ws8_w <- get_differencef(precip_streamflow_weekly_data_long, "8", "week")
+diff_ws9_w <- get_differencef(precip_streamflow_weekly_data_long, "9", "week")
 
-precip_streamflow_diff_data_long %>% 
-  saveRDS(file = "precip_streamflow_diff_data_long.rds")
 
-save(precip_streamflow_diff_data_long, file = "precip_streamflow_diff_data_long.Rdata")
+precip_streamflow_weekly_diff_data_long <- do.call("rbind", list(diff_ws1_w, diff_ws2_w, diff_ws3_w, diff_ws4_w, diff_ws5_w, diff_ws6_w, diff_ws7_w, diff_ws8_w, diff_ws9_w))
+
+precip_streamflow_weekly_diff_data_long %>% 
+  saveRDS(file = "precip_streamflow_weekly_diff_data_long.rds")
+
+save(precip_streamflow_weekly_diff_data_long, file = "precip_streamflow_weekly_diff_data_long.Rdata")
 
 ```
 
@@ -375,11 +412,11 @@ save(precip_streamflow_diff_data_long, file = "precip_streamflow_diff_data_long.
 
 rm(list=ls())
 
-load("precip_streamflow_diff_data_long.RData")
-load("precip_streamflow_data_long.RData")
-load("precip_streamflow_data_wide.RData")
+load("precip_streamflow_weekly_diff_data_long.RData")
+load("precip_streamflow_weekly_data_long.RData")
+load("precip_streamflow_weekly_data_wide.RData")
 
-save(list = ls(all.names = TRUE), file = "precip_streamflow_dfs.RData", envir = .GlobalEnv)
+save(list = ls(all.names = TRUE), file = "precip_streamflow_weekly_dfs.RData", envir = .GlobalEnv)
 
 ```
 
