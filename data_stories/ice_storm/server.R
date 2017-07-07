@@ -35,8 +35,8 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("flow" = 16, "precip"= 21)
-  watershed_shapes <- c("1"= 0, "2"= 2, "3"= 16, "4"= 1, "5"= 5, "6"= 17)
+  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
+  watershed_shapes <- c("1"= 5, "2"= 2, "3"= 16, "4"= 1, "5"= 0, "6"= 17)
   
   ### End of Theme ################
   
@@ -123,14 +123,25 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  imported_data <- readRDS("precip_stream_data_long.rds")
+#  imported_data <- readRDS("precip_stream_data_long.rds")
   lai_data <- read_csv("lai.txt")
 #  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
-  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
-
-  # lai_data[lai_data=="6"]<-"six"
-  # lai_data[lai_data=="1"]<-"one"
-
+#  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
+  load("precip_streamflow_dfs.RData")
+  imported_data <- precip_streamflow_data_long
+  
+  #Filter data for NO3 discharge plots
+  imported_data_streamflow <- filter(imported_data, source == "streamflow")
+  
+  #Normalize (divide by ws6 flux) watersheds 2,4,5 for NO3 comparisons
+  normalized_flux_ws2 <- imported_data_streamflow[imported_data_streamflow$ws==2, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  normalized_flux_ws4 <- imported_data_streamflow[imported_data_streamflow$ws==4, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  normalized_flux_ws5 <- imported_data_streamflow[imported_data_streamflow$ws==5, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  
+  #Add a new row in imported_data_streamflow called normalized_flux and fill all with NA for now
+  
+  #input normalized_flux_ws2 (and 4,5) into imported_data_streamflow to use in NO3 diffrence graph
+  
   ########### END OF DATA IMPORT #############################################
   
   
@@ -238,11 +249,11 @@ shinyServer(function(session, input, output) {
   ggplot_function3.1 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
     
     if(log) {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = ws, alpha = ws))+
         labs(x = "Water Year", y = paste("log", "(",input$units3, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = ws, alpha = ws))+
         labs(x = "Water Year", y = input$units3)}
     
     final <- plot+ my_theme + geom_line(size = 1) + 
@@ -347,14 +358,13 @@ shinyServer(function(session, input, output) {
   #simple versions of NO3 output to help see what should be interactive
   output$static_NO3_output <- renderPlotly({
     
-    imported_data_flow <- filter(imported_data, source == "flow")
-    
-    static_NO3_output <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616"))+
-      geom_line(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "1"))+
-      geom_point(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "1"))+
-      geom_line(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "6"))+
-      geom_point(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "6"))+my_theme
-    
+    static_NO3_output <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616", shape = ws))+ my_theme+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "6"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "6"))+
+      scale_shape_manual(values = watershed_shapes)
+      
     static_NO3_output <- ggplotly(  
       static_NO3_output, #tooltip = "text",
       width = 900) %>%
@@ -372,15 +382,14 @@ shinyServer(function(session, input, output) {
   #find ways to normalize
   output$static_NO3_difference <- renderPlotly({
     
-    imported_data_flow <- filter(imported_data, source == "flow")
-    
-    static_NO3_difference <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616"))+ my_theme+
-      geom_line(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "2"))+
-      geom_point(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "2"))+
-      geom_line(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "4"))+
-      geom_point(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "4"))+
-      geom_line(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "5"))+
-      geom_point(data = subset(imported_data_flow[imported_data_flow$solute == "NO3",], ws %in% "5"))
+    static_NO3_difference <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616", shape = ws))+ my_theme+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "2"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "2"))+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "4"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "4"))+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "5"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "5"))+
+      scale_shape_manual(values = watershed_shapes)
     
     static_NO3_difference <- ggplotly(  
       static_NO3_difference, #tooltip = "text",

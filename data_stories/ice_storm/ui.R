@@ -47,8 +47,8 @@ watersheds <- list("Watershed 1" = "1",
 watersheds1 <- list("Watershed 1" = "1",
                    "Watershed 6" = "6")
 
-water_sources <- list("Precipitation (P)" = "precip",
-                      "Discharge (Q)" = "flow")
+water_sources <- list("Precipitation (P)" = "precipitation",
+                      "Discharge (Q)" = "streamflow")
 
 granularity <- list("Year" = "year",
                     "Month" = "month",
@@ -205,7 +205,7 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
                                                              choices = water_sources,
-                                                             selected = "flow",
+                                                             selected = "streamflow",
                                                              inline = TRUE))),
                              
                              ##Units  
@@ -307,7 +307,7 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
                                                              choices = water_sources,
-                                                             selected = "flow",
+                                                             selected = "streamflow",
                                                              inline = TRUE))),
                              
                              ##Units  
