@@ -113,6 +113,7 @@ shinyServer(function(session, input, output) {
   })
   
   solutes_NO3 <- reactive({c(input$solutes_NO3)})
+  solutes_NO33 <- reactive({c(input$solutes_NO33)})
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
   
@@ -131,7 +132,7 @@ shinyServer(function(session, input, output) {
   ########### END OF DATA IMPORT #############################################
   
   
-  ########### REACTIVE DATA AND X Y  #########################################
+  ########### REACTIVE DATA AND X Y 2 #########################################
   #Reactive Data Normal
   
   reactive_data2 <- reactive({
@@ -163,8 +164,41 @@ shinyServer(function(session, input, output) {
     if(input$log == "ln"){"transform"}
     else{"no_transform"}
   })
+
+  ########### REACTIVE DATA AND X Y 3 #########################################
+  #Reactive Data Normal
   
-  ########### PLOT FUNCTIONS #########################################
+  reactive_data3 <- reactive({
+    data <- imported_data
+    data <- data[data$source %in% input$water_sources3,]
+    data <- data[data$solute %in% solutes_NO33(),] 
+    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
+    data <- data[data$ws %in% input$watersheds3,]
+  })
+  
+  
+  x3 <- reactive({
+    if(input$granularity3 == "month"){"water_date"}
+    else if(input$granularity3 == "year"){"water_year"}
+  })
+  
+  y3 <- reactive({
+    if(input$granularity3 == "month" & input$units3 =="uMg/L"){"concentration_mg"}
+    else if(input$granularity3 == "year" & input$units3 =="uMg/L"){"mg_weighted_average"}
+    else if(input$granularity3 == "month" & input$units3 =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$granularity3 == "year" & input$units3 =="uEquivalent/L"){"ueq_weighted_average"}
+    else if(input$granularity3 == "month"& input$units3 =="uMole/L"){"concentration_umol"}
+    else if(input$granularity3 == "year"& input$units3 =="uMole/L"){"umol_weighted_average"}
+    else if(input$granularity3 == "month"& input$units3 =="flux"){"flux"}
+    else if(input$granularity3 == "year"& input$units3 =="flux"){"flux_sum"}
+  })
+  
+  log_transform <- reactive({
+    if(input$log3 == "ln"){"transform"}
+    else{"no_transform"}
+  })
+  
+  ########### PLOT FUNCTIONS 2 #########################################
   
   ## GGPLOT TIME FUNCTION
   ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
@@ -182,6 +216,8 @@ shinyServer(function(session, input, output) {
                  aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range2[1]), max(input$date_range2[2]))+ 
+      geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
+      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 22, color = "black")+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -193,7 +229,39 @@ shinyServer(function(session, input, output) {
       config(showLink = FALSE)
     
   }
+
+  ########### PLOT FUNCTIONS 3 #########################################
   
+  ## GGPLOT TIME FUNCTION
+  ggplot_function3 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+    
+    if(log) {
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+        labs(x = "Water Year", y = paste("log", "(",input$units3, ")"))}
+    
+    else{
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+        labs(x = "Water Year", y = input$units3)}
+    
+    final <- plot+ my_theme + geom_line(size = 1) + 
+      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+      xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
+      geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
+      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = -8, color = "black")+
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))
+    
+    ggplotly(  
+      final, tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+  }
+
   
   
   #############################################################
@@ -222,9 +290,16 @@ shinyServer(function(session, input, output) {
   })
   
   #make a plot of nitrates like in the 2003 paper
-  #(moles/ha-yr vs water year, faceted into output (excess) for ws1,6 and diff for ws2,4,5)
+  #(moles/ha-yr (flux) vs water year, faceted into output (excess) for ws1,6 and diff for ws2,4,5)
+  #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
   output$NO3_output <- renderPlotly({
-    
+    NO3_output <- ggplot_function3(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
+    NO3_output$x$layout$width <- NULL
+    NO3_output$y$layout$height <- NULL
+    NO3_output$width <- NULL
+    NO3_output$height <- NULL
+    NO3_output %>%
+      layout(autosize = TRUE, height = 600)
   })
   output$NO3_difference <- renderPlotly({
     
