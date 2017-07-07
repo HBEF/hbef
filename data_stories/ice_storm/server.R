@@ -124,8 +124,9 @@ shinyServer(function(session, input, output) {
   ########### DATA IMPORT ####################################################
   
   imported_data <- readRDS("precip_stream_data_long.rds")
-#  lai_data <- read.csv("lai.txt")
-  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
+  lai_data <- read_csv("lai.txt")
+#  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
+  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
 
   # lai_data[lai_data=="6"]<-"six"
   # lai_data[lai_data=="1"]<-"one"
