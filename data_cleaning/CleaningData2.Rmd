@@ -134,14 +134,15 @@ gather_source <- function(df){
 
 
 #Function that filters by watershed and then finds the difference in each variable between Q and P (P-Q). 
+#We use desc in the function because we Precipitation - Streamflow so we need streamflow to be before precip in the rows. 
 
-get_differencef<- function(df, wsfilter){
+get_differencef<- function(df, wsfilter, granularityfilter){
 df %>% 
   filter(ws == wsfilter)%>% 
-  group_by(ws, water_year, water_date, solute) %>%
-  arrange(source) %>%
-  summarise_each(funs(diff), concentration_mg_month, concentration_ueq_month,concentration_umol_month,flux_month,
-                  concentration_mg_year, concentration_ueq_year,concentration_umol_year,flux_year)}
+  filter(granularity == granularityfilter)%>% 
+  group_by(ws, water_year, water_date, granularity, solute) %>%
+  arrange(desc(source)) %>%
+  summarise_each(funs(diff), concentration_mg, concentration_ueq,concentration_umol,flux)}
 
 
 ```
@@ -349,7 +350,7 @@ year <- data %>%
   filter(granularity =="year")
 
 #delete duplicates for year rows (every year has 12 rows at this point)
-year <- year[!duplicated(year[,c("ws","solute", "unit", "granularity")]),] 
+year <- year[!duplicated(year[,c("ws","solute","source", "unit", "granularity")]),] 
   
 #bind them so month and year are on the same df. 
 precip_streamflow_data_long <- rbind(month,year)%>% 
@@ -384,13 +385,16 @@ save(precip_streamflow_data_long, file = "precip_streamflow_data_long.Rdata")
 long <- precip_streamflow_data_long
 drop <- c("z", "MW")
 df <- long[, !(names(long) %in% drop)]
-fixed <- c("ws","date","water_date","water_year", "source", "water_mm_month", "water_mm_year", "solute")
+fixed <- c("ws","date","water_date","water_year", "source", "water_mm", "granularity", "solute")
 values <- colnames(df[, !(names(df) %in% fixed)])
 
-precip_streamflow_data_wide <- data.table::dcast(data.table::setDT(df), ws + date + water_date + water_year + source + water_mm_month + water_mm_year ~ solute, value.var = values)
+precip_streamflow_data_wide <- data.table::dcast(data.table::setDT(df), ws + date + water_date + water_year + source + water_mm + granularity ~ solute, value.var = values)
 
 precip_streamflow_data_wide$ws <- as.factor(precip_streamflow_data_wide$ws)
 precip_streamflow_data_wide$source <- as.factor(precip_streamflow_data_wide$source)
+
+
+#add column with just year to be able to animate by frames
 
 precip_streamflow_data_wide$frame <- precip_streamflow_data_wide$water_date
 precip_streamflow_data_wide %<>% 
@@ -409,22 +413,34 @@ save(precip_streamflow_data_wide, file = "precip_streamflow_data_wide.Rdata")
 
 ```{r}
 
-diff_ws1 <- get_differencef(precip_streamflow_data_long, "1")
-diff_ws2 <- get_differencef(precip_streamflow_data_long, "2")
-diff_ws3 <- get_differencef(precip_streamflow_data_long, "3")
-diff_ws4 <- get_differencef(precip_streamflow_data_long, "4")
-diff_ws5 <- get_differencef(precip_streamflow_data_long, "5")
-diff_ws6 <- get_differencef(precip_streamflow_data_long, "6")
-diff_ws7 <- get_differencef(precip_streamflow_data_long, "7")
-diff_ws8 <- get_differencef(precip_streamflow_data_long, "8")
-diff_ws9 <- get_differencef(precip_streamflow_data_long, "9")
+diff_ws1_m <- get_differencef(precip_streamflow_data_long, "1", "month")
+diff_ws1_y <- get_differencef(precip_streamflow_data_long, "1", "year")
+diff_ws2_m <- get_differencef(precip_streamflow_data_long, "2", "month")
+diff_ws2_y <- get_differencef(precip_streamflow_data_long, "2", "year")
+diff_ws3_m <- get_differencef(precip_streamflow_data_long, "3", "month")
+diff_ws3_y <- get_differencef(precip_streamflow_data_long, "3", "year")
+diff_ws4_m <- get_differencef(precip_streamflow_data_long, "4", "month")
+diff_ws4_y <- get_differencef(precip_streamflow_data_long, "4", "year")
+diff_ws5_m <- get_differencef(precip_streamflow_data_long, "5", "month")
+diff_ws5_y <- get_differencef(precip_streamflow_data_long, "5", "year")
+diff_ws6_m <- get_differencef(precip_streamflow_data_long, "6", "month")
+diff_ws6_y <- get_differencef(precip_streamflow_data_long, "6", "year")
+diff_ws7_m <- get_differencef(precip_streamflow_data_long, "7", "month")
+diff_ws7_y <- get_differencef(precip_streamflow_data_long, "7", "year")
+diff_ws8_m <- get_differencef(precip_streamflow_data_long, "8", "month")
+diff_ws8_y <- get_differencef(precip_streamflow_data_long, "8", "year")
+diff_ws9_m <- get_differencef(precip_streamflow_data_long, "9", "month")
+diff_ws9_y <- get_differencef(precip_streamflow_data_long, "9", "year")
 
-precip_streamflow_diff_data_long <- do.call("rbind", list(diff_ws1, diff_ws2, diff_ws3, diff_ws4, diff_ws5, diff_ws6, diff_ws7, diff_ws8, diff_ws9))
+precip_streamflow_diff_data_long <- do.call("rbind", list(diff_ws1_m,diff_ws1_y, diff_ws2_m,diff_ws2_y,diff_ws3_m,diff_ws3_y,diff_ws4_m,diff_ws4_y,diff_ws5_m,diff_ws5_y,diff_ws6_m,diff_ws6_y,diff_ws7_m,diff_ws7_y,diff_ws8_m,diff_ws8_y,diff_ws9_m,diff_ws9_y))
 
 precip_streamflow_diff_data_long %>% 
   saveRDS(file = "precip_streamflow_diff_data_long.rds")
 
 save(precip_streamflow_diff_data_long, file = "precip_streamflow_diff_data_long.Rdata")
+
+precip_streamflow_diff_data_long %>% 
+  filter(granularity == "year")
 
 ```
 
