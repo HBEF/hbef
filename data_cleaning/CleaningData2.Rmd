@@ -350,7 +350,7 @@ year <- data %>%
   filter(granularity =="year")
 
 #delete duplicates for year rows (every year has 12 rows at this point)
-year <- year[!duplicated(year[,c("ws","solute","source", "unit", "granularity")]),] 
+year <- year[!duplicated(year[,c("ws", "water_year", "solute","source", "unit", "granularity")]),] 
   
 #bind them so month and year are on the same df. 
 precip_streamflow_data_long <- rbind(month,year)%>% 
