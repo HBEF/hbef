@@ -9,7 +9,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-load("precip_streamflow_dfs.RData")
+rm(list=ls())
+load("precip_streamflow_monthly_dfs.RData")
 load("precip_streamflow_weekly_dfs.RData")
 ```
 
@@ -18,15 +19,17 @@ precip_streamflow_long <- plyr::rbind.fill(precip_streamflow_data_long, precip_s
 
 save(precip_streamflow_long, file = "precip_streamflow_long.RData")
 
-
-a <- colnames(precip_streamflow_data_wide)
-b<- colnames(precip_streamflow_weekly_data_wide)
-m <- union(a, b)
-n <- intersect(a, b)
-setdiff(m, n)
-
-
 precip_streamflow_wide <- plyr::rbind.fill(precip_streamflow_data_wide, precip_streamflow_weekly_data_wide)
 
+save(precip_streamflow_wide, file = "precip_streamflow_wide.RData")
+```
+
+```{r}
+rm(list=ls())
+
+load("precip_streamflow_wide.RData")
+load("precip_streamflow_long.RData")
+
+save(list = ls(all.names = TRUE), file = "precip_streamflow_dfs.RData", envir = .GlobalEnv)
 ```
 
