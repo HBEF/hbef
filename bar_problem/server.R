@@ -12,7 +12,7 @@ shinyServer(function(session, input, output) {
   output$plot1 <- renderPlot(ggplot(data = data, aes(x = x, y = y)) +
   geom_bar(stat = "identity"))
 
-  output$plot2 <- renderPlotly(ggplotly(ggplot(data = data, aes(x = as.numeric(x), y = y)) +
+  output$plot2 <- renderPlotly(ggplotly(ggplot(data = data, aes(x = as.date(x, origin='1970-01-01'), y = y)) +
            geom_bar(stat = "identity")))
            
            })
