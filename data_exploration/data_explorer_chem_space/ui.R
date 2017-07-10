@@ -42,16 +42,16 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 9" = "9")
 
 water_sources <- list("Precipitation (P)" = "precipitation",
-                     "Discharge (Q)" = "discharge")
+                     "Streamflow (Q)" = "streamflow")
 
 granularity <- list("Year" = "year",
                     "Month" = "month",
                     "Week" = "week")
 
-units <- list("uEquivalent/L" = "^concentration_ueq_",
-              "uMole/L" = "^concentration_umol_", 
-              "uMg/L" = "^concentration_mg_", 
-              "flux" = "^flux_")
+units <- list("uEquivalent/L" = "^concentration_ueq",
+              "uMole/L" = "^concentration_umol", 
+              "uMg/L" = "^concentration_mg", 
+              "flux" = "^flux")
 
 
 #######################################################################################
@@ -103,7 +103,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
                                         choices = water_sources,
-                                        selected = "discharge",
+                                        selected = "streamflow",
                                         inline = TRUE))),
         
         ##Units  
