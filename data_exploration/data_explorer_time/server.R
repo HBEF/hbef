@@ -126,7 +126,7 @@ shinyServer(function(session, input, output) {
   
   load("precip_streamflow_dfs.RData")
   
-  imported_data <- precip_streamflow_data_long
+  imported_data <- precip_streamflow_long
   imported_data2 <- precip_streamflow_diff_data_long
   
   ########### END OF DATA IMPORT #############################################
@@ -169,7 +169,8 @@ shinyServer(function(session, input, output) {
   
   
   x <- reactive({
-    if(input$granularity == "month"){"water_date"}
+    if(input$granularity == "week"){"water_date"}
+    else if(input$granularity == "month"){"water_date"}
     else if(input$granularity == "year"){"water_year"}
   })
   
