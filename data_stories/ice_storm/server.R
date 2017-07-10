@@ -134,7 +134,7 @@ shinyServer(function(session, input, output) {
   names(imported_data)
   library(reshape2)
   
-  ws.cast <- imported_data %>%
+  ws_cast_year <- imported_data %>%
     filter(granularity=='year') %>% 
     filter(source=='streamflow') %>%
     filter(solute=='NO3') %>%
@@ -142,9 +142,11 @@ shinyServer(function(session, input, output) {
   
   #melt function to get them all back together (new tidyr version is spread)
 
-  ws.cast$norm2 <- ws.cast$"2"-ws.cast$"6"
-  ws.cast$norm4 <- ws.cast$"4"-ws.cast$"6"
-  ws.cast$norm5 <- ws.cast$"5"-ws.cast$"6"
+  ws_cast_year$norm2 <- ws_cast_year$"2"-ws_cast_year$"6"
+  ws_cast_year$norm4 <- ws_cast_year$"4"-ws_cast_year$"6"
+  ws_cast_year$norm5 <- ws_cast_year$"5"-ws_cast_year$"6"
+  
+  melt(ws_cast_year, id.vars = c(water_year,solute), )
   #Normalizing Efforts########################
   # 
   #   #Filter data for NO3 discharge pots
@@ -433,7 +435,7 @@ shinyServer(function(session, input, output) {
     })
   #yet another plot trying to do that same NO3 difference
   output$another_NO3_difference <- renderPlotly({
-    another_NO3_difference <- ggplot(ws.cast, aes(color = "#BF1616"))+ my_theme+
+    another_NO3_difference <- ggplot(ws_cast_year, aes(color = "#BF1616"))+ my_theme+
       geom_line(aes(x= water_year, y= norm2))+
       geom_point(aes(x= water_year, y= norm2))+
       geom_line(aes(x= water_year, y= norm4))+
