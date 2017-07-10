@@ -127,18 +127,36 @@ shinyServer(function(session, input, output) {
   lai_data <- read_csv("lai.txt")
 #  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
   load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
-  load("precip_streamflow_dfs.RData")
+  #load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_data_long
   
-  #Filter data for NO3 discharge plots
-  imported_data_streamflow <- filter(imported_data, source == "streamflow")
-  imported_data_streamflow_ws2 <- filter(imported_data_streamflow, ws == "2")
+  #Matt####################
+  names(imported_data)
+  library(reshape2)
   
-  #Normalize (divide by ws6 flux) watersheds 2,4,5 for NO3 comparisons
-  imported_data_streamflow_ws2$normalized_flux <- imported_data_streamflow[imported_data_streamflow$ws==2, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  normalized_flux_ws4 <- imported_data_streamflow[imported_data_streamflow$ws==4, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  normalized_flux_ws5 <- imported_data_streamflow[imported_data_streamflow$ws==5, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  ws.cast <- imported_data %>%
+    filter(granularity=='year') %>% 
+    filter(source=='streamflow') %>%
+    filter(solute=='NO3') %>%
+    dcast(.,water_year+solute~ws,value.var='flux')
   
+  #melt function to get them all back together (new tidyr version is spread)
+
+  ws.cast$norm2 <- ws.cast$"2"-ws.cast$"6"
+  ws.cast$norm4 <- ws.cast$"4"-ws.cast$"6"
+  ws.cast$norm5 <- ws.cast$"5"-ws.cast$"6"
+  #Normalizing Efforts########################
+  # 
+  #   #Filter data for NO3 discharge pots
+  # imported_data_streamflow <- filter(imported_data, source == "streamflow")
+  # imported_data_streamflow_ws2 <- filter(imported_data_streamflow, ws == "2")
+  # 
+  # #Normalize (divide by ws6 flux) watersheds 2,4,5 for NO3 comparisons
+  # #imported_data_streamflow_ws2$normalized_flux <- 
+  # normalized_flux_ws2 <- imported_data_streamflow[imported_data_streamflow$ws==2, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  # normalized_flux_ws4 <- imported_data_streamflow[imported_data_streamflow$ws==4, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  # normalized_flux_ws5 <- imported_data_streamflow[imported_data_streamflow$ws==5, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  # 
   #filter for monthly then add normalized flux
   
   #filter by yearly then add normalized flux_sum
@@ -413,6 +431,32 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
     
     })
+  #yet another plot trying to do that same NO3 difference
+  output$another_NO3_difference <- renderPlotly({
+    another_NO3_difference <- ggplot(ws.cast, aes(color = "#BF1616"))+ my_theme+
+      geom_line(aes(x= water_year, y= norm2))+
+      geom_point(aes(x= water_year, y= norm2))+
+      geom_line(aes(x= water_year, y= norm4))+
+      geom_point(aes(x= water_year, y= norm4))+
+      geom_line(aes(x= water_year, y= norm5))+
+      geom_point(aes(x= water_year, y= norm5))+
+      coord_cartesian(ylim= c(-600, 800))
+      scale_shape_manual(values = watershed_shapes)
+    
+    another_NO3_difference <- ggplotly(  
+      another_NO3_difference, #tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+    another_NO3_difference$x$layout$width <- NULL
+    another_NO3_difference$y$layout$height <- NULL
+    another_NO3_difference$width <- NULL
+    another_NO3_difference$height <- NULL
+    another_NO3_difference %>%
+      layout(autosize = TRUE, height = 600)
+  })
+  
   #ggplotly that shows most plots increase in lai following the ice storm
   output$lai_plot <- renderPlotly({
     lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
