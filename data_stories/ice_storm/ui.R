@@ -338,6 +338,7 @@ shinyUI(fluidPage(
                                                                                    
                                                                                    ### PLOT VIEW 1
                                                                                    tabPanel("NO3 Plots Replication",
+                                                                                            plotlyOutput("another_NO3_difference", height = "auto"),
                                                                                             h4("Output (ws1, ws6)"),
                                                                                             plotlyOutput("static_NO3_output", height = "auto"),
                                                                                             h4("Difference (ws2, ws4, ws5)"),
