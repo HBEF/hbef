@@ -126,21 +126,29 @@ shinyServer(function(session, input, output) {
 #  imported_data <- readRDS("precip_stream_data_long.rds")
   lai_data <- read_csv("lai.txt")
 #  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
-#  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
+  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_data_long
   
   #Filter data for NO3 discharge plots
   imported_data_streamflow <- filter(imported_data, source == "streamflow")
+  imported_data_streamflow_ws2 <- filter(imported_data_streamflow, ws == "2")
   
   #Normalize (divide by ws6 flux) watersheds 2,4,5 for NO3 comparisons
-  normalized_flux_ws2 <- imported_data_streamflow[imported_data_streamflow$ws==2, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  normalized_flux_ws4 <- imported_data_streamflow[imported_data_streamflow$ws==4, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  normalized_flux_ws5 <- imported_data_streamflow[imported_data_streamflow$ws==5, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  imported_data_streamflow_ws2$normalized_flux <- imported_data_streamflow[imported_data_streamflow$ws==2, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  normalized_flux_ws4 <- imported_data_streamflow[imported_data_streamflow$ws==4, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  normalized_flux_ws5 <- imported_data_streamflow[imported_data_streamflow$ws==5, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  
+  #filter for monthly then add normalized flux
+  
+  #filter by yearly then add normalized flux_sum
   
   #Add a new row in imported_data_streamflow called normalized_flux and fill all with NA for now
   
   #input normalized_flux_ws2 (and 4,5) into imported_data_streamflow to use in NO3 diffrence graph
+  
+  #REDO NORMALIZATION...looks like the numbers don't match the paper's plot (no negatives, highest value is too low...)
+  #subtracting ws6 from ws looks like the right numbers for ws2 at least
   
   ########### END OF DATA IMPORT #############################################
   
