@@ -64,6 +64,8 @@ shinyUI(fluidPage(
   tags$head(includeScript(system.file('www', 'app.js'))),
   tags$head(tags$style(HTML(
     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
+  tags$head(tags$script(src="/__static__/frontend/scripts/shinyapps.frame.content.js")),
+  tags$head(tags$script(src="/__static__/frontend/scripts/shinyapps.js")),
   ###############################################################################
   
   ########### BODY ##############################################################

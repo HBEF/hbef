@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script type = "text/javascript" src="../hubbard.js"></script>
+<script type = "text/javascript" src="../iframeResizer.min.js"></script>
 
 <title>Home</title>
 <link href="../hubbard.css" rel="stylesheet" type="text/css">
@@ -52,9 +53,13 @@
 
 <!----- EDIT ZONE #2 ---------------------------
 WHERE IT SAYS (src =) insert beteen quotes the URL where your app is hosted. ---------------->
- 
-  <iframe id="form-iframe" src="http://colab-sbx-106.oit.duke.edu:3838/sidebar/" style="margin:0; width:100%; height:150px; border:none; overflow:hidden;" scrolling="no" onload="AdjustIframeHeightOnLoad()"></iframe>
 
+<div class = "shiny-app-frame">
+  <style>iframe{width:100%}</style>
+<iframe id="story_template" src="http://colab-sbx-106.oit.duke.edu:3838/template" scrolling="no"></iframe>
+<script>iFrameResize({log:true})</script>
+
+</div>
 <!----- EDIT ZONE #2 ---------------------------------------------------------->
 
 
@@ -63,9 +68,16 @@ WHERE IT SAYS (src =) insert beteen quotes the URL where your app is hosted. ---
 
 
 <script type="text/javascript">
-function AdjustIframeHeightOnLoad() { document.getElementById("form-iframe").style.height = document.getElementById("form-iframe").contentWindow.document.body.scrollHeight * 1.1 + "px"; }
-function AdjustIframeHeight(i) { document.getElementById("form-iframe").style.height = parseInt(i) + "px"; }
+   
+  $(function() {
+    // manage navbar active state
+    var loc = this.location.pathname;
+    loc = "/" + loc.split('/')[1];
+    $('a[href="' + loc + '"]').parent().addClass('active'); 
+  });
+
 </script>
+
 </section>
 
 <section id = "footer">

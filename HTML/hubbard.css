@@ -11,6 +11,11 @@ iframe {
     width: 100vw;
 }
 
+.shiny-app-frame{
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
 
 body {
 	margin-top: 0px;
