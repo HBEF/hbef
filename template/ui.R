@@ -42,8 +42,8 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
-water_sources <- list("Precipitation (P)" = "precip",
-                     "Discharge (Q)" = "flow")
+water_sources <- list("Precipitation (P)" = "precipitation",
+                     "Streamflow (Q)" = "streamflow")
 
 granularity <- list("Year" = "year",
                     "Month" = "month",
@@ -64,6 +64,8 @@ shinyUI(fluidPage(
   tags$head(includeScript(system.file('www', 'app.js'))),
   tags$head(tags$style(HTML(
     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
+  tags$head(tags$script(src="/__static__/frontend/scripts/shinyapps.frame.content.js")),
+  tags$head(tags$script(src="/__static__/frontend/scripts/shinyapps.js")),
   ###############################################################################
   
   ########### BODY ##############################################################
@@ -131,7 +133,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
                                         choices = water_sources,
-                                        selected = "flow",
+                                        selected = "streamflow",
                                         inline = TRUE))),
         
         ##Units  

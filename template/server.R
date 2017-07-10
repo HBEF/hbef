@@ -35,7 +35,7 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("flow" = 16, "precip"= 21)
+  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
   
   ### End of Theme ################
   
@@ -121,7 +121,9 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  imported_data <- readRDS("precip_stream_data_long.rds")
+  load("precip_streamflow_dfs.RData")
+  
+  imported_data <- precip_streamflow_long
   
   ########### END OF DATA IMPORT #############################################
   
@@ -131,27 +133,25 @@ shinyServer(function(session, input, output) {
   
   reactive_data <- reactive({
     data <- imported_data
+      data <- data[data$granularity %in% input$granularity,]
       data <- data[data$source %in% input$water_sources,]
       data <- data[data$solute %in% solutes(),] 
       #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
       data <- data[data$ws %in% input$watersheds,]
   })
-  
+
   
   x <- reactive({
-    if(input$granularity == "month"){"water_date"}
+    if(input$granularity == "week"){"water_date"}
+    else if(input$granularity == "month"){"water_date"}
     else if(input$granularity == "year"){"water_year"}
   })
   
   y <- reactive({
-    if(input$granularity == "month" & input$units =="uMg/L"){"concentration_mg"}
-    else if(input$granularity == "year" & input$units =="uMg/L"){"mg_weighted_average"}
-    else if(input$granularity == "month" & input$units =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity == "year" & input$units =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity == "month"& input$units =="uMole/L"){"concentration_umol"}
-    else if(input$granularity == "year"& input$units =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity == "month"& input$units =="flux"){"flux"}
-    else if(input$granularity == "year"& input$units =="flux"){"flux_sum"}
+    if(input$units =="uMg/L"){"concentration_mg"}
+    else if(input$units =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$units =="uMole/L"){"concentration_umol"}
+    else if(input$units =="flux"){"flux"}
   })
   
   log_transform <- reactive({
@@ -163,7 +163,6 @@ shinyServer(function(session, input, output) {
   
   ## GGPLOT TIME FUNCTION
   ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
-    
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
       labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
@@ -173,14 +172,14 @@ shinyServer(function(session, input, output) {
       labs(x = "Water Year", y = input$units)}
     
     final <- plot+ my_theme + geom_line(size = 1) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
-                                  "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+      geom_point(size = 1.5, fill = "white", stroke = 0.5,
+                 aes(text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                  "Value:", concentration_mg, "<br>", "Date: ", water_date))) + 
       xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
-    
+  
     ggplotly(  
       final, tooltip = "text",
       width = 900) %>%

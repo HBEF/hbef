@@ -124,10 +124,10 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  load("precip_discharge_dfs.RData")
+  load("precip_streamflow_dfs.RData")
   
-  imported_data <- precip_discharge_data_long
-  imported_data2 <- precip_discharge_diff_data_long
+  imported_data <- precip_streamflow_data_long
+  imported_data2 <- precip_streamflow_diff_data_long
   
   ########### END OF DATA IMPORT #############################################
   
@@ -137,6 +137,7 @@ shinyServer(function(session, input, output) {
   
   reactive_data <- reactive({
     data <- imported_data
+      data <- data[data$granularity %in% input$granularity,]
       data <- data[data$source %in% input$water_sources,]
       data <- data[data$solute %in% solutes(),] 
       #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
@@ -173,22 +174,12 @@ shinyServer(function(session, input, output) {
   })
   
   y <- reactive({
-    if(input$granularity == "month" & input$units =="uMg/L"){"concentration_mg_month"}
-    else if(input$granularity == "year" & input$units =="uMg/L"){"concentration_mg_year"}
-    else if(input$granularity == "month" & input$units =="uEquivalent/L"){"concentration_ueq_month"}
-    else if(input$granularity == "year" & input$units =="uEquivalent/L"){"concentration_ueq_year"}
-    else if(input$granularity == "month"& input$units =="uMole/L"){"concentration_umol_month"}
-    else if(input$granularity == "year"& input$units =="uMole/L"){"concentration_umol_month_year"}
-    else if(input$granularity == "month"& input$units =="flux"){"flux_month"}
-    else if(input$granularity == "year"& input$units =="flux"){"flux_year"}
+    if(input$units =="uMg/L"){"concentration_mg"}
+    else if(input$units =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$units =="uMole/L"){"concentration_umol"}
+    else if(input$units =="flux"){"flux"}
   })
-  
-  
-  y_PQ <- reactive({
-    if(input$granularity == "month"){"water_mm_pm"}
-    else if(input$granularity == "year"){"water_mm_py"}
-  })
-  
+
   log_transform <- reactive({
     if(input$log == "ln"){"transform"}
     else{"no_transform"}
@@ -225,8 +216,8 @@ shinyServer(function(session, input, output) {
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
-    plot2 <- ggplot(data = reactive_data_PQ(), aes(x = get(x), y = get(y_PQ()))) + my_theme +
-      geom_bar(aes(alpha = ws, fill = source), stat = "identity") +
+    plot2 <- ggplot(data = reactive_data_PQ(), aes(x = get(x), y = water_mm)) + my_theme +
+      geom_point(aes(alpha = ws, fill = source), stat = "identity") +
       labs(x = "Water Year", y = "mm") +
       facet_grid(~source)+
       xlim(min(input$date_range[1]), max(input$date_range[2]))+
@@ -252,7 +243,7 @@ shinyServer(function(session, input, output) {
                                                                                         "Date: ", get(x), "<br>", 
                                                                                          "Value:", get(y)))) + 
       my_theme +
-      geom_bar(stat= "identity") +
+      geom_point(stat= "identity") +
       facet_grid(ws~solute) +
       xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
       labs(x = "Water Year", y = input$units) +

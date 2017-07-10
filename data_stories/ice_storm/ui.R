@@ -47,8 +47,8 @@ watersheds <- list("Watershed 1" = "1",
 watersheds1 <- list("Watershed 1" = "1",
                    "Watershed 6" = "6")
 
-water_sources <- list("Precipitation (P)" = "precip",
-                      "Discharge (Q)" = "flow")
+water_sources <- list("Precipitation (P)" = "precipitation",
+                      "Discharge (Q)" = "streamflow")
 
 granularity <- list("Year" = "year",
                     "Month" = "month",
@@ -57,6 +57,8 @@ granularity <- list("Year" = "year",
 units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
 
 units_lai <- list("meterSquaredPerMeterSquared")
+
+units_flux <- list("flux")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
@@ -159,17 +161,10 @@ shinyUI(fluidPage(
               
               
               
-              
-              
-              
-              
-              
-              
-              
-              
+
               ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
               
-              tabPanel("NO3",
+              tabPanel("NO3 general",
                        
                        
                        
@@ -210,7 +205,7 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
                                                              choices = water_sources,
-                                                             selected = "flow",
+                                                             selected = "streamflow",
                                                              inline = TRUE))),
                              
                              ##Units  
@@ -224,13 +219,13 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, selectInput("granularity", label = h4("Granularity"),
                                                       choices = granularity,
-                                                      selected = "year"))),
+                                                      selected = "month"))),
                              
                              ##Date Range
                              sliderInput("date_range2", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1996-01-01"), as.Date("2001-01-01"))), width = 4),
+                                         value = c(as.Date("1997-01-01"), as.Date("2001-01-01"))), width = 4),
                            
                            
                            ############## END OF SIDEBAR 2 #######
@@ -265,7 +260,115 @@ shinyUI(fluidPage(
                        ########################### END OF QUESTION #2 ###################################
                        
                        
-                         ) ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
+                         ), ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
+              
+              
+              
+              ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 3 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
+              
+              tabPanel("NO3 flux",
+                       
+                       
+                       
+                       ########################### QUESTION #3 ###################################
+                       
+                       fluidRow(
+                         tags$div(class = "container_question", tags$h3("Post-ice storm NO3 flux"))
+                       ),
+                       
+                       
+                       #---------VISUALIZATION FOR QUESTION #3 ---------#
+                       
+                       fluidRow(
+                         
+                         sidebarLayout(
+                           ############## SIDE BAR 3 ################ 
+                           #You can edit what the default selected options are. 
+                           #You can also delete inputs if you are not allowing 
+                           #the user to change that particular input. 
+                           
+                           sidebarPanel(
+                             
+                             #Solutes
+                             fluidRow(
+                               column(12, h4("Solutes"))),
+                             column(12,
+                                    selectInput("solutes_NO33", label = "",
+                                                choices = solutes_NO3)),
+                             
+                             ##Watersheds
+                             fluidRow(
+                               column(12, actionLink("select_all_ws3", h4("Watersheds")), 
+                                      selectInput("watersheds3", label = "",
+                                                  choices = watersheds, multiple = TRUE,
+                                                  selected = "6"))),
+                             
+                             ##Water Sources
+                             fluidRow(
+                               column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
+                                                             choices = water_sources,
+                                                             selected = "streamflow",
+                                                             inline = TRUE))),
+                             
+                             ##Units  
+                             fluidRow(
+                               column(12, selectInput("units3", label = h4("Units"),
+                                                      choices = units_flux,
+                                                      selected = "mg/L")),
+                               column(12, checkboxInput("log3", label = ("ln"),
+                                                        value = FALSE))),
+                             ##Granularity
+                             fluidRow(
+                               column(12, selectInput("granularity3", label = h4("Granularity"),
+                                                      choices = granularity,
+                                                      selected = "month"))),
+                             
+                             ##Date Range
+                             sliderInput("date_range3", label = h4("Date Range"),
+                                         min = as.Date("1962-01-01"),
+                                         max = as.Date("2014-01-01"),
+                                         value = c(as.Date("1997-01-01"), as.Date("2001-01-01"))), width = 4),
+                           
+                           
+                           ############## END OF SIDEBAR 3 #######
+                           
+                           ############## GRAPH 3 #################### 
+                           #Edit the name of the plot based on the name given in the server.R file 
+                           mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
+                                                                                   
+                                                                                   ### PLOT VIEW 1
+                                                                                   tabPanel("NO3 Plots Replication",
+                                                                                            plotlyOutput("another_NO3_difference", height = "auto"),
+                                                                                            h4("Output (ws1, ws6)"),
+                                                                                            plotlyOutput("static_NO3_output", height = "auto"),
+                                                                                            h4("Difference (ws2, ws4, ws5)"),
+                                                                                            plotlyOutput("static_NO3_difference", height = "auto"),
+                                                                                            h4("Output (ws1, ws6)"),
+                                                                                            plotlyOutput("NO3_output", height = "auto"),
+                                                                                            h4("Difference (ws2, ws4, ws5)"),
+                                                                                            plotlyOutput("NO3_difference", height = "auto"))
+                           )), width = 8), 
+                           position = "right"
+                         )
+                         ############## END OF GRAPH 3 ################ 
+                       ),
+                       
+                       #---------END OF VISUALIZATION FOR QUESTION #3 ---------#
+                       
+                       
+                       #--------- TEXT QUESTION #3 ----------------------------#
+                       
+                       tags$div(class = "container_paragraph", fluidRow(
+                         tags$p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+                                that damaged the experimental watersheds.  Some effects of the 
+                                storm can be tracked by the NO3 flux data.")
+                         ))
+                       #--------- END OF TEXT QUESTION #3 ----------------------------#
+                       
+                       ########################### END OF QUESTION #3 ###################################
+                       
+                       
+                         ) ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 3 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
               
               
               

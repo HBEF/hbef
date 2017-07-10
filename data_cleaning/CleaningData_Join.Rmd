@@ -1,0 +1,35 @@
+---
+title: "CleaningData_Join"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+rm(list=ls())
+load("precip_streamflow_monthly_dfs.RData")
+load("precip_streamflow_weekly_dfs.RData")
+```
+
+```{r}
+precip_streamflow_long <- plyr::rbind.fill(precip_streamflow_data_long, precip_streamflow_weekly_data_long)
+
+save(precip_streamflow_long, file = "precip_streamflow_long.RData")
+
+precip_streamflow_wide <- plyr::rbind.fill(precip_streamflow_data_wide, precip_streamflow_weekly_data_wide)
+
+save(precip_streamflow_wide, file = "precip_streamflow_wide.RData")
+```
+
+```{r}
+rm(list=ls())
+
+load("precip_streamflow_wide.RData")
+load("precip_streamflow_long.RData")
+
+save(list = ls(all.names = TRUE), file = "precip_streamflow_dfs.RData", envir = .GlobalEnv)
+```
+
