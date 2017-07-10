@@ -35,7 +35,7 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("flow" = 16, "precip"= 21)
+  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
   
   ### End of Theme ################
   
@@ -110,7 +110,9 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  imported_data <- readRDS("precip_stream_data_long.rds")
+  load("precip_streamflow_dfs.RData")
+  
+  imported_data <- precip_streamflow_long
   
   ########### END OF DATA IMPORT #############################################
   
@@ -120,6 +122,7 @@ shinyServer(function(session, input, output) {
   
   reactive_data <- reactive({
     data <- imported_data
+      data <- data[data$granularity %in% input$granularity,]
       data <- data[data$source %in% input$water_sources,]
       data <- data[data$solute %in% solutes(),] 
       #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
@@ -128,19 +131,16 @@ shinyServer(function(session, input, output) {
   
   
   x <- reactive({
-    if(input$granularity == "month"){"water_date"}
+    if(input$granularity == "week"){"water_date"}
+    else if(input$granularity == "month"){"water_date"}
     else if(input$granularity == "year"){"water_year"}
   })
   
   y <- reactive({
-    if(input$granularity == "month" & input$units =="uMg/L"){"concentration_mg"}
-    else if(input$granularity == "year" & input$units =="uMg/L"){"mg_weighted_average"}
-    else if(input$granularity == "month" & input$units =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity == "year" & input$units =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity == "month"& input$units =="uMole/L"){"concentration_umol"}
-    else if(input$granularity == "year"& input$units =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity == "month"& input$units =="flux"){"flux"}
-    else if(input$granularity == "year"& input$units =="flux"){"flux_sum"}
+    if(input$units =="uMg/L"){"concentration_mg"}
+    else if(input$units =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$units =="uMole/L"){"concentration_umol"}
+    else if(input$units =="flux"){"flux"}
   })
   
   log_transform <- reactive({
