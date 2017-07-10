@@ -47,8 +47,8 @@ watersheds <- list("Watershed 1" = "1",
 watersheds1 <- list("Watershed 1" = "1",
                    "Watershed 6" = "6")
 
-water_sources <- list("Precipitation (P)" = "precip",
-                      "Discharge (Q)" = "flow")
+water_sources <- list("Precipitation (P)" = "precipitation",
+                      "Discharge (Q)" = "streamflow")
 
 granularity <- list("Year" = "year",
                     "Month" = "month",
@@ -205,7 +205,7 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
                                                              choices = water_sources,
-                                                             selected = "flow",
+                                                             selected = "streamflow",
                                                              inline = TRUE))),
                              
                              ##Units  
@@ -307,7 +307,7 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
                                                              choices = water_sources,
-                                                             selected = "flow",
+                                                             selected = "streamflow",
                                                              inline = TRUE))),
                              
                              ##Units  
@@ -321,13 +321,13 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, selectInput("granularity3", label = h4("Granularity"),
                                                       choices = granularity,
-                                                      selected = "year"))),
+                                                      selected = "month"))),
                              
                              ##Date Range
                              sliderInput("date_range3", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1962-01-01"), as.Date("2014-01-01"))), width = 4),
+                                         value = c(as.Date("1997-01-01"), as.Date("2001-01-01"))), width = 4),
                            
                            
                            ############## END OF SIDEBAR 3 #######
@@ -337,7 +337,15 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("NO3 Output",plotlyOutput("NO3_output"))
+                                                                                   tabPanel("NO3 Plots Replication",
+                                                                                            h4("Output (ws1, ws6)"),
+                                                                                            plotlyOutput("static_NO3_output", height = "auto"),
+                                                                                            h4("Difference (ws2, ws4, ws5)"),
+                                                                                            plotlyOutput("static_NO3_difference", height = "auto"),
+                                                                                            h4("Output (ws1, ws6)"),
+                                                                                            plotlyOutput("NO3_output", height = "auto"),
+                                                                                            h4("Difference (ws2, ws4, ws5)"),
+                                                                                            plotlyOutput("NO3_difference", height = "auto"))
                            )), width = 8), 
                            position = "right"
                          )

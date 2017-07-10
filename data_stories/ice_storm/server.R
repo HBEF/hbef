@@ -35,7 +35,8 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("flow" = 16, "precip"= 21)
+  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
+  watershed_shapes <- c("1"= 5, "2"= 2, "3"= 16, "4"= 1, "5"= 0, "6"= 17)
   
   ### End of Theme ################
   
@@ -122,13 +123,25 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  imported_data <- readRDS("precip_stream_data_long.rds")
-#  lai_data <- read.csv("lai.txt")
-  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
-
-  # lai_data[lai_data=="6"]<-"six"
-  # lai_data[lai_data=="1"]<-"one"
-
+#  imported_data <- readRDS("precip_stream_data_long.rds")
+  lai_data <- read_csv("lai.txt")
+#  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
+#  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
+  load("precip_streamflow_dfs.RData")
+  imported_data <- precip_streamflow_data_long
+  
+  #Filter data for NO3 discharge plots
+  imported_data_streamflow <- filter(imported_data, source == "streamflow")
+  
+  #Normalize (divide by ws6 flux) watersheds 2,4,5 for NO3 comparisons
+  normalized_flux_ws2 <- imported_data_streamflow[imported_data_streamflow$ws==2, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  normalized_flux_ws4 <- imported_data_streamflow[imported_data_streamflow$ws==4, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  normalized_flux_ws5 <- imported_data_streamflow[imported_data_streamflow$ws==5, "flux"]/imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
+  
+  #Add a new row in imported_data_streamflow called normalized_flux and fill all with NA for now
+  
+  #input normalized_flux_ws2 (and 4,5) into imported_data_streamflow to use in NO3 diffrence graph
+  
   ########### END OF DATA IMPORT #############################################
   
   
@@ -232,8 +245,39 @@ shinyServer(function(session, input, output) {
 
   ########### PLOT FUNCTIONS 3 #########################################
   
-  ## GGPLOT TIME FUNCTION
-  ggplot_function3 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+  ## GGPLOT TIME FUNCTION 3.1
+  ggplot_function3.1 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+    
+    if(log) {
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = ws, alpha = ws))+
+        labs(x = "Water Year", y = paste("log", "(",input$units3, ")"))}
+    
+    else{
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = ws, alpha = ws))+
+        labs(x = "Water Year", y = input$units3)}
+    
+    final <- plot+ my_theme + geom_line(size = 1) + 
+      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+      xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
+      geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
+      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = -8, color = "black")+
+      scale_shape_manual(values = watershed_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))
+    
+    ggplotly(  
+      final, tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+  }
+
+
+  ## GGPLOT TIME FUNCTION 3.2
+  ggplot_function3.2 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
     
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
@@ -261,8 +305,8 @@ shinyServer(function(session, input, output) {
       config(showLink = FALSE)
     
   }
-
   
+    
   
   #############################################################
   ########### OUTPUTS #########################################
@@ -293,7 +337,7 @@ shinyServer(function(session, input, output) {
   #(moles/ha-yr (flux) vs water year, faceted into output (excess) for ws1,6 and diff for ws2,4,5)
   #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function3(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
+    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
@@ -302,9 +346,65 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
   })
   output$NO3_difference <- renderPlotly({
-    
+    NO3_difference <- ggplot_function3.2(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
+    NO3_difference$x$layout$width <- NULL
+    NO3_difference$y$layout$height <- NULL
+    NO3_difference$width <- NULL
+    NO3_difference$height <- NULL
+    NO3_difference %>%
+      layout(autosize = TRUE, height = 600)
   })
-
+  
+  #simple versions of NO3 output to help see what should be interactive
+  output$static_NO3_output <- renderPlotly({
+    
+    static_NO3_output <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616", shape = ws))+ my_theme+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "6"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "6"))+
+      scale_shape_manual(values = watershed_shapes)
+      
+    static_NO3_output <- ggplotly(  
+      static_NO3_output, #tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+    static_NO3_output$x$layout$width <- NULL
+    static_NO3_output$y$layout$height <- NULL
+    static_NO3_output$width <- NULL
+    static_NO3_output$height <- NULL
+    static_NO3_output %>%
+      layout(autosize = TRUE, height = 600)
+  })
+  #static versions of NO3 difference to help see what should be interactive
+  #find ways to normalize
+  output$static_NO3_difference <- renderPlotly({
+    
+    static_NO3_difference <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616", shape = ws))+ my_theme+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "2"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "2"))+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "4"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "4"))+
+      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "5"))+
+      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "5"))+
+      scale_shape_manual(values = watershed_shapes)
+    
+    static_NO3_difference <- ggplotly(  
+      static_NO3_difference, #tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+    static_NO3_difference$x$layout$width <- NULL
+    static_NO3_difference$y$layout$height <- NULL
+    static_NO3_difference$width <- NULL
+    static_NO3_difference$height <- NULL
+    static_NO3_difference %>%
+      layout(autosize = TRUE, height = 600)
+    
+    })
   #ggplotly that shows most plots increase in lai following the ice storm
   output$lai_plot <- renderPlotly({
     lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
