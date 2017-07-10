@@ -37,7 +37,7 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("flow" = 16, "precip"= 21)
+  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
   
   ### End of Theme ################
   
@@ -180,8 +180,15 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  imported_data <- readRDS("precip_stream_data_long.rds")
-
+  #imported_data <- readRDS("precip_stream_data_long.rds")
+  load("precip_streamflow_dfs.RData")
+  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/acid_rain/precip_streamflow_dfs.RData")
+  imported_data <- precip_streamflow_data_long
+  
+  #####ASK CAMILA IF THERE IS A DF WITH ALL GRANULARITIES, OR IF WEEKLY IS STRICTLY SEPARATED...
+  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/acid_rain/precip_streamflow_weekly_dfs.RData")
+  imported_data_weekly <- precip_streamflow_weekly_data_long
+  
   #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
   historyData <- data.frame(
     id = 1:7,
@@ -224,6 +231,8 @@ shinyServer(function(session, input, output) {
   ########### REACTIVE DATA AND X Y 1 #########################################
   #Reactive Data Normal
   reactive_data1 <- reactive({
+    data <- imported_data
+    data <- data[data$granularity %in% input$granularity,]
     data <- subset(imported_data[imported_data$ws == 6,], solute %in% "pH")
     data <- data[data$source %in% input$water_sources1,]
     })
@@ -233,11 +242,10 @@ shinyServer(function(session, input, output) {
     if(input$granularity1 == "month"){"water_date"}
     else if(input$granularity1 == "year"){"water_year"}
   })
-  
-  y1 <- reactive({
-    if(input$granularity1 == "month" & input$units1 =="uMg/L"){"concentration_mg"}
-    else if(input$granularity1 == "year" & input$units1 =="uMg/L"){"mg_weighted_average"}
-  })
+  ############ASK CAMILA WHERE I NEED TO FILTER
+   y1 <- reactive({
+     if(input$units1 =="uMg/L"){"concentration_mg"}
+   })
 
   ########### END REACTIVE DATA AND X Y 1 #########################################
   
@@ -292,22 +300,19 @@ shinyServer(function(session, input, output) {
   })
   
   
-  x2 <- reactive({
-    if(input$granularity2 == "month"){"water_date"}
-    else if(input$granularity2 == "year"){"water_year"}
-  })
-  
-  y2 <- reactive({
-    if(input$granularity2 == "month" & input$units2 =="uMg/L"){"concentration_mg"}
-    else if(input$granularity2 == "year" & input$units2 =="uMg/L"){"mg_weighted_average"}
-    else if(input$granularity2 == "month" & input$units2 =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity2 == "year" & input$units2 =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity2 == "month"& input$units2 =="uMole/L"){"concentration_umol"}
-    else if(input$granularity2 == "year"& input$units2 =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity2 == "month"& input$units2 =="flux"){"flux"}
-    else if(input$granularity2 == "year"& input$units2 =="flux"){"flux_sum"}
-  })
-  
+   x2 <- reactive({
+     if(input$granularity2 == "week"){"water_date"}
+     else if(input$granularity2 == "month"){"water_date"}
+     else if(input$granularity2 == "year"){"water_year"}
+   })
+   
+   y2 <- reactive({
+     if(input$units2 =="uMg/L"){"concentration_mg"}
+     else if(input$units2 =="uEquivalent/L"){"concentration_ueq"}
+     else if(input$units2 =="uMole/L"){"concentration_umol"}
+     else if(input$units2 =="flux"){"flux"}
+   })
+   
   log_transform2 <- reactive({
     if(input$log2 == "ln"){"transform"}
     else{"no_transform"}
@@ -377,20 +382,17 @@ shinyServer(function(session, input, output) {
     data <- data[data$ws %in% input$watersheds3,]
   })
   
-    x3 <- reactive({
-    if(input$granularity3 == "month"){"water_date"}
+  x3 <- reactive({
+    if(input$granularity3 == "week"){"water_date"}
+    else if(input$granularity3 == "month"){"water_date"}
     else if(input$granularity3 == "year"){"water_year"}
   })
   
   y3 <- reactive({
-    if(input$granularity3 == "month" & input$units3 =="uMg/L"){"concentration_mg"}
-    else if(input$granularity3 == "year" & input$units3 =="uMg/L"){"mg_weighted_average"}
-    else if(input$granularity3 == "month" & input$units3 =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity3 == "year" & input$units3 =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity3 == "month"& input$units3 =="uMole/L"){"concentration_umol"}
-    else if(input$granularity3 == "year"& input$units3 =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity3 == "month"& input$units3 =="flux"){"flux"}
-    else if(input$granularity3 == "year"& input$units3 =="flux"){"flux_sum"}
+    if(input$units3 =="uMg/L"){"concentration_mg"}
+    else if(input$units3 =="uEquivalent/L"){"concentration_ueq"}
+    else if(input$units3 =="uMole/L"){"concentration_umol"}
+    else if(input$units3 =="flux"){"flux"}
   })
   
   log_transform3 <- reactive({
