@@ -53,8 +53,13 @@ water_sources <- list("Precipitation (P)" = "precipitation",
 granularity <- list("Year" = "year",
                     "Month" = "month",
                     "Week" = "week")
+granularity3 <- list("Year" = "year",
+                    "Month" = "month",
+                    "Week" = "week")
 
 units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
+
+units3 <- list("uEquivalent/L","uMole/L", "uMg/L", "flux", "normalized_flux")
 
 units_lai <- list("meterSquaredPerMeterSquared")
 
@@ -313,21 +318,21 @@ shinyUI(fluidPage(
                              ##Units  
                              fluidRow(
                                column(12, selectInput("units3", label = h4("Units"),
-                                                      choices = units_flux,
-                                                      selected = "mg/L")),
+                                                      choices = units3,
+                                                      selected = "normalized_flux")),
                                column(12, checkboxInput("log3", label = ("ln"),
                                                         value = FALSE))),
                              ##Granularity
                              fluidRow(
                                column(12, selectInput("granularity3", label = h4("Granularity"),
                                                       choices = granularity,
-                                                      selected = "month"))),
+                                                      selected = "year"))),
                              
                              ##Date Range
                              sliderInput("date_range3", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1997-01-01"), as.Date("2001-01-01"))), width = 4),
+                                         value = c(as.Date("1991-01-01"), as.Date("2014-01-01"))), width = 4),
                            
                            
                            ############## END OF SIDEBAR 3 #######
@@ -338,14 +343,14 @@ shinyUI(fluidPage(
                                                                                    
                                                                                    ### PLOT VIEW 1
                                                                                    tabPanel("NO3 Plots Replication",
-                                                                                            plotlyOutput("another_NO3_difference", height = "auto"),
-                                                                                            h4("Output (ws1, ws6)"),
-                                                                                            plotlyOutput("static_NO3_output", height = "auto"),
-                                                                                            h4("Difference (ws2, ws4, ws5)"),
+                                                                                            #plotlyOutput("another_NO3_difference", height = "auto"),
+                                                                                            #h4("Output (ws1, ws6)"),
+                                                                                            #plotlyOutput("static_NO3_output", height = "auto"),
+                                                                                            #h4("Difference (ws2, ws4, ws5)"),
                                                                                             plotlyOutput("static_NO3_difference", height = "auto"),
-                                                                                            h4("Output (ws1, ws6)"),
-                                                                                            plotlyOutput("NO3_output", height = "auto"),
-                                                                                            h4("Difference (ws2, ws4, ws5)"),
+                                                                                            #h4("Output (ws1, ws6)"),
+                                                                                            #plotlyOutput("NO3_output", height = "auto"),
+                                                                                            #h4("Difference (ws2, ws4, ws5)"),
                                                                                             plotlyOutput("NO3_difference", height = "auto"))
                            )), width = 8), 
                            position = "right"
