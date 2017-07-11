@@ -180,9 +180,7 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  #imported_data <- readRDS("precip_stream_data_long.rds")
   load("precip_streamflow_dfs.RData")
-  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/acid_rain/precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
   #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
