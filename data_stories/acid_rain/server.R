@@ -180,6 +180,7 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
+  #load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/acid_rain/precip_streamflow_dfs.RData")
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
@@ -540,19 +541,56 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
   })
   
-  #plot pH vs Q to see if there are any trends
-  output$pH_streamflow <- renderPlotly({
-#    pH_streamflow <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
-    pH_streamflow <- ggplot(imported_data, x = )
-    
-    pH_streamflow$x$layout$width <- NULL
-    pH_streamflow$y$layout$height <- NULL
-    pH_streamflow$width <- NULL
-    pH_streamflow$height <- NULL
-    pH_streamflow %>%
-      layout(autosize = TRUE, height = 600)
-  })
-  
+#   #plot pH vs Q to see if there are any trends##################
+#   output$pH_streamflow <- renderPlotly({
+# #    pH_streamflow <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
+#     pH_streamflow_data <- imported_data
+#     pH_streamflow_data <- pH_streamflow_data[pH_streamflow_data$granularity %in% c("month"),]
+#     pH_streamflow_data <- pH_streamflow_data[pH_streamflow_data$source %in% c("streamflow"),]
+#     pH_streamflow_data <- pH_streamflow_data[pH_streamflow_data$ws %in% c("6"),]
+#     pH_streamflow_data <- pH_streamflow_data[pH_streamflow_data$solute %in% c("pH"),]
+#     pH_streamflow_data <- pH_streamflow_data %>% filter(date <"1990-06-01")
+# 
+#     pH_streamflow <- ggplot(pH_streamflow_data, aes(x = water_mm, y=concentration_mg, color = water_date))+
+#       geom_point(aes(text=paste("Date: ", date)))+
+#       geom_smooth(method="lm",se=F)+
+#       coord_cartesian(ylim = c(4.5, 6))
+#     
+#     pH_streamflow <- ggplotly(pH_streamflow, tooltip = "text",
+#       width = 900) %>%
+#         config(displayModeBar = FALSE) %>%
+#         config(showLink = FALSE)
+#     
+#     pH_streamflow$x$layout$width <- NULL
+#     pH_streamflow$y$layout$height <- NULL
+#     pH_streamflow$width <- NULL
+#     pH_streamflow$height <- NULL
+#     pH_streamflow %>%
+#       layout(autosize = TRUE, height = 600)
+#   })
+#   #second half
+#   #plot pH vs Q to see if there are any trends
+#   output$pH_streamflow1990 <- renderPlotly({
+#     pH_streamflow_data1990 <- pH_streamflow_data %>% filter(date > "1990-06-01")
+#     
+#     pH_streamflow1990 <- ggplot(pH_streamflow_data1990, aes(x = water_mm, y=concentration_mg, color = water_date))+
+#       geom_point(aes(text=paste("Date: ", date)))+
+#       geom_smooth(method="lm",se=F)+
+#       coord_cartesian(ylim = c(4.5, 6))
+#     
+#     pH_streamflow1990 <- ggplotly(pH_streamflow1990, tooltip = "text",
+#                               width = 900) %>%
+#       config(displayModeBar = FALSE) %>%
+#       config(showLink = FALSE)
+#     
+#     pH_streamflow1990$x$layout$width <- NULL
+#     pH_streamflow1990$y$layout$height <- NULL
+#     pH_streamflow1990$width <- NULL
+#     pH_streamflow1990$height <- NULL
+#     pH_streamflow1990 %>%
+#       layout(autosize = TRUE, height = 600)
+#   })
+#   #################
   #Successfully interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
   output$policy_SO4_NO3 <- renderPlotly({
     policy_SO4_NO3 <- ggplot_function3(reactive_data3_anions(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)

@@ -303,7 +303,9 @@ shinyUI(fluidPage(
                                                           ### PLOT VIEW 1
                                                           tabPanel("Precipitation and discharge chemistry",
                                                                    h4("Changes in chemical concentrations explained in part by acid rain"),
-                                                                   plotlyOutput("chemistry", height = "auto")
+                                                                   plotlyOutput("chemistry", height = "auto"),
+                                                                   plotlyOutput("pH_streamflow", height= "auto"),
+                                                                   plotlyOutput("pH_streamflow1990", height = "auto")
                                                           )
                                                           
                                                           # ### PLOT VIEW 2
