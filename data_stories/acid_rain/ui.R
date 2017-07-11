@@ -66,6 +66,10 @@ granularity <- list("Year" = "year",
 granularity1 <- list("Year" = "year",
                      "Month" = "month")
 
+granularity3 <- list("Year" = "year",
+                    "Month" = "month",
+                    "Week" = "week")
+
 units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
 units1 <- list("uMg/L")
 
@@ -125,7 +129,7 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, selectInput("units1", label = h4("Units"),
                                                       choices = units1,
-                                                      selected = "mg/L"))),
+                                                      selected = "uMg/L"))),
                              
                              ##Granularity
                              fluidRow(
@@ -485,127 +489,6 @@ shinyUI(fluidPage(
                        ########### END OF TEXT FOR QUESTION #3 ###############
                        
               )### ------------------------ END MAIN TAB 3 -------------------------------####
-              
-              # ### ------------------------ MAIN TAB 4 -------------------------------####
-              # 
-              # tabPanel("Take Action",
-              # 
-              # 
-              # 
-                       # ########### QUESTION #4 ####################
-                       #
-                       # fluidRow(
-                       #   tags$div(class = "container_question", tags$h3("How can I help?")) #acid rain Take Action
-                       # ),
-                       #
-                       # # #############################################
-                       #
-                       # ########### GRAPH FOR QUESTION #4 ##########
-                       #
-                       # fluidRow(
-                       #
-                       #   sidebarLayout(
-                       #     ############## SIDE BAR 4 ################
-                       #     #You can edit what the default selected options are.
-                       #     #You can also delete inputs if you are not allowing
-                       #     #the user to change that particular input.
-                       #
-                       #     sidebarPanel(
-                       #
-                       #       #Solutes
-                       #       fluidRow(
-                       #         column(12, actionLink("select_all_ions4", h4("Solutes"))),
-                       #
-                       #         #Cations
-                       #         column(6,
-                       #                actionLink("select_all_cations4", h5("Cations")),
-                       #                checkboxGroupInput("solutes_cations4", label = "",
-                       #                                   choices = solutes_cations,
-                       #                                   selected = "Na")),
-                       #
-                       #         #Anions
-                       #
-                       #         column(6, actionLink("select_all_anions4", h5("Anions")),
-                       #                checkboxGroupInput("solutes_anions4", label = "",
-                       #                                   choices = solutes_anions,
-                       #                                   selected = "SO4)"))),
-                       #       #Hydrogen
-                       #
-                       #       fluidRow(
-                       #         column(12, checkboxGroupInput("solutes_H4", label = h4(""),
-                       #                                       choices = solutes_H,
-                       #                                       selected = ""))),
-                       #
-                       #       ##Watersheds
-                       #       fluidRow(
-                       #         column(12, actionLink("select_all_ws4", h4("Watersheds")),
-                       #                selectInput("watersheds4", label = "",
-                       #                            choices = watersheds, multiple = TRUE,
-                       #                            selected = "6"))),
-                       #
-                       #       ##Water Sources
-                       #       fluidRow(
-                       #         column(12, checkboxGroupInput("water_sources4", label = h4("Water Sources"),
-                       #                                       choices = water_sources,
-                       #                                       selected = "precipitation",
-                       #                                       inline = TRUE))),
-                       #
-                       #       ##Units
-                       #       fluidRow(
-                       #         column(12, selectInput("units4", label = h4("Units"),
-                       #                                choices = units,
-                       #                                selected = "mg/L")),
-                       #         column(12, checkboxInput("log4", label = ("ln"),
-                       #                                  value = FALSE))),
-                       #       ##Granularity
-                       #       fluidRow(
-                       #         column(12, selectInput("granularity4", label = h4("Granularity"),
-                       #                                choices = granularity,
-                       #                                selected = "year"))),
-                       #
-                       #       ##Date Range
-                       #       sliderInput("date_range4", label = h4("Date Range"),
-                       #                   min = as.Date("1962-01-01"),
-                       #                   max = as.Date("2014-01-01"),
-                       #                   value = c(as.Date("1965-01-01"), as.Date("2013-01-01")), timeFormat = "%b %Y"), width = 4),
-                       #
-                       #
-                       #     ############## END OF SIDEBAR 4 #######
-                       #
-                       #     ############## GRAPH 4 ################
-                       #     #Edit the name of the plot based on the name given in the server.R file
-                       #     mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab4",
-                       #
-                       #                                                             ### PLOT VIEW 1
-                       #                                                             tabPanel("practice", plotlyOutput("practice"))
-                       #     )), width = 8),
-                       #     position = "right"
-                       #   )
-                       #   ############## END OF GRAPH 4 ################
-                       # ),
-                       #
-                       # ########### END OF GRAPH FOR QUESTION #4 ##########
-                       #
-                       # ########### TEXT FOR QUESTION #4 ##################
-                       # tags$div(class = "container_paragraph",
-                       #          fluidRow(column(width = 9,
-                       #                          p("	Feeling stressed about nature?  Slightly overwhelmed?  If you’re a farmer,
-                       #                    you can reduce your nitrogen oxide in a number of ways, like timing the
-                       #                    nitrogen fertilization to crop demand.  For the rest of us?  The overemphasized
-                       #                    carpooling, biking, or walking actually does help to reduce your nitrogen oxide
-                       #                    and sulfur dioxide emissions.  Even switching over to more
-                       #                    energy efficient lightbulbs and appliances helps, because electricity is
-                       #                    produced in large part by burning fossil fuels.  If you’re feeling super
-                       #                    energized, you could even get a solar panel to produce some of your own
-                       #                    electricity use.  Now there’s a bright idea."),
-                       #                          column(3)))
-                       #
-                       # )
-                       # ########### END OF TEXT FOR QUESTION #4 ###############
-                       #
-              ### ------------------------ END MAIN TAB 4 -------------------------------####
-              
-              
               
   )# Closes Tabset Panel for Main Tabs
   

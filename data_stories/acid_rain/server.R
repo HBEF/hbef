@@ -183,11 +183,7 @@ shinyServer(function(session, input, output) {
   #imported_data <- readRDS("precip_stream_data_long.rds")
   load("precip_streamflow_dfs.RData")
   load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/acid_rain/precip_streamflow_dfs.RData")
-  imported_data <- precip_streamflow_data_long
-  
-  #####ASK CAMILA IF THERE IS A DF WITH ALL GRANULARITIES, OR IF WEEKLY IS STRICTLY SEPARATED...
-  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/acid_rain/precip_streamflow_weekly_dfs.RData")
-  imported_data_weekly <- precip_streamflow_weekly_data_long
+  imported_data <- precip_streamflow_long
   
   #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
   historyData <- data.frame(
@@ -221,10 +217,6 @@ shinyServer(function(session, input, output) {
             NA,
             NA)
   )
-
-  #watershed 6 dataframe for flux...
- # imported_data_ws6 <- imported_data[imported_data$ws == "6",]
-  
   ########### END OF DATA IMPORT #############################################
   
   
@@ -232,20 +224,22 @@ shinyServer(function(session, input, output) {
   #Reactive Data Normal
   reactive_data1 <- reactive({
     data <- imported_data
-    data <- data[data$granularity %in% input$granularity,]
-    data <- subset(imported_data[imported_data$ws == 6,], solute %in% "pH")
+    data <- data[data$granularity %in% input$granularity1,]
+    data <- data[data$ws %in% c("6"),]
+    data <- data[data$solute %in% c("pH"),]
     data <- data[data$source %in% input$water_sources1,]
     })
   
   
   x1 <- reactive({
-    if(input$granularity1 == "month"){"water_date"}
+    if(input$granularity1 == "week"){"water_date"}
+    else if(input$granularity1 == "month"){"water_date"}
     else if(input$granularity1 == "year"){"water_year"}
   })
-  ############ASK CAMILA WHERE I NEED TO FILTER
-   y1 <- reactive({
-     if(input$units1 =="uMg/L"){"concentration_mg"}
-   })
+
+  y1 <- reactive({
+    if(input$units1 =="uMg/L"){"concentration_mg"}
+    })
 
   ########### END REACTIVE DATA AND X Y 1 #########################################
   
@@ -266,7 +260,7 @@ shinyServer(function(session, input, output) {
     final <- plot+ my_theme + 
       geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                 aes(text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range1[1]), max(input$date_range1[2]))+ 
       geom_vline(size = 0.5, xintercept = -5, alpha = 0.5)+
@@ -293,6 +287,7 @@ shinyServer(function(session, input, output) {
   ##sidebar_number_function <- function(number){  #try this out later on for optimization purposes
   reactive_data2 <- reactive({
     data <- imported_data
+    data <- data[data$granularity %in% input$granularity2,]
     data <- data[data$source %in% input$water_sources2,]
     data <- data[data$solute %in% solutes2(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
@@ -361,6 +356,7 @@ shinyServer(function(session, input, output) {
   reactive_data3_Al <- reactive({
 #    data <- subset(imported_data[imported_data$ws == 6,], solute %in% "Al")
     data <- imported_data
+    data <- data[data$granularity %in% input$granularity3,]
     data <- data[data$source %in% input$water_sources3,]
     data <- data[data$solute %in% Al_anions3(),] 
     data <- data[data$ws %in% input$watersheds3,]
@@ -368,6 +364,7 @@ shinyServer(function(session, input, output) {
   
   reactive_data3_anions <- reactive({
     data <- imported_data
+    data <- data[data$granularity %in% input$granularity3,]
     data <- data[data$source %in% input$water_sources3,]
     data <- data[data$solute %in% anions3(),] 
     #note that anions is a function, that's because the inputs come from input$anions
@@ -376,6 +373,7 @@ shinyServer(function(session, input, output) {
   
   reactive_data3_cations <- reactive({
     data <- imported_data
+    data <- data[data$granularity %in% input$granularity3,]
     data <- data[data$source %in% input$water_sources3,]
     data <- data[data$solute %in% cations3(),] 
     #note that cations is a function, that's because the inputs come from input$cations
@@ -544,6 +542,19 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
   })
   
+  #plot pH vs Q to see if there are any trends
+  output$pH_streamflow <- renderPlotly({
+#    pH_streamflow <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
+    pH_streamflow <- ggplot(imported_data, x = )
+    
+    pH_streamflow$x$layout$width <- NULL
+    pH_streamflow$y$layout$height <- NULL
+    pH_streamflow$width <- NULL
+    pH_streamflow$height <- NULL
+    pH_streamflow %>%
+      layout(autosize = TRUE, height = 600)
+  })
+  
   #Successfully interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
   output$policy_SO4_NO3 <- renderPlotly({
     policy_SO4_NO3 <- ggplot_function3(reactive_data3_anions(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
@@ -576,29 +587,7 @@ shinyServer(function(session, input, output) {
     policy_Al%>%
       layout(autosize = TRUE, height = 600)
     })
-  
-  #plot of Al flux and acid flux to show acids release Al from the soil ###Not sure how to interpret and/or make faster
-  #also try to make this yearly by creating a yearly flux... but would that defeat the purpose? 
-  #flux units: "eq/ ha/yr" - Annie
-  # output$fluxAlAcids <- renderPlotly({
-  #   fluxAlAcids <- ggplot(subset(imported_data_ws6, solute %in% c("Al", "SO4")),#######################################################
-  #                         aes(x = date, y = flux,
-  #                             shape = source, color = solute, alpha = ws))+ my_theme+
-  #     geom_line(size = 1) +
-  #     geom_point(size = 1.5, fill = "white", stroke = 0.5,
-  #                aes(text = paste("Solute: ", solute, "<br>", "Flux in ___ units:", flux, "<br>", "Date:", date)))+
-  #     scale_shape_manual(values = source_shapes) +
-  #     scale_color_manual(values = solute_palette) +
-  #     scale_alpha_discrete(range = c(0.9, 0.5))+
-  #     labs(colour = "Source", x = "Year", y = "(units)")+
-  #     coord_cartesian(ylim = c(0, 130))+
-  #     xlim(min(input$dateSlide[1]), max(input$dateSlide[2]))+ #use the date slider to change x axis
-  #     ggtitle("Increasing acid inflow increases Aluminum outflow")
-  #   ggplotly(fluxAlAcids, tooltip = "text", width = 1900)%>%
-  #     config(displayModeBar = F)%>%
-  #     config(showLink = F)
-  # }) ################################
-  
+
   #in progress plot of Al and acid flux and conc... shoudl be on seperate tab so has a diff sidebar!
   output$chemistry_flux <- renderPlotly({
     chemistry_flux <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
