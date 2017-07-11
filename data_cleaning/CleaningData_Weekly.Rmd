@@ -127,7 +127,7 @@ gather_concentration <- function(df){
 }
 
 
-#Gather function that creates water source and water_mm_month (water in mm per month) columns. It understands columns that have a either precip or streamflow as showing water sources and puts them under the source column. It takes their corresponding values and puts them under the water_mm_month column. 
+#Gather function that creates water source and water_mm_week (water in mm per week) columns. It understands columns that have a either precip or streamflow as showing water sources and puts them under the source column. It takes their corresponding values and puts them under the water_mm_week column. 
 
 gather_source <- function(df){
   x <- df
@@ -167,7 +167,6 @@ df %>%
 
 streamflow_weekly <- read_csv("data_original/HBEF_stream_chemistry_1963-2013.csv")
 precipitation_weekly <- read_csv("data_original/HBEF_precipitation_chemistry_1963-2013.csv")
-
 
 load("public_data.Rdata", envir = parent.frame(), verbose = FALSE)
 
@@ -333,6 +332,10 @@ for(x in seq(8,9)){
 
 precip_streamflow_weekly_data_long <- do.call("rbind", list(precip_ws_2, precip_ws_3, precip_ws_4, precip_ws_5, precip_ws_6,precip_ws_8, precip_ws_9,precip_streamflow_weekly_data_long))
 
+precip_streamflow_weekly_data_long$frame <- precip_streamflow_weekly_data_long$water_date
+precip_streamflow_weekly_data_long %<>% 
+  separate("frame", c("framey") )
+
 ```
 
 
@@ -353,7 +356,7 @@ save(precip_streamflow_weekly_data_long, file = "precip_streamflow_weekly_data_l
 ```{r}
 
 long <- precip_streamflow_weekly_data_long
-drop <- c("z", "MW")
+drop <- c("z", "MW", "framey")
 df <- long[, !(names(long) %in% drop)]
 fixed <- c("ws","date","water_date", "datetime", "water_year","canonical", "source", "water_mm", "granularity", "solute", "datetime", "canonical")
 values <- colnames(df[, !(names(df) %in% fixed)])
@@ -386,6 +389,7 @@ load("precip_streamflow_weekly_data_long.RData")
 load("precip_streamflow_weekly_data_wide.RData")
 
 save(list = ls(all.names = TRUE), file = "precip_streamflow_weekly_dfs.RData", envir = .GlobalEnv)
+
 
 ```
 

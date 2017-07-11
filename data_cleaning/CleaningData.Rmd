@@ -356,6 +356,10 @@ year <- year[!duplicated(year[,c("ws", "water_year", "solute","source", "unit", 
 precip_streamflow_data_long <- rbind(month,year)%>% 
   spread(unit, value)
 
+precip_streamflow_data_long$frame <- precip_streamflow_data_long$water_date
+precip_streamflow_data_long %<>% 
+  separate("frame", c("framey") )
+
 ```
 
 
@@ -381,7 +385,7 @@ save(precip_streamflow_data_long, file = "precip_streamflow_data_long.Rdata")
 ```{r}
 
 long <- precip_streamflow_data_long
-drop <- c("z", "MW")
+drop <- c("z", "MW", "framey")
 df <- long[, !(names(long) %in% drop)]
 fixed <- c("ws","date","water_date","water_year", "source", "water_mm", "granularity", "solute")
 values <- colnames(df[, !(names(df) %in% fixed)])
