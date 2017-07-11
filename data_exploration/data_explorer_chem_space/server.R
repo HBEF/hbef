@@ -132,23 +132,12 @@ shinyServer(function(session, input, output) {
     #data <- data[data$date >= input$date_range[1] & data$date <= input$date_range[2]]
     unit_columns <- colnames(imported_data[,(grep(input$units, colnames(data)))])
 
-    # if(input$granularity == "month"){
-    #   date_range_columns <- colnames(data[,(grep("month", colnames(data))), with = FALSE])
-    #   final_columns <-intersect(unit_columns, date_range_columns)
-    #   }
-    # else{
-    #   date_range_columns <- colnames(data[,(grep("year", colnames(data))), with = FALSE])
-    #   final_columns <-intersect(unit_columns, date_range_columns)
-    # }
-  
+   
     basic_columns <- c("ws","date","water_date","water_year","source","water_mm","framey")
     needed_columns <- c(basic_columns,unit_columns)
     data <- data[,needed_columns]
     
-    # if(input$granularity == "year"){
-    #   data <- data[!duplicated(data[,c("water_year","source", "ws", "framey")]),]}
-    # 
-    # else{data}
+  
     
     if(length(input$solutesx) == 1){data}
     else{ solutes_to_add <- colnames(data[,grep(paste(input$solutesx, collapse="|"), names(data))])
