@@ -251,6 +251,7 @@ shinyServer(function(session, input, output) {
       my_theme +
       geom_point(stat= "identity") +
       facet_grid(ws~solute) +
+      ggtitle('COMING SOON!')
       xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
       labs(x = "Water Year", y = input$units) +
       scale_fill_manual(values = solute_palette)
