@@ -225,7 +225,7 @@ shinyServer(function(session, input, output) {
     plot2 <- ggplot(data = reactive_data_PQ(), aes(x = get(x), y = water_mm)) + my_theme +
       geom_point(aes(alpha = ws, fill = source), stat = "identity") +
       labs(x = "Water Year", y = "mm") +
-      facet_grid(~source)+
+      facet_grid(source~.)+
       xlim(min(input$date_range[1]), max(input$date_range[2]))+
       scale_fill_manual(values = source_color)+
       scale_alpha_discrete(range = c(0.9, 0.5))
