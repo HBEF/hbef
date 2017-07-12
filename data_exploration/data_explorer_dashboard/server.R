@@ -10,6 +10,7 @@ library(utils)
 library(grid)
 library(ggthemes)
 library(lattice)
+library(stringr)
 
 #######################################################################################
 ########### SHINY SERVER ##############################################################
@@ -82,6 +83,15 @@ shinyServer(function(session, input, output) {
     })
     dplyr::bind_rows(dats)
   }
+  
+  formula_function_x <- function(df, s){
+    q = quote(mutate(df, temporary_x = s))
+    eval(parse(text=sub("s", s, deparse(q))))}
+  
+  formula_function_y <- function(df, s){
+    q = quote(mutate(df, temporary_y = s))
+    eval(parse(text=sub("s", s, deparse(q))))}
+
   
   ########### END OF IMPORTANT PRELIMINARY INFO #############################################
   
@@ -173,6 +183,33 @@ shinyServer(function(session, input, output) {
   })
   
   
+  solutesx_formula <- reactive({
+
+    capitalized<-"[A-Z]"
+    strip_spaces <- gsub(" ", "", input$solutesx_formula, fixed = TRUE)
+    include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
+    trim <- str_trim(include_space)
+    split_each <- str_split(trim, " ")
+    include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x , sep=""), x))
+    formula <- paste(include_units, collapse=' ' )
+    formula
+  
+  })
+  
+  
+  solutesy_formula <- reactive({
+
+    capitalized<-"[A-Z]"
+    strip_spaces <- gsub(" ", "", input$solutesy_formula, fixed = TRUE)
+    include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
+    trim <- str_trim(include_space)
+    split_each <- str_split(trim, " ")
+    include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x , sep=""), x))
+    formula <- paste(include_units, collapse=' ' )
+    formula
+    
+  })
+  
   reactive_data_bubble <- reactive({
     data <- imported_data_wide
     data <- data[data$granularity %in% input$granularity_bubble,]
@@ -184,16 +221,9 @@ shinyServer(function(session, input, output) {
     basic_columns <- c("ws","date","water_date","water_year","source","water_mm","framey")
     needed_columns <- c(basic_columns,unit_columns)
     data <- data[,needed_columns]
-    
-    if(length(input$solutesx_bubble) == 1){data}
-    else{solutes_to_add <- colnames(data[,grep(paste(input$solutesx_bubble, collapse="|"), names(data))])
-    data$sum_temporary_x = rowSums(data[, solutes_to_add], na.rm=TRUE)
-    }
-    
-    if(length(input$solutesy_bubble) == 1){data}
-    else{solutes_to_add <- colnames(data[,grep(paste(input$solutesy_bubble, collapse="|"), names(data))])
-    data$sum_temporary_y = rowSums(data[, solutes_to_add], na.rm=TRUE)
-    }
+  
+    data <- formula_function_x(data, solutesx_formula())
+    data <- formula_function_y(data, solutesy_formula())
     
     if(input$trace_bubble){data <- accumulate_by(data, ~framey)}
     else{data}
@@ -206,18 +236,6 @@ shinyServer(function(session, input, output) {
     if(input$granularity == "week"){"water_date"}
     else if(input$granularity == "month"){"water_date"}
     else if(input$granularity == "year"){"water_year"}
-  })
-  
-  
-  
-  x_bubble <- reactive({
-    if(length(input$solutesx_bubble) == 1) {colnames(reactive_data_bubble()[grep(input$solutesx_bubble, names(reactive_data_bubble()))])}
-    else{"sum_temporary_x"}
-  })
-  
-  y_bubble <- reactive({
-    if(length(input$solutesy_bubble) == 1) {colnames(reactive_data_bubble()[grep(input$solutesy_bubble, names(reactive_data_bubble()))])}
-    else{"sum_temporary_y"}
   })
 
   
@@ -249,6 +267,8 @@ shinyServer(function(session, input, output) {
     
       plot <- plot+ my_theme + geom_line(size = 0.5) + 
       geom_point(size = 1.3, fill = "white", stroke = 0.2) +  
+      #xlim(min(as.Date(event_data("plotly_relayout")[1])), as.Date(max(event_data("plotly_relayout")[2])))+
+        
       #xlim(min(input$date_range[1]), max(input$date_range[2]))+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
@@ -272,16 +292,16 @@ shinyServer(function(session, input, output) {
     
     if(log) {
       streamflow <- ggplot() + my_theme +
-        geom_line(data=data_stream, aes(x = as.POSIXct(date), y = logb(water_mm, base=exp(1)), color = ws))+
+        geom_line(data=data_stream, aes(x = as.POSIXct(date), y = logb(water_mm, base=exp(1)), color = ws, key = date))+
         labs(x = "Date", y = "log(mm)")}
       
     else{
       streamflow <- ggplot() + my_theme +
-        geom_line(data=data_stream, aes(x = as.POSIXct(date), y = water_mm, color = ws))+
+        geom_line(data=data_stream, aes(x = as.POSIXct(date), y = water_mm, color = ws, key = date))+
         labs(x = "Date", y = "mm")}
     
       precipitation <- ggplotly(ggplot()+ my_theme + 
-                           geom_bar(data=data_precip, aes(x = as.POSIXct(date), y = water_mm, fill = ws), stat = "identity", position = "dodge")+ 
+                           geom_bar(data=data_precip, aes(x = as.POSIXct(date), y = water_mm, fill = ws), stat = "identity", position = "dodge", key = date)+ 
                            scale_y_reverse() + labs(x = "Date", y = "mm"))
   
       streamflow <- ggplotly(streamflow)
@@ -290,6 +310,7 @@ shinyServer(function(session, input, output) {
       plot <- subplot(precipitation, streamflow, nrows = 2, shareX = TRUE, heights = c(0.5, 0.5), titleY = TRUE)%>%
         config(displayModeBar = FALSE) %>%
         config(showLink = FALSE)
+        #layout(dragmode = "select")
       
       plot
   }
@@ -339,6 +360,7 @@ shinyServer(function(session, input, output) {
     theplot$height <- NULL
     theplot %>%
       layout(autosize = TRUE, height = 300)
+      #layout(dragmode = "select")
      })
 
   output$plot_cq <- renderPlotly({
@@ -350,6 +372,7 @@ shinyServer(function(session, input, output) {
     theplot$height <- NULL
     theplot %>%
       layout(autosize = TRUE, height = 300)
+    
   })
   
   
@@ -376,17 +399,22 @@ shinyServer(function(session, input, output) {
   })
   
   output$bubblePlot <- renderPlotly({
-    theplot <- ggplot_bubble_function(reactive_data_bubble(), x_bubble(), y_bubble())
+    theplot <- ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y")
     
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
     theplot$width <- NULL
     theplot$height <- NULL
     theplot %>%
-      layout(autosize = TRUE)
+      layout(autosize = TRUE, height = 600)
     
   })
   
 
+  output$zoom <- renderPrint({
+    d <- event_data("plotly_relayout")
+    d
+  })
+  
   
 })
