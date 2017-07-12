@@ -429,7 +429,7 @@ shinyServer(function(session, input, output) {
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
+    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y = imported_data$flux, ncol = 1, log = input$log3)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
@@ -442,8 +442,9 @@ shinyServer(function(session, input, output) {
     streamflow_NO3_data <- imported_data
     streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$source %in% c("streamflow"),]
     streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$solute %in% c("NO3"),]
-
-    static_NO3_output <- ggplot(streamflow_NO3_data, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
+    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$granularity %in% input$granularity3,]
+    
+    static_NO3_output <- ggplot(NULL, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
       geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "1",])+
       geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws =="1",])+
       geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
