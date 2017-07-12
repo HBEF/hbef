@@ -70,8 +70,8 @@ granularity3 <- list("Year" = "year",
                     "Month" = "month",
                     "Week" = "week")
 
-units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
-units1 <- list("uMg/L")
+units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
+units1 <- list("mg/L")
 
 
 #######################################################################################
@@ -129,7 +129,7 @@ shinyUI(fluidPage(
                              fluidRow(
                                column(12, selectInput("units1", label = h4("Units"),
                                                       choices = units1,
-                                                      selected = "uMg/L"))),
+                                                      selected = "mg/L"))),
                              
                              ##Granularity
                              fluidRow(

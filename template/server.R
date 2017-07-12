@@ -148,7 +148,7 @@ shinyServer(function(session, input, output) {
   })
   
   y <- reactive({
-    if(input$units =="uMg/L"){"concentration_mg"}
+    if(input$units =="mg/L"){"concentration_mg"}
     else if(input$units =="uEquivalent/L"){"concentration_ueq"}
     else if(input$units =="uMole/L"){"concentration_umol"}
     else if(input$units =="flux"){"flux"}

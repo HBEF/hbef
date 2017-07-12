@@ -237,7 +237,7 @@ shinyServer(function(session, input, output) {
   })
 
   y1 <- reactive({
-    if(input$units1 =="uMg/L"){"concentration_mg"}
+    if(input$units1 =="mg/L"){"concentration_mg"}
     })
 
   ########### END REACTIVE DATA AND X Y 1 #########################################
@@ -301,7 +301,7 @@ shinyServer(function(session, input, output) {
    })
    
    y2 <- reactive({
-     if(input$units2 =="uMg/L"){"concentration_mg"}
+     if(input$units2 =="mg/L"){"concentration_mg"}
      else if(input$units2 =="uEquivalent/L"){"concentration_ueq"}
      else if(input$units2 =="uMole/L"){"concentration_umol"}
      else if(input$units2 =="flux"){"flux"}
@@ -386,7 +386,7 @@ shinyServer(function(session, input, output) {
   })
   
   y3 <- reactive({
-    if(input$units3 =="uMg/L"){"concentration_mg"}
+    if(input$units3 =="mg/L"){"concentration_mg"}
     else if(input$units3 =="uEquivalent/L"){"concentration_ueq"}
     else if(input$units3 =="uMole/L"){"concentration_umol"}
     else if(input$units3 =="flux"){"flux"}
@@ -451,8 +451,8 @@ shinyServer(function(session, input, output) {
   })
   
   y4 <- reactive({
-    if(input$granularity4 == "month" & input$units4 =="uMg/L"){"concentration_mg"}
-    else if(input$granularity4 == "year" & input$units4 =="uMg/L"){"mg_weighted_average"}
+    if(input$granularity4 == "month" & input$units4 =="mg/L"){"concentration_mg"}
+    else if(input$granularity4 == "year" & input$units4 =="mg/L"){"mg_weighted_average"}
     else if(input$granularity4 == "month" & input$units4 =="uEquivalent/L"){"concentration_ueq"}
     else if(input$granularity4 == "year" & input$units4 =="uEquivalent/L"){"ueq_weighted_average"}
     else if(input$granularity4 == "month"& input$units4 =="uMole/L"){"concentration_umol"}

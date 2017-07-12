@@ -49,7 +49,7 @@ granularity <- list( "Week" = "week",
                     "Month" = "month",
                     "Year" = "year")
 
-units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_umol", "uMg/L" = "concentration_mg")
+units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_umol", "mg/L" = "concentration_mg")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################

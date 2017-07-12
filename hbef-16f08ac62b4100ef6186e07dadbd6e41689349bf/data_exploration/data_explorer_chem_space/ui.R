@@ -50,7 +50,7 @@ granularity <- list("Year" = "year",
 
 units <- list("uEquivalent/L" = "^concentration_ueq",
               "uMole/L" = "^concentration_umol", 
-              "uMg/L" = "^concentration_mg", 
+              "mg/L" = "^concentration_mg", 
               "flux" = "^flux")
 
 

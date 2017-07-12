@@ -76,7 +76,7 @@ shinyServer(function(session, input, output) {
   
   units <- list("uEquivalent/L" = "^concentration_ueq_",
                 "uMole/L" = "^concentration_umol_", 
-                "uMg/L" = "^concentration_mg_", 
+                "mg/L" = "^concentration_mg_", 
                 "flux" = "^flux_")
 
   ############
