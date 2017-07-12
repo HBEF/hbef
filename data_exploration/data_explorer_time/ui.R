@@ -154,9 +154,10 @@ shinyUI(fluidPage(
       mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
         
         ### PLOT VIEW 1
-        tabPanel("Concentration", plotlyOutput("plot1a"))
+        tabPanel("Concentration", plotlyOutput("plot1a")),
         
         ### PLOT VIEW 2
+        tabPanel("Net Ecosystem Retention",plotlyOutput("plot1c"))
         )), width = 8), 
       position = "right"
     )
