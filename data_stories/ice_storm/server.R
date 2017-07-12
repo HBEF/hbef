@@ -124,8 +124,8 @@ shinyServer(function(session, input, output) {
   ########### DATA IMPORT ####################################################
   
   lai_data <- read_csv("lai.txt")
-#  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
-#  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
+  # lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
+  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
@@ -215,16 +215,7 @@ shinyServer(function(session, input, output) {
   #merge all ws_cast s together
   ws_cast <- merge(ws_cast_month, ws_cast_year, all = T)
   ws_cast <- merge(ws_cast, ws_cast_week, all = T)
-  
-  #merge into imported_data by solute and ws and source...
-  #try filtering first like in the reactive data then adding the normalized flux
-  data_norm <- imported_data
-  data_norm <- data_norm[data_norm$source %in% c("streamflow"),]
-  data_norm <- data_norm[data_norm$ws %in% c("2", "4", "5"),]
-  data_norm <- data_norm[data_norm$solute %in% c("NO3"),]
-  #add normalized flux by merging?
-  data_norm <- merge(data_norm, ws_cast, all = T)
-  
+
   ########### END OF DATA IMPORT #############################################
   
   
@@ -447,31 +438,31 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
   })
   #simple version of NO3 output to help see what should be interactive, etc
-  # output$static_NO3_output <- renderPlotly({
-  #   streamflow_NO3_data <- imported_data
-  #   streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$source %in% c("streamflow"),]
-  #   streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$solute %in% c("NO3"),]
-  #   
-  #   static_NO3_output <- ggplot(streamflow_NO3_data, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
-  #     geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "1",])+
-  #     geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws =="1",])+
-  #     geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
-  #     geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
-  #     scale_shape_manual(values = watershed_shapes)
-  #     
-  #   static_NO3_output <- ggplotly(  
-  #     static_NO3_output, #tooltip = "text",
-  #     width = 900) %>%
-  #     config(displayModeBar = FALSE) %>%
-  #     config(showLink = FALSE)
-  #   
-  #   static_NO3_output$x$layout$width <- NULL
-  #   static_NO3_output$y$layout$height <- NULL
-  #   static_NO3_output$width <- NULL
-  #   static_NO3_output$height <- NULL
-  #   static_NO3_output %>%
-  #     layout(autosize = TRUE, height = 600)
-  # })
+  output$static_NO3_output <- renderPlotly({
+    streamflow_NO3_data <- imported_data
+    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$source %in% c("streamflow"),]
+    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$solute %in% c("NO3"),]
+
+    static_NO3_output <- ggplot(streamflow_NO3_data, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
+      geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "1",])+
+      geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws =="1",])+
+      geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
+      geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
+      scale_shape_manual(values = watershed_shapes)
+
+    static_NO3_output <- ggplotly(
+      static_NO3_output, #tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+
+    static_NO3_output$x$layout$width <- NULL
+    static_NO3_output$y$layout$height <- NULL
+    static_NO3_output$width <- NULL
+    static_NO3_output$height <- NULL
+    static_NO3_output %>%
+      layout(autosize = TRUE, height = 600)
+  })
   
   #NO3 excess
   output$NO3_excess <- renderPlotly({
