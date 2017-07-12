@@ -178,7 +178,7 @@ shinyServer(function(session, input, output) {
     if(input$units =="mg/L"){"concentration_mg"}
     else if(input$units =="uEquivalent/L"){"concentration_ueq"}
     else if(input$units =="uMole/L"){"concentration_umol"}
-    else if(input$units =="flux"){"flux"}
+    else if(input$units =="Eq/ha-yr"){"flux"}
   })
 
   log_transform <- reactive({
