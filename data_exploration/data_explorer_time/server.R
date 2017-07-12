@@ -180,6 +180,11 @@ shinyServer(function(session, input, output) {
     else if(input$units =="uMole/L"){"concentration_umol"}
     else if(input$units =="Eq/ha-yr"){"flux"}
   })
+  
+  vwcYN <- reactive({
+    if(input$granularity == 'week'){''}
+    else {' (VWC)'}
+  })
 
   log_transform <- reactive({
     if(input$log == "ln"){"transform"}
@@ -194,11 +199,11 @@ shinyServer(function(session, input, output) {
   
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+      labs(x = "Water Year", y = paste("log", "(",input$units, vwcYN, ")"))}
     
     else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = input$units)}
+      labs(x = "Water Year", y = paste(input$units, vwcYN)}
     
       plot <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
