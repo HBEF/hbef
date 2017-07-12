@@ -25,7 +25,7 @@ solutes_anions <- list("Phosphate (PO4)" = "PO4",
                        "Sulfate (SO4)" = "SO4",
                        "Nitrate (NO3)" = "NO3",
                        "Silicon Dioxide (SiO2)" = "SiO2",
-                       "Chlorine (Cl)" = "Cl",
+                       "Chloride (Cl)" = "Cl",
                        "Bicarbonate (HCO3)" = "HCO3")
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
@@ -61,7 +61,7 @@ units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
 
 units3 <- list("uEquivalent/L","uMole/L", "uMg/L", "flux", "normalized_flux")
 
-units_lai <- list("meterSquaredPerMeterSquared")
+units_lai <- list("meterSquaredPerMeterSquared", ("NO^2"))
 
 units_flux <- list("flux")
 
