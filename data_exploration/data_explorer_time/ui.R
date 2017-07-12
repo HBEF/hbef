@@ -22,11 +22,11 @@ solutes_cations <- list("Aluminum (Al)" = "Al",
                         "Potassium (K)" = "K")
 
 solutes_anions <- list("Phosphate (PO4)" = "PO4",
-                        "Sulfate (SO4)" = "SO4",
-                        "Nitrate (NO3)" = "NO3",
-                        "Silicon Dioxide (SiO2)" = "SiO2",
-                        "Chloride (Cl)" = "Cl",
-                        "Bicarbonate (HCO3)" = "HCO3")
+                       "Sulfate (SO4)" = "SO4",
+                       "Nitrate (NO3)" = "NO3",
+                       "Silicon Dioxide (SiO2)" = "SiO2",
+                       "Chloride (Cl)" = "Cl",
+                       "Bicarbonate (HCO3)" = "HCO3")
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
 
@@ -43,7 +43,7 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 9" = "9")
 
 water_sources <- list("Precipitation (P)" = "precipitation",
-                     "Streamflow (Q)" = "streamflow")
+                      "Streamflow (Q)" = "streamflow")
 
 granularity <- list("Year (VWC)" = "year",
                     "Month (VWC)" = "month",
@@ -68,11 +68,11 @@ shinyUI(fluidPage(
   
   ########### BODY ##############################################################
   
-
-      
-              
+  
+  
+  
   ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
-    
+  
   
   ########################### QUESTION #1 ###################################
   
@@ -92,33 +92,33 @@ shinyUI(fluidPage(
         #Solutes
         fluidRow(
           column(12, actionLink("select_all_ions", h4("Solutes"))),
-         
+          
           #Cations
-           column(6,
-                    actionLink("select_all_cations", h5("Cations")),
-                    checkboxGroupInput("solutes_cations", label = "",
-                    choices = solutes_cations,
-                    selected = "Na")),
+          column(6,
+                 actionLink("select_all_cations", h5("Cations")),
+                 checkboxGroupInput("solutes_cations", label = "",
+                                    choices = solutes_cations,
+                                    selected = "Na")),
           
           #Anions
           
           column(6, actionLink("select_all_anions", h5("Anions")),
-                    checkboxGroupInput("solutes_anions", label = "",
-                    choices = solutes_anions,
-                    selected = "SO4)"))),
-          #Hydrogen  
+                 checkboxGroupInput("solutes_anions", label = "",
+                                    choices = solutes_anions,
+                                    selected = "SO4)"))),
+        #Hydrogen  
         
         fluidRow(
           column(12, checkboxGroupInput("solutes_H", label = h4(""),
-                                       choices = solutes_H,
-                                       selected = ""))),
+                                        choices = solutes_H,
+                                        selected = ""))),
         
         ##Watersheds
         fluidRow(
           column(12, actionLink("select_all_ws", h4("Watersheds")), 
                  selectInput("watersheds", label = "",
-                                       choices = watersheds, multiple = TRUE,
-                                       selected = "6"))),
+                             choices = watersheds, multiple = TRUE,
+                             selected = "6"))),
         
         ##Water Sources
         fluidRow(
@@ -130,15 +130,15 @@ shinyUI(fluidPage(
         ##Units  
         fluidRow(
           column(12, selectInput("units", label = h4("Units"),
-                    choices = units,
-                    selected = "mg/L")),
+                                 choices = units,
+                                 selected = "mg/L")),
           column(12, checkboxInput("log", label = ("ln"),
                                    value = FALSE))),
         ##Granularity
         fluidRow(
           column(12, selectInput("granularity", label = h4("Granularity"),
-                    choices = granularity,
-                    selected = "year"))),
+                                 choices = granularity,
+                                 selected = "year"))),
         
         ##Date Range
         sliderInput("date_range", label = h4("Date Range"),
@@ -152,13 +152,13 @@ shinyUI(fluidPage(
       ############## GRAPH #################### 
       #Edit the name of the plot based on the name given in the server.R file 
       mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
-        
-        ### PLOT VIEW 1
-        tabPanel("Concentration", plotlyOutput("plot1a")),
-        
-        ### PLOT VIEW 2
-        tabPanel("Net Ecosystem Retention",plotlyOutput("plot1c"))
-        )), width = 8), 
+                                                              
+                                                              ### PLOT VIEW 1
+                                                              tabPanel("Concentration", plotlyOutput("plot1a")),
+                                                              
+                                                              ### PLOT VIEW 2
+                                                              tabPanel("Net Ecosystem Retention",plotlyOutput("plot1c"))
+      )), width = 8), 
       position = "right"
     )
     ############## END OF GRAPH ################ 
@@ -170,12 +170,11 @@ shinyUI(fluidPage(
   ########################### END OF QUESTION #1 ###################################
   
   
-### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
-
+  ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
   
-
+  
+  
   
 )#closes FluidPage
 ) #closes ShinyUI
 
-  

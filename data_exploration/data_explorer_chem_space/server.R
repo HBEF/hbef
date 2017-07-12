@@ -135,9 +135,8 @@ shinyServer(function(session, input, output) {
    
     basic_columns <- c("ws","date","water_date","water_year","source","water_mm","framey")
     needed_columns <- c(basic_columns,unit_columns)
-    data <- data[,needed_columns]
+    data <- data[, needed_columns]
     
-  
     
     if(length(input$solutesx) == 1){data}
     else{ solutes_to_add <- colnames(data[,grep(paste(input$solutesx, collapse="|"), names(data))])
