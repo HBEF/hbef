@@ -295,19 +295,17 @@ shinyServer(function(session, input, output) {
   })
   
   reactive_data_norm <- reactive({
-    data_norm <- imported_data
+    data_norm <- merge(imported_data, ws_cast, all = T)
     data_norm <- data_norm[data_norm$granularity %in% input$granularity3,]
     data_norm <- data_norm[data_norm$source %in% c("streamflow"),]
     data_norm <- data_norm[data_norm$ws %in% c("2", "4", "5"),]
     data_norm <- data_norm[data_norm$solute %in% c("NO3"),]
-    #add normalized flux by merging?
-    data_norm <- merge(data_norm, ws_cast, all = T)
   })
   
   x3 <- reactive({
     if(input$granularity3 == "week"){"water_date"}
     else if(input$granularity3 == "month"){"water_date"}
-    else if(input$granularity3 == "year"){"water_year"} ############FIX WATER_YEAR VALUES
+    else if(input$granularity3 == "year"){"water_year"}
   })
   
   y3 <- reactive({
@@ -388,8 +386,8 @@ shinyServer(function(session, input, output) {
   }
 
 
-  ## GGPLOT TIME FUNCTION 3.2
-  ggplot_function3.2 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+  ## GGPLOT TIME FUNCTION _excess
+  ggplot_function_excess <- function(data, x, y, ncol = NULL, nrow = NULL, log){
     
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
@@ -406,7 +404,7 @@ shinyServer(function(session, input, output) {
       xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = -8, color = "black")+
-      scale_shape_manual(values = watershed_shapes)+
+      scale_shape_manual(values = source_shapes)+
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
     
@@ -429,6 +427,8 @@ shinyServer(function(session, input, output) {
     lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
+      theme(axis.title.x = element_text(face="bold", colour="#990000", size=20))+
+      ylab("Leaf Area Index T")+
       facet_wrap(~PLOT)+
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
     
@@ -458,7 +458,7 @@ shinyServer(function(session, input, output) {
   })
   
   #make a plot of nitrates like in the 2003 paper
-  #(moles/ha-yr (flux) vs water year, faceted into output (excess) for ws1,6 and diff for ws2,4,5)
+  #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
   output$NO3_output <- renderPlotly({
     NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
@@ -469,18 +469,10 @@ shinyServer(function(session, input, output) {
     NO3_output %>%
       layout(autosize = TRUE, height = 600)
   })
-  output$NO3_difference <- renderPlotly({
-    NO3_difference <- ggplot_function3.2(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
-    NO3_difference$x$layout$width <- NULL
-    NO3_difference$y$layout$height <- NULL
-    NO3_difference$width <- NULL
-    NO3_difference$height <- NULL
-    NO3_difference %>%
-      layout(autosize = TRUE, height = 600)
-  })
-  
-  #simple versions of NO3 output to help see what should be interactive
+  #simple version of NO3 output to help see what should be interactive, etc
   output$static_NO3_output <- renderPlotly({
+    imported_data_streamflow <- imported_data
+    imported_data_streamflow <- imported_data_streamflow[imported_data_streamflow$source %in% c("streamflow"),]
     
     static_NO3_output <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616", shape = ws))+ my_theme+
       geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
@@ -502,44 +494,15 @@ shinyServer(function(session, input, output) {
     static_NO3_output %>%
       layout(autosize = TRUE, height = 600)
   })
-  #static versions of NO3 difference to help see what should be interactive
-  #find ways to normalize
-  output$static_NO3_difference <- renderPlotly({
-    
-    static_NO3_difference <- ggplot_function3.2(reactive_data_norm(), x3(), y3(), ncol = 1, log = input$log3)
-
-    static_NO3_difference$x$layout$width <- NULL
-    static_NO3_difference$y$layout$height <- NULL
-    static_NO3_difference$width <- NULL
-    static_NO3_difference$height <- NULL
-    static_NO3_difference %>%
+  
+  #NO3 excess
+  output$NO3_excess <- renderPlotly({
+    NO3_excess <- ggplot_function_excess(reactive_data_norm(), x3(), y3(), ncol = 1, log = input$log3)
+    NO3_excess$x$layout$width <- NULL
+    NO3_excess$y$layout$height <- NULL
+    NO3_excess$width <- NULL
+    NO3_excess$height <- NULL
+    NO3_excess %>%
       layout(autosize = TRUE, height = 600)
-    
     })
-  #yet another plot trying to do that same NO3 difference
-  #  output$another_NO3_difference <- renderPlotly({
-  #   another_NO3_difference <- ggplot(ws_cast_year, aes(color = "#BF1616"))+ my_theme+
-  #     geom_line(aes(x= water_year, y= norm2))+
-  #     geom_point(aes(x= water_year, y= norm2))+
-  #     geom_line(aes(x= water_year, y= norm4))+
-  #     geom_point(aes(x= water_year, y= norm4))+
-  #     geom_line(aes(x= water_year, y= norm5))+
-  #     geom_point(aes(x= water_year, y= norm5))+
-  #     coord_cartesian(ylim= c(-600, 800))+
-  #     scale_shape_manual(values = watershed_shapes)
-  #   
-  #   another_NO3_difference <- ggplotly(  
-  #     another_NO3_difference, #tooltip = "text",
-  #     width = 900) %>%
-  #     config(displayModeBar = FALSE) %>%
-  #     config(showLink = FALSE)
-  #   
-  #   another_NO3_difference$x$layout$width <- NULL
-  #   another_NO3_difference$y$layout$height <- NULL
-  #   another_NO3_difference$width <- NULL
-  #   another_NO3_difference$height <- NULL
-  #   another_NO3_difference %>%
-  #     layout(autosize = TRUE, height = 600)
-  # })
-  # 
 })

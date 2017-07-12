@@ -237,7 +237,7 @@ shinyServer(function(session, input, output) {
   })
 
   y1 <- reactive({
-    if(input$units1 =="mg/L"){"concentration_mg"}
+    {"concentration_mg"}
     })
 
   ########### END REACTIVE DATA AND X Y 1 #########################################
@@ -254,7 +254,7 @@ shinyServer(function(session, input, output) {
         geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
         annotate("text", label = "Normal (clean) rain pH", x = as.Date("1979-01-01"), y = 5.01, alpha = 0.7, color = "black")+
         geom_ribbon(aes(ymin=5,ymax=5.4), fill="blue", alpha=0.3)+
-        labs(x = "Water Year", y = input$units1)
+        labs(x = "Water Year", y = "pH")
     
     final <- plot+ my_theme + 
       geom_line(size = 1) + 
