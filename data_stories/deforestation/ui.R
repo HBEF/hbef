@@ -79,8 +79,8 @@ shinyUI(fluidPage(
                                value = FALSE))),
                  fluidRow(column(12,
                  selectInput("granularity", label = h3("Granularity"),
-                             choices = list("By month" = "month",
-                                            "By year" = "year"),
+                             choices = list("Month (VWC)" = "month",
+                                            "Year (VWC)" = "year"),
                              selected = "year"))),
                  fluidRow(column(12,
                  selectInput("p", label = h3("Adding Precipitation"),
@@ -110,8 +110,8 @@ shinyUI(fluidPage(
                sidebarPanel(
                  fluidRow(column(12,
                  selectInput("granularity2", label = h3("Time Scale"),
-                             choices = list("By month" = "month",
-                                            "By year" = "year"),
+                             choices = list("Month (VWC)" = "month",
+                                            "Year (VWC)" = "year"),
                              selected = "year"))),
                  #checkbox input for selecting whether to apply the logarithm
                  fluidRow(column(12, 

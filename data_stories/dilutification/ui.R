@@ -39,8 +39,8 @@ watersheds <- list("Watershed 1" = 1,
 water_sources <- list("Add Precipitation" = "precip",
                       "No Precipitation" = "flow")
 
-granularity <- list("Year" = "year",
-                    "Month" = "month")
+granularity <- list("Year (VWC)" = "year",
+                    "Month (VWC)" = "month")
 
 units <- list("ueq/L","umol/L", "umg/L")
 
