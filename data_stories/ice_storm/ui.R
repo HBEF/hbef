@@ -57,9 +57,9 @@ granularity3 <- list("Year" = "year",
                     "Month" = "month",
                     "Week" = "week")
 
-units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
+units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 
-units3 <- list("uEquivalent/L","uMole/L", "uMg/L", "flux", "normalized_flux")
+units3 <- list("uEquivalent/L","uMole/L", "mg/L", "flux", "normalized_flux")
 
 units_lai <- list("meterSquaredPerMeterSquared", ("NO^2"))
 
