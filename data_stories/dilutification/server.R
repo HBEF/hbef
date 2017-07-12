@@ -32,7 +32,7 @@ solute_change <- function(df){
   df[df$solute == "Al", "solute"] = "Aluminum"
   df[df$solute == "SO4", "solute"] = "Sulfate"
   df[df$solute == "NO3", "solute"] = "Nitrate"
-  df[df$solute == "Cl", "solute"] = "Chlorine"
+  df[df$solute == "Cl", "solute"] = "Chloride"
   df[df$solute == "H", "solute"] = "Hydrogen"
   return(df)
   
@@ -56,7 +56,7 @@ shinyServer(function(session, input, output) {
   
   color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", "Calcium" = "#3B5C95",
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
-  color_anion <- c("Sulfate" = "#8F1010", "Nitrate" = "#BF1616", "Chlorine" = "#D97373")
+  color_anion <- c("Sulfate" = "#8F1010", "Nitrate" = "#BF1616", "Chloride" = "#D97373")
   color_hydro <- c("Hydrogen" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
@@ -86,7 +86,7 @@ shinyServer(function(session, input, output) {
   
   solutes_anions <- list("Sulfate (SO4)" = "SO4",
                          "Nitrate (NO3)" = "NO3",
-                         "Chlorine (Cl)" = "Cl")
+                         "Chloride (Cl)" = "Cl")
   
   ########### END OF IMPORTANT PRELIMINARY INFO #############################################
   

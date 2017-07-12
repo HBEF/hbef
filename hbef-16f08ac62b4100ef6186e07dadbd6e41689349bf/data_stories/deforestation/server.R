@@ -30,7 +30,7 @@ solute_change <- function(df){
   df[df$solute == "Al", "solute"] = "Aluminum"
   df[df$solute == "SO4", "solute"] = "Sulfate"
   df[df$solute == "NO3", "solute"] = "Nitrate"
-  df[df$solute == "Cl", "solute"] = "Chlorine"
+  df[df$solute == "Cl", "solute"] = "Chloride"
   df[df$solute == "H", "solute"] = "Hydrogen Ion"
   return(df)
   
@@ -204,7 +204,7 @@ plot.formatted.df <- function(df, timescale, date.input, y.lab, title.lab, addpr
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
   color_anion <- c("Phosphate" = "#600B0B", "Sulfate" = "#8F1010", 
                    "Nitrate" = "#BF1616", "Silicon Dioxide"= "#CC4545",
-                   "Chlorine" = "#D97373", "Bicarbonate" = "#E5A2A2")
+                   "Chloride" = "#D97373", "Bicarbonate" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "Hydrogen Ion" = "#FFE79C")
   
   solutes_palette <- c(color_cation, color_anion, color_hydro)
@@ -275,7 +275,7 @@ plot.dis.df <- function(df, timescale, date.input, y.lab, title.lab, addprecip){
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
   color_anion <- c("Phosphate" = "#600B0B", "Sulfate" = "#8F1010", 
                    "Nitrate" = "#BF1616", "Silicon Dioxide"= "#CC4545",
-                   "Chlorine" = "#D97373", "Bicarbonate" = "#E5A2A2")
+                   "Chloride" = "#D97373", "Bicarbonate" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "Hydrogen Ion" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
@@ -347,7 +347,7 @@ shinyServer(function(session, input, output) {
   
   solutes_anions <- list("Sulfate (SO4)" = "Sulfate",
                          "Nitrate (NO3)" = "Nitrate",
-                         "Chlorine (Cl)" = "Chlorine")
+                         "Chloride (Cl)" = "Chloride")
   solutes_H <- c("Hydrogen (H)" = "Hydrogen Ion")
   
   observeEvent(input$select_all_ions, {
