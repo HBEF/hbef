@@ -181,7 +181,6 @@ shinyServer(function(session, input, output) {
     else if(input$units =="Eq/ha-yr"){"flux"}
   })
   
-  
   log_transform <- reactive({
     if(input$log == "ln"){"transform"}
     else{"no_transform"}
@@ -199,7 +198,7 @@ shinyServer(function(session, input, output) {
     
     else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = input$units}
+        labs(x = "Water Year", y = input$units)}
     
     plot <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
@@ -245,7 +244,6 @@ shinyServer(function(session, input, output) {
                                                                                        "Date: ", get(x), "<br>", 
                                                                                        "Value:", get(y)))) + 
       my_theme +
-      ggtitle('COMING SOON!') +
       geom_point(stat= "identity") +
       facet_grid(ws~solute) +
       xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
