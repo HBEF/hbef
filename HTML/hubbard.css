@@ -146,7 +146,9 @@ h4 {
 
 p{
 	font-size: 14pt;
+	font-weight:normal;
 }
+
 
 
 @media (max-width: 765px) {
@@ -188,6 +190,21 @@ p{font-size: 12pt;}}
 
 
 /* button */
+
+button{
+	background: rgba(0,0,0,0);
+	border: solid 2px #fefefe;
+	padding: 1em;
+	margin-right: 0.5em;
+}
+
+button:hover{
+	background: #fefefe;
+	color: #363229 !important;
+	padding: 1em;
+	margin-right: 0.5em;
+}
+
 .btn {
 	vertical-align: middle;
 	padding: 10px 10px;
@@ -557,10 +574,29 @@ color: #fafafa;
 	font-size: 1em;
 	z-index: 100;
 	opacity: 0;
-	padding: 10%;
+	margin: 0;
+	margin-top: 30%;
+	
 }
 
-.list-content:hover h4{
+.list-content hr{
+	border-style: solid;
+	border-color: #fefefe;
+	width: 40%;
+	z-index: 100;
+	opacity: 0;
+}
+
+.list-content p{
+	color: #ffffff;
+	text-align: center;
+	font-size: 0.8em;
+	z-index: 100;
+	opacity: 0;
+}
+
+
+.list-content:hover h4, .list-content:hover p, .list-content:hover hr{
 	opacity: 1;
 }
 
