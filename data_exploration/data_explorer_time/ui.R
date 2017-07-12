@@ -45,11 +45,11 @@ watersheds <- list("Watershed 1" = "1",
 water_sources <- list("Precipitation (P)" = "precipitation",
                      "Streamflow (Q)" = "streamflow")
 
-granularity <- list("Year" = "year",
-                    "Month" = "month",
+granularity <- list("Year (VWC)" = "year",
+                    "Month (VWC)" = "month",
                     "Week" = "week")
 
-units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
+units <- list("uEquivalent/L","uMole/L", "mg/L", "Eq/ha-yr")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
@@ -157,7 +157,7 @@ shinyUI(fluidPage(
         tabPanel("Concentration", plotlyOutput("plot1a")),
         
         ### PLOT VIEW 2
-        tabPanel("P - Q",plotlyOutput("plot1c"))
+        tabPanel("Net Ecosystem Retention",plotlyOutput("plot1c"))
         )), width = 8), 
       position = "right"
     )
