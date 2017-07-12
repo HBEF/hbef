@@ -225,29 +225,6 @@ shinyServer(function(session, input, output) {
   #add normalized flux by merging?
   data_norm <- merge(data_norm, ws_cast, all = T)
   
-  #Normalizing Efforts########################
-  # 
-  #   #Filter data for NO3 discharge pots
-  # imported_data_streamflow <- filter(imported_data, source == "streamflow")
-  # imported_data_streamflow_ws2 <- filter(imported_data_streamflow, ws == "2")
-  # 
-  # #Normalize (divide by ws6 flux) watersheds 2,4,5 for NO3 comparisons
-  # #imported_data_streamflow_ws2$normalized_flux <- 
-  # normalized_flux_ws2 <- imported_data_streamflow[imported_data_streamflow$ws==2, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  # normalized_flux_ws4 <- imported_data_streamflow[imported_data_streamflow$ws==4, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  # normalized_flux_ws5 <- imported_data_streamflow[imported_data_streamflow$ws==5, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  # 
-  #filter for monthly then add normalized flux
-  
-  #filter by yearly then add normalized flux_sum
-  
-  #Add a new row in imported_data_streamflow called normalized_flux and fill all with NA for now
-  
-  #input normalized_flux_ws2 (and 4,5) into imported_data_streamflow to use in NO3 diffrence graph
-  
-  #REDO NORMALIZATION...looks like the numbers don't match the paper's plot (no negatives, highest value is too low...)
-  #subtracting ws6 from ws looks like the right numbers for ws2 at least
-  
   ########### END OF DATA IMPORT #############################################
   
   
@@ -470,30 +447,31 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, height = 600)
   })
   #simple version of NO3 output to help see what should be interactive, etc
-  output$static_NO3_output <- renderPlotly({
-    imported_data_streamflow <- imported_data
-    imported_data_streamflow <- imported_data_streamflow[imported_data_streamflow$source %in% c("streamflow"),]
-    
-    static_NO3_output <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616", shape = ws))+ my_theme+
-      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
-      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
-      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "6"))+
-      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "6"))+
-      scale_shape_manual(values = watershed_shapes)
-      
-    static_NO3_output <- ggplotly(  
-      static_NO3_output, #tooltip = "text",
-      width = 900) %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-    static_NO3_output$x$layout$width <- NULL
-    static_NO3_output$y$layout$height <- NULL
-    static_NO3_output$width <- NULL
-    static_NO3_output$height <- NULL
-    static_NO3_output %>%
-      layout(autosize = TRUE, height = 600)
-  })
+  # output$static_NO3_output <- renderPlotly({
+  #   streamflow_NO3_data <- imported_data
+  #   streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$source %in% c("streamflow"),]
+  #   streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$solute %in% c("NO3"),]
+  #   
+  #   static_NO3_output <- ggplot(streamflow_NO3_data, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
+  #     geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "1",])+
+  #     geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws =="1",])+
+  #     geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
+  #     geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
+  #     scale_shape_manual(values = watershed_shapes)
+  #     
+  #   static_NO3_output <- ggplotly(  
+  #     static_NO3_output, #tooltip = "text",
+  #     width = 900) %>%
+  #     config(displayModeBar = FALSE) %>%
+  #     config(showLink = FALSE)
+  #   
+  #   static_NO3_output$x$layout$width <- NULL
+  #   static_NO3_output$y$layout$height <- NULL
+  #   static_NO3_output$width <- NULL
+  #   static_NO3_output$height <- NULL
+  #   static_NO3_output %>%
+  #     layout(autosize = TRUE, height = 600)
+  # })
   
   #NO3 excess
   output$NO3_excess <- renderPlotly({
