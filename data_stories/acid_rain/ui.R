@@ -59,20 +59,18 @@ watersheds6 <- list("Watershed 6" = "6")
 water_sources <- list("Precipitation (P)" = "precipitation",
                       "Discharge (Q)" = "streamflow")
 
-granularity <- list("Year" = "year",
-                    "Month" = "month",
+granularity <- list("Year (VWC)" = "year",
+                    "Month (VWC)" = "month",
                     "Week" = "week")
 
-granularity1 <- list("Year" = "year",
-                     "Month" = "month")
+granularity1 <- list("Year (VWC)" = "year",
+                     "Month (VWC)" = "month")
 
-granularity3 <- list("Year" = "year",
-                    "Month" = "month",
+granularity3 <- list("Year (VWC)" = "year",
+                    "Month (VWC)" = "month",
                     "Week" = "week")
 
 units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
-units1 <- list("mg/L")
-
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
@@ -124,13 +122,6 @@ shinyUI(fluidPage(
                                                              choices = water_sources,
                                                              selected = "precipitation",
                                                              inline = TRUE))),
-                             
-                             ##Units  
-                             fluidRow(
-                               column(12, selectInput("units1", label = h4("Units"),
-                                                      choices = units1,
-                                                      selected = "mg/L"))),
-                             
                              ##Granularity
                              fluidRow(
                                column(12, selectInput("granularity1", label = h4("Granularity"),
