@@ -30,7 +30,7 @@ shinyServer(function(session, input, output) {
           axis.title= element_text(NULL), axis.title.x= element_blank(), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
   
-  color_cation <- c("Al" = "#162338", "Mg" = "#273D64", "Ca" = "#3B5C95", "NH4" = "#4E7AC7" , "Na" = "#7195D2", "K" = "#95AFDD")
+  color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
   color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
@@ -124,8 +124,8 @@ shinyServer(function(session, input, output) {
   ########### DATA IMPORT ####################################################
   
   lai_data <- read_csv("lai.txt")
-#  lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
-#  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
+  # lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
+  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
@@ -215,39 +215,7 @@ shinyServer(function(session, input, output) {
   #merge all ws_cast s together
   ws_cast <- merge(ws_cast_month, ws_cast_year, all = T)
   ws_cast <- merge(ws_cast, ws_cast_week, all = T)
-  
-  #merge into imported_data by solute and ws and source...
-  #try filtering first like in the reactive data then adding the normalized flux
-  data_norm <- imported_data
-  data_norm <- data_norm[data_norm$source %in% c("streamflow"),]
-  data_norm <- data_norm[data_norm$ws %in% c("2", "4", "5"),]
-  data_norm <- data_norm[data_norm$solute %in% c("NO3"),]
-  #add normalized flux by merging?
-  data_norm <- merge(data_norm, ws_cast, all = T)
-  
-  #Normalizing Efforts########################
-  # 
-  #   #Filter data for NO3 discharge pots
-  # imported_data_streamflow <- filter(imported_data, source == "streamflow")
-  # imported_data_streamflow_ws2 <- filter(imported_data_streamflow, ws == "2")
-  # 
-  # #Normalize (divide by ws6 flux) watersheds 2,4,5 for NO3 comparisons
-  # #imported_data_streamflow_ws2$normalized_flux <- 
-  # normalized_flux_ws2 <- imported_data_streamflow[imported_data_streamflow$ws==2, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  # normalized_flux_ws4 <- imported_data_streamflow[imported_data_streamflow$ws==4, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  # normalized_flux_ws5 <- imported_data_streamflow[imported_data_streamflow$ws==5, "flux"]-imported_data_streamflow[imported_data_streamflow$ws==6, "flux"]
-  # 
-  #filter for monthly then add normalized flux
-  
-  #filter by yearly then add normalized flux_sum
-  
-  #Add a new row in imported_data_streamflow called normalized_flux and fill all with NA for now
-  
-  #input normalized_flux_ws2 (and 4,5) into imported_data_streamflow to use in NO3 diffrence graph
-  
-  #REDO NORMALIZATION...looks like the numbers don't match the paper's plot (no negatives, highest value is too low...)
-  #subtracting ws6 from ws looks like the right numbers for ws2 at least
-  
+
   ########### END OF DATA IMPORT #############################################
   
   
@@ -461,7 +429,7 @@ shinyServer(function(session, input, output) {
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
+    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y = imported_data$flux, ncol = 1, log = input$log3)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
@@ -471,22 +439,24 @@ shinyServer(function(session, input, output) {
   })
   #simple version of NO3 output to help see what should be interactive, etc
   output$static_NO3_output <- renderPlotly({
-    imported_data_streamflow <- imported_data
-    imported_data_streamflow <- imported_data_streamflow[imported_data_streamflow$source %in% c("streamflow"),]
+    streamflow_NO3_data <- imported_data
+    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$source %in% c("streamflow"),]
+    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$solute %in% c("NO3"),]
+    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$granularity %in% input$granularity3,]
     
-    static_NO3_output <- ggplot(NULL, aes(get(x3()), get(y3()), color = "#BF1616", shape = ws))+ my_theme+
-      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
-      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "1"))+
-      geom_line(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "6"))+
-      geom_point(data = subset(imported_data_streamflow[imported_data_streamflow$solute == "NO3",], ws %in% "6"))+
+    static_NO3_output <- ggplot(NULL, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
+      geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "1",])+
+      geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws =="1",])+
+      geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
+      geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
       scale_shape_manual(values = watershed_shapes)
-      
-    static_NO3_output <- ggplotly(  
+
+    static_NO3_output <- ggplotly(
       static_NO3_output, #tooltip = "text",
       width = 900) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
-    
+
     static_NO3_output$x$layout$width <- NULL
     static_NO3_output$y$layout$height <- NULL
     static_NO3_output$width <- NULL
