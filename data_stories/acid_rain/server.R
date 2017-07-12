@@ -249,7 +249,7 @@ shinyServer(function(session, input, output) {
   ggplot_function1 <- function(data, x, y, ncol = NULL, nrow = NULL){
     
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
-        geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+
+       # geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+
         annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.21, alpha = 0.7, color = "black")+
         geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
         annotate("text", label = "Normal (clean) rain pH", x = as.Date("1979-01-01"), y = 5.01, alpha = 0.7, color = "black")+
