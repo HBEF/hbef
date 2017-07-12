@@ -65,7 +65,7 @@ shinyServer(function(session, input, output) {
                          "Sulfate (SO4)" = "SO4",
                          "Nitrate (NO3)" = "NO3",
                          "Silicon Dioxide (SiO2)" = "SiO2",
-                         "Chlorine (Cl)" = "Cl",
+                         "Chloride (Cl)" = "Cl",
                          "Bicarbonate (HCO3)" = "HCO3")
   
   ########### END OF IMPORTANT PRELIMINARY INFO #############################################

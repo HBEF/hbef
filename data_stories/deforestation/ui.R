@@ -17,7 +17,7 @@ solutes_cations <- list("Potassium (K)" = "Potassium",
 
 solutes_anions <- list("Sulfate (SO4)" = "Sulfate",
                        "Nitrate (NO3)" = "Nitrate",
-                       "Chlorine (Cl)" = "Chlorine")
+                       "Chloride (Cl)" = "Chloride")
 solutes_H <- c("Hydrogen (H)" = "Hydrogen Ion")
 
   # Application title

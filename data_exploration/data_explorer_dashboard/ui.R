@@ -25,7 +25,7 @@ solutes_anions <- list("Phosphate (PO4)" = "PO4",
                         "Sulfate (SO4)" = "SO4",
                         "Nitrate (NO3)" = "NO3",
                         "Silicon Dioxide (SiO2)" = "SiO2",
-                        "Chlorine (Cl)" = "Cl",
+                        "Chloride (Cl)" = "Cl",
                         "Bicarbonate (HCO3)" = "HCO3")
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
@@ -59,7 +59,7 @@ units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_u
 
 shinyUI(
   
-  dashboardPage(
+  dashboardPage(skin = "black",
     dashboardHeader(title = "Exploratory Dashboard"),
     dashboardSidebar(
       width = 50,
@@ -81,22 +81,27 @@ shinyUI(
       tabItems(
         # First tab content
         tabItem(tabName = "dashboard",
+      
+        box(width = 13,
+        ##Watersheds
+        
+          #column(3, actionLink("select_all_ws",  h4("Watersheds"))),
+          column(5, selectInput("watersheds", label = "",
+                                choices = watersheds, multiple = TRUE,
+                                selected = "8"))),
+                
+      
       fluidRow(
         box(width = 10, height = "400px",
-          ##Watersheds
-          fluidRow(
-            #column(3, actionLink("select_all_ws",  h4("Watersheds"))),
-            column(5, selectInput("watersheds", label = "",
-                                  choices = watersheds, multiple = TRUE,
-                                  selected = "8")),
-            ##Granularity
-            column(2, selectInput("granularity", label = "",
+            fluidRow(##Granularity
+            column(2, offset = 9, selectInput("granularity", label = "",
                                    choices = granularity,
-                                   selected = "week"))
-            ),
-         
+                                   selected = "week"))),
+            
+            verbatimTextOutput("zoom"),
           
           plotlyOutput("plot_pq")
+          
           
         ),
         
@@ -120,7 +125,7 @@ shinyUI(
         box(width = 10, height = "400px",
             fluidRow(
               ##Granularity
-              column(2, selectInput("granularity_time", label = "",
+              column(2,  offset = 9,selectInput("granularity_time", label = "",
                                     choices = granularity,
                                     selected = "week"))
             ),#Closes Row
@@ -184,7 +189,7 @@ shinyUI(
         box(width = 6,
             fluidRow(
             ##Granularity
-            column(4, selectInput("granularity_cq", label = "",
+            column(4, offset = 7,selectInput("granularity_cq", label = "",
                                   choices = granularity,
                                   selected = "week"))
             ),#Closes Row
@@ -192,7 +197,7 @@ shinyUI(
         box(width = 6,
             fluidRow(
               ##Granularity
-              column(4, selectInput("granularity_cq", label = "",
+              column(4,  offset = 7, selectInput("granularity_cq", label = "",
                                     choices = granularity,
                                     selected = "week"))
             ),#Closes Row
@@ -210,26 +215,18 @@ shinyUI(
               
             fluidRow(
               
-              box(width = 9,
+              box(width = 9, height = "800px",
                 #Solutes Y
-                fluidRow(
-                  column(12,
-                         selectInput("solutesy_bubble", label = "",
-                                     choices = list("Cations" = solutes_cations, "Anions" = solutes_anions, "Hydrogen" = solutes_H),
-                                     selected = "Na", 
-                                     multiple = TRUE, 
-                                     selectize = TRUE))),
-                fluidRow( 
-                  plotlyOutput("bubblePlot")),
+                fluidRow(column(6,
+                                textInput("solutesy_formula", label = "", value = "Ca + Na + Mg", placeholder = "type in desired formula"))),
+                fluidRow(div(style = "height:600px;",
+                  plotlyOutput("bubblePlot"))),
                 
                 #Solutes X
-                fluidRow(div(style = "margin-left:30%;", 
-                             column(12,
-                                    selectInput("solutesx_bubble", label = "",
-                                                choices = list("Cations" = solutes_cations, "Anions" = solutes_anions, "Hydrogen" = solutes_H),
-                                                selected = "Mg", 
-                                                multiple = TRUE, 
-                                                selectize = TRUE))))
+          
+                fluidRow(column(6, offset = 3,
+                                    textInput("solutesx_formula", label = "", value = "SO4 + NO3", placeholder = "type in desired formula")))
+                         
                 
                 ),
               

@@ -66,7 +66,7 @@ shinyServer(function(session, input, output) {
                          "Sulfate (SO4)" = "SO4",
                          "Nitrate (NO3)" = "NO3",
                          "Silicon Dioxide (SiO2)" = "SiO2",
-                         "Chlorine (Cl)" = "Cl",
+                         "Chloride (Cl)" = "Cl",
                          "Bicarbonate (HCO3)" = "HCO3")
   
   solutes_H <- list("Hydrogen (H)" = "H",
@@ -178,7 +178,12 @@ shinyServer(function(session, input, output) {
     if(input$units =="mg/L"){"concentration_mg"}
     else if(input$units =="uEquivalent/L"){"concentration_ueq"}
     else if(input$units =="uMole/L"){"concentration_umol"}
-    else if(input$units =="flux"){"flux"}
+    else if(input$units =="Eq/ha-yr"){"flux"}
+  })
+  
+  vwcYN <- reactive({
+    if(input$granularity == 'week'){''}
+    else {' (VWC)'}
   })
 
   log_transform <- reactive({
@@ -194,11 +199,11 @@ shinyServer(function(session, input, output) {
   
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+      labs(x = "Water Year", y = paste("log", "(",input$units, vwcYN, ")"))}
     
     else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = input$units)}
+      labs(x = "Water Year", y = paste(input$units, vwcYN)}
     
       plot <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
@@ -220,7 +225,7 @@ shinyServer(function(session, input, output) {
     plot2 <- ggplot(data = reactive_data_PQ(), aes(x = get(x), y = water_mm)) + my_theme +
       geom_point(aes(alpha = ws, fill = source), stat = "identity") +
       labs(x = "Water Year", y = "mm") +
-      facet_grid(~source)+
+      facet_grid(source~.)+
       xlim(min(input$date_range[1]), max(input$date_range[2]))+
       scale_fill_manual(values = source_color)+
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -246,6 +251,7 @@ shinyServer(function(session, input, output) {
       my_theme +
       geom_point(stat= "identity") +
       facet_grid(ws~solute) +
+      ggtitle('COMING SOON!')
       xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
       labs(x = "Water Year", y = input$units) +
       scale_fill_manual(values = solute_palette)

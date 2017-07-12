@@ -23,7 +23,7 @@ solutes_cations <- list("Potassium (K)" = "K",
 
 solutes_anions <- list("Sulfate (SO4)" = "SO4",
                        "Nitrate (NO3)" = "NO3",
-                       "Chlorine (Cl)" = "Cl")
+                       "Chloride (Cl)" = "Cl")
 solutes_H <- c("Hydrogen (H)" = "H")
 
 watersheds <- list("Watershed 1" = 1,
