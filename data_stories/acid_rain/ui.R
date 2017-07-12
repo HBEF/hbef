@@ -24,9 +24,9 @@ solutes_cations <- list("Potassium (K)" = "K",
                         "Aluminum (Al)" = "Al")
 
 solutes_base_cations <- list("Potassium (K)" = "K",
-                        "Sodium (Na)" = "Na",
-                        "Calcium (Ca)" = "Ca",
-                        "Magnesium (Mg)" = "Mg")
+                             "Sodium (Na)" = "Na",
+                             "Calcium (Ca)" = "Ca",
+                             "Magnesium (Mg)" = "Mg")
 
 solutes_anions <- list("Phosphate (PO4)" = "PO4",
                        "Sulfate (SO4)" = "SO4",
@@ -38,8 +38,8 @@ solutes_anions3 <- list("Sulfate (SO4)" = "SO4",
                         "Nitrate (NO3)" = "NO3")
 
 solutes_Al_anions3 <- list("Sulfate (SO4)" = "SO4",
-                        "Nitrate (NO3)" = "NO3",
-                        "Aluminum (Al)" = "Al")
+                           "Nitrate (NO3)" = "NO3",
+                           "Aluminum (Al)" = "Al")
 
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
@@ -55,7 +55,7 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 9" = "9")
 
 watersheds6 <- list("Watershed 6" = "6")
-                   
+
 water_sources <- list("Precipitation (P)" = "precipitation",
                       "Discharge (Q)" = "streamflow")
 
@@ -67,8 +67,8 @@ granularity1 <- list("Year (VWC)" = "year",
                      "Month (VWC)" = "month")
 
 granularity3 <- list("Year (VWC)" = "year",
-                    "Month (VWC)" = "month",
-                    "Week" = "week")
+                     "Month (VWC)" = "month",
+                     "Week" = "week")
 
 units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 
@@ -155,7 +155,23 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #1 ##################
                        tags$div(class = "container_paragraph",
                                 fluidRow(column(width = 9,
-                                                p("Placeholder text..."))),
+                                                p("Air pollution amplifies acid rain, which washes nutrients out of the 
+                                                  soil and releases toxins into the streamflow that inhibit ecosystem 
+                                                  growth.  United States policy has largely mitigated the effects 
+                                                  of acid rain, and the long term data from Hubbard Brook is able 
+                                                  to show the story of an ecosystem on the long path to recovery."),
+                                                p("In order to best understand the canonical story of acid rain, this 
+                                                  module will focus on watershed six - the biogeochemical reference - 
+                                                  in order to observe the effects of acid rain without experimental 
+                                                  disruptions.  The dataset for watershed six dates back to 1963, 
+                                                  which coincidentally is the year of the first rendition of the 
+                                                  Clean Air Act.  This was also eight years after the first 
+                                                  legislation on air pollution (The Air Pollution Control Act of 1955.)
+                                                  Thus, the data concretely describes more of the ecosystem recovery 
+                                                  following the effects of acid rain."),
+                                                p("Ecosystem recovery can in part be tracked by the increasing 
+                                                  (de-acidifying) pH, as seen over the past 60+ years as new 
+                                                  policies are implemented to address air quality (see plot above.)"))),
                                 fluidRow(column(width = 9,
                                                 #insert widget that links to a quizlet or something here
                                                 h4("Let's see how much you know offhand about acid rain... Click",
@@ -198,7 +214,7 @@ shinyUI(fluidPage(
                            #the user to change that particular input. 
                            
                            sidebarPanel(
-                  
+                             
                              #Solutes
                              fluidRow(
                                column(12, actionLink("select_all_ions2", h4("Solutes"))),
@@ -370,7 +386,7 @@ shinyUI(fluidPage(
                                                           ### PLOT VIEW 1
                                                           tabPanel("Combined", 
                                                                    h4("Decrease in SOx and NOx concentrations"),
-
+                                                                   
                                                                    #Anions
                                                                    checkboxGroupInput("solutes_anions3", label = "",
                                                                                       choices = solutes_anions3,
@@ -392,7 +408,7 @@ shinyUI(fluidPage(
                                                                                       selected = c("SO4", "NO3", "Al")),
                                                                    plotlyOutput("policy_Al", height = "auto"))
                                               )
-                                              ), width = 8), 
+                           ), width = 8), 
                            position = "right"
                          ),
                          
