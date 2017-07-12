@@ -203,7 +203,7 @@ shinyServer(function(session, input, output) {
     
     else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = paste(input$units, vwcYN)}
+      labs(x = "Water Year", y = paste(input$units, vwcYN))}
     
       plot <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
