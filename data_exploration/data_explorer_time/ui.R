@@ -25,7 +25,7 @@ solutes_anions <- list("Phosphate (PO4)" = "PO4",
                         "Sulfate (SO4)" = "SO4",
                         "Nitrate (NO3)" = "NO3",
                         "Silicon Dioxide (SiO2)" = "SiO2",
-                        "Chlorine (Cl)" = "Cl",
+                        "Chloride (Cl)" = "Cl",
                         "Bicarbonate (HCO3)" = "HCO3")
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
@@ -45,11 +45,11 @@ watersheds <- list("Watershed 1" = "1",
 water_sources <- list("Precipitation (P)" = "precipitation",
                      "Streamflow (Q)" = "streamflow")
 
-granularity <- list("Year" = "year",
-                    "Month" = "month",
+granularity <- list("Year (VWC)" = "year",
+                    "Month (VWC)" = "month",
                     "Week" = "week")
 
-units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
+units <- list("uEquivalent/L","uMole/L", "mg/L", "Eq/ha-yr")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
@@ -157,7 +157,7 @@ shinyUI(fluidPage(
         tabPanel("Concentration", plotlyOutput("plot1a")),
         
         ### PLOT VIEW 2
-        tabPanel("P - Q",plotlyOutput("plot1c"))
+        tabPanel("Net Ecosystem Retention",plotlyOutput("plot1c"))
         )), width = 8), 
       position = "right"
     )

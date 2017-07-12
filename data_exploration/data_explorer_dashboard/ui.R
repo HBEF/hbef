@@ -25,7 +25,7 @@ solutes_anions <- list("Phosphate (PO4)" = "PO4",
                         "Sulfate (SO4)" = "SO4",
                         "Nitrate (NO3)" = "NO3",
                         "Silicon Dioxide (SiO2)" = "SiO2",
-                        "Chlorine (Cl)" = "Cl",
+                        "Chloride (Cl)" = "Cl",
                         "Bicarbonate (HCO3)" = "HCO3")
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
@@ -49,7 +49,7 @@ granularity <- list( "Week" = "week",
                     "Month" = "month",
                     "Year" = "year")
 
-units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_umol", "uMg/L" = "concentration_mg")
+units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_umol", "mg/L" = "concentration_mg")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################

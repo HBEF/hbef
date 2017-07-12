@@ -66,7 +66,7 @@ shinyServer(function(session, input, output) {
                          "Sulfate (SO4)" = "SO4",
                          "Nitrate (NO3)" = "NO3",
                          "Silicon Dioxide (SiO2)" = "SiO2",
-                         "Chlorine (Cl)" = "Cl",
+                         "Chloride (Cl)" = "Cl",
                          "Bicarbonate (HCO3)" = "HCO3")
   
   solutes_H <- list("Hydrogen (H)" = "H",
@@ -175,10 +175,10 @@ shinyServer(function(session, input, output) {
   })
   
   y <- reactive({
-    if(input$units =="uMg/L"){"concentration_mg"}
+    if(input$units =="mg/L"){"concentration_mg"}
     else if(input$units =="uEquivalent/L"){"concentration_ueq"}
     else if(input$units =="uMole/L"){"concentration_umol"}
-    else if(input$units =="flux"){"flux"}
+    else if(input$units =="Eq/ha-yr"){"flux"}
   })
 
   log_transform <- reactive({
