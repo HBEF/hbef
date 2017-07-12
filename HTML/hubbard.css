@@ -96,7 +96,11 @@ section{
 
 a{
 	color: #363229;
-	text-decoration:none;
+	text-decoration: none;
+}
+
+p a{
+	text-decoration: underline;
 }
 
 a:hover {
@@ -187,71 +191,6 @@ p{font-size: 12pt;}}
 	color: #fafafa;
 }
 
-
-
-/* button */
-
-button{
-	background: rgba(0,0,0,0);
-	border: solid 2px #fefefe;
-	padding: 1em;
-	margin-right: 0.5em;
-}
-
-button:hover{
-	background: #fefefe;
-	color: #363229 !important;
-	padding: 1em;
-	margin-right: 0.5em;
-}
-
-.btn {
-	vertical-align: middle;
-	padding: 10px 10px;
-	width:250px;
-	text-align: center;
-	cursor: pointer;
-	text-transform: uppercase;
-}
-
-.btn-three{
-	color: #FFF;
-	transition: all 0.5s;
-	position: relative;
-}
-
-.btn-three::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 1;
-	background-color: rgba(255,255,255,0.3);
-	transition: all 0.3s;
-}
-.btn-three:hover::before {
-	opacity: 0 ;
-	transform: scale(0.5,0.5);
-}
-.btn-three::after {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 1;
-	opacity: 0;
-	transition: all 0.3s;
-	border: 3px solid rgba(255,255,255,0.5);
-	transform: scale(1.2,1.2);
-}
-.btn-three:hover::after {
-	opacity: 1;
-	transform: scale(1,1);
-}
 
 
 /* horizontal buttons */
@@ -661,3 +600,27 @@ color: #fafafa;
 .left_col {
 	width: 500px;
 }
+
+
+
+
+
+
+/* button */
+
+button{
+	background: rgba(0,0,0,0);
+	border: solid 2px #fefefe;
+	padding: 0 2em;
+	margin-top: 0.5em;
+	margin-right: 0.5em;
+	color: #fefefe;
+	text-transform: uppercase;
+}
+
+button:hover{
+	background: #fefefe;
+	color: #363229 !important;
+}
+
+
