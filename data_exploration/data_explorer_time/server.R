@@ -19,7 +19,7 @@ library(directlabels)
 
 
 shinyServer(function(session, input, output) {
-
+  
   ########### IMPORTANT PRELIMINARY INFO #############################################
   
   ###  Theme  ################
@@ -66,14 +66,14 @@ shinyServer(function(session, input, output) {
                          "Sulfate (SO4)" = "SO4",
                          "Nitrate (NO3)" = "NO3",
                          "Silicon Dioxide (SiO2)" = "SiO2",
-                         "Chlorine (Cl)" = "Cl",
+                         "Chloride (Cl)" = "Cl",
                          "Bicarbonate (HCO3)" = "HCO3")
   
   solutes_H <- list("Hydrogen (H)" = "H",
                     "pH" = "pH")
   
   all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
-
+  
   ########### END OF IMPORTANT PRELIMINARY INFO #############################################
   
   
@@ -118,7 +118,7 @@ shinyServer(function(session, input, output) {
   solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
-
+  
   
   
   
@@ -126,7 +126,7 @@ shinyServer(function(session, input, output) {
   
   load("precip_streamflow_dfs.RData")
   
-  imported_data <- precip_streamflow_data_long
+  imported_data <- precip_streamflow_long
   imported_data2 <- precip_streamflow_diff_data_long
   
   ########### END OF DATA IMPORT #############################################
@@ -137,11 +137,11 @@ shinyServer(function(session, input, output) {
   
   reactive_data <- reactive({
     data <- imported_data
-      data <- data[data$granularity %in% input$granularity,]
-      data <- data[data$source %in% input$water_sources,]
-      data <- data[data$solute %in% solutes(),] 
-      #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-      data <- data[data$ws %in% input$watersheds,]
+    data <- data[data$granularity %in% input$granularity,]
+    data <- data[data$source %in% input$water_sources,]
+    data <- data[data$solute %in% solutes(),] 
+    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
+    data <- data[data$ws %in% input$watersheds,]
   })
   
   reactive_data2 <- reactive({
@@ -169,17 +169,18 @@ shinyServer(function(session, input, output) {
   
   
   x <- reactive({
-    if(input$granularity == "month"){"water_date"}
+    if(input$granularity == "week"){"water_date"}
+    else if(input$granularity == "month"){"water_date"}
     else if(input$granularity == "year"){"water_year"}
   })
   
   y <- reactive({
-    if(input$units =="uMg/L"){"concentration_mg"}
+    if(input$units =="mg/L"){"concentration_mg"}
     else if(input$units =="uEquivalent/L"){"concentration_ueq"}
     else if(input$units =="uMole/L"){"concentration_umol"}
-    else if(input$units =="flux"){"flux"}
+    else if(input$units =="Eq/ha-yr"){"flux"}
   })
-
+  
   log_transform <- reactive({
     if(input$log == "ln"){"transform"}
     else{"no_transform"}
@@ -190,29 +191,29 @@ shinyServer(function(session, input, output) {
   ## GGPLOT TIME FUNCTION
   ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
     
-  
+    
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+        labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
     
     else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = input$units)}
+        labs(x = "Water Year", y = input$units)}
     
-      plot <- plot+ my_theme + geom_line(size = 1) + 
+    plot <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes(text = paste("Solute: ", solute, "<br>", 
-                                   "Water Source: ", source, "<br>", 
-                                   "Watershed: ", ws, "<br>", 
-                                   "Date: ", get(x), "<br>", 
-                                    "Value:", get(y)))) + 
+                                  "Water Source: ", source, "<br>", 
+                                  "Watershed: ", ws, "<br>", 
+                                  "Date: ", get(x), "<br>", 
+                                  "Value:", get(y)))) + 
       xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
     
     plot1 <- ggplotly(plot, tooltip = "text",
-      width = 900) %>%
+                      width = 900) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
@@ -223,7 +224,7 @@ shinyServer(function(session, input, output) {
       xlim(min(input$date_range[1]), max(input$date_range[2]))+
       scale_fill_manual(values = source_color)+
       scale_alpha_discrete(range = c(0.9, 0.5))
-        
+    
     
     plot2 <- ggplotly(  
       plot2,
@@ -239,21 +240,21 @@ shinyServer(function(session, input, output) {
   ## GGPLOT DIFF FUNCTION
   ggplot_diff_function <- function(data, x, y, ncol = NULL, nrow = NULL){
     final <- ggplot(data=data, aes(x = get(x), y = get(y), fill = solute, text = paste("Solute: ", solute, "<br>",
-                                                                                        "Watershed: ", ws, "<br>", 
-                                                                                        "Date: ", get(x), "<br>", 
-                                                                                         "Value:", get(y)))) + 
+                                                                                       "Watershed: ", ws, "<br>", 
+                                                                                       "Date: ", get(x), "<br>", 
+                                                                                       "Value:", get(y)))) + 
       my_theme +
       geom_point(stat= "identity") +
       facet_grid(ws~solute) +
       xlim(min(input$date_range[1]), max(input$date_range[2]))+ 
       labs(x = "Water Year", y = input$units) +
       scale_fill_manual(values = solute_palette)
-  
-  ggplotly(  
-    final, tooltip = "text",
-    width = 900) %>%
-    config(displayModeBar = FALSE) %>%
-    config(showLink = FALSE)  
+    
+    ggplotly(  
+      final, tooltip = "text",
+      width = 900) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)  
     
   }
   
@@ -272,8 +273,8 @@ shinyServer(function(session, input, output) {
     theplot$height <- NULL
     theplot %>%
       layout(autosize = TRUE, height = 800)
-     })
-
+  })
+  
   output$plot1c <- renderPlotly({
     theplot <- ggplot_diff_function(reactive_data2(), x(), y(), ncol = 1)
     theplot$x$layout$width <- NULL
@@ -286,6 +287,6 @@ shinyServer(function(session, input, output) {
   
   
   
-
+  
   
 })

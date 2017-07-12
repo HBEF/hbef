@@ -23,7 +23,7 @@ solutes_cations <- list("Potassium (K)" = "K",
 
 solutes_anions <- list("Sulfate (SO4)" = "SO4",
                        "Nitrate (NO3)" = "NO3",
-                       "Chlorine (Cl)" = "Cl")
+                       "Chloride (Cl)" = "Cl")
 solutes_H <- c("Hydrogen (H)" = "H")
 
 watersheds <- list("Watershed 1" = 1,
@@ -39,8 +39,8 @@ watersheds <- list("Watershed 1" = 1,
 water_sources <- list("Add Precipitation" = "precip",
                       "No Precipitation" = "flow")
 
-granularity <- list("Year" = "year",
-                    "Month" = "month")
+granularity <- list("Year (VWC)" = "year",
+                    "Month (VWC)" = "month")
 
 units <- list("ueq/L","umol/L", "umg/L")
 

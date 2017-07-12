@@ -10,7 +10,7 @@ library(utils)
 library(grid)
 library(ggthemes)
 library(lattice)
-library(directlabels)
+library(data.table)
 
 
 #######################################################################################
@@ -37,7 +37,7 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("discharge" = 16, "precipitation"= 21)
+  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
   source_color <- c("flow" = "#505050", "precip"= "#CCCDD9")
   
   ### End of Theme ################
@@ -66,7 +66,7 @@ shinyServer(function(session, input, output) {
                          "Sulfate (SO4)" = "SO4",
                          "Nitrate (NO3)" = "NO3",
                          "Silicon Dioxide (SiO2)" = "SiO2",
-                         "Chlorine (Cl)" = "Cl",
+                         "Chloride (Cl)" = "Cl",
                          "Bicarbonate (HCO3)" = "HCO3")
   
   solutes_H <- list("Hydrogen (H)" = "H",
@@ -76,7 +76,7 @@ shinyServer(function(session, input, output) {
   
   units <- list("uEquivalent/L" = "^concentration_ueq_",
                 "uMole/L" = "^concentration_umol_", 
-                "uMg/L" = "^concentration_mg_", 
+                "mg/L" = "^concentration_mg_", 
                 "flux" = "^flux_")
 
   ############
@@ -114,9 +114,9 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
-  load("precip_discharge_dfs.RData")
+  load("precip_streamflow_dfs.RData")
   
-  imported_data <- precip_discharge_data_wide
+  imported_data <- precip_streamflow_wide
   
   ########### END OF DATA IMPORT #############################################
   
@@ -126,36 +126,25 @@ shinyServer(function(session, input, output) {
   
   reactive_data <- reactive({
     data <- imported_data
+    data <- data[data$granularity %in% input$granularity,]
     data <- data[data$ws %in% input$watersheds,]
     data <- data[data$source %in% input$water_sources,]
-    data <- data[data$date >= input$date_range[1] & data$date <= input$date_range[2]]
-    unit_columns <- colnames(imported_data[,(grep(input$units, colnames(data))), with = FALSE])
+    #data <- data[data$date >= input$date_range[1] & data$date <= input$date_range[2]]
+    unit_columns <- colnames(imported_data[,(grep(input$units, colnames(data)))])
 
-    if(input$granularity == "month"){
-      date_range_columns <- colnames(data[,(grep("month", colnames(data))), with = FALSE])
-      final_columns <-intersect(unit_columns, date_range_columns)
-      }
-    else{
-      date_range_columns <- colnames(data[,(grep("year", colnames(data))), with = FALSE])
-      final_columns <-intersect(unit_columns, date_range_columns)
-    }
-  
-    basic_columns <- c("ws","date","water_date","water_year","source","water_mm_pm", "water_mm_py", "framey")
-    needed_columns <- c(final_columns, basic_columns)
-    data <- data[,needed_columns, with = FALSE]
+   
+    basic_columns <- c("ws","date","water_date","water_year","source","water_mm","framey")
+    needed_columns <- c(basic_columns,unit_columns)
+    data <- data[, needed_columns]
     
-    if(input$granularity == "year"){
-      data <- data[!duplicated(data[,c("water_year","source", "ws", "framey")]),]}
-  
-    else{data}
     
     if(length(input$solutesx) == 1){data}
-    else{ solutes_to_add <- colnames(data[,grep(paste(input$solutesx, collapse="|"), names(data)), with = FALSE])
+    else{ solutes_to_add <- colnames(data[,grep(paste(input$solutesx, collapse="|"), names(data))])
     data$sum_temporary_x = rowSums(data[,  solutes_to_add, with = FALSE], na.rm=TRUE)
     }
     
     if(length(input$solutesy) == 1){data}
-    else{ solutes_to_add <- colnames(data[,grep(paste(input$solutesy, collapse="|"), names(data)), with = FALSE])
+    else{ solutes_to_add <- colnames(data[,grep(paste(input$solutesy, collapse="|"), names(data))])
     data$sum_temporary_y = rowSums(data[,  solutes_to_add, with = FALSE], na.rm=TRUE)
     }
     
@@ -165,21 +154,17 @@ shinyServer(function(session, input, output) {
   })
   
   x <- reactive({
-    if(length(input$solutesx) == 1) {colnames(reactive_data()[,grep(input$solutesx, names(reactive_data())), with = FALSE])}
+    if(length(input$solutesx) == 1) {colnames(reactive_data()[grep(input$solutesx, names(reactive_data()))])}
     else{
       "sum_temporary_x"
     }
   })
   
   y <- reactive({
-    if(length(input$solutesy) == 1) {colnames(reactive_data()[,grep(input$solutesy, names(reactive_data())), with = FALSE])}
+    if(length(input$solutesy) == 1) {colnames(reactive_data()[grep(input$solutesy, names(reactive_data()))])}
     else{"sum_temporary_y"}
   })
   
-  size <- reactive({
-    if(input$granularity == "year"){"water_mm_py"}
-    else{"water_mm_pm"}
-  })
   
   log_transform <- reactive({
     if(input$log == "ln"){"transform"}
@@ -195,16 +180,16 @@ shinyServer(function(session, input, output) {
 
   ggplot_bubble_function <- function(data, x, y, ncol = NULL, nrow = NULL){
     if(input$trace){
-    plot <- ggplot(data=data) + my_theme + 
+      plot <- ggplot(data=data) + my_theme + 
       geom_point(aes(x = get(x), y = get(y), shape = source, 
-                     size = get(size()), color = water_year, frame = frame), stroke= 1, alpha = 0.8) +
+                     size = water_mm, color = water_year, frame = frame), stroke= 1, alpha = 0.8) +
       scale_shape_manual(values= source_shapes)+ 
       labs(y = "")}
     
     else{
     plot <- ggplot(data=data) + my_theme + 
       geom_point(aes(x = get(x), y = get(y), shape = source, 
-                       size = get(size()), color = water_year, frame = framey), stroke= 1, alpha = 0.8) +
+                       size = water_mm, color = water_year, frame = framey), stroke= 1, alpha = 0.8) +
       scale_shape_manual(values= source_shapes)+ 
       labs(y = "")
       

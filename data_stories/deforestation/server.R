@@ -13,8 +13,8 @@ library(grid)
 source_shapes <- c("Discharge" = 16, "Precipitation"= 21)
 
 #read in the data
-precip_dis <- readRDS("precip_stream_data_long.rds")
-
+load("precip_streamflow_dfs.RData")
+imported_data <- precip_streamflow_long
 
 watershed_change <- function(df){
   df$ws2 <- paste("Watershed", df$ws, sep = " ")
@@ -30,173 +30,21 @@ solute_change <- function(df){
   df[df$solute == "Al", "solute"] = "Aluminum"
   df[df$solute == "SO4", "solute"] = "Sulfate"
   df[df$solute == "NO3", "solute"] = "Nitrate"
-  df[df$solute == "Cl", "solute"] = "Chlorine"
+  df[df$solute == "Cl", "solute"] = "Chloride"
   df[df$solute == "H", "solute"] = "Hydrogen Ion"
   return(df)
   
 }
 
 source_change <- function(df){
-  df[df$source == "flow", "source"] = "Streamflow (Q)"
-  df[df$source == "precip", "source"] = "Precipitation (P)"
+  df[df$source == "streamflow", "source"] = "Streamflow (Q)"
+  df[df$source == "precipitation", "source"] = "Precipitation (P)"
   return(df)
-}
-
-# a function that formats the data to use in the plot 
-#based on the user input parameters
-format_data <- function(df, watersheds, ion, precipitation, 
-                        c.units, log, t.scale){
-  df <- as.data.frame(df)
-  df <- solute_change(df)
-  df1 <- source_change(df)
-  df2 <- df1[df1$ws %in% watersheds,]
-  df3 <- df2[df2$solute %in% ion, ]
-  if (precipitation == "precip"){
-    df4 <- df3
-  }else{
-    df4 <- filter(df3, source == "Streamflow (Q)") 
-  }
-  if (log == FALSE){
-    if (c.units == "ueq/L"){
-      if (t.scale == "year"){
-        df4$value = df4$ueq_weighted_average
-        df4$date.st = paste(df4$water_year)
-      }else{
-        df4$value = df4$concentration_ueq
-        df4$date.st = paste(df4$water_date)
-      }
-    }else if (c.units == "mg/L"){
-      if (t.scale == "year"){
-        df4$value = df4$mg_weighted_average
-        df4$date.st = paste(df4$water_year)
-      }else{
-        df4$value = df4$concentration_mg
-        df4$date.st = paste(df4$water_date)
-      }
-    }else if (c.units == "umol/L"){
-      if (t.scale == "year"){
-        df4$value = df4$umol_weighted_average
-        df4$date.st = paste(df4$water_year)
-      }else{
-        df4$value = df4$concentration_umol
-        df4$date.st = paste(df4$water_date)
-      }
-    }else {
-      if (t.scale == "year"){
-        df4$value = df4$flux_sum
-        df4$date.st = paste(df4$water_year)
-      }else{
-        df4$value = df4$flux
-        df4$date.st = paste(df4$water_date)
-      }
-    }
-  }else{
-    if (c.units == "ueq/L"){
-      if (t.scale == "year"){
-        df4$value = log(df4$ueq_weighted_average)
-        df4$date.st = paste(df4$water_year)
-      }else{
-        df4$value = log(df4$concentration_ueq)
-        df4$date.st = paste(df4$water_date)
-      }
-    }else if (c.units == "mg/L"){
-      if (t.scale == "year"){
-        df4$value = log(df4$mg_weighted_average)
-        df4$date.st = paste(df4$water_year)
-      }else{
-        df4$value = log(df4$concentration_mg)
-        df4$date.st = paste(df4$water_date)
-      }
-    }else if (c.units == "umol/L"){
-      if (t.scale == "year"){
-        df4$value = log(df4$umol_weighted_average)
-        df4$date.st = paste(df4$water_year)
-      }else{
-        df4$value = log(df4$concentration_umol)
-        df4$date.st = paste(df4$water_date)
-      }
-    }else {
-      if (t.scale == "year"){
-        df4$value = log(df4$flux_sum)
-        df4$date.st = paste(df4$water_year)
-      }else{
-        df4$value = log(df4$flux)
-        df4$date.st = paste(df4$water_date)
-      }
-    }
-  }
-  df5 <- select(df4, ws, water_date, water_year,
-                date.st, source, solute, value) 
-  colnames(df5) = c("ws","water.date", "water.year",
-                    "date", "source", "solute",
-                    "value")
-  df5$ws = paste("Watershed", df5$ws, sep = " ")
-  return(df5)
-}
-
-#Function to produce a formatted data frame of the quantities of 
-#precipitation and discharge on the correct scales
-quantity_format <- function(df, time.scale, log.q) {
-  if (time.scale == "monthly"){
-    if (log.q == FALSE){
-      timely <- df %>%
-        select(ws, water_year, water_date, 
-               solute, water_mm_pm, source)%>%
-        filter(ws == 6 | ws == 2 | ws == 4 |
-               ws == 5, solute == "Ca")
-      timely <- source_change(timely)
-      colnames(timely) = c("ws", "water.year", "water.date",
-                            "solute", "value", "source")
-      timely$ws <- paste("Watershed", timely$ws, sep = " ")
-      timely$date <- paste(timely$water.date)
-    }else{
-      timely <- df %>%
-        select(ws, water_year, water_date, 
-               solute, water_mm_pm, source)%>%
-        filter(ws == 6 | ws == 2 | ws == 4 |
-                 ws == 5, solute == "Ca")
-      timely$ln_water_mm_pm <- log(timely$water_mm_pm)
-      timely <- source_change(timely)
-      colnames(timely) = c("ws", "water.year", "water.date",
-                           "solute", "water_mm_pm", "source", "value")
-      timely$ws <- paste("Watershed", timely$ws, sep = " ")
-      timely$date <- paste(timely$water.date)
-    }
-  }else{
-    if (log.q == FALSE){
-      timely <- df %>%
-        select(ws, water_year, water_date, 
-               solute, water_mm_pm, source)%>%
-        filter(ws == 6 | ws == 2 | ws == 4 |
-                 ws == 5, solute == "Ca") %>%
-        group_by(ws, source, water_year) %>%
-        summarize(value = sum(water_mm_pm))
-      timely <- source_change(timely)
-      colnames(timely) <- c("ws", "source", "water.year", "value")
-      timely$ws <- paste("Watershed", timely$ws, sep = " ")
-      timely$date <- paste(timely$water.year)
-    }else{
-      timely <- df %>%
-        select(ws, water_year, water_date, 
-               solute, water_mm_pm, source)%>%
-        filter(ws == 6 | ws == 2 | ws == 4 |
-                 ws == 5, solute == "Ca") %>%
-        group_by(ws, source, water_year) %>%
-        summarize(value = log(sum(water_mm_pm)))
-      timely <- source_change(timely)
-      colnames(timely) <- c("ws", "source", "water.year", "value")
-      timely$ws <- paste("Watershed", timely$ws, sep = " ")
-      timely$date <- paste(timely$water.year)
-    
-    }
-    
-  }
-  return(as.data.frame(timely))
 }
 
 
 #Function to plot the formatted data frame in ggplot2
-plot.formatted.df <- function(df, timescale, date.input, y.lab, title.lab, addprecip){
+plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab, logarithm){
   theme <- theme(legend.position = "none", legend.direction = "vertical", legend.title = element_blank())
   
   color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", 
@@ -204,78 +52,61 @@ plot.formatted.df <- function(df, timescale, date.input, y.lab, title.lab, addpr
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
   color_anion <- c("Phosphate" = "#600B0B", "Sulfate" = "#8F1010", 
                    "Nitrate" = "#BF1616", "Silicon Dioxide"= "#CC4545",
-                   "Chlorine" = "#D97373", "Bicarbonate" = "#E5A2A2")
+                   "Chloride" = "#D97373", "Bicarbonate" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "Hydrogen Ion" = "#FFE79C")
   
   solutes_palette <- c(color_cation, color_anion, color_hydro)
   source_shapes <- c("Streamflow (Q)" = 16, "Precipitation (P)"= 21)
   m <- max(df$value, na.rm = TRUE)
-  v.line <- data.frame(ws = c("Watershed 2", "Watershed 4",
-                                 "Watershed 5", "Watershed 6"), 
+  v.line <- data.frame(ws2 = c("Watershed 2", "Watershed 4",
+                               "Watershed 5", "Watershed 6"), 
                        vals = c(-1675, 92, 4926, NA))
-  if (addprecip == "precip"){
-    p <- ggplot(df,aes(x= get(timescale),y=value, shape =source, 
-                       color = solute, label=date)) +
-      geom_line() +
-      geom_point(fill = "white",
-                 aes(text = paste("Solute: ", solute, "<br>", 
-                                  "Water Source: ", source, "<br>",
-                                  "Value:", round(value, 2), "<br>", 
-                                  "Date: ", get(timescale)))) +
-      theme+
-      geom_vline(data = v.line,
-                 aes(xintercept = vals),
-                 linetype = 1,
-                 show.legend = T) +
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solutes_palette) +
-      coord_cartesian(xlim = c(as.Date(date.input[1]), 
-                               as.Date(date.input[2])))+
-      labs(x = "Date (In Water Years)", 
-           y = y.lab,
-           title = title.lab)+
-      scale_shape_manual(values = source_shapes) +
-      facet_wrap(~ws, ncol = 1) 
-  }else{
-    p <- ggplot(df,aes(x= get(timescale),y=value,color = solute, label=date)) +
-      geom_line() +
-      geom_point(fill = "white",
-                 aes(text = paste("Solute: ", solute, "<br>", 
-                                  "Water Source: ", source, "<br>",
-                                  "Value:", round(value, 2), "<br>", 
-                                  "Date: ", get(timescale)))) +
-      geom_vline(data = v.line,
-                 aes(xintercept = vals),
-                 linetype = 1,
-                 show.legend = T) +
-      theme+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solutes_palette) +
-      coord_cartesian(xlim = c(as.Date(date.input[1]), 
-                               as.Date(date.input[2])))+
-      labs(x = "Date (In Water Years)", 
-           y = y.lab,
-           title = title.lab)+
-      facet_wrap(~ws, ncol = 1) 
+  if (logarithm == TRUE) {
+    gg <- ggplot(df,aes(x= get(x.r),y= log(get(y.r)), shape =source, 
+                        color = solute, label=date))
+  }else {
+    gg <- ggplot(df,aes(x= get(x.r),y= get(y.r), shape =source, 
+                        color = solute, label=date))
   }
+  p <- gg +
+    geom_line() +
+    geom_point(fill = "white",
+               aes(text = paste("Solute: ", solute, "<br>", 
+                                "Water Source: ", source, "<br>",
+                                "Value:", round(get(y.r), 2), "<br>", 
+                                "Date: ", get(x.r)))) +
+    scale_shape_manual(values = source_shapes) +
+    scale_color_manual(values = solutes_palette) +
+    coord_cartesian(xlim = c(as.Date(date.input[1]), 
+                             as.Date(date.input[2])))+
+    labs(x = "Date (In Water Years)", 
+         y = y.lab,
+         title = title.lab)+
+    scale_shape_manual(values = source_shapes) +
+    facet_wrap(~ws2, ncol = 1) +
+    geom_vline(data = v.line,
+               aes(xintercept = vals),
+               linetype = 1,
+               show.legend = T) +
+    theme_bw() + theme
   plot <- ggplotly(p,tooltip = "text",
-  width = 400, height = 600) %>%
-  layout(margin = list(b = 90)) %>%
-  config(displayModeBar = FALSE) %>%
-  config(showLink = FALSE)
+                   width = 400, height = 600) %>%
+    layout(margin = list(b = 90)) %>%
+    config(displayModeBar = FALSE) %>%
+    config(showLink = FALSE)
   
   return(plot)
 }
 
-plot.dis.df <- function(df, timescale, date.input, y.lab, title.lab, addprecip){
- theme <- theme(legend.position = "none", legend.direction = "vertical", legend.title = element_blank())
+plot.solute.eco <- function(df, x.r, y.r, date.input, y.lab, title.lab){
+  theme <- theme(legend.position = "none", legend.direction = "vertical", legend.title = element_blank())
   
   color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", 
                     "Ammonium" = "#4E7AC7" , "Calcium" = "#3B5C95",
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
   color_anion <- c("Phosphate" = "#600B0B", "Sulfate" = "#8F1010", 
                    "Nitrate" = "#BF1616", "Silicon Dioxide"= "#CC4545",
-                   "Chlorine" = "#D97373", "Bicarbonate" = "#E5A2A2")
+                   "Chloride" = "#D97373", "Bicarbonate" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "Hydrogen Ion" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
@@ -284,48 +115,52 @@ plot.dis.df <- function(df, timescale, date.input, y.lab, title.lab, addprecip){
   v.line <- data.frame(ws = c("Watershed 2", "Watershed 4",
                               "Watershed 5", "Watershed 6"), 
                        vals = c(-1675, 92, 4926, NA))
-  if (addprecip == "precip"){
-    p <- ggplot(df,aes(x= get(timescale),y=value, shape =source, label=date)) +
-      geom_line(color = "red") +
-      geom_point(color = "blue", fill = "white",
-                 aes(text = paste("Water Source: ", source, "<br>",
-                                  "Value:", round(value, 2), "<br>", 
-                                  "Date: ", get(timescale)))) +
-      geom_vline(data = v.line,
-                 aes(xintercept = vals),
-                 linetype = 1,
-                 show.legend = T) +
-      theme+
-      coord_cartesian(xlim = c(as.Date(date.input[1]), 
-                               as.Date(date.input[2])))+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      labs(x = "Date (In Water Years)", 
-           y = y.lab,
-           title = title.lab)+
-      scale_shape_manual(values = source_shapes) +
-      facet_wrap(~ws, ncol = 1) 
+  p <- ggplot(df,aes(x= get(x.r),y= get(y.r), shape =source, 
+                     color = solute, label=date)) +
+    theme
+}
+plot.dis.df <- function(df, x.r, date.input, y.lab, title.lab, logarithm){
+  theme <- theme(legend.position = "none", legend.direction = "vertical", legend.title = element_blank())
+  
+  color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", 
+                    "Ammonium" = "#4E7AC7" , "Calcium" = "#3B5C95",
+                    "Magnesium" = "#273D64", "Aluminum" = "#162338")
+  color_anion <- c("Phosphate" = "#600B0B", "Sulfate" = "#8F1010", 
+                   "Nitrate" = "#BF1616", "Silicon Dioxide"= "#CC4545",
+                   "Chloride" = "#D97373", "Bicarbonate" = "#E5A2A2")
+  color_hydro <- c("pH" = "#FFC408", "Hydrogen Ion" = "#FFE79C")
+  
+  solute_palette <- c(color_cation, color_anion, color_hydro)
+  source_shapes <- c("Streamflow (Q)" = 16, "Precipitation (P)"= 21)
+  
+  v.line <- data.frame(ws2 = c("Watershed 2", "Watershed 4",
+                               "Watershed 5", "Watershed 6"), 
+                       vals = c(-1675, 92, 4926, NA))
+  if (logarithm == TRUE){
+    gg <- ggplot(df,aes(x= get(x.r),y= log(water_mm), shape =source, label=date))
   }else{
-    p <- ggplot(df,aes(x= get(timescale),y=value,label=date)) +
-      geom_line(color = "red") +
-      geom_point(color = "blue", fill = "white",
-                 aes(text = paste("Water Source: ", source, "<br>",
-                                  "Value:", round(value, 2), "<br>", 
-                                  "Date: ", get(timescale)))) +
-      geom_vline(data = v.line,
-                 aes(xintercept = vals),
-                 linetype = 1,
-                 show.legend = T) +
-      theme+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      coord_cartesian(xlim = c(as.Date(date.input[1]), 
-                               as.Date(date.input[2])))+
-      labs(x = "Date (In Water Years)", 
-           y = y.lab,
-           title = title.lab)+
-      facet_wrap(~ws, ncol = 1) 
+    gg <- ggplot(df,aes(x= get(x.r),y= water_mm, shape =source, label=date))
   }
+  p <- gg +
+    geom_line(color = "red") +
+    geom_point(color = "blue", fill = "white",
+               aes(text = paste("Water Source: ", source, "<br>",
+                                "Value:", round(water_mm, 2), "<br>", 
+                                "Date: ", get(x.r))))  +
+    coord_cartesian(xlim = c(as.Date(date.input[1]), 
+                             as.Date(date.input[2])))+
+    scale_shape_manual(values = source_shapes) +
+    scale_color_manual(values = solute_palette) +
+    labs(x = "Date (In Water Years)", 
+         y = y.lab,
+         title = title.lab)+
+    scale_shape_manual(values = source_shapes) +
+    facet_wrap(~ws2, ncol = 1) +
+    geom_vline(data = v.line,
+               aes(xintercept = vals),
+               linetype = 1,
+               show.legend = T) +
+    theme_bw() + theme
   plot <- ggplotly(p, tooltip = "text",
                    height = 600, width = 400)%>%
     layout(margin = list(b = 90)) %>%
@@ -347,7 +182,7 @@ shinyServer(function(session, input, output) {
   
   solutes_anions <- list("Sulfate (SO4)" = "Sulfate",
                          "Nitrate (NO3)" = "Nitrate",
-                         "Chlorine (Cl)" = "Chlorine")
+                         "Chloride (Cl)" = "Chloride")
   solutes_H <- c("Hydrogen (H)" = "Hydrogen Ion")
   
   observeEvent(input$select_all_ions, {
@@ -374,60 +209,84 @@ shinyServer(function(session, input, output) {
   
   solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
   
-  #Reactive value for the units, either in
-  #concentration or flux
-  unit <- reactive({input$units})
-  
-  #Reactive value selecting the discharge quantity data set by the time scale,
-  #annually or monthly
-  discharge.data <- reactive({
-    if (input$p.dis == "precip"){
-      if (input$ln.dis == FALSE){
-        if (input$granularity2 == "month"){
-          quantity_format(df = precip_dis, time.scale = "monthly", log.q = FALSE)
-        }else{
-          quantity_format(df = precip_dis, time.scale = "yearly", log.q = FALSE)
-        }
-      }else{
-        if (input$granularity2 == "month"){
-          quantity_format(df = precip_dis, time.scale = "monthly", log.q = TRUE)
-        }else{
-          quantity_format(df = precip_dis, time.scale = "yearly", log.q = TRUE)
-        }
-      }
+  sources <- reactive({
+    if (input$p == "precip"){
+      c("Precipitation (P)", "Streamflow (Q)")
     }else{
-      if (input$ln.dis == FALSE){
-        if (input$granularity2 == "month"){
-          quantity_format(df = precip_dis, time.scale = "monthly", log.q = FALSE) %>%
-            filter(source == "Streamflow (Q)")
-        }else{
-          quantity_format(df = precip_dis, time.scale = "yearly", log.q = FALSE) %>%
-            filter(source == "Streamflow (Q)")
-        }
-      }else{
-        if (input$granularity2 == "month"){
-          quantity_format(df = precip_dis, time.scale = "monthly", log.q = TRUE) %>%
-            filter(source == "Streamflow (Q)")
-        }else{
-          quantity_format(df = precip_dis, time.scale = "yearly", log.q = TRUE) %>%
-            filter(source == "Streamflow (Q)")
-        }
-      }
+      c("Streamflow (Q)")
     }
+  })
+  
+  solute_data <- reactive({
+    data <- imported_data
+    data <- watershed_change(data)
+    data <- solute_change(data)
+    data <- source_change(data)
+    data <- data[data$source %in% sources(),]
+    data <- data[data$solute %in% solutes(),] 
+    data <- data[data$ws %in% c(2,4,5,6),]
+    data <- data[data$granularity %in% input$granularity,]
     
   })
   
-  #Reactive value selecting the data set for discharge chemistry
-  #by time scale, unit and solute
-  solute.data <- reactive({
-    format_data(df = precip_dis,
-                watersheds = c(2, 6, 4, 5),
-                ion = solutes(),
-                precipitation = input$p,
-                c.units = input$units,
-                log = input$ln,
-                t.scale = input$granularity)
+  solute_data_eco <- reactive({
+    data <- imported_data
+    data <- watershed_change(data)
+    data <- solute_change(data)
+    data <- source_change(data)
+    data <- data[data$solute %in% solutes(),] 
+    data <- data[data$ws %in% c(2,4,5,6),]
+    data <- data[data$granularity %in% input$granularity,]
+    
   })
+  
+  x <- reactive({
+    if(input$granularity == "week"){"water_date"}
+    else if(input$granularity == "month"){"water_date"}
+    else if(input$granularity == "year"){"water_year"}
+  })
+  
+  y <- reactive({
+    if(input$units =="umg/L"){"concentration_mg"}
+    else if(input$units =="ueq/L"){"concentration_ueq"}
+    else if(input$units =="umol/L"){"concentration_umol"}
+    else if(input$units =="Eq/ha-yr"){"flux"}
+  })
+  
+  sources.dis <- reactive({
+    if (input$p.dis == "precip"){
+      c("Precipitation (P)", "Streamflow (Q)")
+    }else{
+      c("Streamflow (Q)")
+    }
+  })
+  discharge_data <- reactive({
+    data <- imported_data
+    data <- watershed_change(data)
+    data <- solute_change(data)
+    data <- source_change(data)
+    data <- data[data$source %in% sources.dis(),]
+    data <- data[data$solute %in% c("Calcium"),] 
+    data <- data[data$ws %in% c(2,4,5,6),]
+    data <- data[data$granularity %in% input$granularity2,]
+  })
+  
+  discharge_data_eco <- reactive({
+    data <- imported_data
+    data <- watershed_change(data)
+    data <- solute_change(data)
+    data <- source_change(data)
+    data <- data[data$solute %in% c("Calcium"),] 
+    data <- data[data$ws %in% c(2,4,5,6),]
+    data <- data[data$granularity %in% input$granularity2,]
+  })
+  
+  x2 <- reactive({
+    if(input$granularity2 == "week"){"water_date"}
+    else if(input$granularity2 == "month"){"water_date"}
+    else if(input$granularity2 == "year"){"water_year"}
+  })
+  
   
   #Plot output for water chemistry
   output$s.plot <- renderPlotly({
@@ -448,18 +307,14 @@ shinyServer(function(session, input, output) {
         y = paste("ln(", input$units, ")", sep = "")
       }
     }
-    if (input$granularity == "month"){
-      s <- "water.date"
-    }else{
-      s <- "water.year"
-    }
-
-    plot.formatted.df(df = solute.data(),
-                      timescale = s,
-                      date.input = input$dates,
-                      y.lab = y,
-                      title.lab = title,
-                      addprecip = input$p)
+    
+    plot.solute.df(df = solute_data(),
+                   x.r = x(),
+                   y.r = y(),
+                   date.input = input$dates,
+                   y.lab = y,
+                   title.lab = title,
+                   logarithm = input$ln)
   })
   
   #Plot output for discharge quantity
@@ -467,7 +322,7 @@ shinyServer(function(session, input, output) {
     if (input$p.dis == "precip"){
       if (input$ln.dis == FALSE){
         y <- "mm"
-        title <- "Discharge and Precipitation Quantities"
+        title <- "Streamflow and Precipitation Quantities"
       }else{
         y <- "ln(mm)"
         title <- "Natural Log of Water Quantities"
@@ -475,24 +330,19 @@ shinyServer(function(session, input, output) {
     }else{
       if (input$ln.dis == FALSE){
         y <- "mm"
-        title <- "Discharge Quantities"
+        title <- "Streamflow Quantities"
       }else{
         y <- "ln(mm)"
-        title <- "Natural Log of Discharge Quantities"
+        title <- "Natural Log of Streamflow Quantities"
       }
     }
     
-    if (input$granularity2 == "month"){
-      s2 <- "water.date"
-    }else{
-      s2 <- "water.year"
-    }
     
-      plot.dis.df(df = discharge.data(), 
-                        timescale = s2,
-                        date.input = input$dates.dis,
-                        y.lab = y, title.lab = title,
-                        addprecip = input$p.dis)
+    plot.dis.df(df = discharge_data(), 
+                x.r = x2(),
+                date.input = input$dates.dis,
+                y.lab = y, title.lab = title,
+                logarithm = input$ln.dis)
     
     
     

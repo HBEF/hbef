@@ -25,7 +25,7 @@ solutes_anions <- list("Phosphate (PO4)" = "PO4",
                         "Sulfate (SO4)" = "SO4",
                         "Nitrate (NO3)" = "NO3",
                         "Silicon Dioxide (SiO2)" = "SiO2",
-                        "Chlorine (Cl)" = "Cl",
+                        "Chloride (Cl)" = "Cl",
                         "Bicarbonate (HCO3)" = "HCO3")
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
@@ -40,14 +40,14 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
-water_sources <- list("Precipitation (P)" = "precip",
-                     "Discharge (Q)" = "flow")
+water_sources <- list("Precipitation (P)" = "precipitation",
+                     "Discharge (Q)" = "streamflow")
 
 granularity <- list("Year" = "year",
                     "Month" = "month",
                     "Week" = "week")
 
-units <- list("uEquivalent/L","uMole/L", "uMg/L", "flux")
+units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
@@ -129,7 +129,7 @@ shinyUI(fluidPage(
         fluidRow(
           column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
                                         choices = water_sources,
-                                        selected = "precip",
+                                        selected = "streamflow",
                                         inline = TRUE))),
         
         ##Units  
