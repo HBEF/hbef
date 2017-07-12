@@ -30,7 +30,7 @@ shinyServer(function(session, input, output) {
           axis.title= element_text(NULL), axis.title.x= element_blank(), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
   
-  color_cation <- c("Al" = "#162338", "Mg" = "#273D64", "Ca" = "#3B5C95", "NH4" = "#4E7AC7" , "Na" = "#7195D2", "K" = "#95AFDD")
+  color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
   color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
