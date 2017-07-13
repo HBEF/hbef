@@ -129,7 +129,7 @@ shinyUI(
         #### Main area
         column(9,   
         box(width = 13, height = "600px", id = "time",
-              div(class = "titleRow", fluidRow(
+            div(class = "titleRow", fluidRow(
                 column(9, tags$h2("Time Data")),
                 ##Granularity
                 column(2,selectInput("granularity_time", label = "",
@@ -149,25 +149,48 @@ shinyUI(
         fluidRow(
           ###  ---- CQ GRAPH
           #### Main area CQ Graph
-          box(width = 6,
-              div(class = "titleRow", fluidRow(
-                column(5, tags$h2("CQ")),
+          tabBox(width = 6, side="right", selected = shiny::icon("circle"),
+              
+             ##Units - Y Axis Log
+             tabPanel(shiny::icon("gear"),
+                      fluidRow(
+                        box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                      ##Units - Y Axis Log
+                          column(6, selectInput("log_cq_y", label = "Y Axis",
+                                                                 choices = c("linear", "log"), 
+                                                                 selected = "linear")),
+                      ##Units - X Axis Log
+                          column(6, selectInput("log_cq_x", label = "X Axis",
+                                                                 choices = c("linear", "log"), 
+                                                                 selected = "linear")))),  
+                     
+                      fluidRow(
+                        box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
+                        ##Leave trace
+                        column(12, checkboxInput("trace", label = ("Leave Trace"),
+                                                  value = TRUE)),
+                      ##Animation Speed
+                        column(12, sliderInput("animation_speed", label = h4("Speed"),
+                                                min = 0.25,
+                                                max = 2, 
+                                                step = 0.25,
+                                                post = "x",
+                                                value = 1))))),
+                 
+            
+              tabPanel(shiny::icon("circle"),
+              div(class = "titleRow", fluidRow(column(5, tags$h2("CQ")),
+                  ##Granularity
+                  column(4, offset = 2,selectInput("granularity_cq", label = "",
+                                                   choices = granularity,
+                                                   selected = "year")))),         
+                  ## CQ plot
               fluidRow(
-                ##Granularity
-                column(4, offset = 2,selectInput("granularity_cq", label = "",
-                                                 choices = granularity,
-                                                 selected = "year")))
-              )),#Closes Row
-              ## CQ plot
-              plotlyOutput("plot_cq"),
-              ##Units - Y Axis Log
-              fluidRow(column(4, offset = 7, selectInput("log_cq_y", label = "Y Axis",
-                                                         choices = c("linear", "log"), 
-                                                         selected = "linear"))),
-              ##Units - X Axis Log
-              fluidRow(column(4, offset = 7, selectInput("log_cq_x", label = "X Axis",
-                                                         choices = c("linear", "log"), 
-                                                         selected = "linear")))
+                  plotlyOutput("plot_cq"))
+              
+              )#Closes Row
+              
+              
           ),
           
           ###  ---- FLUX GRAPH
@@ -238,19 +261,8 @@ shinyUI(
                 column(12, sliderInput("date_range", label = h4("Date Range"),
                                        min = as.Date("1962-01-01"),
                                        max = as.Date("2014-01-01"),
-                                       value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))))), 
-              ##Leave trace
-              fluidRow(
-                column(12, checkboxInput("trace", label = ("Leave Trace"),
-                                         value = TRUE))),
-              ##Animation Speed
-              fluidRow(
-                column(12, sliderInput("animation_speed", label = h4("Speed"),
-                                       min = 0.25,
-                                       max = 2, 
-                                       step = 0.25,
-                                       post = "x",
-                                       value = 1)))
+                                       value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))))) 
+              
             ) #Closes sidebar box
         )
           ) #Closes Time Graph Row.
