@@ -296,6 +296,7 @@ shinyServer(function(session, input, output) {
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5)) +
+          theme_bw() + 
           guides(color = FALSE, alpha = FALSE) 
         
       }else{
@@ -311,6 +312,7 @@ shinyServer(function(session, input, output) {
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5))+
+          theme_bw() + 
           guides(color = FALSE, alpha = FALSE)
         
       }
@@ -327,7 +329,8 @@ shinyServer(function(session, input, output) {
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5)) +
-          guides(color = FALSE, alpha = FALSE) 
+          theme_bw() + 
+          guides(color = FALSE, alpha = FALSE)
       }else{
         final <- plot+ geom_line(size = 1,aes(color = solute), guide = FALSE) + 
           geom_point(size = 1.5, fill = "white", stroke = 0.5, 
@@ -341,6 +344,7 @@ shinyServer(function(session, input, output) {
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5))+
+          theme_bw() + 
           guides(color = FALSE, alpha = FALSE)
       }
     }

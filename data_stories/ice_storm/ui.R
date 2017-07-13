@@ -285,13 +285,6 @@ shinyUI(fluidPage(
                                     selectInput("solutes_NO33", label = "",
                                                 choices = solutes_NO3)),
                              
-                             ##Watersheds
-                             fluidRow(
-                               column(12, actionLink("select_all_ws3", h4("Watersheds")), 
-                                      selectInput("watersheds3", label = "",
-                                                  choices = watersheds, multiple = TRUE,
-                                                  selected = "6"))),
-                             
                              ##Water Sources
                              fluidRow(
                                column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
@@ -327,8 +320,8 @@ shinyUI(fluidPage(
                                                                                    
                                                                                    ### PLOT VIEW 1
                                                                                    tabPanel("NO3 Plots Replication",
-                                                                                            h4("Static Output (ws1, ws6)"),
-                                                                                            plotlyOutput("static_NO3_output", height = "auto"),
+                                                                                           # h4("Static Output (ws1, ws6)"),
+                                                                                            #plotlyOutput("static_NO3_output", height = "auto"),
                                                                                             h4("Output (ws1, ws6)"),
                                                                                             plotlyOutput("NO3_output", height = "auto"),
                                                                                             h4("Excess (ws2, ws4, ws5)"),

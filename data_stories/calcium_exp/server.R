@@ -159,6 +159,9 @@ w6.2002.acsa <- biomass.sp(df = w6_2002, num.plots = 208, tib = TRUE, sp = "ACSA
 w6.2007.acsa <- biomass.sp(df = w6_2007, num.plots = 208, tib = FALSE, sp = "ACSA")
 w6.2012.acsa <- biomass.sp(df = w6_2012, num.plots = 208, tib = FALSE, sp = "ACSA")
 w1.1996.acsa <- biomass.sp(df = w1_1996, num.plots = 200, tib = TRUE, sp = "ACSA")
+w1.2001.acsa <- biomass.sp(df = w1_2001, num.plots = 200, tib = TRUE, sp = "ACSA")
+w1.2006.acsa <- biomass.sp(df = w1_2006, num.plots = 200, tib = TRUE, sp = "ACSA")
+w1.2011.acsa <- biomass.sp(df = w1_2011, num.plots = 200, tib = TRUE, sp = "ACSA")
 
 
 
@@ -245,10 +248,10 @@ mapdf@data$id <- rownames(mapdf@data)
 wsPoints <- fortify(mapdf, region = "id")
 wsDF <- merge(wsPoints, mapdf, by = "id")
 ggplotly(ggplot(data = wsDF)+
-           geom_polygon(aes(x = long, y = lat, group = group, fill = Biomass, frame = Year))  +
+           geom_polygon(aes(x = long, y = lat, group = group, fill = Biomass, frame = Year,
+                            text = paste("Biomass Per Meter Squared: ", Amount, sep = "")))  +
            geom_path(color = "white", 
-                     aes(x = long, y = lat, group = group, fill = Biomass, frame = Year,
-                         text = paste("Biomass per Meter Squared:", Amount, sep = " "))) +
+                     aes(x = long, y = lat, group = group, fill = Biomass, frame = Year)) +
            scale_fill_manual(values = c("violet", "purple", 
                                         "blue", "green","orange", "yellow", "red")) +
            facet_wrap(~Watershed) +
@@ -262,5 +265,5 @@ ggplotly(ggplot(data = wsDF)+
   config(showLink = FALSE) %>% 
   animation_opts(frame = 4000, transition = 0)
 
-#grid.text("Watershed 6, 2007", x=unit(0.6, "npc"), y=unit(0.03, "npc")) 
-#grid.text("Watershed 1, 2006", x=unit(0.25, "npc"), y=unit(0.03, "npc"))
+
+shinyServer(function(input, output) {})

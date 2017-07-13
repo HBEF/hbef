@@ -331,7 +331,7 @@ shinyServer(function(session, input, output) {
         labs(x = "Water Year", y = paste("log", "(",input$units3, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = ws, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = get(x), y = imported_data$flux, color = solute, shape = ws, alpha = ws))+
         labs(x = "Water Year", y = input$units3)}
     
     final <- plot+ my_theme + geom_line(size = 1) + 
@@ -395,7 +395,7 @@ shinyServer(function(session, input, output) {
     lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
-      theme(axis.title.x = element_text(face="bold", colour="#990000", size=20))+
+      xlab(" ")+
       ylab("Leaf Area Index T")+
       facet_wrap(~PLOT)+
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -429,7 +429,7 @@ shinyServer(function(session, input, output) {
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y = imported_data$flux, ncol = 1, log = input$log3)
+    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y, ncol = 1, log = input$log3)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
