@@ -44,6 +44,7 @@ shinyServer(function(session, input, output) {
   solute_palette <- c(color_cation, color_anion, color_hydro)
   source_shapes <- c("streamflow" = 16, "precipitation"= 21)
   source_color <- c("flow" = "#505050", "precip"= "#CCCDD9")
+  grey_palette <- c("#505050", "#CCCDD9")
   
   ### End of Theme ################
   
@@ -193,6 +194,13 @@ shinyServer(function(session, input, output) {
     
   })
   
+  reactive_data_flux <- reactive({
+    data<- imported_data
+    data <- data[data$granularity %in% input$granularity_flux,]
+    data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
+    data <- data[data$ws %in% input$watersheds,]
+  })
+  
   
   solutesx_formula <- reactive({
     capitalized<-"^[[:upper:]][[:alpha:]]"
@@ -247,6 +255,12 @@ shinyServer(function(session, input, output) {
     else if(input$granularity_time == "year"){"water_year"}
   })
   
+  x_flux <- reactive({
+    if(input$granularity_flux == "week"){"date"}
+    else if(input$granularity_flux == "month"){"date"}
+    else if(input$granularity_flux == "year"){"water_year"}
+  })
+  
   
   y_time <- reactive({
     if(input$yaxis_time == "concentration"){as.character(input$units)}
@@ -259,6 +273,11 @@ shinyServer(function(session, input, output) {
   
   animation_speed_bubble <- reactive({
     (80)*(1/(input$animation_speed_bubble))^2
+  })
+  
+  coloring <- reactive({
+    if(input$yaxis_time == "concentration"){solute_palette}
+    else{grey_palette}    
   })
   
   
@@ -301,10 +320,10 @@ shinyServer(function(session, input, output) {
   
   
   #### --- GGPLOT TIME FUNCTION
-  ggplot_time_function <- function(data, x, y, log, y_label){
+  ggplot_time_function <- function(data, x, y, log, y_label, color_scale){
     
     if(log == "log") {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solutes(), shape = source, alpha = ws))+
       labs(x = "Water Year", y = paste("log", "(",y_label, ")"))}
     
     else{
@@ -317,7 +336,7 @@ shinyServer(function(session, input, output) {
         
       #xlim(min(input$date_range[1]), max(input$date_range[2]))+
       scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
+      scale_color_manual(values = color_scale) +
       scale_alpha_discrete(range = c(0.9, 0.5))
     
     ggplotly(plot) %>%
@@ -393,7 +412,7 @@ shinyServer(function(session, input, output) {
      })
   
   output$plot_time <- renderPlotly({
-    theplot <- ggplot_time_function(reactive_data_time(), x_time(), y_time(),log = input$log_time, y_time())
+    theplot <- ggplot_time_function(reactive_data_time(), x_time(), y_time(),log = input$log_time, y_time(), coloring())
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -412,14 +431,13 @@ shinyServer(function(session, input, output) {
     theplot$height <- NULL
     theplot %>%
       layout(autosize = TRUE)
-    
   })
   
   
   #input log was an input cause the function thing. 
   
   output$plot_flux <- renderPlotly({
-    theplot <- ggplot_time_function(reactive_data_time(), x_time(), "flux", log = input$log_flux, "flux")
+    theplot <- ggplot_time_function(reactive_data_flux(), x_flux(), "flux", log = input$log_flux, "flux", coloring())
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
