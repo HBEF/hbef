@@ -44,8 +44,8 @@ water_sources <- list("Precipitation (P)" = "precipitation",
                      "Streamflow (Q)" = "streamflow")
 
 granularity <- list( "Week" = "week",
-                    "Month" = "month",
-                    "Year" = "year")
+                    "Month (VWC)" = "month",
+                    "Year (VWC)" = "year")
 
 time_variables <- list("concentration" = "concentration", 
                        "pH" = "pH",
@@ -112,10 +112,10 @@ shinyUI(
                    ######## PLOT 
                    tabPanel(shiny::icon("circle"),
                             div(class = "titleRow", fluidRow(column(5, tags$h2("Hydrologic Flux")),
-                                                             ##Granularity
-                                                             column(4,  offset = 2, selectInput("granularity", label = "",
-                                                                                                choices = granularity,
-                                                                                                selected = "year")))
+                             ##Granularity
+                             column(3,  offset = 4, selectInput("granularity", label = "",
+                                                                choices = granularity,
+                                                                selected = "year")))
                             ),
                             ## Time Plot
                             plotlyOutput("plot_pq")
@@ -203,7 +203,7 @@ shinyUI(
                                                    selected = "year")))),         
                   ## CQ plot
               fluidRow(
-                  plotlyOutput("plot_cq"))
+                conditionalPanel(condition = "input.yaxis_time == 'concentration'", plotlyOutput("plot_cq")))
               
               )#Closes Row
               
@@ -231,7 +231,7 @@ shinyUI(
                                                    selected = "year")))
               ),
               ## Flux Plot
-              plotlyOutput("plot_flux")
+          conditionalPanel(condition = "input.yaxis_time == 'concentration'", plotlyOutput("plot_flux"))
           ) #Closes tabpanel
           
         )# Closes tab Box
@@ -279,13 +279,7 @@ shinyUI(
             
                 checkboxGroupInput("solutes_H", label = h4(""),
                                               choices = solutes_H,
-                                              selected = "")))),
-              ##Date Range
-              fluidRow(
-                column(12, sliderInput("date_range", label = h4("Date Range"),
-                                       min = as.Date("1962-01-01"),
-                                       max = as.Date("2014-01-01"),
-                                       value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))))) 
+                                              selected = ""))))
               
             ) #Closes sidebar box
         )
