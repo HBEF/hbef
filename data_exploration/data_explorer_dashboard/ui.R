@@ -128,56 +128,68 @@ shinyUI(
         ###  ---- TIME GRAPH
         #### Main area
         column(9,   
-        box(width = 13, height = "600px", id = "time",
-            div(class = "titleRow", fluidRow(
-                column(9, tags$h2("Time Data")),
-                ##Granularity
-                column(2,selectInput("granularity_time", label = "",
-                                      choices = granularity,
-                                      selected = "year")))
-              ),#Closes div
-              ## Time graph Plot
-              plotlyOutput("plot_time"),
-              
-              ##Units - Y Axis Log
-              fluidRow(column(2, offset = 9, selectInput("log_time", label = "Y Axis",
-                                                         choices = c("linear", "log"), 
-                                                         selected = "linear")))
-          ),
+        fluidRow(
+         tabBox(width = 12, side="right", selected = shiny::icon("circle"),
+                ######## OPTIONS
+                ##Units - Axis Log
+                tabPanel(shiny::icon("gear"),
+                         fluidRow(
+                           box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                               
+                               ##Units - Y Axis Log
+                               column(6, selectInput("log_time", label = "Y Axis",
+                                                     choices = c("linear", "log"), 
+                                                     selected = "linear"))))),
+                ######## PLOT 
+                tabPanel(shiny::icon("circle"),
+                         div(class = "titleRow", fluidRow(column(5, tags$h2("Time")),
+                          ##Granularity
+                          column(4,  offset = 2, selectInput("granularity_time", label = "",
+                                                             choices = granularity,
+                                                             selected = "year")))
+                         ),
+                         ## Time Plot
+                         plotlyOutput("plot_time")
+                ) #Closes tabpanel
+                
+            )# Closes tab Box
+         
+            ),# Closes CQ and Flux Row
         
         
         fluidRow(
+          
           ###  ---- CQ GRAPH
-          #### Main area CQ Graph
+          
           tabBox(width = 6, side="right", selected = shiny::icon("circle"),
-              
-             ##Units - Y Axis Log
+          ######## OPTIONS
+             ##Units - Axis Log
              tabPanel(shiny::icon("gear"),
                       fluidRow(
                         box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                      ##Units - Y Axis Log
-                          column(6, selectInput("log_cq_y", label = "Y Axis",
-                                                                 choices = c("linear", "log"), 
-                                                                 selected = "linear")),
+                    
                       ##Units - X Axis Log
                           column(6, selectInput("log_cq_x", label = "X Axis",
                                                                  choices = c("linear", "log"), 
-                                                                 selected = "linear")))),  
-                     
+                                                                 selected = "linear")),  
+                      ##Units - Y Axis Log
+                      column(6, selectInput("log_cq_y", label = "Y Axis",
+                                            choices = c("linear", "log"), 
+                                            selected = "linear")))),
                       fluidRow(
                         box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
                         ##Leave trace
-                        column(12, checkboxInput("trace", label = ("Leave Trace"),
+                        column(12, checkboxInput("trace_cq", label = ("Leave Trace"),
                                                   value = TRUE)),
                       ##Animation Speed
-                        column(12, sliderInput("animation_speed", label = h4("Speed"),
+                        column(12, sliderInput("animation_speed_cq", label = h4("Speed"),
                                                 min = 0.25,
                                                 max = 2, 
                                                 step = 0.25,
                                                 post = "x",
                                                 value = 1))))),
                  
-            
+              ######## PLOT
               tabPanel(shiny::icon("circle"),
               div(class = "titleRow", fluidRow(column(5, tags$h2("CQ")),
                   ##Granularity
@@ -194,32 +206,39 @@ shinyUI(
           ),
           
           ###  ---- FLUX GRAPH
-          #### Main area Flux Graph  
-          box(width = 6,
-              fluidRow(
-                div(class = "titleRow", fluidRow(
-                  column(5, tags$h2("Flux")),
+          tabBox(width = 6, side="right", selected = shiny::icon("circle"),
+          ######## OPTIONS
+          ##Units - Axis Log
+          tabPanel(shiny::icon("gear"),
+                   fluidRow(
+                     box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                         
+                         ##Units - Y Axis Log
+                         column(6, selectInput("log_flux", label = "Y Axis",
+                                               choices = c("linear", "log"), 
+                                               selected = "linear"))))),
+          ######## PLOT 
+          tabPanel(shiny::icon("circle"),
+          div(class = "titleRow", fluidRow(column(5, tags$h2("Flux")),
                 ##Granularity
-                column(4,  offset = 2, selectInput("granularity_cq", label = "",
+                column(4,  offset = 2, selectInput("granularity_flux", label = "",
                                                    choices = granularity,
                                                    selected = "year")))
-              )),#Closes Row
+              ),
               ## Flux Plot
-              plotlyOutput("plot_flux"),
-              ##Units - Y Axis Log
-              fluidRow(column(4, offset = 7, selectInput("log_flux", label = "Y Axis",
-                                                         choices = c("linear", "log"), 
-                                                         selected = "linear")))
-          ) #Closes Box
+              plotlyOutput("plot_flux")
+          ) #Closes tabpanel
           
-        ) #Closes CQ and Flux Row
+        )# Closes tab Box
         
-        ),
+        )# Closes CQ and Flux Row
+        
+        ),#Closes timegraph and flux and pq column. 
         
         column(3,
         
           #### Side Bar Area
-          box(width = 13, height = "1000px", id = "sidebar",
+          box(width = 13, height = "1200px", id = "sidebar",
               #Y Axis
               fluidRow(column(12,
                               selectInput("yaxis_time", label = "",

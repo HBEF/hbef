@@ -188,7 +188,7 @@ shinyServer(function(session, input, output) {
     data <- data[data$ws %in% input$watersheds,]
     data <- data[data$source %in% "streamflow",]
   
-    if(input$trace){data <- accumulate_by(data, ~framey)}
+    if(input$trace_cq){data <- accumulate_by(data, ~framey)}
     else{data}
     
   })
@@ -253,8 +253,8 @@ shinyServer(function(session, input, output) {
     else {as.character(input$yaxis_time)}
   })
   
-  animation_speed <- reactive({
-    (80)*(1/(input$animation_speed))^2
+  animation_speed_cq <- reactive({
+    (80)*(1/(input$animation_speed_cq))^2
   })
   
   animation_speed_bubble <- reactive({
@@ -329,9 +329,9 @@ shinyServer(function(session, input, output) {
   
   #### --- GGPLOT BUBBLE PLOT
   
-  ggplot_bubble_function <- function(data, x, y, log_x, log_y){
+  ggplot_bubble_function <- function(data, x, y, log_x, log_y, speed, trace){
     
-    if(input$trace_bubble){
+    if(trace){
       plot <- ggplot(data=data, aes(shape = source, frame = frame, alpha = ws)) + my_theme + 
         scale_shape_manual(values= source_shapes)+
         scale_color_manual(values = solute_palette)}
@@ -370,7 +370,9 @@ shinyServer(function(session, input, output) {
     ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) %>% 
-      animation_opts(frame = animation_speed_bubble(), transition = 0, redraw = FALSE)
+      animation_opts(frame = speed, transition = 0, redraw = FALSE) %>% 
+      animation_slider(currentvalue = list(prefix = "Water Year ", font = list(size = 15))) %>% 
+      animation_button(font = list(size = 12))
   }
   
   
@@ -389,19 +391,6 @@ shinyServer(function(session, input, output) {
     theplot %>%
       layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
      })
-
-  output$plot_cq <- renderPlotly({
-    theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, input$log_cq_x,input$log_cq_y)
-    #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
-    theplot$x$layout$width <- NULL
-    theplot$y$layout$height <- NULL
-    theplot$width <- NULL
-    theplot$height <- NULL
-    theplot %>%
-      layout(autosize = TRUE)
-    
-  })
-  
   
   output$plot_time <- renderPlotly({
     theplot <- ggplot_time_function(reactive_data_time(), x_time(), y_time(),log = input$log_time, y_time())
@@ -413,6 +402,19 @@ shinyServer(function(session, input, output) {
     theplot %>%
       layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
   })
+  
+  output$plot_cq <- renderPlotly({
+    theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, input$log_cq_x,input$log_cq_y, animation_speed_cq(), input$trace_cq)
+    #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
+    theplot$x$layout$width <- NULL
+    theplot$y$layout$height <- NULL
+    theplot$width <- NULL
+    theplot$height <- NULL
+    theplot %>%
+      layout(autosize = TRUE)
+    
+  })
+  
   
   #input log was an input cause the function thing. 
   
@@ -428,7 +430,7 @@ shinyServer(function(session, input, output) {
   })
   
   output$bubblePlot <- renderPlotly({
-    theplot <- ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", input$log_bubble_x, input$log_bubble_y)
+    theplot <- ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", input$log_bubble_x, input$log_bubble_y, animation_speed_bubble(), input$trace_bubble)
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
