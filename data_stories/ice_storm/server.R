@@ -125,7 +125,7 @@ shinyServer(function(session, input, output) {
   
   lai_data <- read_csv("lai.txt")
   # lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
-  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
+  #load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
@@ -385,7 +385,7 @@ shinyServer(function(session, input, output) {
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
       xlab(" ")+
-      ylab("Leaf Area Index T")+
+      ylab("Leaf Area Index (Trees)")+
       facet_wrap(~PLOT)+
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
     
