@@ -289,7 +289,7 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("NO3 Plots Replication (2003 paper)",
+                                                                                   tabPanel("NO3 Plots Replication (Bernhardt, 2003)",
                                                                                             h4("Streamflow flux (ws1, ws6)"),
                                                                                             plotlyOutput("NO3_output", height = "auto"),
                                                                                             h4("Streamflow flux normalized against ws6 (ws2, ws4, ws5)"),
