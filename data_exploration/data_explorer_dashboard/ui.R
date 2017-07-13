@@ -98,28 +98,33 @@ shinyUI(
         
         ###  ---- PQ GRAPH
         fluidRow(
-          #### Main area 
-          box(width = 9, height = "600px", status = "primary", id = "pq",
-              div(class = "titleRow", fluidRow(
-              column(9, tags$h2("Hydrologic Flux")),
-              ##Granularity
-              column(2, selectInput("granularity", label = "",
-                                     choices = granularity,
-                                     selected = "year")))),
-                
-              ##PQ plot
-              fluidRow(plotlyOutput("plot_pq")),
-              
-              ##Units - Y Axis Log
-              fluidRow(column(2, offset = 9, selectInput("log_pq", label = "Y Axis",
-                                                         choices = c("linear", "log"), 
-                                                         selected = "linear")))
-          )
-        
-          #### Sidebar area
-          #box(width = 2, height = ) #Closes sidebar box
-        
-        ), #Closes PQ Graph Row 
+            tabBox(width = 12, side="right", selected = shiny::icon("circle"),
+                   ######## OPTIONS
+                   ##Units - Axis Log
+                   tabPanel(shiny::icon("gear"),
+                            fluidRow(
+                              box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                  
+                                  ##Units - Y Axis Log
+                                  column(6, selectInput("log_pq", label = "Y Axis",
+                                                        choices = c("linear", "log"), 
+                                                        selected = "linear"))))),
+                   ######## PLOT 
+                   tabPanel(shiny::icon("circle"),
+                            div(class = "titleRow", fluidRow(column(5, tags$h2("Hydrologic Flux")),
+                                                             ##Granularity
+                                                             column(4,  offset = 2, selectInput("granularity", label = "",
+                                                                                                choices = granularity,
+                                                                                                selected = "year")))
+                            ),
+                            ## Time Plot
+                            plotlyOutput("plot_pq")
+                   ) #Closes tabpanel
+                   
+            )# Closes tab Box
+            
+          ),# Closes Time Row
+      
       
         ###  ---- PQ GRAPH END -----
         
@@ -154,7 +159,7 @@ shinyUI(
                 
             )# Closes tab Box
          
-            ),# Closes CQ and Flux Row
+            ),# Closes Time Row
         
         
         fluidRow(
@@ -238,7 +243,7 @@ shinyUI(
         column(3,
         
           #### Side Bar Area
-          box(width = 13, height = "1200px", id = "sidebar",
+          box(width = 13, height = "1050px", id = "sidebar",
               #Y Axis
               fluidRow(column(12,
                               selectInput("yaxis_time", label = "",
