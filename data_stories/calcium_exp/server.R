@@ -5,8 +5,8 @@ library(sp)
 library(ggplot2)
 library(maptools)
 library(lattice)
-library(grid)
 library(plotly)
+
 #Read in and clean grid coordinates for watersheds
 w1_coords <- read_csv("w1_coords.csv")
 w6_coords <- read_csv("w6_coords_revised.csv")
