@@ -82,3 +82,17 @@ ggplotly(ggplot(data=data) +
         labs(y = ""))
 ```
 
+
+```{r}
+
+formula_function <- function(df, s){
+    q = quote(mutate(df, temp = s))
+    eval(parse(text=sub("s", s, deparse(q))))}
+
+g(precip_streamflow_wide, "concentration_mg_Na * concentration_mg_Mg") %>% 
+  select(temp)
+
+precip_streamflow_wide$concentration_mg_Na
+precip_streamflow_wide$concentration_mg_Mg
+```
+

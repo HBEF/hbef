@@ -22,14 +22,20 @@ shinyServer(function(session, input, output) {
   ########### IMPORTANT PRELIMINARY INFO #############################################
   
   ###  Theme  ################
-  my_theme <- theme_fivethirtyeight() + 
+  my_theme <- 
     theme(rect = element_rect(fill = NA),
+          panel.background = element_rect("transparent", colour = NA),
           panel.grid.major = element_line(colour = "#dddddd"), 
-          text = element_text(family = "Helvetica", size = 14), 
-          legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
-          strip.text = element_text(hjust = 1, size = 12, face = "bold"), 
-          axis.title= element_text(NULL), axis.title.x= element_blank(), 
-          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
+          panel.grid.major.x = element_line(colour = NA),
+          text = element_text(family = "Helvetica", size = 12), 
+          legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
+          strip.text = element_text(margin = margin(20)),
+          axis.title= element_text(size = 10, margin = margin(20)), 
+          plot.margin = margin(1, 1, 0, 1, "cm"))
+  
+  color_cation <- c("Al" = "#240085", "Mg" = "#1D267A", "Ca" = "#164C6F", "NH4" = "#0F7364" , "Na" = "#089959", "K" = "#02C04E")
+  color_anion <- c("PO4" = "#BB1D4C", "SO4" = "#BB1D4C", "NO3" = "#C83239", "SiO2"= "#D54726", "Cl" = "#E25C13", "HCO3" = "#F07100")
+  
   
   color_cation <- c("Al" = "#162338", "Mg" = "#273D64", "Ca" = "#3B5C95", "NH4" = "#4E7AC7" , "Na" = "#7195D2", "K" = "#95AFDD")
   color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
@@ -148,6 +154,11 @@ shinyServer(function(session, input, output) {
   imported_data <- precip_streamflow_long
   imported_data_wide<- precip_streamflow_wide
   
+  names(imported_data)
+  levels(as.factor(imported_data$solute))
+  
+  names(imported_data_wide)
+  levels(as.factor(imported_data$solute))
   
   ########### END OF DATA IMPORT #############################################
   
@@ -158,7 +169,7 @@ shinyServer(function(session, input, output) {
   reactive_data_time <- reactive({
     data<- imported_data
     data <- data[data$granularity %in% input$granularity_time,]
-    data <- data[data$solute %in% input$solutesy,] #filter so that they only appear once. 
+    data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
     data <- data[data$ws %in% input$watersheds,]
   })
   
@@ -172,11 +183,11 @@ shinyServer(function(session, input, output) {
   reactive_data_cq <- reactive({
     data <- imported_data
     data <- data[data$granularity %in% input$granularity_cq,] 
-    data <- data[data$solute %in% input$solutesy,] 
+    data <- data[data$solute %in% solutes(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-    data <- data[data$ws %in% c("8"),]
+    data <- data[data$ws %in% input$watersheds,]
     data <- data[data$source %in% "streamflow",]
-    
+  
     if(input$trace){data <- accumulate_by(data, ~framey)}
     else{data}
     
@@ -184,30 +195,28 @@ shinyServer(function(session, input, output) {
   
   
   solutesx_formula <- reactive({
-
-    capitalized<-"[A-Z]"
+    capitalized<-"^[[:upper:]][[:alpha:]]"
     strip_spaces <- gsub(" ", "", input$solutesx_formula, fixed = TRUE)
     include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
     trim <- str_trim(include_space)
     split_each <- str_split(trim, " ")
     include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x , sep=""), x))
-    formula <- paste(include_units, collapse=' ' )
+    p_q_replace <- sapply(include_units, function(x) gsub("^[P|Q]", "water_mm", x, fixed = FALSE))
+    formula <- paste(p_q_replace, collapse=' ' )
     formula
-  
   })
   
   
   solutesy_formula <- reactive({
-
-    capitalized<-"[A-Z]"
+    capitalized<-"^[[:upper:]][[:alpha:]]"
     strip_spaces <- gsub(" ", "", input$solutesy_formula, fixed = TRUE)
     include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
     trim <- str_trim(include_space)
     split_each <- str_split(trim, " ")
     include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x , sep=""), x))
-    formula <- paste(include_units, collapse=' ' )
+    p_q_replace <- sapply(include_units, function(x) gsub("^[P|Q]", "water_mm", x, fixed = FALSE))
+    formula <- paste(p_q_replace, collapse=' ' )
     formula
-    
   })
   
   reactive_data_bubble <- reactive({
@@ -218,7 +227,7 @@ shinyServer(function(session, input, output) {
     #data <- data[data$date >= input$date_range[1] & data$date <= input$date_range[2]]
     unit_columns <- colnames(imported_data_wide[,(grep(input$units_bubble, colnames(data)))])
     
-    basic_columns <- c("ws","date","water_date","water_year","source","water_mm","framey")
+    basic_columns <- c("ws","date","water_date","water_year","source","water_mm", "pH", "anc", "dic","temp", "spcond", "framey")
     needed_columns <- c(basic_columns,unit_columns)
     data <- data[,needed_columns]
   
@@ -233,15 +242,15 @@ shinyServer(function(session, input, output) {
   
 
   x_time <- reactive({
-    if(input$granularity == "week"){"water_date"}
-    else if(input$granularity == "month"){"water_date"}
-    else if(input$granularity == "year"){"water_year"}
+    if(input$granularity_time == "week"){"date"}
+    else if(input$granularity_time == "month"){"date"}
+    else if(input$granularity_time == "year"){"water_year"}
   })
-
   
-  log_transform <- reactive({
-    if(input$log == "ln"){"transform"}
-    else{"no_transform"}
+  
+  y_time <- reactive({
+    if(input$yaxis_time == "concentration"){as.character(input$units)}
+    else {as.character(input$yaxis_time)}
   })
   
   animation_speed <- reactive({
@@ -252,18 +261,55 @@ shinyServer(function(session, input, output) {
     (80)*(1/(input$animation_speed_bubble))^2
   })
   
+  
   ########### PLOT FUNCTIONS #########################################
   
-  ## GGPLOT TIME FUNCTION
-  ggplot_time_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+  #### ---  GGPLOT BASIC PLOT FUNCTION
+  basic_ggplot_function <- function(data, x, y, log){
     
-    if(log) {
+    data_stream <- data[data$source %in% c("streamflow"),]
+    data_precip <- data[data$source %in% c("precipitation"),]
+    
+    if(log == "log") {
+      streamflow <- ggplot(data=data_stream, aes(x = as.POSIXct(date), y = logb(water_mm, base=exp(1)), color = ws)) + my_theme +
+        geom_line()+
+        geom_point(size = 1.3, fill = "white", stroke = 0.2) +
+        labs(x = "Date", y = "log(Q (mm))")+
+        scale_colour_grey()}
+    
+    else{
+      streamflow <- ggplot(data=data_stream, aes(x = as.POSIXct(date), y = water_mm, color = ws)) + my_theme +
+        geom_line()+
+        geom_point(size = 1.3, fill = "white", stroke = 0.2)+
+        labs(x = "Date", y = "Q (mm)")+
+        scale_colour_grey()}
+    
+    precipitation <- ggplot()+ my_theme + 
+                                geom_bar(data=data_precip, aes(x = as.POSIXct(date), y = water_mm, fill = ws), stat = "identity", position = "dodge", key = date)+ 
+                                scale_y_reverse() + labs(x = "Date", y = "P (mm)")+
+                                scale_fill_grey()
+    
+    streamflow <- ggplotly(streamflow, showlegend = FALSE)
+    precipitation <- ggplotly(precipitation)
+    
+    plot <- subplot(precipitation, streamflow, nrows = 2, shareX = TRUE, heights = c(0.5, 0.5), titleY = TRUE)%>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+    
+    plot
+  }
+  
+  
+  #### --- GGPLOT TIME FUNCTION
+  ggplot_time_function <- function(data, x, y, log, y_label){
+    
+    if(log == "log") {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+      labs(x = "Water Year", y = paste("log", "(",y_label, ")"))}
     
     else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-      labs(x = "Water Year", y = input$units)}
+      labs(x = "Water Year", y = y_label)}
     
       plot <- plot+ my_theme + geom_line(size = 0.5) + 
       geom_point(size = 1.3, fill = "white", stroke = 0.2) +  
@@ -279,59 +325,41 @@ shinyServer(function(session, input, output) {
       config(showLink = FALSE)
     
   }
-  
 
   
+  #### --- GGPLOT BUBBLE PLOT
   
-  
-  ## GGPLOT BASIC PLOT FUNCTION
-  basic_ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
-  
-    data_stream <- data[data$source %in% c("streamflow"),]
-    data_precip <- data[data$source %in% c("precipitation"),]
+  ggplot_bubble_function <- function(data, x, y, log_x, log_y){
     
-    if(log) {
-      streamflow <- ggplot() + my_theme +
-        geom_line(data=data_stream, aes(x = as.POSIXct(date), y = logb(water_mm, base=exp(1)), color = ws, key = date))+
-        labs(x = "Date", y = "log(mm)")}
-      
-    else{
-      streamflow <- ggplot() + my_theme +
-        geom_line(data=data_stream, aes(x = as.POSIXct(date), y = water_mm, color = ws, key = date))+
-        labs(x = "Date", y = "mm")}
-    
-      precipitation <- ggplotly(ggplot()+ my_theme + 
-                           geom_bar(data=data_precip, aes(x = as.POSIXct(date), y = water_mm, fill = ws), stat = "identity", position = "dodge", key = date)+ 
-                           scale_y_reverse() + labs(x = "Date", y = "mm"))
-  
-      streamflow <- ggplotly(streamflow)
-      precipitation <- ggplotly(precipitation)
-      
-      plot <- subplot(precipitation, streamflow, nrows = 2, shareX = TRUE, heights = c(0.5, 0.5), titleY = TRUE)%>%
-        config(displayModeBar = FALSE) %>%
-        config(showLink = FALSE)
-        #layout(dragmode = "select")
-      
-      plot
-  }
-  
-
-  
-  # GGPLOT BUBBLE PLOT
-  
-  ggplot_bubble_function <- function(data, x, y, ncol = NULL, nrow = NULL){
     if(input$trace_bubble){
-      plot <- ggplot(data=data) + my_theme + 
-        geom_point(aes(x = get(x), y = get(y), shape = source, frame = frame, alpha = ws), stroke= 1) +
-        scale_shape_manual(values= source_shapes)+ 
-        labs(y = "")}
+      plot <- ggplot(data=data, aes(shape = source, frame = frame, alpha = ws)) + my_theme + 
+        scale_shape_manual(values= source_shapes)+
+        scale_color_manual(values = solute_palette)}
     
     else{
-      plot <- ggplot(data=data) + my_theme + 
-        geom_point(aes(x = get(x), y = get(y), shape = source, frame = framey, alpha = ws), stroke= 1) +
-        scale_shape_manual(values= source_shapes)+ 
-        labs(y = "")
+      plot <- ggplot(data=data, aes(shape = source, frame = framey, alpha = ws)) + my_theme + 
+        scale_shape_manual(values= source_shapes)+
+        scale_color_manual(values = solute_palette)}
       
+    
+    if(log_y == "log"){
+      
+      if(log_x == "log"){
+      plot <- plot + geom_point(aes(x = logb(get(x), base=exp(1)), y = logb(get(y), base=exp(1)), color = solute), stroke= 0.2) +
+        labs(y = "")}
+      else{
+      plot <- plot + geom_point(aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute), stroke= 0.2) +
+        labs(y = "")}
+    }
+    
+    else{
+      
+      if(log_x == "log"){
+        plot <- plot + geom_point(aes(x = logb(get(x), base=exp(1)), y = get(y), color = solute), stroke= 0.2) +
+          labs(y = "")}
+      else{
+        plot <- plot + geom_point(aes(x = get(x), y = get(y), color = solute), stroke= 0.2) +
+          labs(y = "")}
     }
     
     plot <- plot + 
@@ -352,55 +380,56 @@ shinyServer(function(session, input, output) {
   #############################################################
   
   output$plot_pq <- renderPlotly({
-    theplot <- basic_ggplot_function(reactive_data_pq(), x(), y(), ncol = 1, log = input$log)
+    theplot <- basic_ggplot_function(reactive_data_pq(), x(), y(), log = input$log_pq) 
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
     theplot$width <- NULL
     theplot$height <- NULL
     theplot %>%
-      layout(autosize = TRUE, height = 300)
-      #layout(dragmode = "select")
+      layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
      })
 
   output$plot_cq <- renderPlotly({
-    theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, ncol = 1)
+    theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, input$log_cq_x,input$log_cq_y)
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
     theplot$width <- NULL
     theplot$height <- NULL
     theplot %>%
-      layout(autosize = TRUE, height = 300)
+      layout(autosize = TRUE)
     
   })
   
   
   output$plot_time <- renderPlotly({
-    theplot <- ggplot_time_function(reactive_data_time(), x_time(), input$units, ncol = 1, log = input$log)
+    theplot <- ggplot_time_function(reactive_data_time(), x_time(), y_time(),log = input$log_time, y_time())
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
     theplot$width <- NULL
     theplot$height <- NULL
     theplot %>%
-      layout(autosize = TRUE, height = 300)
+      layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
   })
   
+  #input log was an input cause the function thing. 
+  
   output$plot_flux <- renderPlotly({
-    theplot <- ggplot_time_function(reactive_data_time(), x_time(), "flux", ncol = 1, log = input$log)
+    theplot <- ggplot_time_function(reactive_data_time(), x_time(), "flux", log = input$log_flux, "flux")
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
     theplot$width <- NULL
     theplot$height <- NULL
     theplot %>%
-      layout(autosize = TRUE, height = 300)
+      layout(autosize = TRUE)
   })
   
   output$bubblePlot <- renderPlotly({
-    theplot <- ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y")
-    
+    theplot <- ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", input$log_bubble_x, input$log_bubble_y)
+    #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
     theplot$width <- NULL

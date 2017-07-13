@@ -1,8 +1,27 @@
-s@charset "UTF-8";
+@charset "UTF-8";
 
 
 
 
+.titleRow{
+	border-bottom: 1px solid #8C8C8C;
+}
+
+.box-body{
+	margin:0; !important
+}
+
+#pq.box-body{
+	background: #f9f9f9;
+}
+
+#time.box-body{
+	background: #f9f9f9;
+}
+
+#sidebar.box-body{
+	padding: 20pt;
+}
 
 #solutes ~ .selectize-control.single .selectize-dropdown [data-value=pH] { color: #FFC408 }
 #solutes ~ .selectize-control.single .selectize-dropdown [data-value=H] { color: #FFE79C }
@@ -18,6 +37,7 @@ s@charset "UTF-8";
 #solutes ~ .selectize-control.single .selectize-dropdown [data-value=Ca] { color: #3B5C95 }
 #solutes ~ .selectize-control.single .selectize-dropdown [data-value=Mg] { color: #273D64 }
 #solutes ~ .selectize-control.single .selectize-dropdown [data-value=Al] { color: #162338 }
+
 
 input[type="checkbox"]:after {
 		width: 20px;
@@ -306,13 +326,15 @@ h1 {
 
 
 h2 {
-	
+	color: #363229;
 	text-transform: uppercase;
+	font-family: 'Montserrat', sans-serif;
+	margin-left: 10pt;
 }
 
 
 h3 {
-	font-size: 2em;
+	font-size: 1em;
 	font-family: 'Montserrat', sans-serif;
 	text-align: left;
 	font-style: normal;
@@ -321,7 +343,7 @@ h3 {
 
 
 h4 {
-	font-size: 1.2em;
+	font-size: 1em;
 	font-weight: 400;
 	font-family: 'Montserrat', sans-serif;
 	text-align: left;
@@ -350,7 +372,9 @@ h4 {font-size: 1em;}
 p{font-size: 12pt;}}
 
 
-
+body{
+	font-size: 10pt;
+}
 
 
 /*use for ligth fonts */
