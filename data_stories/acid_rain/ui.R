@@ -24,9 +24,9 @@ solutes_cations <- list("Potassium (K)" = "K",
                         "Aluminum (Al)" = "Al")
 
 solutes_base_cations <- list("Potassium (K)" = "K",
-                        "Sodium (Na)" = "Na",
-                        "Calcium (Ca)" = "Ca",
-                        "Magnesium (Mg)" = "Mg")
+                             "Sodium (Na)" = "Na",
+                             "Calcium (Ca)" = "Ca",
+                             "Magnesium (Mg)" = "Mg")
 
 solutes_anions <- list("Phosphate (PO4)" = "PO4",
                        "Sulfate (SO4)" = "SO4",
@@ -38,8 +38,8 @@ solutes_anions3 <- list("Sulfate (SO4)" = "SO4",
                         "Nitrate (NO3)" = "NO3")
 
 solutes_Al_anions3 <- list("Sulfate (SO4)" = "SO4",
-                        "Nitrate (NO3)" = "NO3",
-                        "Aluminum (Al)" = "Al")
+                           "Nitrate (NO3)" = "NO3",
+                           "Aluminum (Al)" = "Al")
 
 solutes_H <- list("Hydrogen (H)" = "H",
                   "pH" = "pH")
@@ -55,7 +55,7 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 9" = "9")
 
 watersheds6 <- list("Watershed 6" = "6")
-                   
+
 water_sources <- list("Precipitation (P)" = "precipitation",
                       "Discharge (Q)" = "streamflow")
 
@@ -67,8 +67,8 @@ granularity1 <- list("Year (VWC)" = "year",
                      "Month (VWC)" = "month")
 
 granularity3 <- list("Year (VWC)" = "year",
-                    "Month (VWC)" = "month",
-                    "Week" = "week")
+                     "Month (VWC)" = "month",
+                     "Week" = "week")
 
 units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 
@@ -155,34 +155,23 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #1 ##################
                        tags$div(class = "container_paragraph",
                                 fluidRow(column(width = 9,
-                                                p("Placeholder text..."))),
-                                fluidRow(column(width = 9,
-                                                p("Experiencing nature for many people means traveling to see awe-inspiring
-                                            views and wildlife in national parks or forests. Perhaps the place pictured above used to be one of
-                                            those nature hubs. These national sites, as well as anywhere in nature, are composed of many diverse
-                                            ecosystems that maintain an important balance.")),
-                                         column(width = 3,
-                                                h5(strong("Ecosystem:"), "a network of animals, plants, and the physical features
-                                           of where they live"))),
-                                fluidRow(column(width = 9,
-                                                p("Starting in the early 1950s (soon after Disney first released Cinderella
-                                            and Peter Pan) this balance within ecosystems everywhere began to tip.
-                                            What caused this shift in so many ecosystems?  Well, the weather did
-                                            believe it or not.  More specifically, the precipitation that fell
-                                            on the ecosystems."),
-                                                p('“But don’t plants and animals need the rain and snowmelt to survive” you
-                                            ask?  Yes, point for you.  Though the precipitation at this time was
-                                            acid rain, and had become polluted to a point of concern.  Many
-                                            plants and aquatic creatures specifically were harmed by the increasing
-                                            acidity of the water, which began to disrupt the streamflow of the ecosystems.'),
-                                                p('Acid rain hasn’t always been around to harm ecosystems though.  It became
-                                            an issue as humans increasingly emitted sulfur dioxide (SO2) and
-                                            nitrogen oxides (NOx).  These chemicals came mostly from burning
-                                            fossil fuels (namely coal) to produce electricity, and from car
-                                            emissions.  They then rise into the atmosphere to react with water,
-                                            oxygen, etc. and are carried quite far from where they originated.
-                                            When they fall back to earth, in rain, snow, or even fog, it is called acid rain.')),
-                                         column(3)),
+                                                p("Air pollution amplifies acid rain, which washes nutrients out of the 
+                                                  soil and releases toxins into the streamflow that inhibit ecosystem 
+                                                  growth.  United States policy has largely mitigated the effects 
+                                                  of acid rain, and the long term data from Hubbard Brook is able 
+                                                  to show the story of an ecosystem on the long path to recovery."),
+                                                p("In order to best understand the canonical story of acid rain, this 
+                                                  module will focus on watershed six - the biogeochemical reference - 
+                                                  in order to observe the effects of acid rain without experimental 
+                                                  disruptions.  The dataset for watershed six dates back to 1963, 
+                                                  which coincidentally is the year of the first rendition of the 
+                                                  Clean Air Act.  This was also eight years after the first 
+                                                  legislation on air pollution (The Air Pollution Control Act of 1955.)
+                                                  Thus, the data concretely describes more of the ecosystem recovery 
+                                                  following the effects of acid rain."),
+                                                p("Ecosystem recovery can in part be tracked by the increasing 
+                                                  (de-acidifying) pH, as seen over the past 60+ years as new 
+                                                  policies are implemented to address air quality (see plot above.)"))),
                                 fluidRow(column(width = 9,
                                                 #insert widget that links to a quizlet or something here
                                                 h4("Let's see how much you know offhand about acid rain... Click",
@@ -225,7 +214,7 @@ shinyUI(fluidPage(
                            #the user to change that particular input. 
                            
                            sidebarPanel(
-                  
+                             
                              #Solutes
                              fluidRow(
                                column(12, actionLink("select_all_ions2", h4("Solutes"))),
@@ -316,35 +305,11 @@ shinyUI(fluidPage(
                                 fluidRow(column(width = 9,
                                                 p("More placeholder text..."))),
                                 fluidRow(column(width = 9,
-                                                p(" Though sulfur dioxide and nitrogen oxides have different effects on their
-                                          own, when combined in acid rain they do a number on nature.  One way they harm
-                                          ecosystems is by wearing down the natural soil buffer.")),
+                                                p("")),
                                          column(width = 3, #make a text box
                                                 h5(strong("Soil buffer:"), "chemicals naturally present in the soil, which neutralize the
                                          strong acidity of acid rain at the expense of losing base cations in the
-                                         neutralizing reactions"))
-                                ),
-                                fluidRow(column(width = 9,
-                                                p("The acid rain reacts with the base cations in the soil, causing them to be
-                                          washed out of the ecosystem.  Try exploring this pattern for each compound using the graph
-                                          above.  You can see that calcium (Ca) discharge increases even though the Ca
-                                          precipitation remains relatively stable.  Also note that these plots all
-                                          show data from watershed 6, the biogeochemical reference point, meaning
-                                          that there have been no experiments to alter its natural state.")),
-                                         column(width = 3,
-                                                h5(strong("Base cations:"), "positively charged elements present in the soil that help
-                                         neutralize acid rain (ie. Ca, Mg, K)")
-                                         )),
-                                fluidRow(column(width = 9,
-                                                p("One effect of the base cation loss was the poor growth of Sugar Maples,
-                               which rely heavily on Ca to grow.  Another danger to the ecosystem balance
-                               was caused by acid rain reacting to release aluminum from the soil.  Aluminum
-                               is toxic once released from its stable soil state, and makes it hard for trees
-                               to take up water.  Taking the pH of the precipitation and streamflow also show
-                               these effects of acid rain, because the inflow is acidic when the outflow is
-                               much less so.  Acid is coming in, reacting, and staying.  Sounds like an
-                               unwelcome house guest.")),
-                                         column(3))
+                                         neutralizing reactions")))
                        )
                        ########### END OF TEXT FOR QUESTION #2 ###############
                        
@@ -421,7 +386,7 @@ shinyUI(fluidPage(
                                                           ### PLOT VIEW 1
                                                           tabPanel("Combined", 
                                                                    h4("Decrease in SOx and NOx concentrations"),
-
+                                                                   
                                                                    #Anions
                                                                    checkboxGroupInput("solutes_anions3", label = "",
                                                                                       choices = solutes_anions3,
@@ -443,7 +408,7 @@ shinyUI(fluidPage(
                                                                                       selected = c("SO4", "NO3", "Al")),
                                                                    plotlyOutput("policy_Al", height = "auto"))
                                               )
-                                              ), width = 8), 
+                           ), width = 8), 
                            position = "right"
                          ),
                          
@@ -458,26 +423,7 @@ shinyUI(fluidPage(
                        ########### TEXT FOR QUESTION #3 ##################
                        tags$div(class = "container_paragraph",
                                 fluidRow(column(width = 9,
-                                                p("Even more of this lovely placeholder text..."))),
-                                fluidRow(column(width = 9,
-                                                p("The hydrologic dataset doesn’t begin until 1963 (which was after the onset
-                               of acid rain) but it still captures the story of an increasing dilemma,
-                               actions taken to mitigate it, and the rebalancing of the ecosystem.  Up
-                               until this time, the United States government was just beginning to fund
-                               research and small policies around air pollution.  In 1967 they began to
-                               expand their monitoring and control, until the enactment of the Clean Air
-                               Act in 1970.")),
-                                         column(3)),
-                                fluidRow(column(width = 9,
-                                                p("The Clean Air Act was made to regulate emissions from both stationary sources
-                               (like power plants) and mobile ones (like cars).  The EPA was also founded in
-                               1970 in order to enforce the new act.  There have since been amendments, in
-                               1977 and 1990, with the 1990 ones specifically addressing the control of acid
-                               rain.  Since then, SO2 emissions have been declining because of mandatory
-                               reductions, though NOx has been tougher to reduce.  Ecosystems aren’t
-                               recovering as quickly as hoped, and efforts continue to both reduce emissions
-                               and mitigate ecological distress.")),
-                                         column(3))
+                                                p("Yet more placeholder text...")))
                        )
                        ########### END OF TEXT FOR QUESTION #3 ###############
                        

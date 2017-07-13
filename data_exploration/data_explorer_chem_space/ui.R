@@ -99,6 +99,13 @@ shinyUI(fluidPage(
                                        choices = watersheds, multiple = TRUE,
                                        selected = "6"))),
         
+        ##Size
+        fluidRow(
+          column(12, h4("Bubble Size"),
+                 selectInput("size", label = "",
+                             choices = c("hydrologic flux" = "water_mm"),
+                             selected = "water_mm"))),
+        
         ##Water Sources
         fluidRow(
           column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),

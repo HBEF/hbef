@@ -331,7 +331,7 @@ shinyServer(function(session, input, output) {
         labs(x = "Water Year", y = paste("log", "(",input$units3, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = ws, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = get(x), y = imported_data$flux, color = solute, shape = ws, alpha = ws))+
         labs(x = "Water Year", y = input$units3)}
     
     final <- plot+ my_theme + geom_line(size = 1) + 
@@ -395,7 +395,7 @@ shinyServer(function(session, input, output) {
     lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
-      theme(axis.title.x = element_text(face="bold", colour="#990000", size=20))+
+      xlab(" ")+
       ylab("Leaf Area Index T")+
       facet_wrap(~PLOT)+
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -429,7 +429,7 @@ shinyServer(function(session, input, output) {
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y3(), ncol = 1, log = input$log3)
+    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y, ncol = 1, log = input$log3)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
@@ -442,8 +442,9 @@ shinyServer(function(session, input, output) {
     streamflow_NO3_data <- imported_data
     streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$source %in% c("streamflow"),]
     streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$solute %in% c("NO3"),]
-
-    static_NO3_output <- ggplot(streamflow_NO3_data, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
+    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$granularity %in% input$granularity3,]
+    
+    static_NO3_output <- ggplot(NULL, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
       geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "1",])+
       geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws =="1",])+
       geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+

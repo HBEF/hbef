@@ -250,9 +250,7 @@ shinyServer(function(session, input, output) {
     
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
         geom_ribbon(aes(ymin=4.2, ymax= 5), fill = "grey", alpha = 0.2)+
-        annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.21, alpha = 0.7, color = "black")+
         geom_ribbon(aes(ymin=4, ymax= 4.2), fill = "black", alpha = 0.4)+
-        annotate("text", label = "Normal (clean) rain pH", x = as.Date("1979-01-01"), y = 5.01, alpha = 0.7, color = "black")+
         geom_ribbon(aes(ymin=5,ymax=5.4), fill="blue", alpha=0.3)+
         labs(x = "Water Year", y = "pH")
     
@@ -266,6 +264,8 @@ shinyServer(function(session, input, output) {
       annotate("text", label = "Clean Air Act", x = as.Date("1970-01-01"), y = 4.02, color = "black")+
       geom_vline(size = 0.5, xintercept = 7300, alpha = 0.5)+
       annotate("text", label = "Clean Air Act Amendment  ", x = as.Date("1990-01-01"), y = 4.02, color = "black")+
+      annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.21, alpha = 0.7, color = "black")+
+      annotate("text", label = "Normal (clean) rain pH", x = as.Date("1979-01-01"), y = 5.01, alpha = 0.7, color = "black")+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_alpha_discrete(range = c(0.9, 0.5))
