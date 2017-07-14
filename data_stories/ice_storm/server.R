@@ -291,21 +291,21 @@ shinyServer(function(session, input, output) {
   ########### PLOT FUNCTIONS 2 #########################################
   
   ## GGPLOT TIME FUNCTION
-  ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+  ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log, units, date_range){
     
     if(log) {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+        labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
     else{
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = input$units)}
+        labs(x = "Water Year", y = units)}
     
     final <- plot+ my_theme + geom_line(size = 1) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                  aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range2[1]), max(input$date_range2[2]))+ 
+      xlim(min(date_range[1]), max(date_range[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 22, color = "black")+
       scale_shape_manual(values = source_shapes) +
@@ -341,6 +341,7 @@ shinyServer(function(session, input, output) {
 
     ggplotly(  
       final, tooltip = "text",
+      legend= "text",
       width = 900) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
@@ -384,6 +385,7 @@ shinyServer(function(session, input, output) {
     lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
+      labs(color="Plot Elevation")+
       xlab(" ")+
       ylab("Leaf Area Index (Trees)")+
       facet_wrap(~PLOT)+
@@ -404,7 +406,7 @@ shinyServer(function(session, input, output) {
   
   #plot to generally show how the ice storm affected NO3 (conc or flux?)
   output$NO3_plot <- renderPlotly({
-    NO3_plot <- ggplot_function(reactive_data2(), x(), y(), ncol = 1, log = input$log)
+    NO3_plot <- ggplot_function(reactive_data2(), x(), y(), ncol = 1, log=input$log, units=input$units, date_range=input$date_range2)
     NO3_plot$x$layout$width <- NULL
     NO3_plot$y$layout$height <- NULL
     NO3_plot$width <- NULL
@@ -415,9 +417,8 @@ shinyServer(function(session, input, output) {
   
   #make a plot of nitrates like in the 2003 paper
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
-  #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y3.1(), ncol = 1)
+    NO3_output <- ggplot_function(reactive_data3(), x3(), y3.1(), ncol = 1, log=input$log, units="moles/ha-yr", date_range = input$date_range3)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
@@ -434,6 +435,6 @@ shinyServer(function(session, input, output) {
     NO3_excess$width <- NULL
     NO3_excess$height <- NULL
     NO3_excess %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE, height = 600, showlegend = T)
     })
 })
