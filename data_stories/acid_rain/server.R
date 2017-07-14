@@ -11,6 +11,8 @@ library(grid)
 library(ggthemes)
 library(magrittr)
 library(timevis)
+library(shinydashboard)
+library(grid)
 
 
 #######################################################################################
@@ -227,33 +229,9 @@ shinyServer(function(session, input, output) {
   ########### END OF DATA IMPORT #############################################
   
   
-  ########### REACTIVE DATA AND X Y 1 #########################################
-  #Reactive Data Normal
-  reactive_data1 <- reactive({
-    data <- imported_data
-    data <- data[data$granularity %in% input$granularity1,]
-    data <- data[data$ws %in% c("6"),]
-    data <- data[data$solute %in% c("pH"),]
-    data <- data[data$source %in% input$water_sources1,]
-    })
+  ########### PLOT FUNCTIONS  #########################################
   
-  
-  x1 <- reactive({
-    if(input$granularity1 == "week"){"water_date"}
-    else if(input$granularity1 == "month"){"water_date"}
-    else if(input$granularity1 == "year"){"water_year"}
-  })
-
-  y1 <- reactive({
-    {"concentration_mg"}
-    })
-
-  ########### END REACTIVE DATA AND X Y 1 #########################################
-  
-  
-  ########### PLOT FUNCTIONS 1 #########################################
-  
-  ## GGPLOT TIME FUNCTION
+  ## GGPLOT pH FUNCTION -- This builds the pH graph
   ggplot_function1 <- function(data, x, y, ncol = NULL, nrow = NULL){
     
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
@@ -286,10 +264,59 @@ shinyServer(function(session, input, output) {
     
   }
   
-  ########### END PLOT FUNCTIONS 1 #########################################
+  
+  ## GGPLOT TIME FUNCTION
+  #### --- GGPLOT TIME FUNCTION
+  ggplot_function2 <- function(data, x, y, log, y_label, date_range){
+    
+    if(log == "log") {
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+        labs(x = "Water Year", y = paste("log", "(",y_label, ")"))}
+    
+    else{
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+        labs(x = "Water Year", y = y_label)}
+    
+    plot <- plot+ my_theme + geom_line(size = 0.5) + 
+      geom_point(size = 1.3, fill = "white", stroke = 0.2, aes(text = paste(solute,":", round(get(y), 4)))) +
+      xlim(min(date_range[1]), max(date_range[2]))+ 
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = solute_palette) +
+      scale_alpha_discrete(range = c(0.9, 0.5))
+    
+    ggplotly(plot, tooltip = "text") %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE) %>% 
+      layout(hovermode = "x")
+  }
+  
+  ########### END PLOT FUNCTIONS #########################################
+  
+
+  ########### REACTIVE DATA #########################################
+  
+  ########## Reactive Data 1
+  #Reactive Data Normal
+  reactive_data1 <- reactive({
+    data <- imported_data
+    data <- data[data$granularity %in% input$granularity1,]
+    data <- data[data$ws %in% c("6"),]
+    data <- data[data$solute %in% c("pH"),]
+    data <- data[data$source %in% input$water_sources1,]
+  })
   
   
-  ########### REACTIVE DATA AND X Y 2 #########################################
+  x1 <- reactive({
+    if(input$granularity1 == "week"){"water_date"}
+    else if(input$granularity1 == "month"){"water_date"}
+    else if(input$granularity1 == "year"){"water_year"}
+  })
+  
+  y1 <- reactive({
+    {"concentration_mg"}
+  })
+  
+  ########## Reactive Data 2
   #Reactive Data Normal
   ##sidebar_number_function <- function(number){  #try this out later on for optimization purposes
   reactive_data2 <- reactive({
@@ -315,55 +342,11 @@ shinyServer(function(session, input, output) {
      else if(input$units2 =="flux"){"flux"}
    })
    
-  log_transform2 <- reactive({
-    if(input$log2 == "ln"){"transform"}
-    else{"no_transform"}
-  })
-  
-  ########### END REACTIVE DATA AND X Y 2 #########################################
-  
-  
-  ########### PLOT FUNCTIONS 2 #########################################
-  
-  ## GGPLOT TIME FUNCTION
-  ggplot_function2 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
-    
-    if(log) {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",input$units2, ")"))}
-    
-    else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = input$units2)}
-    
-    final <- plot+ my_theme + geom_line(size = 1) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range2[1]), max(input$date_range2[2]))+ 
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))
-    
-    ggplotly(  
-      final, tooltip = "text",
-      width = 900) %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-  }
-  
-  ## }#end sidebar number function
-  
-  ########### END PLOT FUNCTIONS 2 #########################################
-  
-  
-  ########### REACTIVE DATA AND X Y 3 #########################################
+  ########## Reactive Data 3
   #Reactive Data Normal
   reactive_data3_Al <- reactive({
-#    data <- subset(imported_data[imported_data$ws == 6,], solute %in% "Al")
     data <- imported_data
-    data <- data[data$granularity %in% input$granularity3,]
+    data <- data[data$granularity %in% input$granularity5,]
     data <- data[data$source %in% input$water_sources3,]
     data <- data[data$solute %in% Al_anions3(),] 
     data <- data[data$ws %in% input$watersheds3,]
@@ -380,7 +363,7 @@ shinyServer(function(session, input, output) {
   
   reactive_data3_cations <- reactive({
     data <- imported_data
-    data <- data[data$granularity %in% input$granularity3,]
+    data <- data[data$granularity %in% input$granularity4,]
     data <- data[data$source %in% input$water_sources3,]
     data <- data[data$solute %in% cations3(),] 
     #note that cations is a function, that's because the inputs come from input$cations
@@ -393,139 +376,35 @@ shinyServer(function(session, input, output) {
     else if(input$granularity3 == "year"){"water_year"}
   })
   
+  
+  x4 <- reactive({
+    if(input$granularity4 == "week"){"water_date"}
+    else if(input$granularity4 == "month"){"water_date"}
+    else if(input$granularity4 == "year"){"water_year"}
+  })
+  
+  x5 <- reactive({
+    if(input$granularity5 == "week"){"water_date"}
+    else if(input$granularity5 == "month"){"water_date"}
+    else if(input$granularity5 == "year"){"water_year"}
+  })
+  
   y3 <- reactive({
     if(input$units3 =="mg/L"){"concentration_mg"}
     else if(input$units3 =="uEquivalent/L"){"concentration_ueq"}
     else if(input$units3 =="uMole/L"){"concentration_umol"}
     else if(input$units3 =="flux"){"flux"}
   })
+ 
   
-  log_transform3 <- reactive({
-    if(input$log3 == "ln"){"transform"}
-    else{"no_transform"}
-  })
-  
-  ########### END REACTIVE DATA AND X Y 3 #########################################
+  ########### END REACTIVE DATA #########################################
   
   
-  ########### PLOT FUNCTIONS 3 #########################################
-  
-  ## GGPLOT TIME FUNCTION
-  ggplot_function3 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
-    
-    if(log) {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",input$units3, ")"))}
-    
-    else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = input$units3)}
-    
-    final <- plot+ my_theme + geom_line(size = 1) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))
-    
-    ggplotly(  
-      final, tooltip = "text",
-      width = 900) %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-  }
-  
-  ########### END PLOT FUNCTIONS 3 #########################################
-  
-    
-  ########### REACTIVE DATA AND X Y 4 #########################################
-  #Reactive Data Normal
-                    ##sidebar_number_function <- function(number){  #try this out later on for optimization purposes
-  reactive_data4 <- reactive({
-    data <- imported_data
-    data <- data[data$source %in% input$water_sources4,]
-    data <- data[data$solute %in% solutes4(),] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-    data <- data[data$ws %in% input$watersheds4,]
-  })
-  
-  
-  x4 <- reactive({
-    if(input$granularity4 == "month"){"water_date"}
-    else if(input$granularity4 == "year"){"water_year"}
-  })
-  
-  y4 <- reactive({
-    if(input$granularity4 == "month" & input$units4 =="mg/L"){"concentration_mg"}
-    else if(input$granularity4 == "year" & input$units4 =="mg/L"){"mg_weighted_average"}
-    else if(input$granularity4 == "month" & input$units4 =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$granularity4 == "year" & input$units4 =="uEquivalent/L"){"ueq_weighted_average"}
-    else if(input$granularity4 == "month"& input$units4 =="uMole/L"){"concentration_umol"}
-    else if(input$granularity4 == "year"& input$units4 =="uMole/L"){"umol_weighted_average"}
-    else if(input$granularity4 == "month"& input$units4 =="flux"){"flux"}
-    else if(input$granularity4 == "year"& input$units4 =="flux"){"flux_sum"}
-  })
-  
-  log_transform4 <- reactive({
-    if(input$log4 == "ln"){"transform"}
-    else{"no_transform"}
-  })
-  
-  ########### END REACTIVE DATA AND X Y 4 #########################################
-  
-  
-  ########### PLOT FUNCTIONS 4 #########################################
-  
-  ## GGPLOT TIME FUNCTION
-  ggplot_function4 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
-    
-    if(log) {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",input$units4, ")"))}
-    
-    else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = input$units4)}
-    
-    final <- plot+ my_theme + geom_line(size = 1) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range4[1]), max(input$date_range4[2]))+ 
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))
-    
-    ggplotly(  
-      final, tooltip = "text",
-      width = 900) %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-  }
-  
- ## }#end sidebar number function
-  
-  ########### END PLOT FUNCTIONS 4 #########################################
-  
-  
+
   #############################################################
   ########### OUTPUTS #########################################
   #############################################################
   
-  output$plot1a <- renderPlotly({
-    theplot <- ggplot_function(reactive_data(), x(), y(), ncol = 1, log = input$log)
-    #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
-    theplot$x$layout$width <- NULL
-    theplot$y$layout$height <- NULL
-    theplot$width <- NULL
-    theplot$height <- NULL
-    theplot %>%
-      layout(autosize = TRUE, height = 600)
-  })
 
   #successfully interactive/integrated intro pH plot
   output$pH_intro <- renderPlotly({
@@ -535,18 +414,18 @@ shinyServer(function(session, input, output) {
     pH_intro$width <- NULL
     pH_intro$height <- NULL
     pH_intro %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
     })
   
   #Successfully interactive/integrated plot of any compound conc
   output$chemistry <- renderPlotly({
-    chemistry <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
+    chemistry <- ggplot_function2(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range2)
     chemistry$x$layout$width <- NULL
     chemistry$y$layout$height <- NULL
     chemistry$width <- NULL
     chemistry$height <- NULL
     chemistry %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
   })
   
 #   #plot pH vs Q to see if there are any trends##################
@@ -601,46 +480,46 @@ shinyServer(function(session, input, output) {
 #   #################
   #Successfully interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
   output$policy_SO4_NO3 <- renderPlotly({
-    policy_SO4_NO3 <- ggplot_function3(reactive_data3_anions(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
+    policy_SO4_NO3 <- ggplot_function2(reactive_data3_anions(), x3(), y3(), log = input$log3, input$units3, input$date_range3)
     policy_SO4_NO3$x$layout$width <- NULL
     policy_SO4_NO3$y$layout$height <- NULL
     policy_SO4_NO3$width <- NULL
     policy_SO4_NO3$height <- NULL
     policy_SO4_NO3%>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
   })
   
   #Successfully interactive/integrated base cation trends plot 
   output$policy_base_cations <- renderPlotly({
-    policy_base_cations <- ggplot_function3(reactive_data3_cations(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
+    policy_base_cations <- ggplot_function2(reactive_data3_cations(), x4(), y3(), log = input$log4, input$units3, input$date_range3)
     policy_base_cations$x$layout$width <- NULL
     policy_base_cations$y$layout$height <- NULL
     policy_base_cations$width <- NULL
     policy_base_cations$height <- NULL
     policy_base_cations%>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
   })
   
   #Successfully interactive/integrated Al plot to show decrease in acids mean less Al released from soil
   output$policy_Al <- renderPlotly({
-    policy_Al <- ggplot_function3(reactive_data3_Al(), x3(), y3(), ncol = 1, nrow = NULL, log = input$log3)
+    policy_Al <- ggplot_function2(reactive_data3_Al(), x5(), y3(), log = input$log5, input$units3, input$date_range3)
     policy_Al$x$layout$width <- NULL
     policy_Al$y$layout$height <- NULL
     policy_Al$width <- NULL
     policy_Al$height <- NULL
     policy_Al%>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
     })
 
   #in progress plot of Al and acid flux and conc... shoudl be on seperate tab so has a diff sidebar!
   output$chemistry_flux <- renderPlotly({
-    chemistry_flux <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
+    chemistry_flux <- ggplot_function2(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range2)
     chemistry_flux$x$layout$width <- NULL
     chemistry_flux$y$layout$height <- NULL
     chemistry_flux$width <- NULL
     chemistry_flux$height <- NULL
     chemistry_flux %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
     
   })
   
@@ -649,16 +528,7 @@ shinyServer(function(session, input, output) {
     timevis(historyData) #possibly use groups in order to contextualize (ie disney movie years)
   })
   
-  #template to output all compounds plot using the ggplot_function
-  output$practice <- renderPlotly({
-    practice <- ggplot_function4(reactive_data4(), x4(), y4(), ncol = 1, nrow = NULL, log = input$log4)
-    practice$x$layout$width <- NULL
-    practice$y$layout$height <- NULL
-    practice$width <- NULL
-    practice$height <- NULL
-    practice %>%
-      layout(autosize = TRUE, height = 600)
-  })
+
   
 })
 

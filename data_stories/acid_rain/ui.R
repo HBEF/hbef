@@ -9,6 +9,8 @@ library(ggthemes)
 library(directlabels)
 library(magrittr)
 library(timevis)
+library(shinydashboard)
+library(grid)
 
 
 ########### IMPORTANT LISTS #############
@@ -76,362 +78,426 @@ units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 ########### APPLICATION UI ############################################################
 ########################################################################################
 
-shinyUI(fluidPage(
+shinyUI(
   
+  dashboardPage(skin = "black",
+                dashboardHeader(title = "Acid Rain"),
+                dashboardSidebar(
+                  width = 50,
+                  sidebarMenu(
+                    menuItem("Introduction", tabName = "introduction", icon = icon("home")),
+                    menuItem("Chemistry", tabName = "chemistry", icon = icon("search-plus")),
+                    menuItem("Policy", tabName = "policy", icon = icon("search-plus"))
+                  )
+                ),
+  dashboardBody(
   ########### HEAD - DO NOT EDIT ################################################
-  theme = "app.css",
+  tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
   tags$head(includeScript(system.file('www', 'ajax.js'))),
   tags$head(includeScript(system.file('www', 'hubbard.js'))),
   tags$head(tags$style(HTML(
     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
   ###############################################################################
   
-  ########### BODY ##############################################################
+  tabItems(
+    
   
-  tabsetPanel(id = "top", type = "pills",
+  ###############################################################################
+  #### ------------  Introduction  Tab ---------------------------------- #######
+  ###############################################################################
+  
+  tabItem(tabName = "introduction",
+       
+    ########### TITLE ####################
+    fluidRow(tags$div(class = "container_question", 
+                      tags$h3("How does pH change when acid rain is mitigated?")) #acid rain intro and annotated pH graph
+                      ),
+                       
+    #############################################
+                       
+    ########### GRAPH FOR QUESTION #1 ##########
+                       
+    fluidRow(
+      column(9,
+      tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+      ######## OPTIONS
+             ###Units - Axis Log
+             tabPanel(shiny::icon("gear"),
+                      fluidRow(
+                        box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                            
+                  ##Units - Y Axis Log
+                  column(6, selectInput("log_pq", label = "Y Axis",
+                                        choices = c("linear", "log"), 
+                                        selected = "linear"))))),
+      ######## PLOT 
+             tabPanel(shiny::icon("circle"),
+                      div(class = "titleRow", fluidRow(column(5, tags$h2("pH")),
+                      ##Granularity
+                      column(3,  offset = 4, selectInput("granularity1", label = "",
+                                                         choices = granularity,
+                                                         selected = "year")))
+                      ),
+                      ## Time Plot
+                      plotlyOutput("pH_intro")
+             ) #Closes tabpanel
+             
+      )# Closes tab Box
+      
+      ), #Closes the column
+      
+      ######## SIDEBAR
+      column(3, 
+         box(width = 13, height = "600px", id = "sidebar",
+             ##Water Sources
+             fluidRow(
+               column(12, checkboxGroupInput("water_sources1", label = h4("Water Sources"),
+                                             choices = water_sources,
+                                             selected = "precipitation",
+                                             inline = TRUE))),
+             
+             ##Date Range
+             fluidRow(
+             sliderInput("date_range1", label = h4("Date Range"),
+                         min = as.Date("1962-01-01"),
+                         max = as.Date("2014-01-01"),
+                         value = c(as.Date("1962-01-01"), as.Date("2014-01-01")), timeFormat = "%b %Y")))
+             
+      )#Closes the column
+      
+    ),#Closes graph row
+    
+    ########### END OF GRAPH FOR QUESTION #1 ##########
+    
+    
+    ########### TEXT FOR QUESTION #1 ##########
+    
+    tags$div(class = "container_paragraph",
+             fluidRow(column(width = 9,
+                             p("Air pollution amplifies acid rain, which washes nutrients out of the 
+                               soil and releases toxins into the streamflow that inhibit ecosystem 
+                               growth.  United States policy has largely mitigated the effects 
+                               of acid rain, and the long term data from Hubbard Brook is able 
+                               to show the story of an ecosystem on the long path to recovery."),
+                             p("In order to best understand the canonical story of acid rain, this 
+                               module will focus on watershed six - the biogeochemical reference - 
+                               to observe the effects of acid rain without experimental 
+                               disruptions.  The dataset for watershed six dates back to 1963, 
+                               which coincidentally is the year of the first rendition of the 
+                               Clean Air Act.  This was also eight years after the first 
+                               legislation on air pollution (The Air Pollution Control Act of 1955.)
+                               Thus, the data concretely describes more of the ecosystem recovery 
+                               following the effects of acid rain."),
+                             p("Ecosystem recovery can in part be tracked by the increasing 
+                               (de-acidifying) pH, as seen over the past 60+ years as new 
+                               policies are implemented to address air quality (see plot above.)"))),
+             fluidRow(column(width = 9,
+                             #insert widget that links to a quizlet or something here
+                             h4("Let's see how much you know offhand about acid rain... Click",
+                                tags$a(href = "https://www.surveymonkey.com/r/RGNNTMH", "here"),
+                                "to take the acid rain quiz."))))
+    ########### END OF QUESTION #1 ##########
+    ), # Closes Intro Tab
+    
+    ###############################################################################
+    #### ------------  End of Introduction Tab ---------------------------- #######
+    ###############################################################################                     
+
+  
+    ###############################################################################
+    #### ------------  Chemistry  Tab ---------------------------------- #######
+    ###############################################################################
+    
+    tabItem(tabName = "chemistry",
+            
+            ########### TITLE ####################
+            fluidRow(tags$div(class = "container_question", 
+                              tags$h3("What does acid rain do to the different solutes in the water?")) 
+            ),
+            
+            #############################################
+            
+            ########### GRAPH FOR QUESTION #1 ##########
+            
+            fluidRow(
+              column(9,
+                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                            ######## OPTIONS
+                            ###Units - Axis Log
+                            tabPanel(shiny::icon("gear"),
+                                     fluidRow(
+                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                           
+                                           ##Units - Y Axis Log
+                                           column(6, selectInput("log2", label = "Y Axis",
+                                                                 choices = c("linear", "log"), 
+                                                                 selected = "linear"))))),
+                            ######## PLOT 
+                            tabPanel(shiny::icon("circle"),
+                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Water Chemistry")),
+                                    ##Granularity
+                                    column(3,  offset = 4, selectInput("granularity2", label = "",
+                                                                       choices = granularity,
+                                                                       selected = "year")))),
+                                     ## Time Plot
+                                     plotlyOutput("chemistry")
+                            ) #Closes tabpanel
+                            
+                     )# Closes tab Box
+                     
+              ), #Closes the column
               
-              
-              ### ------------------------ MAIN TAB 1 -------------------------------####
-              tabPanel("Intro",
-                       
-                       
-                       
-                       ########### QUESTION #1 ####################
-                       
-                       fluidRow(
-                         tags$div(class = "container_question", tags$h3("How does pH change when acid rain is mitigated?")) #acid rain intro and annotated pH graph
-                       ),
-                       
-                       #############################################
-                       
-                       ########### GRAPH FOR QUESTION #1 ##########
-                       
-                       fluidRow(
+              ######## SIDEBAR
+              column(3, 
+                     box(width = 13, height = "600px", id = "sidebar",
+                         #Solutes
+                         fluidRow(
+                           column(12, actionLink("select_all_ions2", h4("Solutes")),
+                           
+                           #Cations
+                                  actionLink("select_all_cations2", h5("Cations")),
+                                  checkboxGroupInput("solutes_cations2", label = "",
+                                                     choices = solutes_cations,
+                                                     selected = "Ca"),
+                           
+                           #Anions
+                                  actionLink("select_all_anions2", h5("Anions")),
+                                  checkboxGroupInput("solutes_anions2", label = "",
+                                                     choices = solutes_anions,
+                                                     selected = ""))),
+                         #Hydrogen  
                          
-                         sidebarLayout(
-                           ############## SIDE BAR 1 ################ 
-                           #You can edit what the default selected options are. 
-                           #You can also delete inputs if you are not allowing 
-                           #the user to change that particular input. 
-                           
-                           sidebarPanel(
-                             
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources1", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = "precipitation",
-                                                             inline = TRUE))),
-                             ##Granularity
-                             fluidRow(
-                               column(12, selectInput("granularity1", label = h4("Granularity"),
-                                                      choices = granularity1,
-                                                      selected = "year"))),
-                             
-                             ##Date Range
-                             sliderInput("date_range1", label = h4("Date Range"),
-                                         min = as.Date("1962-01-01"),
-                                         max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1962-01-01"), as.Date("2014-01-01")), timeFormat = "%b %Y"), width = 4),
-                           
-                           
-                           ############## END OF SIDEBAR 1 #######
-                           
-                           ############## GRAPH 1 ################ 
-                           #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab1",
-                                                                                   
-                                                                                   ### PLOT VIEW 1
-                                                                                   tabPanel("pH improvement", 
-                                                                                            plotlyOutput("pH_intro", height = "auto"))
-                           )), width = 8), 
-                           position = "right"
-                         )
-                         ############## END OF GRAPH 1 ################ 
-                       ),
-                       
-                       ########### END OF GRAPH FOR QUESTION #1 ##########
-                       
-                       ########### TEXT FOR QUESTION #1 ##################
-                       tags$div(class = "container_paragraph",
-                                fluidRow(column(width = 9,
-                                                p("Air pollution amplifies acid rain, which washes nutrients out of the 
-                                                  soil and releases toxins into the streamflow that inhibit ecosystem 
-                                                  growth.  United States policy has largely mitigated the effects 
-                                                  of acid rain, and the long term data from Hubbard Brook is able 
-                                                  to show the story of an ecosystem on the long path to recovery."),
-                                                p("In order to best understand the canonical story of acid rain, this 
-                                                  module will focus on watershed six - the biogeochemical reference - 
-                                                  to observe the effects of acid rain without experimental 
-                                                  disruptions.  The dataset for watershed six dates back to 1963, 
-                                                  which coincidentally is the year of the first rendition of the 
-                                                  Clean Air Act.  This was also eight years after the first 
-                                                  legislation on air pollution (The Air Pollution Control Act of 1955.)
-                                                  Thus, the data concretely describes more of the ecosystem recovery 
-                                                  following the effects of acid rain."),
-                                                p("Ecosystem recovery can in part be tracked by the increasing 
-                                                  (de-acidifying) pH, as seen over the past 60+ years as new 
-                                                  policies are implemented to address air quality (see plot above.)"))),
-                                fluidRow(column(width = 9,
-                                                #insert widget that links to a quizlet or something here
-                                                h4("Let's see how much you know offhand about acid rain... Click",
-                                                   tags$a(href = "https://www.surveymonkey.com/r/RGNNTMH", "here"),
-                                                   "to take the acid rain quiz.")
-                                ),
-                                column(3))
-                       )
-                       ########### END OF TEXT FOR QUESTION #1 ###############
-              ),  ### ------------------------ END OF MAIN TAB 1 -------------------------------####
-              
-              
-              
-              
-              
-              
-              
-              ### ------------------------ MAIN TAB 2 -------------------------------####
-              
-              tabPanel("Chemistry",
-                       
-                       
-                       
-                       ########### QUESTION #2 ####################
-                       
-                       fluidRow(
-                         tags$div(class = "container_question", tags$h3("What does acid rain do?")) #acid rain chemistry
-                       ),
-                       
-                       #############################################
-                       
-                       ########### GRAPH FOR QUESTION #2 ##########
-                       
-                       fluidRow(
-                         
-                         sidebarLayout(
-                           ############## SIDE BAR 2 ################ 
-                           #You can edit what the default selected options are. 
-                           #You can also delete inputs if you are not allowing 
-                           #the user to change that particular input. 
-                           
-                           sidebarPanel(
-                             
-                             #Solutes
-                             fluidRow(
-                               column(12, actionLink("select_all_ions2", h4("Solutes"))),
-                               
-                               #Cations
-                               column(6,
-                                      actionLink("select_all_cations2", h5("Cations")),
-                                      checkboxGroupInput("solutes_cations2", label = "",
-                                                         choices = solutes_cations,
-                                                         selected = "Ca")),
-                               
-                               #Anions
-                               
-                               column(6, actionLink("select_all_anions2", h5("Anions")),
-                                      checkboxGroupInput("solutes_anions2", label = "",
-                                                         choices = solutes_anions,
+                         fluidRow(
+                           column(12, checkboxGroupInput("solutes_H2", label = h4(""),
+                                                         choices = solutes_H,
                                                          selected = ""))),
-                             #Hydrogen  
-                             
-                             fluidRow(
-                               column(12, checkboxGroupInput("solutes_H2", label = h4(""),
-                                                             choices = solutes_H,
-                                                             selected = ""))),
-                             ##Watersheds
-                             fluidRow(
-                               column(12, h4("Watersheds"), 
-                                      selectInput("watersheds2", label = "",
-                                                  choices = watersheds6,
-                                                  selected = "6"))),
-                             
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = c("precipitation", "streamflow"),
-                                                             inline = TRUE))),
-                             
-                             ##Units  
-                             fluidRow(
-                               column(12, selectInput("units2", label = h4("Units"),
-                                                      choices = units,
-                                                      selected = "mg/L")),
-                               column(12, checkboxInput("log2", label = ("ln"),
-                                                        value = FALSE))),
-                             ##Granularity
-                             fluidRow(
-                               column(12, selectInput("granularity2", label = h4("Granularity"),
-                                                      choices = granularity,
-                                                      selected = "year"))),
-                             
-                             ##Date Range
-                             sliderInput("date_range2", label = h4("Date Range"),
-                                         min = as.Date("1962-01-01"),
-                                         max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1965-01-01"), as.Date("2013-01-01")),
-                                         timeFormat = "%b %Y"), width = 4),
-                           
-                           
-                           ############## END OF SIDEBAR 2 #######
-                           
-                           ############## GRAPH 2 ################ 
-                           #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph",
-                                              tabsetPanel(id = "plot_tab2",
-                                                          
-                                                          ### PLOT VIEW 1
-                                                          tabPanel("Precipitation and discharge chemistry",
-                                                                   h4("Changes in chemical concentrations explained in part by acid rain"),
-                                                                   plotlyOutput("chemistry", height = "auto"),
-                                                                   plotlyOutput("pH_streamflow", height= "auto"),
-                                                                   plotlyOutput("pH_streamflow1990", height = "auto")
-                                                          )
-                                                          
-                                                          # ### PLOT VIEW 2
-                                                          # tabPanel("Flux chemistry",
-                                                          #          #   plotlyOutput("fluxAlAcids", height = "auto")  ###Not showing since not sure how to interpret...
-                                                          # )
-                                              )), width = 8), 
-                           position = "right"
-                         )
-                         ############## END OF GRAPH 2 ################ 
-                       ),
-                       
-                       ########### END OF GRAPH FOR QUESTION #2 ##########
-                       
-                       ########### TEXT FOR QUESTION #2 ##################
-                       tags$div(class = "container_paragraph",
-                                fluidRow(column(width = 9,
-                                                p("More placeholder text..."))),
-                                fluidRow(column(width = 9,
-                                                p("")),
-                                         column(width = 3, #make a text box
-                                                h5(strong("Soil buffer:"), "chemicals naturally present in the soil, which neutralize the
-                                         strong acidity of acid rain at the expense of losing base cations in the
-                                         neutralizing reactions")))
-                       )
-                       ########### END OF TEXT FOR QUESTION #2 ###############
-                       
-              ),### ------------------------ END MAIN TAB 2 -------------------------------####
-              
-              
-              ### ------------------------ MAIN TAB 3 -------------------------------####
-              
-              tabPanel("Policy",
-                       
-                       
-                       
-                       ########### QUESTION #3 ####################
-                       
-                       fluidRow(
-                         tags$div(class = "container_question", tags$h3("How have policies altered the effects of acid rain?")) #acid rain history/policy
-                       ),
-                       
-                       #############################################
-                       
-                       ########### GRAPH FOR QUESTION #3 ##########
-                       
-                       fluidRow(
+                         ##Watersheds
+                         fluidRow(
+                           column(12, h4("Watersheds"), 
+                                  selectInput("watersheds2", label = "",
+                                              choices = watersheds6,
+                                              selected = "6"))),
                          
-                         sidebarLayout(
-                           ############## SIDE BAR 3 ################ 
-                           #You can edit what the default selected options are. 
-                           #You can also delete inputs if you are not allowing 
-                           #the user to change that particular input. 
-                           
-                           sidebarPanel(
-                             
-                             ##Watersheds
-                             fluidRow(
-                               column(12, h4("Watersheds"), 
-                                      selectInput("watersheds3", label = "",
-                                                  choices = watersheds6,
-                                                  selected = "6"))),
-                             
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = c("streamflow", "precipitation"),
-                                                             inline = TRUE))),
-                             
-                             ##Units  
-                             fluidRow(
-                               column(12, selectInput("units3", label = h4("Units"),
-                                                      choices = units,
-                                                      selected = "mg/L")),
-                               column(12, checkboxInput("log3", label = ("ln"),
-                                                        value = FALSE))),
-                             ##Granularity
-                             fluidRow(
-                               column(12, selectInput("granularity3", label = h4("Granularity"),
-                                                      choices = granularity,
-                                                      selected = "year"))),
-                             
-                             ##Date Range
-                             sliderInput("date_range3", label = h4("Date Range"),
-                                         min = as.Date("1962-01-01"),
-                                         max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1965-01-01"), as.Date("2013-01-01")), timeFormat = "%b %Y"), width = 4),
-                           
-                           
-                           ############## END OF SIDEBAR 3 #######
-                           
-                           ############## GRAPH 3 ################ 
-                           #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph", 
-                                              tabsetPanel(id = "plot_tab3",
-                                                          
-                                                          ### PLOT VIEW 1
-                                                          tabPanel("Combined", 
-                                                                   h4("Decrease in SOx and NOx concentrations"),
-                                                                   
-                                                                   #Anions
-                                                                   checkboxGroupInput("solutes_anions3", label = "",
-                                                                                      choices = solutes_anions3,
-                                                                                      selected = c("SO4", "NO3")),
-                                                                   plotlyOutput("policy_SO4_NO3", height = "auto"),
-                                                                   
-                                                                   h4("Decrease in loss of base cations"),
-                                                                   #Cations
-                                                                   actionLink("select_all_cations3", h5("Base Cations")),
-                                                                   checkboxGroupInput("solutes_cations3", label = "",
-                                                                                      choices = solutes_base_cations,
-                                                                                      selected = c("K", "Na", "Ca", "Mg")),
-                                                                   plotlyOutput("policy_base_cations", height = "auto"),
-                                                                   
-                                                                   h4("Decrease in toxic Al streamflow"),
-                                                                   #Al and SO4, NO3
-                                                                   checkboxGroupInput("solutes_Al_anions3", label = "",
-                                                                                      choices = solutes_Al_anions3,
-                                                                                      selected = c("SO4", "NO3", "Al")),
-                                                                   plotlyOutput("policy_Al", height = "auto"))
-                                              )
-                           ), width = 8), 
-                           position = "right"
-                         ),
+                         ##Water Sources
+                         fluidRow(
+                           column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
+                                                         choices = water_sources,
+                                                         selected = c("precipitation", "streamflow"),
+                                                         inline = TRUE))),
                          
-                         fluidRow(column(width = 11, offset = 1,
-                                         timevisOutput("timeline")))
+                         ##Units  
+                         fluidRow(
+                           column(12, selectInput("units2", label = h4("Units"),
+                                                  choices = units,
+                                                  selected = "mg/L"))),
                          
-                         ############## END OF GRAPH 3 ################ 
-                       ),
-                       
-                       ########### END OF GRAPH FOR QUESTION #3 ##########
-                       
-                       ########### TEXT FOR QUESTION #3 ##################
-                       tags$div(class = "container_paragraph",
-                                fluidRow(column(width = 9,
-                                                p("Yet more placeholder text...")))
-                       )
-                       ########### END OF TEXT FOR QUESTION #3 ###############
-                       
-              )### ------------------------ END MAIN TAB 3 -------------------------------####
+                         ##Date Range
+                         sliderInput("date_range2", label = h4("Date Range"),
+                                     min = as.Date("1962-01-01"),
+                                     max = as.Date("2014-01-01"),
+                                     value = c(as.Date("1965-01-01"), as.Date("2013-01-01")),
+                                     timeFormat = "%b %Y"))
+                     
+              )#Closes the column
               
-  )# Closes Tabset Panel for Main Tabs
+            ),#Closes graph row
+            
+            ########### END OF GRAPH FOR QUESTION #1 ##########
+            
+            
+            ########### TEXT FOR QUESTION #1 ##########
+            
+            tags$div(class = "",
+                     fluidRow(column(width = 9,
+                                     p("Air pollution amplifies acid rain, which washes nutrients out of the 
+                                       soil and releases toxins into the streamflow that inhibit ecosystem 
+                                       growth.  United States policy has largely mitigated the effects 
+                                       of acid rain, and the long term data from Hubbard Brook is able 
+                                       to show the story of an ecosystem on the long path to recovery."))))
+                                
+            ########### END OF QUESTION #1 ##########
+                                     ),# Closes Intro Tab
+    
+    ###############################################################################
+    #### ------------  End of Chemistry Tab ------------------------------- #######
+    ###############################################################################  
   
-)#closes FluidPage
+  
+    ###############################################################################
+    #### ------------  Policy Tab  ---------------------------------------- #######
+    ###############################################################################
+    
+    tabItem(tabName = "policy",
+            
+            ########### TITLE ####################
+            fluidRow(tags$div(class = "container_question", 
+                              tags$h3("How have policies altered the effects of acid rain?")) 
+            ),
+            
+            #############################################
+            
+            ########### GRAPH FOR QUESTION #1 ##########
+            
+            fluidRow(
+              column(9,
+                     #------ Box 1 --------#
+                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                            ######## OPTIONS
+                            ###Units - Axis Log
+                            tabPanel(shiny::icon("gear"),
+                                     fluidRow(
+                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                           
+                                           ##Units - Y Axis Log
+                                           column(6, selectInput("log3", label = "Y Axis",
+                                                                 choices = c("linear", "log"), 
+                                                                 selected = "linear"))))),
+                            ######## PLOT 
+                            tabPanel(shiny::icon("circle"),
+                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Decrease in SOx and NOx")),
+                                      ##Granularity
+                                      column(3,  offset = 4, selectInput("granularity3", label = "",
+                                                                         choices = granularity,
+                                                                         selected = "year"))),
+                                      #Solutes
+                                      fluidRow(checkboxGroupInput("solutes_anions3", label = "",
+                                                         choices = solutes_anions3,
+                                                         selected = c("SO4", "NO3")))
+                                      ),
+                                     ## Time Plot
+                                     plotlyOutput("policy_SO4_NO3")
+                            ) #Closes tabpanel
+                            
+                     ),# Closes tab Box
+                     
+                     #------ End of Box 1 --------#
+                     
+                     #------ Box 2 --------#
+                     
+                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                            ######## OPTIONS
+                            ###Units - Axis Log
+                            tabPanel(shiny::icon("gear"),
+                                     fluidRow(
+                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                           
+                                           ##Units - Y Axis Log
+                                           column(6, selectInput("log4", label = "Y Axis",
+                                                                 choices = c("linear", "log"), 
+                                                                 selected = "linear"))))),
+                            ######## PLOT 
+                            tabPanel(shiny::icon("circle"),
+                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Decrease in loss of base cations")),
+                                     ##Granularity
+                                    column(3,  offset = 4, selectInput("granularity4", label = "",
+                                                                       choices = granularity, selected = "year"))),
+                                    #Solutes
+                                    fluidRow(checkboxGroupInput("solutes_cations3", label = "",
+                                                                choices = solutes_base_cations,
+                                                                selected = c("K", "Na", "Ca", "Mg")))), 
+                                    ## Time Plot
+                                     plotlyOutput("policy_base_cations")
+                            ) #Closes tabpanel
+                            
+                     ), # Closes tab Box
+                     
+                     #------ End of Box 2 --------#
+                     
+                     #------ Box 3 --------#
+                     
+                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                            ######## OPTIONS
+                            ###Units - Axis Log
+                            tabPanel(shiny::icon("gear"),
+                                     fluidRow(
+                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                           
+                                           ##Units - Y Axis Log
+                                           column(6, selectInput("log5", label = "Y Axis",
+                                                                 choices = c("linear", "log"), 
+                                                                 selected = "linear"))))),
+                            ######## PLOT 
+                            tabPanel(shiny::icon("circle"),
+                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Decrease in toxic Al streamflow")),
+                                    ##Granularity
+                                    column(3,  offset = 4, selectInput("granularity5", label = "",
+                                                                         choices = granularity,
+                                                                         selected = "year"))),
+                                    #Solutes
+                                    fluidRow(checkboxGroupInput("solutes_Al_anions3", label = "",
+                                                                choices = solutes_Al_anions3,
+                                                                selected = c("Al")))),
+                                     ## Time Plot
+                                     plotlyOutput("policy_Al")
+                            ) #Closes tabpanel
+                            
+                     )# Closes tab Box
+                     
+                     
+              ), #Closes the column
+              
+              ######## SIDEBAR
+              column(3, 
+                     box(width = 13, height = "600px", id = "sidebar",
+                        
+                         ##Watersheds
+                         fluidRow(
+                           column(12, h4("Watersheds"), 
+                                  selectInput("watersheds3", label = "",
+                                              choices = watersheds6,
+                                              selected = "6"))),
+                         
+                         ##Water Sources
+                         fluidRow(
+                           column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
+                                                         choices = water_sources,
+                                                         selected = c("precipitation", "streamflow"),
+                                                         inline = TRUE))),
+                         
+                         ##Units  
+                         fluidRow(
+                           column(12, selectInput("units3", label = h4("Units"),
+                                                  choices = units,
+                                                  selected = "mg/L")),
+                           column(12, checkboxInput("log3", label = ("ln"),
+                                                    value = FALSE))),
+                         
+                         ##Date Range
+                         sliderInput("date_range3", label = h4("Date Range"),
+                                     min = as.Date("1962-01-01"),
+                                     max = as.Date("2014-01-01"),
+                                     value = c(as.Date("1965-01-01"), as.Date("2013-01-01")),
+                                     timeFormat = "%b %Y"))
+                     
+              )#Closes the column
+              
+            ),#Closes graph row
+            
+            ########### END OF GRAPH FOR QUESTION #1 ##########
+            
+            
+            ########### TEXT FOR QUESTION #1 ##########
+            
+            tags$div(class = "",
+                     fluidRow(column(width = 9,
+                                     p("Air pollution amplifies acid rain, which washes nutrients out of the 
+                                       soil and releases toxins into the streamflow that inhibit ecosystem 
+                                       growth.  United States policy has largely mitigated the effects 
+                                       of acid rain, and the long term data from Hubbard Brook is able 
+                                       to show the story of an ecosystem on the long path to recovery."))))
+            
+            ########### END OF QUESTION #1 ##########
+                                     )# Closes Intro Tab
+    
+    ###############################################################################
+    #### ------------  End of Policy Tab ------------------------------- #######
+    ###############################################################################    
+  
+              
+
+)# Closes Tabset Panel for Main Tabs
+)#Closes Dashboard Body
+)#Closes Dashboard Page
 ) #closes ShinyUI
 
 
