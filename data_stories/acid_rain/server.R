@@ -25,20 +25,23 @@ shinyServer(function(session, input, output) {
   ########### IMPORTANT PRELIMINARY INFO #############################################
   
   ###  Theme  ################
-  my_theme <- theme_fivethirtyeight() + 
+  my_theme <- 
     theme(rect = element_rect(fill = NA),
+          panel.background = element_rect("transparent", colour = NA),
           panel.grid.major = element_line(colour = "#dddddd"), 
+          panel.grid.major.x = element_line(colour = NA),
           text = element_text(family = "Helvetica", size = 12), 
-          legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
-          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
-          axis.title= element_text(NULL), axis.title.x= element_blank(), 
-          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
+          legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
+          strip.text = element_text(margin = margin(20)),
+          axis.title= element_text(size = 10, margin = margin(20)), 
+          plot.margin = margin(1, 1, 0, 1, "cm"))
   
   color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
   color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
+  grey_palette <- c("#505050", "#CCCDD9")
   source_shapes <- c("streamflow" = 16, "precipitation"= 21)
   
   ### End of Theme ################
@@ -267,7 +270,7 @@ shinyServer(function(session, input, output) {
   
   ## GGPLOT TIME FUNCTION
   #### --- GGPLOT TIME FUNCTION
-  ggplot_function2 <- function(data, x, y, log, y_label, date_range){
+  ggplot_function2 <- function(data, x, y, log, y_label, date_range, color){
     
     if(log == "log") {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
@@ -281,7 +284,7 @@ shinyServer(function(session, input, output) {
       geom_point(size = 1.3, fill = "white", stroke = 0.2, aes(text = paste(solute,":", round(get(y), 4)))) +
       xlim(min(date_range[1]), max(date_range[2]))+ 
       scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
+      scale_color_manual(values = color) +
       scale_alpha_discrete(range = c(0.9, 0.5))
     
     ggplotly(plot, tooltip = "text") %>%
@@ -301,7 +304,7 @@ shinyServer(function(session, input, output) {
     data <- imported_data
     data <- data[data$granularity %in% input$granularity1,]
     data <- data[data$ws %in% c("6"),]
-    data <- data[data$solute %in% c("pH"),]
+    data <- data[data$solute %in% c("H"),]
     data <- data[data$source %in% input$water_sources1,]
   })
   
@@ -313,7 +316,7 @@ shinyServer(function(session, input, output) {
   })
   
   y1 <- reactive({
-    {"concentration_mg"}
+    {"pH"}
   })
   
   ########## Reactive Data 2
@@ -408,18 +411,49 @@ shinyServer(function(session, input, output) {
 
   #successfully interactive/integrated intro pH plot
   output$pH_intro <- renderPlotly({
-    pH_intro <- ggplot_function1(reactive_data1(), x1(), y1(), ncol = 1, nrow = NULL)
+    
+    line <- list(
+      type = "line",
+      line = list(color = "red"),
+      xref = "x",
+      yref = "y",
+      width=200
+    )
+    
+    lines <- list()
+    for (i in c(as.Date("1970-06-01"))) {
+      line[["x0"]] <- as.double(as.POSIXlt("1970-06-01"))
+      line[["x1"]] <- as.double(as.POSIXlt("1980-06-01"))
+      line[c("y0", "y1")] <- 4.5
+      lines <- c(lines, list(line))}
+    
+   
+    m <- reactive_data1()[reactive_data1()$water_year == as.Date("1970-06-01"),]
+    
+    a <- list(
+      x = as.double(as.POSIXlt(m$water_year)),
+      y = m$pH,
+      text = "clean air act",
+      xref = "x",
+      yref = "y",
+      showarrow = TRUE,
+      arrowhead = 7,
+      ax = 10,
+      ay = -40
+    )
+    
+    pH_intro <- ggplot_function2(reactive_data1(), x1(), y1(), log = input$log1, "pH", input$date_range1, grey_palette)
     pH_intro$x$layout$width <- NULL
     pH_intro$y$layout$height <- NULL
     pH_intro$width <- NULL
     pH_intro$height <- NULL
     pH_intro %>%
-      layout(autosize = TRUE)
+      layout(autosize = TRUE, shapes= lines, annotations = a)
     })
   
   #Successfully interactive/integrated plot of any compound conc
   output$chemistry <- renderPlotly({
-    chemistry <- ggplot_function2(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range2)
+    chemistry <- ggplot_function2(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range2, solute_palette)
     chemistry$x$layout$width <- NULL
     chemistry$y$layout$height <- NULL
     chemistry$width <- NULL
@@ -480,7 +514,7 @@ shinyServer(function(session, input, output) {
 #   #################
   #Successfully interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
   output$policy_SO4_NO3 <- renderPlotly({
-    policy_SO4_NO3 <- ggplot_function2(reactive_data3_anions(), x3(), y3(), log = input$log3, input$units3, input$date_range3)
+    policy_SO4_NO3 <- ggplot_function2(reactive_data3_anions(), x3(), y3(), log = input$log3, input$units3, input$date_range3, solute_palette)
     policy_SO4_NO3$x$layout$width <- NULL
     policy_SO4_NO3$y$layout$height <- NULL
     policy_SO4_NO3$width <- NULL
@@ -491,7 +525,7 @@ shinyServer(function(session, input, output) {
   
   #Successfully interactive/integrated base cation trends plot 
   output$policy_base_cations <- renderPlotly({
-    policy_base_cations <- ggplot_function2(reactive_data3_cations(), x4(), y3(), log = input$log4, input$units3, input$date_range3)
+    policy_base_cations <- ggplot_function2(reactive_data3_cations(), x4(), y3(), log = input$log4, input$units3, input$date_range3, solute_palette)
     policy_base_cations$x$layout$width <- NULL
     policy_base_cations$y$layout$height <- NULL
     policy_base_cations$width <- NULL
@@ -502,7 +536,7 @@ shinyServer(function(session, input, output) {
   
   #Successfully interactive/integrated Al plot to show decrease in acids mean less Al released from soil
   output$policy_Al <- renderPlotly({
-    policy_Al <- ggplot_function2(reactive_data3_Al(), x5(), y3(), log = input$log5, input$units3, input$date_range3)
+    policy_Al <- ggplot_function2(reactive_data3_Al(), x5(), y3(), log = input$log5, input$units3, input$date_range3, solute_palette)
     policy_Al$x$layout$width <- NULL
     policy_Al$y$layout$height <- NULL
     policy_Al$width <- NULL
@@ -513,7 +547,7 @@ shinyServer(function(session, input, output) {
 
   #in progress plot of Al and acid flux and conc... shoudl be on seperate tab so has a diff sidebar!
   output$chemistry_flux <- renderPlotly({
-    chemistry_flux <- ggplot_function2(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range2)
+    chemistry_flux <- ggplot_function2(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range2, solute_palette)
     chemistry_flux$x$layout$width <- NULL
     chemistry_flux$y$layout$height <- NULL
     chemistry_flux$width <- NULL

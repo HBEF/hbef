@@ -43,8 +43,7 @@ solutes_Al_anions3 <- list("Sulfate (SO4)" = "SO4",
                            "Nitrate (NO3)" = "NO3",
                            "Aluminum (Al)" = "Al")
 
-solutes_H <- list("Hydrogen (H)" = "H",
-                  "pH" = "pH")
+solutes_H <- list("Hydrogen (H)" = "H")
 
 watersheds <- list("Watershed 1" = "1",
                    "Watershed 2" = "2", 
@@ -83,7 +82,7 @@ shinyUI(
   dashboardPage(skin = "black",
                 dashboardHeader(title = "Acid Rain"),
                 dashboardSidebar(
-                  width = 50,
+                  width = 150,
                   sidebarMenu(
                     menuItem("Introduction", tabName = "introduction", icon = icon("home")),
                     menuItem("Chemistry", tabName = "chemistry", icon = icon("search-plus")),
@@ -127,7 +126,7 @@ shinyUI(
                         box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
                             
                   ##Units - Y Axis Log
-                  column(6, selectInput("log_pq", label = "Y Axis",
+                  column(6, selectInput("log1", label = "Y Axis",
                                         choices = c("linear", "log"), 
                                         selected = "linear"))))),
       ######## PLOT 
@@ -153,8 +152,7 @@ shinyUI(
              fluidRow(
                column(12, checkboxGroupInput("water_sources1", label = h4("Water Sources"),
                                              choices = water_sources,
-                                             selected = "precipitation",
-                                             inline = TRUE))),
+                                             selected = "precipitation"))),
              
              ##Date Range
              fluidRow(
@@ -172,7 +170,7 @@ shinyUI(
     
     ########### TEXT FOR QUESTION #1 ##########
     
-    tags$div(class = "container_paragraph",
+    tags$div(class = "",
              fluidRow(column(width = 9,
                              p("Air pollution amplifies acid rain, which washes nutrients out of the 
                                soil and releases toxins into the streamflow that inhibit ecosystem 
@@ -282,8 +280,7 @@ shinyUI(
                          fluidRow(
                            column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
                                                          choices = water_sources,
-                                                         selected = c("precipitation", "streamflow"),
-                                                         inline = TRUE))),
+                                                         selected = c("precipitation", "streamflow")))),
                          
                          ##Units  
                          fluidRow(
@@ -354,16 +351,17 @@ shinyUI(
                                                                  selected = "linear"))))),
                             ######## PLOT 
                             tabPanel(shiny::icon("circle"),
-                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Decrease in SOx and NOx")),
+                                     div(class = "titleRow", fluidRow(column(9, tags$h2("Decrease in SOx and NOx")),
                                       ##Granularity
-                                      column(3,  offset = 4, selectInput("granularity3", label = "",
+                                      column(3, selectInput("granularity3", label = "",
                                                                          choices = granularity,
-                                                                         selected = "year"))),
+                                                                         selected = "year")))),
                                       #Solutes
-                                      fluidRow(checkboxGroupInput("solutes_anions3", label = "",
+                                      fluidRow(column(12, checkboxGroupInput("solutes_anions3", label = "",
                                                          choices = solutes_anions3,
-                                                         selected = c("SO4", "NO3")))
-                                      ),
+                                                         selected = c("SO4", "NO3"), 
+                                                         inline = TRUE))),
+                                      
                                      ## Time Plot
                                      plotlyOutput("policy_SO4_NO3")
                             ) #Closes tabpanel
@@ -387,14 +385,15 @@ shinyUI(
                                                                  selected = "linear"))))),
                             ######## PLOT 
                             tabPanel(shiny::icon("circle"),
-                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Decrease in loss of base cations")),
+                                     div(class = "titleRow", fluidRow(column(9, tags$h2("Decrease in loss of base cations")),
                                      ##Granularity
-                                    column(3,  offset = 4, selectInput("granularity4", label = "",
-                                                                       choices = granularity, selected = "year"))),
+                                    column(3, selectInput("granularity4", label = "",
+                                                                       choices = granularity, selected = "year")))),
                                     #Solutes
                                     fluidRow(checkboxGroupInput("solutes_cations3", label = "",
                                                                 choices = solutes_base_cations,
-                                                                selected = c("K", "Na", "Ca", "Mg")))), 
+                                                                selected = c("K", "Na", "Ca", "Mg"), 
+                                                                inline = TRUE)), 
                                     ## Time Plot
                                      plotlyOutput("policy_base_cations")
                             ) #Closes tabpanel
@@ -418,15 +417,16 @@ shinyUI(
                                                                  selected = "linear"))))),
                             ######## PLOT 
                             tabPanel(shiny::icon("circle"),
-                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Decrease in toxic Al streamflow")),
+                                     div(class = "titleRow", fluidRow(column(9, tags$h2("Decrease in toxic Al streamflow")),
                                     ##Granularity
-                                    column(3,  offset = 4, selectInput("granularity5", label = "",
+                                    column(3, selectInput("granularity5", label = "",
                                                                          choices = granularity,
-                                                                         selected = "year"))),
+                                                                         selected = "year")))),
                                     #Solutes
                                     fluidRow(checkboxGroupInput("solutes_Al_anions3", label = "",
                                                                 choices = solutes_Al_anions3,
-                                                                selected = c("Al")))),
+                                                                selected = c("Al"), 
+                                                                inline = TRUE)),
                                      ## Time Plot
                                      plotlyOutput("policy_Al")
                             ) #Closes tabpanel
@@ -451,16 +451,13 @@ shinyUI(
                          fluidRow(
                            column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
                                                          choices = water_sources,
-                                                         selected = c("precipitation", "streamflow"),
-                                                         inline = TRUE))),
+                                                         selected = c("precipitation", "streamflow")))),
                          
                          ##Units  
                          fluidRow(
                            column(12, selectInput("units3", label = h4("Units"),
                                                   choices = units,
-                                                  selected = "mg/L")),
-                           column(12, checkboxInput("log3", label = ("ln"),
-                                                    value = FALSE))),
+                                                  selected = "mg/L"))),
                          
                          ##Date Range
                          sliderInput("date_range3", label = h4("Date Range"),

@@ -1,33 +1,52 @@
 @charset "UTF-8";
 
 
-/* IFRAME */
-
-.intrinsic-container {
-  position: relative;
-  height: 0;
-  overflow: hidden;
-}
- 
-/* 16x9 Aspect Ratio */
-.intrinsic-container-16x9 {
-  padding-bottom: 56.25%;
-}
- 
-/* 4x3 Aspect Ratio */
-.intrinsic-container-4x3 {
-  padding-bottom: 75%;
-}
- 
-.intrinsic-container iframe {
-  position: absolute;
-  top:0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
 
 
+.titleRow{
+	border-bottom: 1px solid #8C8C8C;
+}
+
+.titleRow h2{
+	font-size: 2em;
+}
+
+.box-body{
+	margin:0; !important
+}
+
+#pq.box-body{
+	background: #f9f9f9;
+}
+
+#time.box-body{
+	background: #f9f9f9;
+}
+
+#sidebar.box-body{
+	padding: 20pt;
+}
+
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=pH] { color: #FFC408 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=H] { color: #FFE79C }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=NO3] { color: #BF1616 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=SiO2] { color: #CC4545 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=PO4] { color: #600B0B }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=SO4] { color: #8F1010 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Cl] { color: #D97373 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=HCO3] { color: #E5A2A2 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=K] { color: #95AFDD }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Na] { color: #7195D2 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=NH4] { color: #4E7AC7 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Ca] { color: #3B5C95 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Mg] { color: #273D64 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Al] { color: #162338 }
+
+
+#solutes_anions3, #solutes_cations3, #solutes_Al_anions3{
+	float: right;
+	margin-right: 5%;
+}
 
 input[type="checkbox"]:after {
 		width: 20px;
@@ -60,7 +79,7 @@ input[type='checkbox']:checked:after {
 
 /* WATER SOURCES */
 
-input[value = "precipitation"]:checked:after {
+input[value = "precip"]:checked:after {
     background-color: #EBEBEB;
 	border: 5px solid #3E3D3D;
     }
@@ -221,7 +240,8 @@ input[value = "Al"]:checked:after {
 /* this gives the sidebar a specified height and enables the scrollbar*/
 
 form.well { 
-	overflow-y: none;
+	max-height: 900px; 
+	overflow-y: auto;
 	overflow-x:none;
 	background: #EBEBEB;
 	border: none;
@@ -263,6 +283,12 @@ section{
 	margin-right: auto;
 	padding-top: 10vh;
 	padding-bottom: 10vh;
+	-webkit-column-count: 2; /* Chrome, Safari, Opera */
+    -moz-column-count: 2; /* Firefox */
+    column-count: 2;
+	-webkit-column-gap: 60px; /* Chrome, Safari, Opera */
+    -moz-column-gap: 60px; /* Firefox */
+    column-gap: 60px;
 }
 
 .container_graph {
@@ -309,13 +335,15 @@ h1 {
 
 
 h2 {
-	
+	color: #363229;
 	text-transform: uppercase;
+	font-family: 'Montserrat', sans-serif;
+	margin-left: 10pt;
 }
 
 
 h3 {
-	font-size: 2em;
+	font-size: 1em;
 	font-family: 'Montserrat', sans-serif;
 	text-align: left;
 	font-style: normal;
@@ -324,8 +352,8 @@ h3 {
 
 
 h4 {
-	font-size: 1.2em;
-	font-weight: 200;
+	font-size: 1em;
+	font-weight: 400;
 	font-family: 'Montserrat', sans-serif;
 	text-align: left;
 	letter-spacing: 2px;
@@ -353,7 +381,9 @@ h4 {font-size: 1em;}
 p{font-size: 12pt;}}
 
 
-
+body{
+	font-size: 10pt;
+}
 
 
 /*use for ligth fonts */
