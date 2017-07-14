@@ -8,8 +8,8 @@ library(lattice)
 library(plotly)
 
 #Read in and clean grid coordinates for watersheds
-w1_coords <- read_csv("w1_coords.csv")
-w6_coords <- read_csv("w6_coords_revised.csv")
+w1_coords <- read.csv("w1_coords.csv")
+w6_coords <- read.csv("w6_coords_revised.csv")
 coordinates <- w6_coords[,c("x", "y")]
 coordinates$y <- coordinates$y*(-1)
 coordinates$x <- coordinates$x - 5
@@ -250,7 +250,7 @@ proj4string(mapdf) <- CRS("+init=EPSG:4326")
 #grid.text("Watershed 1, 2001", x=unit(0.3, "npc"), y=unit(0.03, "npc"))
 mapdf@data$id <- rownames(mapdf@data)
 wsPoints <- fortify(mapdf, region = "id")
-wsDF <- merge(wsPoints, mapdf, by = "id")
+wsDF <- merge(wsPoints, mapdf@data, by = "id")
 plot = ggplotly(ggplot(data = wsDF)+
            geom_polygon(aes(x = long, y = lat, group = group, fill = Biomass, frame = Year))  +
            geom_path(color = "white", 
@@ -261,11 +261,11 @@ plot = ggplotly(ggplot(data = wsDF)+
            theme(axis.text.y = element_blank(),
                  axis.text.x = element_blank(),
                  axis.ticks = element_blank(),
-                 legend.position = "none",
+                 legend.position = "none", 
                  legend.title = element_blank()) +
-           labs(x = "", y = "")) %>%
+           labs(x = "", y = "", title = "Total Biomass"))%>%
   config(displayModeBar = FALSE) %>%
-  config(showLink = FALSE) %>% 
+  config(showLink = FALSE) %>%
   animation_opts(frame = 4000, transition = 0)
 
 
@@ -273,4 +273,5 @@ shinyServer(function(input, output) {
   output$map.plot = renderPlotly({
     plot
   })
+  options(warn = -1)
 })
