@@ -14,7 +14,7 @@ coordinates <- w6_coords[,c("x", "y")]
 coordinates$y <- coordinates$y*(-1)
 coordinates$x <- coordinates$x - 5
 coordinates_w1 <- w1_coords[, c("x", "y")]
-coordinates_w1$x <- coordinates_w1$x + 5
+coordinates_w1$x <- coordinates_w1$x -10
 coordinates_w1$y <- coordinates_w1$y - 34
 coordsdf <- rbind(coordinates, coordinates_w1)
 poly = c()
@@ -242,25 +242,16 @@ proj4string(mapdf) <- CRS("+init=EPSG:4326")
 #spplot(mapdf)
 #grid.text("Watershed 6, 2002", x=unit(0.6, "npc"), y=unit(0.03, "npc"))
 #grid.text("Watershed 1, 2001", x=unit(0.3, "npc"), y=unit(0.03, "npc"))
-mapdf@data$id <- rownames(mapdf@data)
-wsPoints <- fortify(mapdf, region = "id")
-wsDF <- merge(wsPoints, mapdf@data, by = "id")
-plot = ggplot(data = wsDF)+
-                  geom_polygon(aes(x = long, y = lat, group = group, fill = Biomass))  +
-                  geom_path(color = "white", 
-                            aes(x = long, y = lat, group = group, fill = Biomass)) +
-                  scale_fill_manual(values = c("violet", "purple", 
-                                               "blue", "green","orange", "yellow", "red")) +
-                  facet_wrap(~Watershed) +
-                  theme(axis.text.y = element_blank(),
-                        axis.text.x = element_blank(),
-                        axis.ticks = element_blank()) +
-                  labs(x = "", y = "", title = "Total Biomass")
+#mapdf@data$id <- rownames(mapdf@data)
+#wsPoints <- fortify(mapdf, region = "id")
+#wsDF <- merge(wsPoints, mapdf@data, by = "id")
+
 
 
 shinyServer(function(input, output) {
   output$map.plot = renderPlot({
-    plot
+    spplot(mapdf, c("Biomass"), col.regions =  c("violet", "purple", 
+                                   "blue", "green","orange", "yellow", "red"))
   })
 
 })
