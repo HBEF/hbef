@@ -1,257 +1,403 @@
-library(readr)
-library(dplyr)
-library(rgdal)
-library(sp)
 library(ggplot2)
-library(maptools)
-library(lattice)
+library(lubridate)
+library(gridExtra)
+library(readr)
+library(tidyr)
+library(dplyr)
+library(shiny)
 library(plotly)
+library(utils)
+library(grid)
+library(ggthemes)
+library(directlabels)
 
-#Read in and clean grid coordinates for watersheds
-w1_coords <- read.csv("w1_coords.csv")
-w6_coords <- read.csv("w6_coords_revised.csv")
-coordinates <- w6_coords[,c("x", "y")]
-coordinates$y <- coordinates$y*(-1)
-coordinates$x <- coordinates$x - 5
-coordinates_w1 <- w1_coords[, c("x", "y")]
-coordinates_w1$x <- coordinates_w1$x -10
-coordinates_w1$y <- coordinates_w1$y - 34
-coordsdf <- rbind(coordinates, coordinates_w1)
-poly = c()
-for (row in 1:nrow(coordsdf)){
-  points <- rbind(c(coordsdf[[row, 1]], coordsdf[[row, 2]]),
-                  c(coordsdf[[row, 1]] + 1, coordsdf[[row, 2]]),
-                  c(coordsdf[[row, 1]] + 1, coordsdf[[row, 2]] - 1),
-                  c(coordsdf[[row, 1]], coordsdf[[row, 2]] - 1))
-  poly = c(poly, Polygons(list(Polygon(points)), paste("plot", row, sep = "")))
-}
-map <- SpatialPolygons(poly)
-#Read in yearly data
-w1_2006 <- read_csv("w1_2006veg.txt")
-w6_2007 <- read.csv("w6_2007veg.csv")
-w1_2001 <- read_csv("w1_2001veg.txt")
-w6_2002 <- read_csv("w6_2002veg.txt")
-w1_1996 <- read_csv("w1_1996veg.txt")
-w6_1997 <- read_csv("w6_1997veg.txt")
-w1_2011 <- read_csv("w1_2011veg.txt")
-w6_2012 <- read.csv("w6_2012veg.csv")
-#Create extra rows to fill in NAs for plots that
-#aren't listed.
-extra_row_2001 <-c(2001, 1, 144, NA, NA, NA,
-                   NA, NA, NA, NA, NA, NA,
-                   NA, NA, NA) 
-extra_row_2006 = c(2006, 1, 144, NA, NA, NA,
-                   NA, NA, NA, NA, NA, NA,
-                   NA, NA, NA)
-extra_row_1996 = c(1996, 1, 144, NA, NA, NA,
-                   NA, NA, NA, NA, NA, NA,
-                   NA, NA, NA)
-extra_row_2011_1 <- c(2011, 1, 131, NA, NA, NA,
-                      NA, NA, NA, NA, NA, NA,
-                      NA, NA, NA)
-extra_row_2011_2 <- c(2011, 1, 133, NA, NA, NA,
-                      NA, NA, NA, NA, NA, NA,
-                      NA, NA, NA)
-extra_row_2011_3 <- c(2011, 1, 137, NA, NA, NA,
-                      NA, NA, NA, NA, NA, NA,
-                      NA, NA, NA)
-extra_row_2011_4 <- c(2011, 1, 138, NA, NA, NA,
-                      NA, NA, NA, NA, NA, NA,
-                      NA, NA, NA)
-extra_row_2011_5 <- c(2011, 1, 139, NA, NA, NA,
-                      NA, NA, NA, NA, NA, NA,
-                      NA, NA, NA)
-extra_row_2011_6 <- c(2011, 1, 140, NA, NA, NA,
-                      NA, NA, NA, NA, NA, NA,
-                      NA, NA, NA)
-extra_row_2011_7 = c(2011, 1, 143, NA, NA, NA,
-                     NA, NA, NA, NA, NA, NA,
-                     NA, NA, NA)
-extra_row_2011_8 = c(2011, 1, 144, NA, NA, NA,
-                     NA, NA, NA, NA, NA, NA,
-                     NA, NA, NA)
-extra_row_2011_9 = c(2011, 1, 145, NA, NA, NA,
-                     NA, NA, NA, NA, NA, NA,
-                     NA, NA, NA)
-extra_row_2011_10 = c(2011, 1, 146, NA, NA, NA,
-                      NA, NA, NA, NA, NA, NA,
-                      NA, NA, NA)
-extra_row_2011_11 <- c(2011, 1, 149, NA, NA, NA,
-                       NA, NA, NA, NA, NA, NA,
-                       NA, NA, NA)
-extra_row_2011_12 <- c(2011, 1, 150, NA, NA, NA,
-                       NA, NA, NA, NA, NA, NA,
-                       NA, NA, NA)
-extra_row_2011_13 <- c(2011, 1, 151, NA, NA, NA,
-                       NA, NA, NA, NA, NA, NA,
-                       NA, NA, NA)
-w1_2006 <- rbind(w1_2006, extra_row_2006)
-w1_2001 <- rbind(w1_2001, extra_row_2001)
-w1_1996 <- rbind(w1_1996, extra_row_1996)
-w1_2011 <- rbind(w1_2011, extra_row_2011_1,
-                 extra_row_2011_2,
-                 extra_row_2011_3,
-                 extra_row_2011_4,
-                 extra_row_2011_5,
-                 extra_row_2011_6,
-                 extra_row_2011_7,
-                 extra_row_2011_8,
-                 extra_row_2011_9,
-                 extra_row_2011_10,
-                 extra_row_2011_11,
-                 extra_row_2011_12,
-                 extra_row_2011_13)
 
-#Function to ind the sum of the below ground and above ground
-#biomass per meter squared for each plot per year
-biomass <- function(df, num.plots, tib){
-  totals = rep(NA, num.plots)
-  for (p in 1:num.plots){
-    if (tib == TRUE){
-      abv.bmss <- df[df$Plot == p, "AbvBmss"]/625
-      abv.bmss.df <- abv.bmss
-      blw.bmss <- df[df$Plot == p, "BlwBmss"]/625
-      blw.bmss.df <- blw.bmss
-      if (nrow(abv.bmss) <= 0){
-        abv.bmss.df <- 0
-      }
-      if (nrow(blw.bmss) <= 0){
-        blw.bmss.df <- 0
-      }
-      totals[p] = sum(abv.bmss.df) + sum(blw.bmss.df)
-    }else{
-      abv.bmss <- df[df$Plot == p, "AbvBmss"]/625
-      abv.bmss.df <- abv.bmss
-      blw.bmss <- df[df$Plot == p, "BlwBmss"]/625
-      blw.bmss.df <- blw.bmss
-      if (length(abv.bmss) <= 0){
-        abv.bmss.df <- 0
-      }
-      if (length(blw.bmss) <= 0){
-        blw.bmss.df <- 0
-      }
-      totals[p] = sum(abv.bmss.df) + sum(blw.bmss.df)
-    }
-  }
-  return(totals)
-} 
 
-biomass.sp <- function(df, num.plots, tib, sp){
-  totals = rep(NA, num.plots)
-  for (p in 1:num.plots){
-    if (tib == TRUE){
-      abv.bmss <- df[df$Plot == p & df$Species == sp, "AbvBmss"]/625
-      abv.bmss.df <- abv.bmss
-      blw.bmss <- df[df$Plot == p & df$Species == sp, "BlwBmss"]/625
-      blw.bmss.df <- blw.bmss
-      if (nrow(abv.bmss) <= 0){
-        abv.bmss.df <- 0
-      }
-      if (nrow(blw.bmss) <= 0){
-        blw.bmss.df <- 0
-      }
-      totals[p] = sum(abv.bmss.df) + sum(blw.bmss.df)
-    }else{
-      abv.bmss <- df[df$Plot == p & df$Species == sp, "AbvBmss"]/625
-      abv.bmss.df <- abv.bmss
-      blw.bmss <- df[df$Plot == p & df$Species == sp, "BlwBmss"]/625
-      blw.bmss.df <- blw.bmss
-      if (length(abv.bmss) <= 0){
-        abv.bmss.df <- 0
-      }
-      if (length(blw.bmss) <= 0){
-        blw.bmss.df <- 0
-      }
-      totals[p] = sum(abv.bmss.df) + sum(blw.bmss.df)
-    }
-  }
-  return(totals)
-}
-
-cut.rename <- function(df, ws, plotnames){
-  colnames(df) = c("year", "biomass1")
-  df <- df %>%
-    mutate(Biomass = cut(biomass1, breaks = c(0, 24, 32, 36, 40, 44,
-                                              48, 5000)))
-  df <- cbind(df, ws)
-  colnames(df) <- c("Year", "Amount", "Biomass", "Watershed")
-  rownames(df) <- plotnames
+#######################################################################################
+########### SHINY SERVER ##############################################################
+#######################################################################################
+#Write a function that converts the Source code from precip and 
+#flow to Precipitation and Streamwater Discharge
+watershed_change <- function(df){
+  df$ws2 <- paste("Watershed", df$ws, sep = " ")
   return(df)
 }
 
-w6.biomass.2007 <- biomass(df = w6_2007, num.plots = 208, tib = FALSE)
-w6.biomass.2002 <- biomass(df = w6_2002, num.plots = 208, tib = TRUE)
-w6.biomass.1997 <- biomass(df = w6_1997, num.plots = 208, tib = TRUE)
-w6.biomass.2012 <- biomass(df = w6_2012, num.plots = 208, tib = FALSE)
-w1.biomass.2006 <- biomass(df = w1_2006, num.plots = 200, tib = TRUE)
-w1.biomass.2001 <- biomass(df = w1_2001, num.plots = 200, tib = TRUE)
-w1.biomass.1996 <- biomass(df = w1_1996, num.plots = 200, tib = TRUE)
-w1.biomass.2011 <- biomass(df = w1_2011, num.plots = 200, tib = TRUE)
+#Write a function that converts the solute labels to their full written name
+solute_change <- function(df){
+  df[df$solute == "K", "solute"] = "Potassium"
+  df[df$solute == "Na", "solute"] = "Sodium"
+  df[df$solute == "Ca", "solute"] = "Calcium"
+  df[df$solute == "Mg", "solute"] = "Magnesium"
+  df[df$solute == "Al", "solute"] = "Aluminum"
+  df[df$solute == "SO4", "solute"] = "Sulfate"
+  df[df$solute == "NO3", "solute"] = "Nitrate"
+  df[df$solute == "Cl", "solute"] = "Chloride"
+  df[df$solute == "H", "solute"] = "Hydrogen"
+  return(df)
+  
+}
 
+source_change <- function(df){
+  df[df$source == "flow", "source"] = "Discharge (Q)"
+  df[df$source == "precip", "source"] = "Precipitation (P)"
+  return(df)
+}
 
-
-plotnames_w6_1997 <- paste("plot", 1:208, sep = "")
-plotnames_w1_1996 <- paste("plot", 209:408, sep = "")
-plotnames_w6_2002 <- paste("plot", 409:616, sep = "")
-plotnames_w1_2001 <- paste("plot", 617:816, sep = "")
-plotnames_w6_2007 <- paste("plot", 817:1024, sep = "")
-plotnames_w1_2006 <- paste("plot", 1025:1224, sep = "")
-plotnames_w6_2012 <- paste("plot", 1225:1432, sep = "")
-plotnames_w1_2011 <- paste("plot", 1433:1632, sep = "")
-
-#Creating vectors of years for the number of plots
-w1.1996 <- rep(1996, 200)
-w6.1996 <- rep(1996, 208)
-w1.2001 <- rep(2001, 200)
-w6.2001 <- rep(2001, 208)
-w1.2006 <- rep(2006, 200)
-w6.2006 <- rep(2006, 208)
-w1.2011 <- rep(2011, 200)
-w6.2011 <- rep(2011, 208)
-
-#Creating data frames from the biomass and year data
-df_w1_1996 <- data.frame(w1.1996, w1.biomass.1996, row.names = plotnames_w1_1996)
-ws1 <- rep("Watershed 1", 200)
-ws6 <- rep("Watershed 6", 208)
-df_w1_1996 <- cut.rename(df = df_w1_1996, ws = ws1, 
-                         plotnames = plotnames_w1_1996)
-df_w6_1996 <- data.frame(w6.1996, w6.biomass.1997, row.names = plotnames_w6_1997)
-df_w6_1996 <- cut.rename(df = df_w6_1996, ws = ws6,
-                         plotnames = plotnames_w6_1997)
-df_w1_2001 <- data.frame(w1.2001, w1.biomass.2001, row.names = plotnames_w1_2001)
-df_w1_2001 <- cut.rename(df = df_w1_2001, ws = ws1,
-                         plotnames = plotnames_w1_2001)
-df_w6_2001 <- data.frame(w6.2001, w6.biomass.2002, row.names = plotnames_w6_2002)
-df_w6_2001 <- cut.rename(df = df_w6_2001, ws = ws6,
-                         plotnames = plotnames_w6_2002)
-df_w1_2006 <- data.frame(w1.2006, w1.biomass.2006, row.names = plotnames_w1_1996)
-df_w1_2006 <- cut.rename(df = df_w1_2006, ws = ws1,
-                         plotnames = plotnames_w1_1996)
-df_w6_2006 <- data.frame(w6.2006, w6.biomass.2007, row.names = plotnames_w6_1997)
-df_w6_2006 <- cut.rename(df = df_w6_2006, ws = ws6,
-                         plotnames = plotnames_w6_1997)
-df_w1_2011 <- data.frame(w1.2011, w1.biomass.2011, row.names = plotnames_w1_2011)
-df_w1_2011 <- cut.rename(df = df_w1_2011, ws = ws1,
-                         plotnames = plotnames_w1_2011)
-df_w6_2011 <- data.frame(w6.2011, w6.biomass.2012, row.names = plotnames_w6_2012)
-df_w6_2011 <- cut.rename(df = df_w6_2011, ws = ws6,
-                         plotnames = plotnames_w6_2012)
-df = rbind(df_w6_2006, df_w1_2006)
-mapdf <- SpatialPolygonsDataFrame(map, df)
-proj4string(mapdf) <- CRS("+init=EPSG:4326")
-#spplot(mapdf)
-#grid.text("Watershed 6, 2002", x=unit(0.6, "npc"), y=unit(0.03, "npc"))
-#grid.text("Watershed 1, 2001", x=unit(0.3, "npc"), y=unit(0.03, "npc"))
-#mapdf@data$id <- rownames(mapdf@data)
-#wsPoints <- fortify(mapdf, region = "id")
-#wsDF <- merge(wsPoints, mapdf@data, by = "id")
-
-
-
-shinyServer(function(input, output) {
-  output$map.plot = renderPlot({
-    spplot(mapdf, c("Biomass"), col.regions =  c("violet", "purple", 
-                                   "blue", "green","orange", "yellow", "red"))
+shinyServer(function(session, input, output) {
+  
+  ########### IMPORTANT PRELIMINARY INFO #############################################
+  
+  ###  Theme  ################
+  my_theme <-theme(rect = element_rect(fill = NA),
+          panel.grid.major = element_line(colour = "#dddddd"),
+          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
+          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
+  
+  color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", "Calcium" = "#3B5C95",
+                    "Magnesium" = "#273D64", "Aluminum" = "#162338")
+  color_anion <- c("Sulfate" = "#8F1010", "Nitrate" = "#BF1616", "Chloride" = "#D97373")
+  color_hydro <- c("Hydrogen" = "#FFE79C")
+  
+  solute_palette <- c(color_cation, color_anion, color_hydro)
+  source_shapes <- c("flow" = 16, "precip"= 21)
+  
+  ### End of Theme ################
+  
+  ###  Lists for the sidebar  ######
+  #Edit if there are values that do not appear or are not relevant to your data. 
+  #Should be the same as the lists in the UI file.
+  
+  watersheds <- list("Watershed 1" = "Watershed 1",
+                     "Watershed 2" = "Watershed 2", 
+                     "Watershed 3" = "Watershed 3",
+                     "Watershed 4" = "Watershed 4",
+                     "Watershed 5" = "Watershed 5",
+                     "Watershed 6" = "Watershed 6",
+                     "Watershed 7" = "Watershed 7",
+                     "Watershed 8" = "Watershed 8",
+                     "Watershed 9" = "Watershed 9")
+  
+  solutes_cations <- list("Potassium (K)" = "K",
+                          "Sodium (Na)" = "Na",
+                          "Calcium (Ca)" = "Ca",
+                          "Magnesium (Mg)" = "Mg",
+                          "Aluminum (Al)" = "Al")
+  
+  solutes_anions <- list("Sulfate (SO4)" = "SO4",
+                         "Nitrate (NO3)" = "NO3",
+                         "Chloride (Cl)" = "Cl")
+  
+  ########### END OF IMPORTANT PRELIMINARY INFO #############################################
+  
+  
+  
+  
+  ########### SIDEBAR FUNCTIONS ##############################################################
+  ###  allow 'select all' interactivity, do not edit
+  
+  observeEvent(input$select_all_ions, {
+    if(input$select_all_ions == 0) {}
+    else if (input$select_all_ions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")
+      updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
+    else{
+      updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
+      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
   })
-
+  
+  observeEvent(input$select_all_anions, {
+    if(input$select_all_anions == 0) {}
+    else if (input$select_all_anions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")}
+    else{updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)}
+  })
+  
+  observeEvent(input$select_all_cations, {
+    if(input$select_all_cations == 0) {}
+    else if (input$select_all_cations%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
+    else{updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
+  })
+  
+  observeEvent(input$select_all_ws, {
+    if(input$select_all_ws == 0) {updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
+    else if (input$select_all_ws%%2 == 0){updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
+    else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
+  })
+  
+  
+  
+  solutes2 <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
+  
+  ########### END OF SIDEBAR FUNCTIONS ####################################################
+  
+  
+  
+  
+  ########### DATA IMPORT ####################################################
+  
+  imported_data <- readRDS("precip_stream_data_long.rds")
+  imported_data <- watershed_change(imported_data)
+  
+  
+  
+  ########### END OF DATA IMPORT #############################################
+  
+  
+  ########### REACTIVE DATA AND X Y  #########################################
+  #Reactive Data Normal
+  add_precip <- reactive({
+    if (input$water_sources == "precip"){
+      c("precip", "flow")
+    }else{
+      "flow"
+    }
+  })
+  
+  add_precip2 <- reactive({
+    if (input$water_sources2 == "precip"){
+      c("precip", "flow")
+    }else{
+      "flow"
+    }
+  })
+  reactive_data <- reactive({
+    data <- imported_data
+    data <- data[data$source %in% add_precip(),]
+    data <- data[data$solute %in% input$sol,] 
+    data <- data[data$ws %in% input$watersheds,]
+    data <- solute_change(data)
+    data <- source_change(data)
+  })
+  
+  reactive_data2 <- reactive({
+    data <- imported_data
+    data <- data[data$source %in% add_precip2(),]
+    data <- data[data$solute %in% solutes2(),] 
+    #note that solutes2 is a function, that's because the inputs for solutes come from input$cations and input$anions
+    data <- data[data$ws %in% input$watersheds2,]
+    data <- solute_change(data)
+    data <- source_change(data)
+  })
+  
+  x <- reactive({
+    if(input$granularity == "month"){"water_date"}
+    else if(input$granularity == "year"){"water_year"}
+  })
+  
+  x2 <- reactive({
+    if(input$granularity2 == "month"){"water_date"}
+    else if(input$granularity2 == "year"){"water_year"}
+  })
+  
+  y <- reactive({
+    if(input$granularity == "month" & input$units =="umg/L"){"concentration_mg"}
+    else if(input$granularity == "year" & input$units =="umg/L"){"mg_weighted_average"}
+    else if(input$granularity == "month" & input$units =="ueq/L"){"concentration_ueq"}
+    else if(input$granularity == "year" & input$units =="ueq/L"){"ueq_weighted_average"}
+    else if(input$granularity == "month"& input$units =="umol/L"){"concentration_umol"}
+    else if(input$granularity == "year"& input$units =="umol/L"){"umol_weighted_average"}
+  })
+  
+  y2 <- reactive({
+    if(input$granularity2 == "month" & input$units2 =="umg/L"){"concentration_mg"}
+    else if(input$granularity2 == "year" & input$units2 =="umg/L"){"mg_weighted_average"}
+    else if(input$granularity2 == "month" & input$units2 =="ueq/L"){"concentration_ueq"}
+    else if(input$granularity2 == "year" & input$units2 =="ueq/L"){"ueq_weighted_average"}
+    else if(input$granularity2 == "month"& input$units2 =="umol/L"){"concentration_umol"}
+    else if(input$granularity2 == "year"& input$units2 =="umol/L"){"umol_weighted_average"}
+  })
+  
+  log_transform <- reactive({
+    if(input$log == "ln"){"transform"}
+    else{"no_transform"}
+  })
+  
+  log_transform2 <- reactive({
+    if(input$log2 == "ln"){"transform"}
+    else{"no_transform"}
+  })
+  
+  ########### PLOT FUNCTIONS #########################################
+  
+  ## GGPLOT TIME FUNCTION
+  ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, facet, w.s, ion, log,
+                              units, date_range, source_shapes, source_palette){
+    if (length(ion) == 1){
+      if (length(w.s) %in% c(1,2,3)){
+        col1 = 1
+        h = 400
+      }else if (length(w.s) == 4){
+        col1 = 2
+        h = 400
+      }else if (length(w.s) == 5){
+        col1 = 1
+        h = 600
+      }else if (length(w.s) == 6){
+        col1 = 2
+        h = 600
+      }else if (length(w.s) == 7){
+        col1 = 1
+        h = 800
+      }else if (length(w.s) == 8){
+        col1 = 2
+        h = 800
+      }else if (length(w.s) == 9){
+        col1 = 3
+        h = 800
+      }
+    }
+    if (length(w.s) == 1){
+      if (length(ion) %in% c(1,2, 3)){
+        col2 = 1
+        h = 400
+      }else if (length(ion) == 4){
+        col2 = 2
+        h = 400
+      }else if (length(ion) == 5){
+        col2 = 1
+        h = 600
+      }else if (length(ion) == 6){
+        col2 = 2
+        h = 600
+      }else if (length(ion) == 7){
+        col2 = 1
+        h = 800
+      }else if (length(ion) == 8){
+        col2 = 2
+        h = 800
+      }else if (length(ion) == 9){
+        col2 = 3
+        h = 800
+      }else{
+        col2 = 1
+        h = 800
+      }
+    }
+    
+    if(log) {
+      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), 
+                                   shape = source))+
+        labs(x = "Water Year", y = paste("log", "(",units, ")", sep = ""))
+    
+    }else{
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), 
+                                    shape = source))+
+        labs(x = "Water Year", y = units)}
+    
+    if (facet == "w.s"){
+      if (length(w.s) <= 1) {
+        final <- plot+ geom_line(size = 1,aes(color = solute)) + 
+          geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                     aes(color = solute,
+                       text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                       "Value:", round(get(y), 2), "<br>", "Date: ", get(x)))) + 
+          geom_smooth(method = "lm", color = "green", se = FALSE) +
+          labs(title = paste(data$solute, "Concentration", sep = " ")) +
+          xlim(min(date_range[1]), max(date_range[2]))+ 
+          scale_shape_manual(values = source_shapes) +
+          scale_color_manual(values = solute_palette) +
+          scale_alpha_discrete(range = c(0.9, 0.5)) +
+          theme_bw() + 
+          guides(color = FALSE, alpha = FALSE) 
+        
+      }else{
+        final <- plot+ geom_line(size = 1,aes(color = solute)) + 
+          geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                     aes(color = solute,
+                         text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                      "Value:", round(get(y), 2), "<br>", "Date: ", get(x)))) + 
+          xlim(min(date_range[1]), max(date_range[2]))+ 
+          geom_smooth(method = "lm", color = "green", se = FALSE) +
+          facet_wrap(~ws2, ncol = col1) +
+          labs(title = paste(data$solute, "Concentrations", sep = " ")) +
+          scale_shape_manual(values = source_shapes) +
+          scale_color_manual(values = solute_palette) +
+          scale_alpha_discrete(range = c(0.9, 0.5))+
+          theme_bw() + 
+          guides(color = FALSE, alpha = FALSE)
+        
+      }
+    }else{
+      if (length(ion) <= 1){
+        final <- plot+ geom_line(size = 1,aes(color = solute), guide = FALSE) + 
+          geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                     aes(color = solute,
+                         text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                      "Value:", round(get(y), 2), "<br>", "Date: ", get(x)))) +
+          xlim(min(date_range[1]), max(date_range[2]))+ 
+          labs(title = paste(data$solute, "Concentration", sep = " ")) +
+          geom_smooth(method = "lm", color = "green", se = FALSE) +
+          scale_shape_manual(values = source_shapes) +
+          scale_color_manual(values = solute_palette) +
+          scale_alpha_discrete(range = c(0.9, 0.5)) +
+          theme_bw() + 
+          guides(color = FALSE, alpha = FALSE)
+      }else{
+        final <- plot+ geom_line(size = 1,aes(color = solute), guide = FALSE) + 
+          geom_point(size = 1.5, fill = "white", stroke = 0.5, 
+                     aes(color = solute,
+                         text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                                      "Value:", round(get(y), 2), "<br>", "Date: ", get(x)))) + 
+          geom_smooth(method = "lm", color = "green", se = FALSE) +
+          xlim(min(date_range[1]), max(date_range[2]))+ 
+          labs(title = "Solute Concentrations") +
+          facet_wrap(~solute, ncol = col2) +
+          scale_shape_manual(values = source_shapes) +
+          scale_color_manual(values = solute_palette) +
+          scale_alpha_discrete(range = c(0.9, 0.5))+
+          theme_bw() + 
+          guides(color = FALSE, alpha = FALSE)
+      }
+    }
+    
+    p = hide_guides(ggplotly(  
+      final, tooltip = "text",
+      width = 1000, height = h) %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE))
+  
+    return(p)
+    
+  }
+  
+  
+  
+  #############################################################
+  ########### OUTPUTS #########################################
+  #############################################################
+  
+  output$plot1 <- renderPlotly({
+    theplot <- ggplot_function(reactive_data(), x(), y(), facet = "w.s",
+                               w.s = input$watersheds, ion = input$sol,
+                               ncol = 1, log = input$log,
+                               units = input$units,
+                               date_range = input$date_range,
+                               source_palette = source_palette,
+                               source_shapes = source_shapes)
+    #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
+    theplot$x$layout$width <- NULL
+    theplot$y$layout$height <- NULL
+    theplot$width <- NULL
+    theplot$height <- NULL
+    theplot %>%
+    layout(margin = list(b = 90))
+  })
+  
+  output$plot2 <- renderPlotly({
+    theplot <- ggplot_function(reactive_data2(), x2(), y2(), facet = "solutes",
+                               w.s = input$watersheds2, ion = solutes2(),
+                               ncol = 1, log = input$log2,
+                               units = input$units,
+                               date_range = input$date_range,
+                               source_palette = source_palette,
+                               source_shapes = source_shapes)
+    theplot$x$layout$width <- NULL
+    theplot$y$layout$height <- NULL
+    theplot$width <- NULL
+    theplot$height <- NULL
+    theplot %>%
+    layout(margin = list(b = 90))
+  })
+  
+  
+  
 })
