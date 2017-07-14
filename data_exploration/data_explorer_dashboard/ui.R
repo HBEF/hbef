@@ -26,7 +26,7 @@ solutes_anions <- list("Phosphate (PO4)" = "PO4",
                         "Silicon Dioxide (SiO2)" = "SiO2",
                         "Chloride (Cl)" = "Cl",
                         "Bicarbonate (HCO3)" = "HCO3")
-solutes_H <- list("Hydrogen (H)" = "H")
+solutes_H <- list("Hydrogen (H)" = "H", "Dissolved Inorganic Carbon" = "DIC")
 
 all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
 
@@ -47,12 +47,11 @@ granularity <- list( "Week" = "week",
                     "Month (VWC)" = "month",
                     "Year (VWC)" = "year")
 
-time_variables <- list("concentration" = "concentration", 
+time_variables <- list("Solute Concentration" = "concentration", 
                        "pH" = "pH",
-                       "temperature" = "temp", 
-                       "acid-neutralizing capacity" = "anc", 
-                       "dic" = "dic",
-                       "specific conductivity" = "spcond")
+                       "Temperature" = "temp", 
+                       "Acid-Neutralizing Capacity" = "anc", 
+                       "Specific Conductivity" = "spcond")
 units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_umol", "mg/L" = "concentration_mg")
 
 #######################################################################################
@@ -147,7 +146,7 @@ shinyUI(
                                                      selected = "linear"))))),
                 ######## PLOT 
                 tabPanel(shiny::icon("circle"),
-                         div(class = "titleRow", fluidRow(column(5, tags$h2("Time")),
+                         div(class = "titleRow", fluidRow(column(5, tags$h2("Time Series Data")),
                           ##Granularity
                           column(4,  offset = 2, selectInput("granularity_time", label = "",
                                                              choices = granularity,
@@ -196,7 +195,7 @@ shinyUI(
                  
               ######## PLOT
               tabPanel(shiny::icon("circle"),
-              div(class = "titleRow", fluidRow(column(5, tags$h2("CQ")),
+              div(class = "titleRow", fluidRow(column(5, tags$h2("c-Q")),
                   ##Granularity
                   column(4, offset = 2,selectInput("granularity_cq", label = "",
                                                    choices = granularity,
@@ -305,72 +304,87 @@ shinyUI(
       tabItem(tabName = "exploratory",
               
             fluidRow(
-              ## Main Plot Area
-              box(width = 9, height = "800px",
-                #Solutes Y Input
-                fluidRow(column(6, textInput("solutesy_formula", label = "", value = "Ca + Na + Mg", 
-                                             placeholder = "type in desired formula"))),
-                #Bubble Plot
-                fluidRow(div(style = "height:600px;",
-                             plotlyOutput("bubblePlot"))),
-                
-                #Solutes X Input
-                fluidRow(column(6, offset = 3, textInput("solutesx_formula", label = "", value = "SO4 + NO3", 
-                                                         placeholder = "type in desired formula"))),
-                ##Units - Y Axis Log
-                fluidRow(column(2, offset = 9, selectInput("log_bubble_y", label = "Y Axis",
-                                                           choices = c("linear", "log"), 
-                                                           selected = "linear"))),
-                ##Units - X Axis Log
-                fluidRow(column(2, offset = 9, selectInput("log_bubble_x", label = "X Axis",
-                                                           choices = c("linear", "log"), 
-                                                           selected = "linear")))
-                ),
+              tabBox(width = 9, side="right", selected = shiny::icon("circle"),
+                     ######## OPTIONS
+                     ##Units - Axis Log
+                     tabPanel(shiny::icon("gear"),
+                              fluidRow(
+                                box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                    
+                                    ##Units - X Axis Log
+                                    column(6, selectInput("log_bubble_x", label = "X Axis",
+                                                          choices = c("linear", "log"), 
+                                                          selected = "linear")),  
+                                    ##Units - Y Axis Log
+                                    column(6, selectInput("log_bubble_y", label = "Y Axis",
+                                                          choices = c("linear", "log"), 
+                                                          selected = "linear")))),
+                              fluidRow(
+                                box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
+                                    ##Leave trace
+                                    column(12, checkboxInput("trace_bubble", label = ("Leave Trace"),
+                                                             value = TRUE)),
+                                    ##Animation Speed
+                                    column(12, sliderInput("animation_speed_bubble", label = h4("Speed"),
+                                                           min = 0.25,
+                                                           max = 2, 
+                                                           step = 0.25,
+                                                           post = "x",
+                                                           value = 1))))),
+                     
+                     ######## PLOT
+                     tabPanel(shiny::icon("circle"),
+                              div(class = "titleRow", fluidRow(column(5, tags$h2("Exploratory Bubble Graph")), 
+                                 ##Granularity
+                                 column(4, offset = 2,selectInput("granularity_bubble", label = "",
+                                                                  choices = granularity,
+                                                                  selected = "year")))),
               
-              ## Sidebar Area
-              box(width = 3,
-                  ##Watersheds
-                  fluidRow(
-                    column(12, actionLink("select_all_ws", h4("Watersheds")), 
-                           selectInput("watersheds_bubble", label = "",
-                                       choices = watersheds, multiple = TRUE,
-                                       selected = "6"))),
-                  ##Water Sources
-                  fluidRow(
-                    column(12, checkboxGroupInput("water_sources_bubble", label = h4("Water Sources"),
-                                                  choices = water_sources,
-                                                  selected = "streamflow",
-                                                  inline = TRUE))),
-                  ##Units  
-                  fluidRow(
-                    column(12, selectInput("units_bubble", label = h4("Units"),
-                                           choices = units,
-                                           selected = "uEquivalent/L")),
-                    column(12, checkboxInput("log_bubble", label = ("ln"),
-                                             value = FALSE))),
-                  ##Granularity
-                  fluidRow(
-                    column(12, selectInput("granularity_bubble", label = h4("Granularity"),
-                                           choices = granularity,
-                                           selected = "year"))),
-                  ##Date Range
-                  fluidRow(
-                    column(12, sliderInput("date_range_bubble", label = h4("Date Range"),
-                                           min = as.Date("1962-01-01"),
-                                           max = as.Date("2014-01-01"),
-                                           value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))))), 
-                  ##Leave trace
-                  fluidRow(
-                    column(12, checkboxInput("trace_bubble", label = ("Leave Trace"),
-                                             value = TRUE))),
-                  ##Leave trace
-                  fluidRow(
-                    column(12, sliderInput("animation_speed_bubble", label = h4("Speed"),
-                                           min = 0.25,
-                                           max = 2, 
-                                           step = 0.25,
-                                           post = "x",
-                                           value = 1)))
+              
+                    ## Main Plot Area
+                      #Solutes Y Input
+                      fluidRow(column(4, textInput("solutesy_formula", label = "", value = "Ca + Na + Mg", 
+                                                   placeholder = "type in desired formula")),
+                               column(2, offset = 0, selectInput("solutesy_source", label = "", choices = c("P" = "precipitation", "Q" = "streamflow"),
+                                                                 selected = "streamflow")) 
+                      ),
+                      #Bubble Plot
+                      fluidRow(plotlyOutput("bubblePlot")),
+                      
+                      #Solutes X Input
+                      fluidRow(column(4, offset = 3, textInput("solutesx_formula", label = "", value = "SO4 + NO3", 
+                                                               placeholder = "type in desired formula")), 
+                              column(2, offset = 0, selectInput("solutesx_source", label = "", choices = c("P" = "precipitation", "Q" = "streamflow"),
+                                                                selected = "streamflow"))
+                      ))),
+                    
+                    ## Sidebar Area
+                    box(width = 3,
+                        ##Watersheds
+                        fluidRow(
+                          column(12, actionLink("select_all_ws", h4("Watersheds")), 
+                                 selectInput("watersheds_bubble", label = "",
+                                             choices = watersheds, multiple = TRUE,
+                                             selected = "6"))),
+                        ##Units  
+                        fluidRow(
+                          column(12, selectInput("units_bubble", label = h4("Units"),
+                                                 choices = c(units, "flux"),
+                                                 selected = "uEquivalent/L"))),
+                  
+                        ##Date Range
+                        fluidRow(
+                          column(12, sliderInput("date_range_bubble", label = h4("Date Range"),
+                                                 min = as.Date("1962-01-01"),
+                                                 max = as.Date("2014-01-01"),
+                                                 value = c(as.Date("1962-01-01"), as.Date("2014-01-01"))))),
+                        
+                        ##Sizing
+                        fluidRow(
+                          column(12, selectInput("sizing_bubble", label = h4("Bubble Size"),
+                                                 choices = c("None" = 10, 
+                                                             "Precipitation (P)" = "water_mm_precipitation", 
+                                                             "Streamflow (Q)" = "water_mm_streamflow"))))
                     
               )#Closes Sidebar Box 
             ) #Closes Fluid Row
