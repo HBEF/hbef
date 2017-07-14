@@ -93,7 +93,7 @@ shinyUI(fluidPage(
                        ########################### QUESTION #1 ###################################
                        
                        fluidRow(
-                         tags$div(class = "container_question", tags$h3("Framework for Ice Storm... still in progress!"))
+                         tags$div(class = "container_question", tags$h3("How do ice storms affect vegetation?"))
                        ),
                        
                        
@@ -160,7 +160,7 @@ shinyUI(fluidPage(
                        ########################### QUESTION #2 ###################################
                        
                        fluidRow(
-                         tags$div(class = "container_question", tags$h3("Post-ice storm NO3 behaviour"))
+                         tags$div(class = "container_question", tags$h3("How do NO3 concentrations change following an ice storm?"))
                        ),
                        
                        
@@ -175,13 +175,6 @@ shinyUI(fluidPage(
                            #the user to change that particular input. 
                            
                            sidebarPanel(
-                             
-                             #Solutes
-                             fluidRow(
-                               column(12, h4("Solutes"))),
-                               column(12,
-                                      selectInput("solutes_NO3", label = "",
-                                                  choices = solutes_NO3)),
                              
                              ##Watersheds
                              fluidRow(
@@ -224,10 +217,8 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("Plot1",plotlyOutput("NO3_plot")),
-                                                                                   
-                                                                                   ### PLOT VIEW 2
-                                                                                   tabPanel("Plot2",plotlyOutput(""))
+                                                                                   tabPanel("Plot1",plotlyOutput("NO3_plot"))
+
                            )), width = 8), 
                            position = "right"
                          )
@@ -277,28 +268,7 @@ shinyUI(fluidPage(
                            #the user to change that particular input. 
                            
                            sidebarPanel(
-                             
-                             #Solutes
-                             fluidRow(
-                               column(12, h4("Solutes"))),
-                             column(12,
-                                    selectInput("solutes_NO33", label = "",
-                                                choices = solutes_NO3)),
-                             
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = "streamflow",
-                                                             inline = TRUE))),
-                             
-                             ##Units  
-                             fluidRow(
-                               column(12, selectInput("units3", label = h4("Units"),
-                                                      choices = units3,
-                                                      selected = "normalized_flux")),
-                               column(12, checkboxInput("log3", label = ("ln"),
-                                                        value = FALSE))),
+
                              ##Granularity
                              fluidRow(
                                column(12, selectInput("granularity3", label = h4("Granularity"),
@@ -309,7 +279,7 @@ shinyUI(fluidPage(
                              sliderInput("date_range3", label = h4("Date Range"),
                                          min = as.Date("1962-01-01"),
                                          max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1991-01-01"), as.Date("2014-01-01"))), width = 4),
+                                         value = c(as.Date("1963-01-01"), as.Date("2004-01-01"))), width = 4),
                            
                            
                            ############## END OF SIDEBAR 3 #######
@@ -319,12 +289,10 @@ shinyUI(fluidPage(
                            mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
                                                                                    
                                                                                    ### PLOT VIEW 1
-                                                                                   tabPanel("NO3 Plots Replication",
-                                                                                           # h4("Static Output (ws1, ws6)"),
-                                                                                            #plotlyOutput("static_NO3_output", height = "auto"),
-                                                                                            h4("Output (ws1, ws6)"),
+                                                                                   tabPanel("NO3 Plots Replication (Bernhardt, 2003)",
+                                                                                            h4("Streamflow flux (ws1, ws6)"),
                                                                                             plotlyOutput("NO3_output", height = "auto"),
-                                                                                            h4("Excess (ws2, ws4, ws5)"),
+                                                                                            h4("Streamflow flux normalized against ws6 (ws2, ws4, ws5)"),
                                                                                             plotlyOutput("NO3_excess", height = "auto"))
                            )), width = 8), 
                            position = "right"

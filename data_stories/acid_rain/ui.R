@@ -162,7 +162,7 @@ shinyUI(fluidPage(
                                                   to show the story of an ecosystem on the long path to recovery."),
                                                 p("In order to best understand the canonical story of acid rain, this 
                                                   module will focus on watershed six - the biogeochemical reference - 
-                                                  in order to observe the effects of acid rain without experimental 
+                                                  to observe the effects of acid rain without experimental 
                                                   disruptions.  The dataset for watershed six dates back to 1963, 
                                                   which coincidentally is the year of the first rendition of the 
                                                   Clean Air Act.  This was also eight years after the first 
