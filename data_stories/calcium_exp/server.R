@@ -17,9 +17,6 @@ coordinates_w1 <- w1_coords[, c("x", "y")]
 coordinates_w1$x <- coordinates_w1$x + 5
 coordinates_w1$y <- coordinates_w1$y - 34
 coordsdf <- rbind(coordinates, coordinates_w1)
-#Create map of watersheds 1 and 6, with coordinates repeated
-#for each year
-coordsdf <- rbind(coordsdf, coordsdf, coordsdf, coordsdf)
 poly = c()
 for (row in 1:nrow(coordsdf)){
   points <- rbind(c(coordsdf[[row, 1]], coordsdf[[row, 2]]),
@@ -44,14 +41,14 @@ extra_row_2001 <-c(2001, 1, 144, NA, NA, NA,
                    NA, NA, NA, NA, NA, NA,
                    NA, NA, NA) 
 extra_row_2006 = c(2006, 1, 144, NA, NA, NA,
-              NA, NA, NA, NA, NA, NA,
-              NA, NA, NA)
+                   NA, NA, NA, NA, NA, NA,
+                   NA, NA, NA)
 extra_row_1996 = c(1996, 1, 144, NA, NA, NA,
                    NA, NA, NA, NA, NA, NA,
                    NA, NA, NA)
 extra_row_2011_1 <- c(2011, 1, 131, NA, NA, NA,
-                     NA, NA, NA, NA, NA, NA,
-                     NA, NA, NA)
+                      NA, NA, NA, NA, NA, NA,
+                      NA, NA, NA)
 extra_row_2011_2 <- c(2011, 1, 133, NA, NA, NA,
                       NA, NA, NA, NA, NA, NA,
                       NA, NA, NA)
@@ -77,8 +74,8 @@ extra_row_2011_9 = c(2011, 1, 145, NA, NA, NA,
                      NA, NA, NA, NA, NA, NA,
                      NA, NA, NA)
 extra_row_2011_10 = c(2011, 1, 146, NA, NA, NA,
-                     NA, NA, NA, NA, NA, NA,
-                     NA, NA, NA)
+                      NA, NA, NA, NA, NA, NA,
+                      NA, NA, NA)
 extra_row_2011_11 <- c(2011, 1, 149, NA, NA, NA,
                        NA, NA, NA, NA, NA, NA,
                        NA, NA, NA)
@@ -227,22 +224,19 @@ df_w1_2001 <- cut.rename(df = df_w1_2001, ws = ws1,
 df_w6_2001 <- data.frame(w6.2001, w6.biomass.2002, row.names = plotnames_w6_2002)
 df_w6_2001 <- cut.rename(df = df_w6_2001, ws = ws6,
                          plotnames = plotnames_w6_2002)
-df_w1_2006 <- data.frame(w1.2006, w1.biomass.2006, row.names = plotnames_w1_2006)
+df_w1_2006 <- data.frame(w1.2006, w1.biomass.2006, row.names = plotnames_w1_1996)
 df_w1_2006 <- cut.rename(df = df_w1_2006, ws = ws1,
-                         plotnames = plotnames_w1_2006)
-df_w6_2006 <- data.frame(w6.2006, w6.biomass.2007, row.names = plotnames_w6_2007)
+                         plotnames = plotnames_w1_1996)
+df_w6_2006 <- data.frame(w6.2006, w6.biomass.2007, row.names = plotnames_w6_1997)
 df_w6_2006 <- cut.rename(df = df_w6_2006, ws = ws6,
-                         plotnames = plotnames_w6_2007)
+                         plotnames = plotnames_w6_1997)
 df_w1_2011 <- data.frame(w1.2011, w1.biomass.2011, row.names = plotnames_w1_2011)
 df_w1_2011 <- cut.rename(df = df_w1_2011, ws = ws1,
                          plotnames = plotnames_w1_2011)
 df_w6_2011 <- data.frame(w6.2011, w6.biomass.2012, row.names = plotnames_w6_2012)
 df_w6_2011 <- cut.rename(df = df_w6_2011, ws = ws6,
                          plotnames = plotnames_w6_2012)
-df = rbind(df_w6_1996, df_w1_1996,
-           df_w6_2001, df_w1_2001,
-           df_w6_2006, df_w1_2006,
-           df_w6_2011, df_w1_2011)
+df = rbind(df_w6_2006, df_w1_2006)
 mapdf <- SpatialPolygonsDataFrame(map, df)
 proj4string(mapdf) <- CRS("+init=EPSG:4326")
 #spplot(mapdf)
@@ -251,27 +245,22 @@ proj4string(mapdf) <- CRS("+init=EPSG:4326")
 mapdf@data$id <- rownames(mapdf@data)
 wsPoints <- fortify(mapdf, region = "id")
 wsDF <- merge(wsPoints, mapdf@data, by = "id")
-plot = ggplotly(ggplot(data = wsDF)+
-           geom_polygon(aes(x = long, y = lat, group = group, fill = Biomass, frame = Year))  +
-           geom_path(color = "white", 
-                     aes(x = long, y = lat, group = group, fill = Biomass, frame = Year)) +
-           scale_fill_manual(values = c("violet", "purple", 
-                                        "blue", "green","orange", "yellow", "red")) +
-           facet_wrap(~Watershed) +
-           theme(axis.text.y = element_blank(),
-                 axis.text.x = element_blank(),
-                 axis.ticks = element_blank(),
-                 legend.position = "none", 
-                 legend.title = element_blank()) +
-           labs(x = "", y = "", title = "Total Biomass"))%>%
-  config(displayModeBar = FALSE) %>%
-  config(showLink = FALSE) %>%
-  animation_opts(frame = 4000, transition = 0)
+plot = ggplot(data = wsDF)+
+                  geom_polygon(aes(x = long, y = lat, group = group, fill = Biomass))  +
+                  geom_path(color = "white", 
+                            aes(x = long, y = lat, group = group, fill = Biomass)) +
+                  scale_fill_manual(values = c("violet", "purple", 
+                                               "blue", "green","orange", "yellow", "red")) +
+                  facet_wrap(~Watershed) +
+                  theme(axis.text.y = element_blank(),
+                        axis.text.x = element_blank(),
+                        axis.ticks = element_blank()) +
+                  labs(x = "", y = "", title = "Total Biomass")
 
 
 shinyServer(function(input, output) {
-  output$map.plot = renderPlotly({
+  output$map.plot = renderPlot({
     plot
   })
-  options(warn = -1)
+
 })
