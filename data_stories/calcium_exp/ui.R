@@ -1,5 +1,11 @@
-library(plotly)
+library(readr)
+library(dplyr)
+library(rgdal)
+library(sp)
 library(ggplot2)
+library(maptools)
+library(lattice)
+library(plotly)
 
 shinyUI(fluidPage(
   tabsetPanel(id = "top", type = "pills",
