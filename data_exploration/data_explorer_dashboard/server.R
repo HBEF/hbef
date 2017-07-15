@@ -336,9 +336,6 @@ shinyServer(function(session, input, output) {
     
       plot <- plot+ my_theme + geom_line(size = 0.5) + 
       geom_point(size = 1.3, fill = "white", stroke = 0.2, aes(text = paste(solute,":", round(get(y), 4)))) +  
-      #xlim(min(as.Date(event_data("plotly_relayout")[1])), as.Date(max(event_data("plotly_relayout")[2])))+
-        
-      #xlim(min(input$date_range[1]), max(input$date_range[2]))+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = color_scale) +
       scale_alpha_discrete(range = c(0.9, 0.5))
@@ -362,27 +359,8 @@ shinyServer(function(session, input, output) {
     else{
       plot <- ggplot(data=data, aes(frame = framey, alpha = ws)) + my_theme+
         scale_size(range = c(5, 1))}
-     
 
-    if(log_y == "log"){
-      
-      if(log_x == "log"){
-      plot <- plot + geom_point(aes_string(x = logb(get(x), base=exp(1)), y = logb(get(y), base=exp(1)), color = color, size = size), stroke= 0.2) +
-        labs(y = "")}
-      else{
-      plot <- plot + geom_point(aes_string(x = get(x), y = logb(get(y), base=exp(1)), color = color, size = size), stroke= 0.2) +
-        labs(y = "")}
-    }
-    
-    else{
-      
-      if(log_x == "log"){
-        plot <- plot + geom_point(aes_string(x = logb(x, base=exp(1)), y = y, color = color, size = size), stroke= 0.2) +
-          labs(y = "")}
-      else{
-        plot <- plot + geom_point(aes_string(x = x, y = y, color = color, size = size), stroke= 0.2) +
-          labs(y = "")}
-    }
+    plot <- plot + geom_point(aes_string(x = x, y = y, color = color, size = size), stroke= 0.2) + labs(y = "")
     
     if(color == "solute"){
       plot <- plot + 
@@ -393,8 +371,17 @@ shinyServer(function(session, input, output) {
         scale_colour_gradient()
     }
     
+    if(log_x == "log"){
+      plot <- plot + scale_x_continuous(trans='log2')
+    }
+    
+    if(log_y == "log"){
+      plot <- plot + scale_y_continuous(trans='log2')
+    }
+    
     plot <- plot + 
       scale_alpha_discrete(range = c(0.9, 0.5))
+      
     
     ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
@@ -439,8 +426,7 @@ shinyServer(function(session, input, output) {
     theplot$y$layout$height <- NULL
     theplot$width <- NULL
     theplot$height <- NULL
-    theplot %>%
-      layout(autosize = TRUE)
+    theplot 
   })
   
   

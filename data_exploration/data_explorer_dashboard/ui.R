@@ -70,8 +70,6 @@ shinyUI(
         menuItem(" ", tabName = "dashboard", icon = icon("home")),
         menuItem(" ", tabName = "exploratory", icon = icon("search-plus"))
       )
-      
-      
     ),
     dashboardBody(
       tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
@@ -286,7 +284,7 @@ shinyUI(
       
           ###  ---- TIME GRAPH END -----
       
-          
+        
         
         
       ),#Closes Dashboard tab item
