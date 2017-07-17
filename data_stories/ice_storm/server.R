@@ -245,12 +245,6 @@ shinyServer(function(session, input, output) {
     else if(input$units =="uMole/L"){"concentration_umol"}
     else if(input$units =="flux"){"flux"}
   })
-  
-  log_transform <- reactive({
-    if(input$log == "ln"){"transform"}
-    else{"no_transform"}
-  })
-
   ########### REACTIVE DATA AND X Y 3 #########################################
   #Reactive Data Normal
   
@@ -282,18 +276,13 @@ shinyServer(function(session, input, output) {
   y3.1 <- reactive({
     {"flux"}
   })
-  
-  log_transform <- reactive({
-    if(input$log3 == "ln"){"transform"}
-    else{"no_transform"}
-  })
-  
+
   ########### PLOT FUNCTIONS 2 #########################################
   
   ## GGPLOT TIME FUNCTION
-  ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log, units, date_range){
+  ggplot_function <- function(data, x, y, log, units, date_range){
     
-    if(log) {
+    if(log == "log") {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
         labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
@@ -401,30 +390,30 @@ shinyServer(function(session, input, output) {
     lai_plot$width <- NULL
     lai_plot$height <- NULL
     lai_plot %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
   })
   
   #plot to generally show how the ice storm affected NO3 (conc or flux?)
   output$NO3_plot <- renderPlotly({
-    NO3_plot <- ggplot_function(reactive_data2(), x(), y(), ncol = 1, log=input$log, units=input$units, date_range=input$date_range2)
+    NO3_plot <- ggplot_function(reactive_data2(), x(), y(), log=input$log, units=input$units, date_range=input$date_range2)
     NO3_plot$x$layout$width <- NULL
     NO3_plot$y$layout$height <- NULL
     NO3_plot$width <- NULL
     NO3_plot$height <- NULL
     NO3_plot %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
   })
   
   #make a plot of nitrates like in the 2003 paper
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function(reactive_data3(), x3(), y3.1(), ncol = 1, log=input$log, units="moles/ha-yr", date_range = input$date_range3)
+    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y3.1(), ncol = 1)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
     NO3_output$height <- NULL
     NO3_output %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
   })
 
   #NO3 excess
@@ -435,6 +424,6 @@ shinyServer(function(session, input, output) {
     NO3_excess$width <- NULL
     NO3_excess$height <- NULL
     NO3_excess %>%
-      layout(autosize = TRUE, height = 600, showlegend = T)
+      layout(autosize = TRUE, showlegend = T)
     })
 })
