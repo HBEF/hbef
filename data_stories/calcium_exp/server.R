@@ -8,7 +8,6 @@ library(lattice)
 library(grid)
 library(plotly)
 
-gpclibPermit()
 
 shinyServer(function(input, output) {
 })
