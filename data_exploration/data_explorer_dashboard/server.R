@@ -286,7 +286,7 @@ shinyServer(function(input, output, session) {
     data <- imported_data_super_wide
     data <- data[data$granularity %in% input$granularity_bubble,]
     data <- data[data$ws %in% input$watersheds_bubble,]
-    data <- data[data$date >= input$date_range_bubble[1] & data$date <= input$date_range_bubble[2]]
+    #data <- data[data$date >= input$date_range_bubble[1] & data$date <= input$date_range_bubble[2]]
     
     #code below creates temporary_x and temporary_y
     #there are the columns that have the appropriate data 
