@@ -286,7 +286,7 @@ shinyServer(function(input, output, session) {
     data <- imported_data_super_wide
     data <- data[data$granularity %in% input$granularity_bubble,]
     data <- data[data$ws %in% input$watersheds_bubble,]
-    #data <- data[data$date >= input$date_range_bubble[1] & data$date <= input$date_range_bubble[2]]
+    data <- data[data$date >= input$date_range_bubble[1] & data$date <= input$date_range_bubble[2]]
     
     #code below creates temporary_x and temporary_y
     #there are the columns that have the appropriate data 
@@ -391,7 +391,7 @@ shinyServer(function(input, output, session) {
       plot <- ggplot(data=data, aes(frame = framey, alpha = ws)) + my_theme+
         scale_size(range = c(5, 1))}
 
-    plot <- plot + geom_point(aes_string(x = x, y = y, color = color, size = size), stroke= 0.2) + labs(y = "")
+    plot <- plot + geom_point(aes_string(x = x, y = y, size = size), stroke= 0.2) + labs(y = "")
     
     if(color == "solute"){
       plot <- plot + 
