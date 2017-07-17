@@ -71,13 +71,13 @@ units_flux <- list("flux")
 ########################################################################################
 
 shinyUI(  dashboardPage(skin = "black",
-                        dashboardHeader(title = "Acid Rain"),
+                        dashboardHeader(title = "Ice Storm"),
                         dashboardSidebar(
                           width = 150,
                           sidebarMenu(
-                            menuItem("LAI", tabName = "LAI", icon = icon("home")),
-                            menuItem("NO3 General", tabName = "General", icon = icon("search-plus")),
-                            menuItem("Flux", tabName = "Flux", icon = icon("search-plus"))
+                            menuItem("LAI", tabName = "LAI", icon = icon("leaf")),
+                            menuItem("NO3 General", tabName = "General", icon = icon("line-chart")),
+                            menuItem("Flux", tabName = "Flux", icon = icon("arrows-v"))
                           )
                         ),
                         dashboardBody(
@@ -126,7 +126,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                     tabPanel(shiny::icon("circle"),
                                                              div(class = "titleRow", fluidRow(column(5, tags$h2("LAI")),
                                                                                               ##Watershed
-                                                                                              column(3,  offset = 4,
+                                                                                              column(3,  offset = 3,
                                                                                                      fluidRow(
                                                                                                        selectInput("watersheds1", label = "",
                                                                                                                    choices = watersheds1,

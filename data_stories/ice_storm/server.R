@@ -319,7 +319,7 @@ shinyServer(function(session, input, output) {
     
     final <- plot+ my_theme + geom_line(size = .8, aes(linetype = ws)) + 
       geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste(#"Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                 aes( text = paste("Solute: ", solute, "<br>", "Watershed: ", ws, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
@@ -413,7 +413,7 @@ shinyServer(function(session, input, output) {
     NO3_output$width <- NULL
     NO3_output$height <- NULL
     NO3_output %>%
-      layout(autosize = TRUE)
+      layout(autosize = TRUE, showlegend = T)
   })
 
   #NO3 excess
