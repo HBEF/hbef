@@ -40,8 +40,8 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
-water_sources <- list("Precipitation (P)" = "precipitation",
-                     "Streamflow (Q)" = "streamflow")
+water_sources <- list("Streamflow (Q)" = "streamflow", 
+                     "Precipitation (P)" = "precipitation")
 
 granularity <- list( "Week" = "week",
                     "Month (VWC)" = "month",
@@ -246,6 +246,12 @@ shinyUI(
                               selectInput("yaxis_time", label = "",
                                           choices = time_variables,
                                           selected = "flux"))),
+              ##Water Sources
+              fluidRow(
+                column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
+                                              choices = water_sources,
+                                              selected = c("precipitation", "streamflow"),
+                                              inline = FALSE))),
               ##Units  
               fluidRow(
                 column(12, conditionalPanel(condition = "input.yaxis_time == 'concentration'",
