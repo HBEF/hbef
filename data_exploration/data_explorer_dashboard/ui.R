@@ -49,6 +49,7 @@ granularity <- list( "Week" = "week",
 
 time_variables <- list("Solute Concentration" = "concentration", 
                        "pH" = "pH",
+                       "Charge Balance" = "charge balance",
                        "Temperature" = "temp", 
                        "Acid-Neutralizing Capacity" = "anc", 
                        "Specific Conductivity" = "spcond")
@@ -151,7 +152,9 @@ shinyUI(
                                                              selected = "year")))
                          ),
                          ## Time Plot
-                         plotlyOutput("plot_time")
+                         conditionalPanel(condition = "input.yaxis_time != 'charge balance'", plotlyOutput("plot_time")),
+                         conditionalPanel(condition = "input.yaxis_time == 'charge balance'", plotlyOutput("plot_charge"))
+                         
                 ) #Closes tabpanel
                 
             )# Closes tab Box
@@ -200,7 +203,7 @@ shinyUI(
                                                    selected = "year")))),         
                   ## CQ plot
               fluidRow(
-                conditionalPanel(condition = "input.yaxis_time == 'concentration'", plotlyOutput("plot_cq")))
+                conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'charge balance'", plotlyOutput("plot_cq")))
               
               )#Closes Row
               
@@ -228,7 +231,8 @@ shinyUI(
                                                    selected = "year")))
               ),
               ## Flux Plot
-          conditionalPanel(condition = "input.yaxis_time == 'concentration'", plotlyOutput("plot_flux"))
+          conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'charge balance'", 
+                           plotlyOutput("plot_flux"))
           ) #Closes tabpanel
           
         )# Closes tab Box
@@ -261,7 +265,7 @@ shinyUI(
               
               #Solutes
             
-                column(12, conditionalPanel(condition = "input.yaxis_time == 'concentration'", 
+                column(12, conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'charge balance'", 
                                             actionLink("select_all_ions", h4("Solutes")),
                 
                 #Cations

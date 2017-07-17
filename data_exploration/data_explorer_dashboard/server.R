@@ -46,6 +46,10 @@ shinyServer(function(input, output, session) {
   source_color <- c("flow" = "#505050", "precip"= "#CCCDD9")
   grey_palette <- c("#505050", "#CCCDD9")
   
+  
+  water_sources <- list("Streamflow (Q)" = "streamflow", 
+                        "Precipitation (P)" = "precipitation")
+  
   ### End of Theme ################
   
   ###  Lists for the sidebar  ######
@@ -144,7 +148,8 @@ shinyServer(function(input, output, session) {
       updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
     else{
       updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
-      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
+      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)
+      updateCheckboxGroupInput(session, "solutes_H", selected = solutes_H)}
   })
   
   observeEvent(input$select_all_anions, {
@@ -217,18 +222,36 @@ shinyServer(function(input, output, session) {
     else {as.character(input$yaxis_time)}
   })
   
-  observe({if(!(input$yaxis_time %in% c("concentration", "pH"))){
+  observe({if(!(input$yaxis_time %in% c("concentration", "pH", "charge balance"))){
     updateSelectInput(session, "granularity_time",
-                      selected = "week")
+                      selected = "week")}})
+    
+  observe({if(!(input$yaxis_time %in% c("concentration", "pH"))){
     updateSelectInput(session, "water_sources",
-                      selected = "streamflow")}})
+                      selected = "streamflow")}
+    else{
+    updateSelectInput(session, "water_sources",
+                      selected = c("streamflow", "precipitation"))
+    }})
+  
+  ###### >>>>>>> Reactive Charge Plot <<<<<<<<<< #####
+  reactive_data_charge <- reactive({
+    data<- imported_data
+    names(data)
+    data <- data[data$granularity %in% input$granularity_time,]
+    data <- data[data$source %in% "precipitation",]
+    data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
+    data <- data[data$ws %in% input$watersheds,]
+    data %<>% 
+      mutate(charge_ueq = ifelse(solute %in% solutes_anions, -1*(concentration_ueq), concentration_ueq))
+  })
   
   #Coloring for Time pLot
   coloring <- reactive({
-    if(input$yaxis_time == "concentration"){solute_palette}
+    if(input$yaxis_time %in% c("concentration", "charge balance")){solute_palette}
     else{grey_palette}    
   })
-  ###### >>>>>>> End of Reactive Time Plot <<<<<<<<<< #####
+  ###### >>>>>>> End of Reactive Charge Plot <<<<<<<<<< #####
   
   
   
@@ -379,6 +402,30 @@ shinyServer(function(input, output, session) {
   }
 
   
+  #### ---------  GGPLOT CHARGE BALANCE FUNCTION-----------------------
+  ggplot_charge_function <- function(data, x, y, log, y_label, color_scale){
+    
+    
+    plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, fill = solute, shape = source, alpha = ws))+
+      my_theme + 
+      geom_area() + 
+      scale_color_manual(values = color_scale) +
+      scale_fill_manual(values = color_scale) +
+      scale_alpha_discrete(range = c(0.9, 0.5))+
+      labs(x = "Water Year", y = y_label)
+    
+    if(log == "log"){
+      plot <- plot + scale_y_continuous(trans='log2')+
+        labs(x = "Water Year", y = paste("log", "(",y_label, ")"))
+    }
+    
+    ggplotly(plot, tooltip = "text") %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE) %>% 
+      layout(hovermode = "x")
+  }
+  
+  
   #### ---------  GGPLOT BUBBLE FUNCTION-----------------------
   
   ggplot_bubble_function <- function(data, x, y, log_x, log_y, speed, trace, color = NA, size = NA){
@@ -391,7 +438,12 @@ shinyServer(function(input, output, session) {
       plot <- ggplot(data=data, aes(frame = framey, alpha = ws)) + my_theme+
         scale_size(range = c(5, 1))}
 
-    plot <- plot + geom_point(aes_string(x = x, y = y, size = size), stroke= 0.2) + labs(y = "")
+    if(is.na(color)){
+    plot <- plot + geom_point(aes_string(x = x, y = y, size = size), stroke= 0.2) + labs(y = "")}
+    
+    else{
+    plot <- plot + geom_point(aes_string(x = x, y = y, size = size, color = color), stroke= 0.2) + labs(y = "")
+    }
     
     if(color == "solute"){
       plot <- plot + 
@@ -443,6 +495,18 @@ shinyServer(function(input, output, session) {
   output$plot_time <- renderPlotly({
     theplot <- ggplot_time_function(reactive_data_time(), x_time(), y_time(),
                                     log = input$log_time, y_time(), coloring())
+    #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
+    theplot$x$layout$width <- NULL
+    theplot$y$layout$height <- NULL
+    theplot$width <- NULL
+    theplot$height <- NULL
+    theplot %>%
+      layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
+  })
+  
+  output$plot_charge <- renderPlotly({
+    theplot <- ggplot_charge_function(reactive_data_charge(), x_time(), "charge_ueq",
+                                    log = input$log_time, y_time(), solute_palette)
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
