@@ -247,9 +247,7 @@ plot = ggplotly(ggplot(data = wsDF)+
            facet_wrap(~Watershed) +
            theme(axis.text.y = element_blank(),
                  axis.text.x = element_blank(),
-                 axis.ticks = element_blank(),
-                 legend.position = "none",
-                 legend.title = element_blank()) +
+                 axis.ticks = element_blank()) +
            guides(frame = FALSE, group = FALSE) +
            labs(x = "", y = "")) %>%
   config(displayModeBar = FALSE) %>%
