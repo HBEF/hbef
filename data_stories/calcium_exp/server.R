@@ -7,6 +7,7 @@ library(maptools)
 library(lattice)
 library(grid)
 library(plotly)
+library(rgeos)
 
 
 shinyServer(function(input, output) {
