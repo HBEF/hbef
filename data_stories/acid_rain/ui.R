@@ -85,8 +85,8 @@ shinyUI(
                   width = 150,
                   sidebarMenu(
                     menuItem("Introduction", tabName = "introduction", icon = icon("home")),
-                    menuItem("Chemistry", tabName = "chemistry", icon = icon("search-plus")),
-                    menuItem("Policy", tabName = "policy", icon = icon("search-plus"))
+                    menuItem("Chemistry", tabName = "chemistry", icon = icon("flask")),
+                    menuItem("Policy", tabName = "policy", icon = icon("book"))
                   )
                 ),
   dashboardBody(
