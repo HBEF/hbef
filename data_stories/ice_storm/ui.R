@@ -75,9 +75,9 @@ shinyUI(  dashboardPage(skin = "black",
                         dashboardSidebar(
                           width = 150,
                           sidebarMenu(
-                            menuItem("LAI", tabName = "LAI", icon = icon("leaf")),
                             menuItem("NO3 trends", tabName = "trends", icon = icon("line-chart")),
-                            menuItem("Flux", tabName = "Flux", icon = icon("arrows-v"))
+                            menuItem("Flux", tabName = "Flux", icon = icon("arrows-v")),
+                            menuItem("LAI", tabName = "LAI", icon = icon("leaf"))
                           )
                         ),
                         dashboardBody(
@@ -124,9 +124,9 @@ shinyUI(  dashboardPage(skin = "black",
                                                                                          selected = "linear"))))),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
-                                                             div(class = "titleRow", fluidRow(column(5, tags$h2("LAI")),
+                                                             div(class = "titleRow", fluidRow(column(6, tags$h2("Increasing LAI after ice storm")),
                                                                                               ##Watershed
-                                                                                              column(3,  offset = 3,
+                                                                                              column(3,  offset = 2,
                                                                                                      fluidRow(
                                                                                                        selectInput("watersheds1", label = "",
                                                                                                                    choices = watersheds1,
@@ -302,12 +302,15 @@ shinyUI(  dashboardPage(skin = "black",
                                                              
                                                              #------ Box 3 --------#
                                                              
-                                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                                                             tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
                                                                     ######## OPTIONS
                                                                     ######## PLOT 
                                                                     tabPanel(shiny::icon("circle"),
                                                                              div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux (ws2, ws4, ws5)")))),
                                                                              ## Time Plot
+                                                                             p("*Note the 1966 devegetation spike (ws2) and the 1983 whole tree harvest spike (ws4)."),
+                                                                             p("To better see the effects of the
+                                                                               ice storm, click and drag to zoom in."),
                                                                              plotlyOutput("NO3_excess")
                                                                     ) #Closes tabpanel
                                                                     

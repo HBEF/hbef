@@ -220,10 +220,10 @@ shinyServer(function(session, input, output) {
   ########### END OF DATA IMPORT #############################################
   
   
-  ########### REACTIVE DATA AND X Y 2 #########################################
-  #Reactive Data Normal
+  ########### REACTIVE DATA AND X Y #########################################
   
-  reactive_data2 <- reactive({
+  #Reactive Data for NO3 trends
+  reactive_data <- reactive({
     data <- imported_data
     data <- data[data$granularity %in% input$granularity,]
     data <- data[data$source %in% input$water_sources2,]
@@ -245,17 +245,21 @@ shinyServer(function(session, input, output) {
     else if(input$units =="uMole/L"){"concentration_umol"}
     else if(input$units =="flux"){"flux"}
   })
-  ########### REACTIVE DATA AND X Y 3 #########################################
-  #Reactive Data Normal
-  
-  reactive_data3 <- reactive({
+
+  #Reactive flux data  
+  reactive_data_flux <- reactive({
     data <- imported_data
     data <- data[data$granularity %in% input$granularity3,]
     data <- data[data$source %in% c("streamflow"),]
     data <- data[data$ws %in% c("1", "6"),]
     data <- data[data$solute %in% c("NO3"),] 
   })
+
+  yflux <- reactive({
+    {"flux"}
+  })
   
+    #Reactive normalized flux data
     reactive_data_norm <- reactive({
     data_norm <- data_norm[data_norm$granularity %in% input$granularity3,]
     data_norm <- data_norm[data_norm$source %in% c("streamflow"),]
@@ -263,31 +267,27 @@ shinyServer(function(session, input, output) {
     data_norm <- data_norm[data_norm$solute %in% c("NO3"),]
   })
   
-  x3 <- reactive({
+  xflux <- reactive({
     if(input$granularity3 == "week"){"water_date"}
     else if(input$granularity3 == "month"){"water_date"}
     else if(input$granularity3 == "year"){"water_year"}
   })
   
-  y3 <- reactive({
+  ynorm <- reactive({
     {"normalized_flux"}
   })
-  
-  y3.1 <- reactive({
-    {"flux"}
-  })
 
-  ########### PLOT FUNCTIONS #########################################
+  ########### PLOT FUNCTION #########################################
   
   ## GGPLOT TIME FUNCTION
   ggplot_function <- function(data, x, y, log, units, date_range){
     
     if(log == "log") {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), color= solute, shape= source, linetype= ws))+
         labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, linetype = ws))+
+      plot <- ggplot(data=data, aes(x= get(x), y= get(y), color= solute, shape= source, linetype= ws))+
         labs(x = "Water Year", y = units)}
     
     final <- plot+ my_theme + geom_line(size = 0.5) + 
@@ -307,58 +307,6 @@ shinyServer(function(session, input, output) {
     
   }
 
-  ########### PLOT FUNCTIONS 3 #########################################
-  
-  ## GGPLOT TIME FUNCTION 3.1
-  ggplot_function3.1 <- function(data, x, y, ncol = NULL, nrow = NULL){
-
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
-        labs(x = "Water Year", y = "moles/ha-yr")
-    
-    final <- plot+ my_theme + geom_line(size = .5, aes(linetype = ws)) + 
-      geom_point(size = 1.3, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Watershed: ", ws, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
-      geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
-      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = -8, color = "black")+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_linetype_manual(values = watershed_linetypes)
-
-    ggplotly(  
-      final, tooltip = "text") %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-  }
-
-
-  ## GGPLOT TIME FUNCTION _excess
-  ggplot_function_excess <- function(data, x, y, ncol = NULL, nrow = NULL){
-    
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
-        labs(x = "Water Year", y = "moles/ha-yr")
-    
-    final <- plot+ my_theme + geom_line(size = .5, aes(linetype = ws)) + 
-      geom_point(size = 1.3, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Watershed: ", ws, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
-      geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
-      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = -250, color = "black")+
-      annotate("text", label = "1965-7 devegetation ws2", x = as.Date("1966-12-01"), y = 775, color = "black")+
-      annotate("text", label = "1983 whole tree harvest ws4", x = as.Date("1983-12-12"), y = 775, color = "black")+
-      coord_cartesian(ylim=c(-550, 800))+
-      scale_shape_manual(values = source_shapes)+
-      scale_color_manual(values = solute_palette) +
-      scale_linetype_manual(values = watershed_linetypes)
-    
-    ggplotly(  
-      final, tooltip = "text") %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-  }
   
   #############################################################
   ########### OUTPUTS #########################################
@@ -389,7 +337,7 @@ shinyServer(function(session, input, output) {
   
   #plot to generally show how the ice storm affected NO3 (conc or flux?)
   output$NO3_plot <- renderPlotly({
-    NO3_plot <- ggplot_function(reactive_data2(), x(), y(), log=input$log, units=input$units, date_range=input$date_range2)
+    NO3_plot <- ggplot_function(reactive_data(), x(), y(), log=input$log, units=input$units, date_range=input$date_range2)
     NO3_plot$x$layout$width <- NULL
     NO3_plot$y$layout$height <- NULL
     NO3_plot$width <- NULL
@@ -401,7 +349,7 @@ shinyServer(function(session, input, output) {
   #make a plot of nitrates like in the 2003 paper
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function(reactive_data3(), x3(), y3.1(), log=input$log_flux, units="moles/ha-yr", date_range=input$date_range3)
+    NO3_output <- ggplot_function(reactive_data_flux(), xflux(), yflux(), log=input$log_flux, units="moles/ha-yr", date_range=input$date_range3)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
@@ -413,13 +361,13 @@ shinyServer(function(session, input, output) {
 
   #NO3 excess
   output$NO3_excess <- renderPlotly({
-    NO3_excess <- ggplot_function(reactive_data_norm(), x3(), y3(), log="linear", units="moles/ha-yr", date_range=input$date_range3)
+    NO3_excess <- ggplot_function(reactive_data_norm(), xflux(), ynorm(), log="linear", units="moles/ha-yr", date_range=input$date_range3)
     NO3_excess$x$layout$width <- NULL
     NO3_excess$y$layout$height <- NULL
     NO3_excess$width <- NULL
     NO3_excess$height <- NULL
     NO3_excess %>%
-      layout(autosize = TRUE#, showlegend = T
+      layout(autosize = TRUE#, showlegend=T
       )
     })
 })
