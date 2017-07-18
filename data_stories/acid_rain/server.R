@@ -191,7 +191,7 @@ shinyServer(function(session, input, output) {
   
   #make a df of acid rain history dates (CAA, etc.) #https://daattali.com/shiny/timevis-demo/
   historyData <- data.frame(
-    id = 1:9,
+    id = 1:8,
     content = c("Span of HBEF dataset",
                 "Air Pollution Control Act",
                 "Clean Air Act of 1963",
@@ -199,17 +199,15 @@ shinyServer(function(session, input, output) {
                 "EPA founded", 
                 "Clean Air Act",
                 "1977 Clean Air Act Amendments",
-                "1990 Clean Air Act Amendments",
-                "Today"),
-    title = c("1 Watershed 6 is displayed in this story, as it is the control",
-              "2 Research funding, first federal legislation on air pollution",
-              "3 Research developing, national program made",
-              "4 Expanded research, interstate pollution policies",
-              "5 The EPA was founded to enforce the Clean Air Act",
-              "6 The Clean Air Act of 1970",
-              "7 National Ambient Air Quality standards improvement",
-              "8 Amendment that more specifically addressed acid rain",
-              "9 Today isn't really today"),
+                "1990 Clean Air Act Amendments"),
+    title = c("Watershed 6 is displayed in this story, as it is the control",
+              "Research funding, first federal legislation on air pollution",
+              "Research developing, national program made",
+              "Expanded research, interstate pollution policies",
+              "The EPA was founded to enforce the Clean Air Act",
+              "The Clean Air Act of 1970",
+              "National Ambient Air Quality standards improvement",
+              "Amendment that more specifically addressed acid rain"),
     start = c("1957-06-01",
               "1955-01-01",
               "1963-01-01",
@@ -217,10 +215,8 @@ shinyServer(function(session, input, output) {
               "1970-12-02", 
               "1970-06-01",
               "1977-01-01",
-              "1990-06-01",
-              "2017-06-19"), #FIND THE REAL DAY OF CAA ENACTMENT!
+              "1990-06-01"), #FIND THE REAL DAY OF CAA ENACTMENT!
     end = c("2014-05-01",
-            NA,
             NA,
             NA, 
             NA,
@@ -321,7 +317,6 @@ shinyServer(function(session, input, output) {
   
   ########## Reactive Data 2
   #Reactive Data Normal
-  ##sidebar_number_function <- function(number){  #try this out later on for optimization purposes
   reactive_data2 <- reactive({
     data <- imported_data
     data <- data[data$granularity %in% input$granularity2,]
@@ -409,7 +404,7 @@ shinyServer(function(session, input, output) {
   #############################################################
   
 
-  #successfully interactive/integrated intro pH plot
+  #intro pH plot with annotations
   output$pH_intro <- renderPlotly({
     
     line <- list(
@@ -451,7 +446,7 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, shapes= lines, annotations = a)
     })
   
-  #Successfully interactive/integrated plot of any compound conc
+  #plot of any compound conc
   output$chemistry <- renderPlotly({
     chemistry <- ggplot_function2(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range2, solute_palette)
     chemistry$x$layout$width <- NULL
@@ -461,58 +456,8 @@ shinyServer(function(session, input, output) {
     chemistry %>%
       layout(autosize = TRUE)
   })
-  
-#   #plot pH vs Q to see if there are any trends##################
-#   output$pH_streamflow <- renderPlotly({
-# #    pH_streamflow <- ggplot_function2(reactive_data2(), x2(), y2(), ncol = 1, nrow = NULL, log = input$log2)
-#     pH_streamflow_data <- imported_data
-#     pH_streamflow_data <- pH_streamflow_data[pH_streamflow_data$granularity %in% c("month"),]
-#     pH_streamflow_data <- pH_streamflow_data[pH_streamflow_data$source %in% c("streamflow"),]
-#     pH_streamflow_data <- pH_streamflow_data[pH_streamflow_data$ws %in% c("6"),]
-#     pH_streamflow_data <- pH_streamflow_data[pH_streamflow_data$solute %in% c("pH"),]
-#     pH_streamflow_data <- pH_streamflow_data %>% filter(date <"1990-06-01")
-# 
-#     pH_streamflow <- ggplot(pH_streamflow_data, aes(x = water_mm, y=concentration_mg, color = water_date))+
-#       geom_point(aes(text=paste("Date: ", date)))+
-#       geom_smooth(method="lm",se=F)+
-#       coord_cartesian(ylim = c(4.5, 6))
-#     
-#     pH_streamflow <- ggplotly(pH_streamflow, tooltip = "text",
-#       width = 900) %>%
-#         config(displayModeBar = FALSE) %>%
-#         config(showLink = FALSE)
-#     
-#     pH_streamflow$x$layout$width <- NULL
-#     pH_streamflow$y$layout$height <- NULL
-#     pH_streamflow$width <- NULL
-#     pH_streamflow$height <- NULL
-#     pH_streamflow %>%
-#       layout(autosize = TRUE, height = 600)
-#   })
-#   #second half
-#   #plot pH vs Q to see if there are any trends
-#   output$pH_streamflow1990 <- renderPlotly({
-#     pH_streamflow_data1990 <- pH_streamflow_data %>% filter(date > "1990-06-01")
-#     
-#     pH_streamflow1990 <- ggplot(pH_streamflow_data1990, aes(x = water_mm, y=concentration_mg, color = water_date))+
-#       geom_point(aes(text=paste("Date: ", date)))+
-#       geom_smooth(method="lm",se=F)+
-#       coord_cartesian(ylim = c(4.5, 6))
-#     
-#     pH_streamflow1990 <- ggplotly(pH_streamflow1990, tooltip = "text",
-#                               width = 900) %>%
-#       config(displayModeBar = FALSE) %>%
-#       config(showLink = FALSE)
-#     
-#     pH_streamflow1990$x$layout$width <- NULL
-#     pH_streamflow1990$y$layout$height <- NULL
-#     pH_streamflow1990$width <- NULL
-#     pH_streamflow1990$height <- NULL
-#     pH_streamflow1990 %>%
-#       layout(autosize = TRUE, height = 600)
-#   })
-#   #################
-  #Successfully interactive/integrated plot of SO4 and NO3 to complement pH increase - shows decreasing trend
+
+  #plot of SO4 and NO3 to complement pH increase - shows decreasing trend
   output$policy_SO4_NO3 <- renderPlotly({
     policy_SO4_NO3 <- ggplot_function2(reactive_data3_anions(), x3(), y3(), log = input$log3, input$units3, input$date_range3, solute_palette)
     policy_SO4_NO3$x$layout$width <- NULL
@@ -523,7 +468,7 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE)
   })
   
-  #Successfully interactive/integrated base cation trends plot 
+  #base cation trends plot 
   output$policy_base_cations <- renderPlotly({
     policy_base_cations <- ggplot_function2(reactive_data3_cations(), x4(), y3(), log = input$log4, input$units3, input$date_range3, solute_palette)
     policy_base_cations$x$layout$width <- NULL
@@ -534,7 +479,7 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE)
   })
   
-  #Successfully interactive/integrated Al plot to show decrease in acids mean less Al released from soil
+  #Al plot to show decrease in acids mean less Al released from soil
   output$policy_Al <- renderPlotly({
     policy_Al <- ggplot_function2(reactive_data3_Al(), x5(), y3(), log = input$log5, input$units3, input$date_range3, solute_palette)
     policy_Al$x$layout$width <- NULL
@@ -545,7 +490,7 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE)
     })
 
-  #in progress plot of Al and acid flux and conc... shoudl be on seperate tab so has a diff sidebar!
+  #in progress plot of Al and acid flux and conc... should be on seperate tab so has a diff sidebar!
   output$chemistry_flux <- renderPlotly({
     chemistry_flux <- ggplot_function2(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range2, solute_palette)
     chemistry_flux$x$layout$width <- NULL
@@ -559,7 +504,7 @@ shinyServer(function(session, input, output) {
   
   #output an interactive timeline for the history of acid rain
   output$timeline <- renderTimevis({
-    timevis(historyData) #possibly use groups in order to contextualize (ie disney movie years)
+    timevis(historyData) #possibly use groups in order to contextualize
   })
   
 
