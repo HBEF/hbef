@@ -74,6 +74,12 @@ shinyUI(
     ),
     dashboardBody(
       tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
+      tags$script('
+        $(document).on("keydown", function (e) {
+        if (e.keyCode === 13) {
+          $("#go").click()};
+        });
+        '),
       tags$head(includeScript(system.file('www', 'ajax.js'))),
       tags$head(includeScript(system.file('www', 'iframeResizer.contentWindow.min.js'))),
       tags$head(includeScript(system.file('www', 'app.js'))),
@@ -116,8 +122,7 @@ shinyUI(
                                                                 selected = "year")))
                             ),
                             ## Time Plot
-                            plotlyOutput("plot_pq"),
-                            verbatimTextOutput("brush")
+                            plotlyOutput("plot_pq")
                    ) #Closes tabpanel
                    
             )# Closes tab Box
@@ -354,8 +359,9 @@ shinyUI(
                       #Solutes Y Input
                       fluidRow(column(4, textInput("solutesy_formula", label = "", value = "Ca + Na + Mg", 
                                                    placeholder = "type in desired formula")),
-                               column(2, offset = 0, selectInput("solutesy_source", label = "", choices = c("P" = "precipitation", "Q" = "streamflow"),
-                                                                 selected = "streamflow")) 
+                               column(2, selectInput("solutesy_source", label = "", choices = c("P" = "precipitation", "Q" = "streamflow"),
+                                                                 selected = "streamflow")), 
+                               column(1, offset = 4, actionButton("go", "Plot"))
                       ),
                       #Bubble Plot
                       fluidRow(plotlyOutput("bubblePlot")),

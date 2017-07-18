@@ -107,7 +107,7 @@ shinyServer(function(input, output, session) {
   #Solutesx_formula and solutesy_formula parse the formula inputed 
   #by the user in the bubble plot to match column names
   
-  
+
   solutesx_formula <- reactive({
     capitalized <-"(^[[:upper:]][[:alpha:]])|^H"
     strip_spaces <- gsub(" ", "", input$solutesx_formula, fixed = TRUE)
@@ -309,7 +309,8 @@ shinyServer(function(input, output, session) {
   
   
   ###### >>>>>>> Reactive Bubble Plot <<<<<<<<<< #####
-  reactive_data_bubble <- reactive({
+  reactive_data_bubble <- eventReactive({input$go |
+    input$lastkeypresscode}, {
     data <- imported_data_super_wide
     data <- data[data$granularity %in% input$granularity_bubble,]
     data <- data[data$ws %in% input$watersheds_bubble,]
@@ -383,13 +384,14 @@ try typing Q and matching the dropdown menu by selecting Q"
     if(input$solutesy_source == "precipitation") {
       validate(
         need(input$solutesy_formula != "", text_no_y),
-        need(input$solutesy_formula != "Q", text_pq_conflict), 
+        need(input$solutesy_formula != "Q", text_pq_conflict),
         need(input$solutesx_formula != "q", text_pq_conflict))}
     if(input$solutesy_source == "streamflow") {
       validate(
         need(input$solutesy_formula != "", text_no_y),
-        need(input$solutesy_formula != "P", text_pq_conflict), 
+        need(input$solutesy_formula != "P", text_pq_conflict),
         need(input$solutesx_formula != "p", text_pq_conflict))}
+    
     
     data <- formula_function_x(data, solutesx_formula())
     data <- formula_function_y(data, solutesy_formula())
@@ -510,11 +512,11 @@ try typing Q and matching the dropdown menu by selecting Q"
     
     if(trace){
       plot <- ggplot(data=data, aes(frame = frame, alpha = ws)) + my_theme +
-        scale_size(range = c(5, 1))}
+        scale_size(range = c(1, 5))}
     
     else{
       plot <- ggplot(data=data, aes(frame = framey, alpha = ws)) + my_theme+
-        scale_size(range = c(5, 1))}
+        scale_size(range = c(1, 5))}
 
     if(is.na(color)){
     plot <- plot + geom_point(aes_string(x = x, y = y, size = size), stroke= 0.2) + labs(y = "")}
@@ -549,7 +551,8 @@ try typing Q and matching the dropdown menu by selecting Q"
       config(showLink = FALSE) %>% 
       animation_opts(frame = speed, transition = 0, redraw = FALSE) %>%
       animation_slider(currentvalue = list(prefix = "Water Year ", font = list(size = 15))) %>%
-      animation_button(font = list(size = 12))
+      animation_button(font = list(size = 12)) %>%
+      layout(hovermode = "closest")
   }
   
   
@@ -652,9 +655,11 @@ try typing Q and matching the dropdown menu by selecting Q"
   
 
   output$bubblePlot <- renderPlotly({
-    theplot <- ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", 
+    input$go
+    input$lastkeypresscode
+    theplot <- isolate(ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", 
                                       input$log_bubble_x, input$log_bubble_y, animation_speed_bubble(), 
-                                      input$trace_bubble, "water_year", input$sizing_bubble)
+                                      input$trace_bubble, "water_year", input$sizing_bubble))
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -667,7 +672,7 @@ try typing Q and matching the dropdown menu by selecting Q"
 
   output$brush <- renderPrint({
     d <- event_data("plotly_selected")
-    if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else{max(d$x)}
+    if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else{d}
   })
   
 })
