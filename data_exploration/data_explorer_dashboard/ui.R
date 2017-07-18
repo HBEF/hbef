@@ -189,7 +189,11 @@ shinyUI(
                                             selected = "linear")))),
                       fluidRow(
                         box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
-                        ##Leave trace
+                      
+                      ##Animate?
+                      column(12, checkboxInput("animate_cq", label = ("Animate"),
+                                               value = FALSE)),  
+                      ##Leave trace
                         column(12, checkboxInput("trace_cq", label = ("Leave Trace"),
                                                   value = TRUE)),
                       ##Animation Speed
@@ -207,7 +211,7 @@ shinyUI(
                   column(4, offset = 2,selectInput("granularity_cq", label = "",
                                                    choices = granularity,
                                                    selected = "year")))),         
-                  ## CQ plot
+              ## CQ plot
               fluidRow(
                 conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'chargebalance'", plotlyOutput("plot_cq")))
               
@@ -335,6 +339,9 @@ shinyUI(
                                                           selected = "linear")))),
                               fluidRow(
                                 box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
+                                    ##Animate?
+                                    column(12, checkboxInput("animate_bubble", label = ("Animate"),
+                                                             value = FALSE)),
                                     ##Leave trace
                                     column(12, checkboxInput("trace_bubble", label = ("Leave Trace"),
                                                              value = TRUE)),

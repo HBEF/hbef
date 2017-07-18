@@ -30,9 +30,9 @@ shinyServer(function(input, output, session) {
           panel.grid.major.x = element_line(colour = NA),
           text = element_text(family = "Helvetica", size = 12), 
           legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
-          strip.text = element_text(margin = margin(20)),
-          axis.title= element_text(size = 10, margin = margin(20)), 
-          plot.margin = margin(1, 1, 0, 1, "cm"))
+          #strip.text = element_text(margin = margin(20)),
+          axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
+          plot.margin = margin(1, 1, 1, 1, "cm"))
   
   color_cation <- c("Al" = "#240085", "Mg" = "#1D267A", "Ca" = "#164C6F", "NH4" = "#0F7364" , "Na" = "#089959", "K" = "#02C04E")
   color_anion <- c("PO4" = "#BB1D4C", "SO4" = "#BB1D4C", "NO3" = "#C83239", "SiO2"= "#D54726", "Cl" = "#E25C13", "HCO3" = "#F07100")
@@ -222,6 +222,16 @@ shinyServer(function(input, output, session) {
     if(input$yaxis_time == "concentration"){as.character(input$units)}
     else if(input$yaxis_time == "chargebalance"){as.character(input$units)}
     else {as.character(input$yaxis_time)}
+  })
+  
+  y_labs <- reactive({
+    if(input$yaxis_time == "concentration"){
+      if(input$units == "concentration_ueq"){"uEquivalent/L"}
+      else if(input$units == "concentration_mg"){"mg/L"}
+      else if(input$units == "concentration_umol"){"uMole/L"}}
+    else{""
+    }
+    
   })
   
   observe({if(!(input$yaxis_time %in% c("concentration", "pH", "chargebalance"))){
@@ -433,13 +443,13 @@ try typing Q and matching the dropdown menu by selecting Q"
       my_theme +
       geom_line()+
       geom_point(size = 1.3, fill = "white", stroke = 0.2, aes(text= paste(framey, ":",water_mm)))+
-      labs(x = "Date", y = "Q (mm)")+
+      labs(x = "", y = "Q (mm)")+
       scale_colour_grey() 
       
     
     if(log == "log"){
       streamflow <- streamflow + scale_y_continuous(trans='log2')+
-        labs(x = "Date", y = "log(Q (mm))")
+        labs(x = "", y = "log(Q (mm))")
     }
     
     #Precipitation Plot
@@ -447,7 +457,7 @@ try typing Q and matching the dropdown menu by selecting Q"
       my_theme + 
       geom_bar(data=data_precip, aes(x = as.POSIXct(date), y = water_mm, fill = ws, text= paste(framey, ":", water_mm)), 
                stat = "identity", position = "dodge", key = date)+ 
-      scale_y_reverse() + labs(x = "Date", y = "P (mm)")+
+      scale_y_reverse() + labs(x = "", y = "P (mm)")+
       scale_fill_grey()
     
     
@@ -467,26 +477,25 @@ try typing Q and matching the dropdown menu by selecting Q"
   #### ---------  GGPLOT TIME FUNCTION-----------------------
   ggplot_time_function <- function(data, x, y, log, y_label, color_scale){
     
-    
-      plot <- ggplot(data=data, aes(x = as.POSIXct(get(x)), y = get(y), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = as.POSIXct(get(x)), y = get(y), color = solute, shape = source, alpha = ws, group = solute))+
         my_theme + 
         geom_line(size = 0.5) + 
         geom_point(size = 1.3, fill = "white", stroke = 0.2, aes(text = paste(solute,":", round(get(y), 4)))) +  
         scale_shape_manual(values = source_shapes) +
         scale_color_manual(values = color_scale) +
         scale_alpha_discrete(range = c(0.9, 0.5))+
-        labs(x = "Water Year", y = y_label)
+        labs(x = "", y = y_label)
       
       if(log == "log"){
         plot <- plot + scale_y_continuous(trans='log2')+
-        labs(x = "Water Year", y = paste("log", "(",y_label, ")"))
+        labs(x = "", y = paste("log", "(",y_label, ")"))
       }
       
       ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) %>% 
       layout(hovermode = "x") %>%
-        layout(dragmode = "select")
+      layout(dragmode = "select")
   }
 
   
@@ -516,22 +525,26 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   #### ---------  GGPLOT BUBBLE FUNCTION-----------------------
   
-  ggplot_bubble_function <- function(data, x, y, log_x, log_y, speed, trace, color = NA, size = NA, size_range, text = NA){
+  ggplot_bubble_function <- function(data, x, y, log_x, log_y, x_label, y_label, animate, speed, trace, color = NA, size = NA, size_range, text = NA){
     
+    if(animate){
     if(trace){
       plot <- ggplot(data=data, aes(frame = frame, alpha = ws, text = paste(frame, ": (", round(get(x)), ", ",round(get(y)), ")", sep = ""))) + my_theme +
         scale_size(range = size_range) }
     
     else{
       plot <- ggplot(data=data, aes(frame = framey, alpha = ws, text = paste(framey, ": (", round(get(x)), ", ", round(get(y)), ")", sep = ""))) + my_theme+
+        scale_size(range = size_range)}}
+    
+    else{
+      plot <- ggplot(data=data, aes(alpha = ws, text = paste(frame, ": (", round(get(x)), ", ",round(get(y)), ")", sep = ""))) + my_theme +
         scale_size(range = size_range)}
 
     if(is.na(color)){
-    plot <- plot + geom_point(aes_string(x = x, y = y, size = size), stroke= 0.2) + labs(y = "")}
+    plot <- plot + geom_point(aes_string(x = x, y = y, size = size), stroke= 0.2)}
     
     else{
-    plot <- plot + geom_point(aes_string(x = x, y = y, size = size, color = color), stroke= 0.2) + labs(y = "")
-    }
+    plot <- plot + geom_point(aes_string(x = x, y = y, size = size, color = color), stroke= 0.2)}
     
     if(color == "solute"){
       plot <- plot + 
@@ -551,16 +564,23 @@ try typing Q and matching the dropdown menu by selecting Q"
     }
     
     plot <- plot + 
-      scale_alpha_discrete(range = c(0.9, 0.5))
+      scale_alpha_discrete(range = c(0.9, 0.5))+
+      labs(x= x_label, y = y_label)
       
-    
+    if(input$animate_bubble){
     ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE) %>% 
+      config(showLink = FALSE) %>%
+      layout(hovermode = "closest") %>% 
       animation_opts(frame = speed, transition = 0, redraw = FALSE) %>%
       animation_slider(currentvalue = list(prefix = "Water Year ", font = list(size = 15))) %>%
-      animation_button(font = list(size = 12)) %>%
-      layout(hovermode = "closest")
+      animation_button(font = list(size = 12))}
+    else{
+      ggplotly(plot, tooltip = "text") %>%
+        config(displayModeBar = FALSE) %>%
+        config(showLink = FALSE) %>% 
+        layout(hovermode = "closest")
+    }
   }
   
   
@@ -590,7 +610,7 @@ try typing Q and matching the dropdown menu by selecting Q"
   output$plot_time <- renderPlotly({
     d <- event_data("plotly_selected")
     theplot <- ggplot_time_function(reactive_data_time(), x_time(), y_time(),
-                                    log = input$log_time, y_time(), coloring())
+                                    log = input$log_time, y_labs(), coloring())
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -608,7 +628,7 @@ try typing Q and matching the dropdown menu by selecting Q"
   output$plot_charge <- renderPlotly({
     d <- event_data("plotly_selected")
     theplot <- ggplot_charge_function(reactive_data_charge(), x_time(), "charge_ueq",
-                                    log = input$log_time, y_time(), solute_palette)
+                                    log = input$log_time, "uEquivalent/L", solute_palette)
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -629,7 +649,7 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   output$plot_cq <- renderPlotly({
     theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, 
-                                      input$log_cq_x,input$log_cq_y, animation_speed_cq(), 
+                                      input$log_cq_x,input$log_cq_y, "mm", y_labs(), input$animate_cq, animation_speed_cq(), 
                                       input$trace_cq, "solute", 1, c(1, 2))
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
     theplot$x$layout$width <- NULL
@@ -645,7 +665,7 @@ try typing Q and matching the dropdown menu by selecting Q"
   output$plot_flux <- renderPlotly({
     d <- event_data("plotly_selected")
     theplot <- ggplot_time_function(reactive_data_flux(), x_flux(), "flux", 
-                                    log = input$log_flux, "flux", coloring())
+                                    log = input$log_flux, "Equivalent / Hectare", coloring())
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -666,7 +686,8 @@ try typing Q and matching the dropdown menu by selecting Q"
     input$go
     input$lastkeypresscode
     theplot <- isolate(ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", 
-                                      input$log_bubble_x, input$log_bubble_y, animation_speed_bubble(), 
+                                      input$log_bubble_x, input$log_bubble_y, "", "",
+                                      input$animate_bubble, animation_speed_bubble(), 
                                       input$trace_bubble, "water_year", input$sizing_bubble, sizing()))
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
