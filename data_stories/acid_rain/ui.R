@@ -219,7 +219,7 @@ shinyUI(
             
             fluidRow(
               column(9,
-                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                     tabBox(width = 12, height = "620px", side="right", selected = shiny::icon("circle"),
                             ######## OPTIONS
                             ###Units - Axis Log
                             tabPanel(shiny::icon("gear"),
@@ -247,7 +247,7 @@ shinyUI(
               
               ######## SIDEBAR
               column(3, 
-                     box(width = 13, height = "600px", id = "sidebar",
+                     box(width = 13, height = "920px", id = "sidebar",
                          #Solutes
                          fluidRow(
                            column(12, actionLink("select_all_ions2", h4("Solutes")),
@@ -338,7 +338,7 @@ shinyUI(
             fluidRow(
               column(9,
                      #------ Box 1 --------#
-                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                             ######## OPTIONS
                             ###Units - Axis Log
                             tabPanel(shiny::icon("gear"),
@@ -372,7 +372,7 @@ shinyUI(
                      
                      #------ Box 2 --------#
                      
-                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                             ######## OPTIONS
                             ###Units - Axis Log
                             tabPanel(shiny::icon("gear"),
@@ -404,7 +404,7 @@ shinyUI(
                      
                      #------ Box 3 --------#
                      
-                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                             ######## OPTIONS
                             ###Units - Axis Log
                             tabPanel(shiny::icon("gear"),
