@@ -83,6 +83,7 @@ shinyServer(function(input, output, session) {
                     "pH" = "pH")
   
   all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
+  
 
   ############ FUNCTIONS ##################################
   
@@ -191,7 +192,6 @@ shinyServer(function(input, output, session) {
   imported_data <- precip_streamflow_long
   imported_data_wide<- precip_streamflow_wide
   imported_data_super_wide<- precip_streamflow_super_wide
-
   levels(as.factor(imported_data$solute))
   levels(as.factor(imported_data$solute))
   
@@ -266,11 +266,15 @@ shinyServer(function(input, output, session) {
   ##--- Reactive cQ Plot -----##
   reactive_data_cq <- reactive({
     data <- imported_data
+    d <- event_data("plotly_selected")
     data <- data[data$granularity %in% input$granularity_cq,] 
     data <- data[data$solute %in% solutes(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds,]
     data <- data[data$source %in% "streamflow",]
+    
+    if (!is.null(d$x)){
+    data <- data[as.numeric(as.POSIXct(data$date)) >= min(d$x) & as.numeric(as.POSIXct(data$date)) <= max(d$x),]}
   
     if(input$trace_cq){data <- accumulate_by(data, ~framey)}
     else{data}
@@ -314,7 +318,79 @@ shinyServer(function(input, output, session) {
     #code below creates temporary_x and temporary_y
     #there are the columns that have the appropriate data 
     #given the column
+    
+    text_no_x <- "PLEASE TYPE A FORMULA FOR THE X AXIS IN THE BOX BELOW.
 
+    Try any of the following possibilities:
+    
+    Solutes: 
+    • Al, Ca, Cl, H, HCO3, K, Mg, Na, NO3, PO4, SiO2, SO4
+    
+    Hydrologic Flux:
+    • P for precipitation in mm
+    • Q for streamflow in mm
+    
+    Others: 
+    • pH for pH
+    • anc for acid neutralizing capacity (only available for streamflow)
+    • spcond for specific conductivity (only available for streamflow)
+    • temp for temperature (only available for streamflow)
+    
+    You can also perform arithmetic operations on the solutes using: +, - , *, /, ^
+    
+    For example, try typing: Na + Mg"
+    
+    text_no_y <- "PLEASE TYPE A FORMULA FOR THE Y AXIS IN THE BOX ABOVE.
+
+    Try any of the following possibilities:
+    
+    Solutes: 
+    • Al, Ca, Cl, H, HCO3, K, Mg, Na, NO3, PO4, SiO2, SO4
+    
+    Hydrologic Flux:
+    • P for precipitation in mm
+    • Q for streamflow in mm
+    
+    Others: 
+    • pH for pH
+    • anc for acid neutralizing capacity (only available for streamflow)
+    • spcond for specific conductivity (only available for streamflow)
+    • temp for temperature (only available for streamflow)
+    
+    You can also perform arithmetic operations on the solutes using: +, - , *, /, ^
+    
+    For example, try typing: Na + Mg"
+    
+    text_pq_conflict <- "When looking at precipitation (P) you can't see streamflow (Q) in mm. 
+When looking at streamflow (Q) you can't see precipitation (P) in mm. 
+
+Try typing P and matching the dropdown menu by selecting P or
+try typing Q and matching the dropdown menu by selecting Q"
+    
+    #X axis validation
+    if(input$solutesx_source == "precipitation") {
+      validate(
+        need(input$solutesx_formula != "", text_no_x),
+        need(input$solutesx_formula != "Q", text_pq_conflict), 
+        need(input$solutesx_formula != "q", text_pq_conflict))}
+    if(input$solutesx_source == "streamflow") {
+      validate(
+        need(input$solutesx_formula != "", text_no_x),
+        need(input$solutesx_formula != "P",text_pq_conflict),
+        need(input$solutesx_formula != "p", text_pq_conflict))}
+    
+    #Y axis validation
+    if(input$solutesy_source == "precipitation") {
+      validate(
+        need(input$solutesy_formula != "", text_no_y),
+        need(input$solutesy_formula != "Q", text_pq_conflict), 
+        need(input$solutesx_formula != "q", text_pq_conflict))}
+    if(input$solutesy_source == "streamflow") {
+      validate(
+        need(input$solutesy_formula != "", text_no_y),
+        need(input$solutesy_formula != "P", text_pq_conflict), 
+        need(input$solutesx_formula != "p", text_pq_conflict))}
+    
     data <- formula_function_x(data, solutesx_formula())
     data <- formula_function_y(data, solutesy_formula())
     
@@ -372,7 +448,8 @@ shinyServer(function(input, output, session) {
     plot <- subplot(precipitation, streamflow, nrows = 2, shareX = TRUE, heights = c(0.5, 0.5), titleY = TRUE)%>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)%>% 
-      layout(hovermode = "x")
+      layout(hovermode = "x") %>%
+      layout(dragmode = "select")
 
   }
   
@@ -381,7 +458,7 @@ shinyServer(function(input, output, session) {
   ggplot_time_function <- function(data, x, y, log, y_label, color_scale){
     
     
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = as.POSIXct(get(x)), y = get(y), color = solute, shape = source, alpha = ws))+
         my_theme + 
         geom_line(size = 0.5) + 
         geom_point(size = 1.3, fill = "white", stroke = 0.2, aes(text = paste(solute,":", round(get(y), 4)))) +  
@@ -398,17 +475,17 @@ shinyServer(function(input, output, session) {
       ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) %>% 
-      layout(hovermode = "x")
+      layout(hovermode = "x") %>%
+        layout(dragmode = "select")
   }
 
   
   #### ---------  GGPLOT CHARGE BALANCE FUNCTION-----------------------
   ggplot_charge_function <- function(data, x, y, log, y_label, color_scale){
-    
-    
-    plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, fill = solute, shape = source, alpha = ws))+
+    plot <- ggplot(data=data, aes(x = as.POSIXct(get(x)), y = get(y), color = solute, fill = solute, shape = source, alpha = ws))+
       my_theme + 
       geom_area() + 
+      facet_grid(ws ~ .)+
       scale_color_manual(values = color_scale) +
       scale_fill_manual(values = color_scale) +
       scale_alpha_discrete(range = c(0.9, 0.5))+
@@ -422,7 +499,8 @@ shinyServer(function(input, output, session) {
     ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) %>% 
-      layout(hovermode = "x")
+      layout(hovermode = "x") %>%
+      layout(dragmode = "select")
   }
   
   
@@ -469,8 +547,8 @@ shinyServer(function(input, output, session) {
     ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) %>% 
-      animation_opts(frame = speed, transition = 0, redraw = FALSE) %>% 
-      animation_slider(currentvalue = list(prefix = "Water Year ", font = list(size = 15))) %>% 
+      animation_opts(frame = speed, transition = 0, redraw = FALSE) %>%
+      animation_slider(currentvalue = list(prefix = "Water Year ", font = list(size = 15))) %>%
       animation_button(font = list(size = 12))
   }
   
@@ -481,7 +559,8 @@ shinyServer(function(input, output, session) {
   #############################################################
   
   output$plot_pq <- renderPlotly({
-    theplot <- basic_ggplot_function(reactive_data_pq(), x(), y(), 
+    d <- event_data("plotly_selected")
+    theplot <- basic_ggplot_function(reactive_data_pq(), x, y, 
                                      log = input$log_pq) 
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
     theplot$x$layout$width <- NULL
@@ -490,9 +569,15 @@ shinyServer(function(input, output, session) {
     theplot$height <- NULL
     theplot %>%
       layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
-     })
+    if(!is.null(d$x)){
+      theplot %>%
+        layout(xaxis = list(range = c(min(d$x), max(d$x))))} 
+    else{theplot} 
+    
+    })
   
   output$plot_time <- renderPlotly({
+    d <- event_data("plotly_selected")
     theplot <- ggplot_time_function(reactive_data_time(), x_time(), y_time(),
                                     log = input$log_time, y_time(), coloring())
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
@@ -502,9 +587,15 @@ shinyServer(function(input, output, session) {
     theplot$height <- NULL
     theplot %>%
       layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
-  })
+    if(!is.null(d$x)){
+      theplot %>%
+        layout(xaxis = list(range = c(min(d$x), max(d$x))))} 
+        #must convert from POSIXct (s) to JavaScript equivalent (ms) 
+    else{theplot}
+  }) 
   
   output$plot_charge <- renderPlotly({
+    d <- event_data("plotly_selected")
     theplot <- ggplot_charge_function(reactive_data_charge(), x_time(), "charge_ueq",
                                     log = input$log_time, y_time(), solute_palette)
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
@@ -514,7 +605,16 @@ shinyServer(function(input, output, session) {
     theplot$height <- NULL
     theplot %>%
       layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
+    
+    if(!is.null(d$x)){
+      theplot %>%
+        layout(xaxis = list(range = c(min(d$x), max(d$x))))} 
+    #must convert from POSIXct (s) to JavaScript equivalent (ms) 
+    else{theplot}
+  
   })
+  
+  
   
   output$plot_cq <- renderPlotly({
     theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, 
@@ -529,7 +629,10 @@ shinyServer(function(input, output, session) {
   })
   
   
+  
+  
   output$plot_flux <- renderPlotly({
+    d <- event_data("plotly_selected")
     theplot <- ggplot_time_function(reactive_data_flux(), x_flux(), "flux", 
                                     log = input$log_flux, "flux", coloring())
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
@@ -539,6 +642,12 @@ shinyServer(function(input, output, session) {
     theplot$height <- NULL
     theplot %>%
       layout(autosize = TRUE)
+    
+    if(!is.null(d$x)){
+      theplot %>%
+        layout(xaxis = list(range = c(min(d$x), max(d$x))))} 
+    #must convert from POSIXct (s) to JavaScript equivalent (ms) 
+    else{theplot}
   })
   
 
@@ -556,5 +665,9 @@ shinyServer(function(input, output, session) {
     
   })
 
+  output$brush <- renderPrint({
+    d <- event_data("plotly_selected")
+    if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else{max(d$x)}
+  })
   
 })

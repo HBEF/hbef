@@ -116,7 +116,8 @@ shinyUI(
                                                                 selected = "year")))
                             ),
                             ## Time Plot
-                            plotlyOutput("plot_pq")
+                            plotlyOutput("plot_pq"),
+                            verbatimTextOutput("brush")
                    ) #Closes tabpanel
                    
             )# Closes tab Box
