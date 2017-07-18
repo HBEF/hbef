@@ -397,7 +397,7 @@ shinyUI(
                         ##Sizing
                         fluidRow(
                           column(12, selectInput("sizing_bubble", label = h4("Bubble Size"),
-                                                 choices = c("None" = 10, 
+                                                 choices = c("None" = 1, 
                                                              "Precipitation (P)" = "water_mm_precipitation", 
                                                              "Streamflow (Q)" = "water_mm_streamflow"))))
                     

@@ -251,6 +251,13 @@ shinyServer(function(input, output, session) {
     if(input$yaxis_time %in% c("concentration", "charge balance")){solute_palette}
     else{grey_palette}    
   })
+  
+  #sizing for Bubble plot
+  sizing <- reactive({
+    if(input$sizing_bubble == 1){c(2,2)}
+    else{c(1,6)}
+  })
+  
   ###### >>>>>>> End of Reactive Charge Plot <<<<<<<<<< #####
   
   
@@ -508,15 +515,15 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   #### ---------  GGPLOT BUBBLE FUNCTION-----------------------
   
-  ggplot_bubble_function <- function(data, x, y, log_x, log_y, speed, trace, color = NA, size = NA){
+  ggplot_bubble_function <- function(data, x, y, log_x, log_y, speed, trace, color = NA, size = NA, size_range){
     
     if(trace){
       plot <- ggplot(data=data, aes(frame = frame, alpha = ws)) + my_theme +
-        scale_size(range = c(1, 5))}
+        scale_size(range = size_range)}
     
     else{
       plot <- ggplot(data=data, aes(frame = framey, alpha = ws)) + my_theme+
-        scale_size(range = c(1, 5))}
+        scale_size(range = size_range)}
 
     if(is.na(color)){
     plot <- plot + geom_point(aes_string(x = x, y = y, size = size), stroke= 0.2) + labs(y = "")}
@@ -622,7 +629,7 @@ try typing Q and matching the dropdown menu by selecting Q"
   output$plot_cq <- renderPlotly({
     theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, 
                                       input$log_cq_x,input$log_cq_y, animation_speed_cq(), 
-                                      input$trace_cq, "solute", 1)
+                                      input$trace_cq, "solute", 1, c(1, 2))
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -659,7 +666,7 @@ try typing Q and matching the dropdown menu by selecting Q"
     input$lastkeypresscode
     theplot <- isolate(ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", 
                                       input$log_bubble_x, input$log_bubble_y, animation_speed_bubble(), 
-                                      input$trace_bubble, "water_year", input$sizing_bubble))
+                                      input$trace_bubble, "water_year", input$sizing_bubble, sizing()))
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
