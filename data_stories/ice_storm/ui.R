@@ -113,15 +113,6 @@ shinyUI(  dashboardPage(skin = "black",
                                       column(9,
                                              tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
-                                                    ###Units - Axis Log
-                                                    tabPanel(shiny::icon("gear"),
-                                                             fluidRow(
-                                                               box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                                                                   
-                                                                   ##Units - Y Axis Log
-                                                                   column(6, selectInput("log1", label = "Y Axis",
-                                                                                         choices = c("linear", "log"), 
-                                                                                         selected = "linear"))))),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
                                                              div(class = "titleRow", fluidRow(column(6, tags$h2("Increasing LAI after ice storm")),
