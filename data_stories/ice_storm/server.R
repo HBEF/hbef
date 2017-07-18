@@ -25,7 +25,7 @@ shinyServer(function(session, input, output) {
     theme(rect = element_rect(fill = NA),
           panel.grid.major = element_line(colour = "#dddddd"), 
           text = element_text(family = "Helvetica", size = 12), 
-          legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
+          legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
           strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
           axis.title= element_text(NULL), axis.title.x= element_blank(), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
@@ -124,6 +124,8 @@ shinyServer(function(session, input, output) {
   ########### DATA IMPORT ####################################################
   
   lai_data <- read_csv("lai.txt")
+  fine_litter_data <- read_csv("fine_litter.txt")
+  #fine_litter <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/fine_litter.txt")
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
@@ -298,6 +300,10 @@ shinyServer(function(session, input, output) {
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_linetype_manual(values = watershed_linetypes)
+      
+    #  theme()
+    
+    
     ggplotly(  
       final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
@@ -312,13 +318,17 @@ shinyServer(function(session, input, output) {
   
   #ggplotly that shows most plots increase in lai following the ice storm
   output$lai_plot <- renderPlotly({
-    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
+    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], ####THIS PLOT SHOULD BE DONE WITH fine_litter.txt HBEF DATA!!
+                       aes(x = YEAR, y = LAIT, color = ELEVATION_M))+ my_theme+ ###ALSO make more plots from said data
+      theme(legend.title = element_text("Plot Elevation", family = "Helvetica"),
+            strip.text = element_text(size = 10))+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
       labs(color="Plot Elevation")+
       xlab(" ")+
-      ylab("Leaf Area Index (Trees)")+
+      ylab("LAI (meter-squared per meter-squared)")+ 
       facet_wrap(~PLOT)+
+      coord_cartesian(ylim = c(2,11))+
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
     
     lai_plot <- ggplotly(lai_plot, tooltip = "text") %>%
