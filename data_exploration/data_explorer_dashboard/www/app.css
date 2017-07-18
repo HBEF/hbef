@@ -1,6 +1,9 @@
 @charset "UTF-8";
 
 
+.shiny-output-error-validation {
+    color: #014F67;
+	padding-left: 20pt;}
 
 
 .titleRow{
