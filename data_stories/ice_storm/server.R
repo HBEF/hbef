@@ -277,7 +277,7 @@ shinyServer(function(session, input, output) {
     {"flux"}
   })
 
-  ########### PLOT FUNCTIONS 2 #########################################
+  ########### PLOT FUNCTIONS #########################################
   
   ## GGPLOT TIME FUNCTION
   ggplot_function <- function(data, x, y, log, units, date_range){
@@ -290,9 +290,9 @@ shinyServer(function(session, input, output) {
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
         labs(x = "Water Year", y = units)}
     
-    final <- plot+ my_theme + geom_line(size = 1) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+    final <- plot+ my_theme + geom_line(size = 0.5) + 
+      geom_point(size = 1.3, fill = "white", stroke = 0.5, 
+                 aes( text = paste("Watershed: ", ws, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(date_range[1]), max(date_range[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
@@ -302,8 +302,7 @@ shinyServer(function(session, input, output) {
       scale_alpha_discrete(range = c(0.9, 0.5))
     
     ggplotly(  
-      final, tooltip = "text",
-      width = 900) %>%
+      final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
@@ -317,9 +316,9 @@ shinyServer(function(session, input, output) {
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
         labs(x = "Water Year", y = "moles/ha-yr")
     
-    final <- plot+ my_theme + geom_line(size = .8, aes(linetype = ws)) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste(#"Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+    final <- plot+ my_theme + geom_line(size = .5, aes(linetype = ws)) + 
+      geom_point(size = 1.3, fill = "white", stroke = 0.5, 
+                 aes( text = paste("Watershed: ", ws, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
@@ -329,9 +328,7 @@ shinyServer(function(session, input, output) {
       scale_linetype_manual(values = watershed_linetypes)
 
     ggplotly(  
-      final, tooltip = "text",
-      legend= "text",
-      width = 900) %>%
+      final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
@@ -344,9 +341,9 @@ shinyServer(function(session, input, output) {
       plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
         labs(x = "Water Year", y = "moles/ha-yr")
     
-    final <- plot+ my_theme + geom_line(size = .8, aes(linetype = ws)) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Watershed: ", ws, "<br>",
+    final <- plot+ my_theme + geom_line(size = .5, aes(linetype = ws)) + 
+      geom_point(size = 1.3, fill = "white", stroke = 0.5, 
+                 aes( text = paste("Watershed: ", ws, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
@@ -359,8 +356,7 @@ shinyServer(function(session, input, output) {
       scale_linetype_manual(values = watershed_linetypes)
     
     ggplotly(  
-      final, tooltip = "text",
-      width = 900) %>%
+      final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
   }
@@ -380,8 +376,7 @@ shinyServer(function(session, input, output) {
       facet_wrap(~PLOT)+
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
     
-    lai_plot <- ggplotly(lai_plot, tooltip = "text",
-                         width = 900) %>%
+    lai_plot <- ggplotly(lai_plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
@@ -413,7 +408,8 @@ shinyServer(function(session, input, output) {
     NO3_output$width <- NULL
     NO3_output$height <- NULL
     NO3_output %>%
-      layout(autosize = TRUE)
+      layout(autosize = TRUE#, showlegend = T
+             )
   })
 
   #NO3 excess
@@ -424,6 +420,7 @@ shinyServer(function(session, input, output) {
     NO3_excess$width <- NULL
     NO3_excess$height <- NULL
     NO3_excess %>%
-      layout(autosize = TRUE, showlegend = T)
+      layout(autosize = TRUE#, showlegend = T
+             )
     })
 })
