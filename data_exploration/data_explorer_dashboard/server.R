@@ -330,6 +330,7 @@ shinyServer(function(input, output, session) {
   reactive_data_bubble <- eventReactive({input$go |
     input$lastkeypresscode}, {
     data <- imported_data_super_wide
+    data$framey <- as.numeric(data$framey)
     data <- data[data$granularity %in% input$granularity_bubble,]
     data <- data[data$ws %in% input$watersheds_bubble,]
     data <- data[data$date >= input$date_range_bubble[1] & data$date <= input$date_range_bubble[2]]
@@ -688,7 +689,7 @@ try typing Q and matching the dropdown menu by selecting Q"
     theplot <- isolate(ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", 
                                       input$log_bubble_x, input$log_bubble_y, "", "",
                                       input$animate_bubble, animation_speed_bubble(), 
-                                      input$trace_bubble, "water_year", input$sizing_bubble, sizing()))
+                                      input$trace_bubble, "framey", input$sizing_bubble, sizing()))
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
