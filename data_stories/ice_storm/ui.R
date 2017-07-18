@@ -76,7 +76,7 @@ shinyUI(  dashboardPage(skin = "black",
                           width = 150,
                           sidebarMenu(
                             menuItem("LAI", tabName = "LAI", icon = icon("leaf")),
-                            menuItem("NO3 General", tabName = "General", icon = icon("line-chart")),
+                            menuItem("NO3 trends", tabName = "trends", icon = icon("line-chart")),
                             menuItem("Flux", tabName = "Flux", icon = icon("arrows-v"))
                           )
                         ),
@@ -163,10 +163,10 @@ shinyUI(  dashboardPage(skin = "black",
                             
                             
                             ###############################################################################
-                            #### ------------  NO3  General  Tab ---------------------------------- #######
+                            #### ------------  NO3  trends  Tab ---------------------------------- #######
                             ###############################################################################
                             
-                            tabItem(tabName = "General",
+                            tabItem(tabName = "trends",
                                     
                                     ########### TITLE ####################
                                     fluidRow(tags$div(class = "container_question", 
@@ -255,7 +255,7 @@ shinyUI(  dashboardPage(skin = "black",
                             ),# Closes Intro Tab
                             
                             ###############################################################################
-                            #### ------------ End of NO3 General Tab ------------------------------ #######
+                            #### ------------ End of NO3 trends Tab ------------------------------ #######
                             ###############################################################################  
                             
                             
@@ -306,7 +306,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                                                    ))),
                                                                     ######## PLOT 
                                                                     tabPanel(shiny::icon("circle"),
-                                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Streamflow flux normalized against ws6 (ws2, ws4, ws5)")))),
+                                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux (ws2, ws4, ws5)")))),
                                                                              ## Time Plot
                                                                              plotlyOutput("NO3_excess")
                                                                     ) #Closes tabpanel
