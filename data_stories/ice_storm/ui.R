@@ -281,7 +281,12 @@ shinyUI(  dashboardPage(skin = "black",
                                                     ###Units - Axis Log
                                                     tabPanel(shiny::icon("gear"),
                                                              fluidRow(
-                                                               box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE 
+                                                               box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE,
+                                                                   
+                                                                   ##Units - Y Axis Log
+                                                                   column(6, selectInput("log_flux", label = "Y Axis",
+                                                                                         choices = c("linear", "log"), 
+                                                                                         selected = "linear"))
                                                                    ))),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
@@ -299,11 +304,6 @@ shinyUI(  dashboardPage(skin = "black",
                                                              
                                                              tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
                                                                     ######## OPTIONS
-                                                                    ###Units - Axis Log
-                                                                    tabPanel(shiny::icon("gear"),
-                                                                             fluidRow(
-                                                                               box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE
-                                                                                   ))),
                                                                     ######## PLOT 
                                                                     tabPanel(shiny::icon("circle"),
                                                                              div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux (ws2, ws4, ws5)")))),

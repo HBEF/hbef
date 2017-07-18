@@ -36,7 +36,7 @@ shinyServer(function(session, input, output) {
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
   source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-  watershed_linetypes <- c("1"= 2, "2"= 1, "3"= 3, "4"= 4, "5"= 5, "6"= 6)
+  watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
   
   ### End of Theme ################
   
@@ -287,7 +287,7 @@ shinyServer(function(session, input, output) {
         labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
+      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, linetype = ws))+
         labs(x = "Water Year", y = units)}
     
     final <- plot+ my_theme + geom_line(size = 0.5) + 
@@ -296,11 +296,10 @@ shinyServer(function(session, input, output) {
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(date_range[1]), max(date_range[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
-      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 22, color = "black")+
+      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))
-    
+      scale_linetype_manual(values = watershed_linetypes)
     ggplotly(  
       final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
@@ -348,8 +347,8 @@ shinyServer(function(session, input, output) {
       xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = -250, color = "black")+
-      annotate("text", label = "1965-7 devegetation", x = as.Date("1966-12-01"), y = 775, color = "black")+
-      annotate("text", label = "1983 whole tree harvest", x = as.Date("1983-12-12"), y = 775, color = "black")+
+      annotate("text", label = "1965-7 devegetation ws2", x = as.Date("1966-12-01"), y = 775, color = "black")+
+      annotate("text", label = "1983 whole tree harvest ws4", x = as.Date("1983-12-12"), y = 775, color = "black")+
       coord_cartesian(ylim=c(-550, 800))+
       scale_shape_manual(values = source_shapes)+
       scale_color_manual(values = solute_palette) +
@@ -402,7 +401,7 @@ shinyServer(function(session, input, output) {
   #make a plot of nitrates like in the 2003 paper
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y3.1(), ncol = 1)
+    NO3_output <- ggplot_function(reactive_data3(), x3(), y3.1(), log=input$log_flux, units="moles/ha-yr", date_range=input$date_range3)
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
@@ -414,13 +413,13 @@ shinyServer(function(session, input, output) {
 
   #NO3 excess
   output$NO3_excess <- renderPlotly({
-    NO3_excess <- ggplot_function_excess(reactive_data_norm(), x3(), y3(), ncol = 1)
+    NO3_excess <- ggplot_function(reactive_data_norm(), x3(), y3(), log="linear", units="moles/ha-yr", date_range=input$date_range3)
     NO3_excess$x$layout$width <- NULL
     NO3_excess$y$layout$height <- NULL
     NO3_excess$width <- NULL
     NO3_excess$height <- NULL
     NO3_excess %>%
       layout(autosize = TRUE#, showlegend = T
-             )
+      )
     })
 })
