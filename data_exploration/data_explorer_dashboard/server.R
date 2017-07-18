@@ -11,6 +11,7 @@ library(grid)
 library(ggthemes)
 library(lattice)
 library(stringr)
+library(magrittr)
 
 #######################################################################################
 ########### SHINY SERVER ##############################################################
@@ -219,10 +220,11 @@ shinyServer(function(input, output, session) {
   # Y axis for Time Plot
   y_time <- reactive({
     if(input$yaxis_time == "concentration"){as.character(input$units)}
+    else if(input$yaxis_time == "chargebalance"){as.character(input$units)}
     else {as.character(input$yaxis_time)}
   })
   
-  observe({if(!(input$yaxis_time %in% c("concentration", "pH", "charge balance"))){
+  observe({if(!(input$yaxis_time %in% c("concentration", "pH", "chargebalance"))){
     updateSelectInput(session, "granularity_time",
                       selected = "week")}})
     
@@ -237,7 +239,6 @@ shinyServer(function(input, output, session) {
   ###### >>>>>>> Reactive Charge Plot <<<<<<<<<< #####
   reactive_data_charge <- reactive({
     data<- imported_data
-    names(data)
     data <- data[data$granularity %in% input$granularity_time,]
     data <- data[data$source %in% "precipitation",]
     data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
@@ -248,7 +249,7 @@ shinyServer(function(input, output, session) {
   
   #Coloring for Time pLot
   coloring <- reactive({
-    if(input$yaxis_time %in% c("concentration", "charge balance")){solute_palette}
+    if(input$yaxis_time %in% c("concentration", "chargebalance")){solute_palette}
     else{grey_palette}    
   })
   
@@ -515,14 +516,14 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   #### ---------  GGPLOT BUBBLE FUNCTION-----------------------
   
-  ggplot_bubble_function <- function(data, x, y, log_x, log_y, speed, trace, color = NA, size = NA, size_range){
+  ggplot_bubble_function <- function(data, x, y, log_x, log_y, speed, trace, color = NA, size = NA, size_range, text = NA){
     
     if(trace){
-      plot <- ggplot(data=data, aes(frame = frame, alpha = ws)) + my_theme +
-        scale_size(range = size_range)}
+      plot <- ggplot(data=data, aes(frame = frame, alpha = ws, text = paste(frame, ": (", round(get(x)), ", ",round(get(y)), ")", sep = ""))) + my_theme +
+        scale_size(range = size_range) }
     
     else{
-      plot <- ggplot(data=data, aes(frame = framey, alpha = ws)) + my_theme+
+      plot <- ggplot(data=data, aes(frame = framey, alpha = ws, text = paste(framey, ": (", round(get(x)), ", ", round(get(y)), ")", sep = ""))) + my_theme+
         scale_size(range = size_range)}
 
     if(is.na(color)){
