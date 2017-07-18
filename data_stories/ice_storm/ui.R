@@ -111,17 +111,11 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     fluidRow(
                                       column(9,
-                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "610px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
-                                                             div(class = "titleRow", fluidRow(column(6, tags$h2("Increasing LAI after ice storm")),
-                                                                                              ##Watershed
-                                                                                              column(3,  offset = 2,
-                                                                                                     fluidRow(
-                                                                                                       selectInput("watersheds1", label = "",
-                                                                                                                   choices = watersheds1,
-                                                                                                                   selected = "1"))))
+                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Vegetation increase after ice storm by plot")))
                                                              ),
                                                              ## Plot
                                                              plotlyOutput("lai_plot")
@@ -129,9 +123,18 @@ shinyUI(  dashboardPage(skin = "black",
                                                     
                                              )# Closes tab Box
                                              
-                                      ) #Closes the column
+                                      ), #Closes the column
                                       
                                       ######## SIDEBAR
+                                      column(3, 
+                                             box(width = 13, height = "610px", id = "sidebar",
+                                                 ##Watershed
+                                                        fluidRow(column(12, h4("Watersheds"),
+                                                          selectInput("watersheds1", label = "",
+                                                                      choices = watersheds1,
+                                                                      selected = "1"))))
+
+                                      )#Closes the column
                                       
                                     ),#Closes graph row
                                     
