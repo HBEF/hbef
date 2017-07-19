@@ -93,14 +93,58 @@ shinyUI(
         
         tabItem(tabName = "dashboard",
         
-        ### ---- Choose a Watershed 
-        box(width = 13,
-          # Watersheds
-          column(5, selectInput("watersheds", label = "",
-                                choices = watersheds, multiple = TRUE,
-                                selected = "6"))),
+        ####### ---- Global Settings
         
-        ###  ---- PQ GRAPH
+        fluidRow(
+          tabBox(width = 12, side="right", selected = shiny::icon("circle"),
+             tabPanel(shiny::icon("gear"),
+                      div(class = "settingsRow", fluidRow(column(11, tags$h3("Global Settings")))),
+                      fluidRow(column(6, offset = 5,
+                      fluidRow(
+                        box(width = 12, title = "Color Mode", collapsible = TRUE, collapsed = TRUE, 
+                            ##Color Mode
+                            column(6, selectInput("colormode_global", label = "",
+                                                  choices = c("Compare Watersheds" = "ws","Compare Solutes"="solute"),
+                                                  selected = "solute")))),
+                      fluidRow(
+                        box(width = 12, title = "Granularity", collapsible = TRUE, collapsed = TRUE, 
+                          ##Granularity
+                          column(6, selectInput("granularity_global", label = "",
+                                                choices = granularity,
+                                                selected = "year")))), 
+                      fluidRow(
+                        box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                            ##Units - Y Axis Log
+                            column(6, selectInput("log_global_y", label = "Y Axis",
+                                                  choices = c("linear", "log"), 
+                                                  selected = "linear")))),
+                       fluidRow(
+                         box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
+                             
+                             ##Animate?
+                             column(4, selectInput("animate_global", label = ("Animate"),
+                                                   choices = c("Animate", "Still"), 
+                                                   selected = "Still")),  
+                             ##Leave trace
+                             column(6, selectInput("trace_global", label = ("Leave Trace"),
+                                                   choices = c("Leave Trace", "No Trace"), 
+                                                   selected = "Leave Trace")),
+                             ##Animation Speed
+                             column(12, sliderInput("animation_speed_global", label = h4("Speed"),
+                                                    min = 0.25,
+                                                    max = 2, 
+                                                    step = 0.25,
+                                                    post = "x",
+                                                    value = 1))))))),
+             ######## Main
+             tabPanel(shiny::icon("circle"),
+                # Watersheds
+                fluidRow(column(4, tags$h3("Select a Watershed")),
+                  column(5, selectInput("watersheds", label = "",
+                                      choices = watersheds, multiple = TRUE,
+                                      selected = "6")))))),
+        
+        ####  ---- PQ GRAPH
         fluidRow(
             tabBox(width = 12, side="right", selected = shiny::icon("circle"),
                    ######## OPTIONS
@@ -191,11 +235,13 @@ shinyUI(
                         box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
                       
                       ##Animate?
-                      column(12, checkboxInput("animate_cq", label = ("Animate"),
-                                               value = FALSE)),  
+                      column(12, selectInput("animate_cq", label = ("Animate"),
+                                            choices = c("Animate", "Still"), 
+                                            selected = "Still")),  
                       ##Leave trace
-                        column(12, checkboxInput("trace_cq", label = ("Leave Trace"),
-                                                  value = TRUE)),
+                        column(12, selectInput("trace_cq", label = ("Leave Trace"),
+                                               choices = c("Leave Trace", "No Trace"), 
+                                               selected = "Leave Trace")),
                       ##Animation Speed
                         column(12, sliderInput("animation_speed_cq", label = h4("Speed"),
                                                 min = 0.25,
@@ -340,11 +386,13 @@ shinyUI(
                               fluidRow(
                                 box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
                                     ##Animate?
-                                    column(12, checkboxInput("animate_bubble", label = ("Animate"),
-                                                             value = FALSE)),
+                                    column(4, selectInput("animate_bubble", label = ("Animate"),
+                                                          choices = c("Animate", "Still"), 
+                                                          selected = "Still")),
                                     ##Leave trace
-                                    column(12, checkboxInput("trace_bubble", label = ("Leave Trace"),
-                                                             value = TRUE)),
+                                    column(12, selectInput("trace_bubble", label = ("Leave Trace"),
+                                                           choices = c("Leave Trace", "No Trace"), 
+                                                           selected = "Leave Trace")),
                                     ##Animation Speed
                                     column(12, sliderInput("animation_speed_bubble", label = h4("Speed"),
                                                            min = 0.25,
@@ -368,7 +416,7 @@ shinyUI(
                                                    placeholder = "type in desired formula")),
                                column(2, selectInput("solutesy_source", label = "", choices = c("P" = "precipitation", "Q" = "streamflow"),
                                                                  selected = "streamflow")), 
-                               column(1, offset = 4, actionButton("go", "Plot"))
+                               column(1, offset = 4, actionButton("go", "PLOT"))
                       ),
                       #Bubble Plot
                       fluidRow(plotlyOutput("bubblePlot")),
