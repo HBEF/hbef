@@ -111,6 +111,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     fluidRow(
                                       column(9,
+                                             #------ Box 1 --------#
                                              tabBox(width = 12, height = "610px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ######## PLOT 
@@ -121,7 +122,34 @@ shinyUI(  dashboardPage(skin = "black",
                                                              plotlyOutput("lai_plot")
                                                     ) #Closes tabpanel
                                                     
-                                             )# Closes tab Box
+                                             ),# Closes tab Box
+                                             
+                                             #------ End of Box 1 --------#
+                                             
+                                             #------ Box 2 --------#
+                                             
+                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                                                    ######## OPTIONS
+                                                    ###Units - Axis Log
+                                                    tabPanel(shiny::icon("gear"),
+                                                             fluidRow(
+                                                               box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                                                   
+                                                                   ##Units - Y Axis Log
+                                                                   column(6, selectInput("log_counts", label = "Y Axis",
+                                                                                         choices = c("linear", "log"), 
+                                                                                         selected = "linear"))))),
+                                                    ######## PLOT 
+                                                    tabPanel(shiny::icon("circle"),
+                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Sudden decline in leaf counts after ice storm")))
+                                                                 ),
+                                                             ## Time Plot
+                                                             plotlyOutput("leaf_count")
+                                                    ) #Closes tabpanel
+                                                    
+                                             ) # Closes tab Box
+                                             
+                                             #------ End of Box 2 --------#
                                              
                                       ), #Closes the column
                                       

@@ -125,7 +125,12 @@ shinyServer(function(session, input, output) {
   
   lai_data <- read_csv("lai.txt")
   fine_litter_data <- read_csv("fine_litter.txt")
-  #fine_litter_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/fine_litter.txt")
+  fine_litter_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/fine_litter.txt")
+  
+  #save as RDS file
+  saveRDS(fine_litter_data, file="fine_litter_data.rds")
+  fine_litter_data <- readRDS("fine_litter_data.rds")
+  
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
@@ -136,11 +141,8 @@ shinyServer(function(session, input, output) {
   fine_litter_data[fine_litter_data == -9999.9] <- NA
   fine_litter_data[fine_litter_data == -9999.99] <- NA
   
-  #try filtering by SITE... can't do this after bc merging deletes it... FIX
-  #fine_litter_data <- fine_litter_data[fine_litter_data$SITE %in% c("TF"),]
-  
   #Average all count columns by year
-  by_year <- fine_litter_data %>% group_by(YEAR)
+  by_year <- fine_litter_data %>% group_by(YEAR, SITE)
   sugarm_count_mean<-by_year %>% summarise(sugarm_count_mean = mean(M_COUNT, na.rm=T))
   redm_count_mean<-by_year %>% summarise(redm_count_mean = mean(f_COUNT, na.rm=T))
   stripedm_count_mean<-by_year %>% summarise(stripedm_count_mean = mean(t_COUNT, na.rm=T))
@@ -152,15 +154,15 @@ shinyServer(function(session, input, output) {
   aspen_count_mean<-by_year %>% summarise(aspen_count_mean = mean(a_COUNT, na.rm=T))
   
   #paste a new column called species in each df
-  sugarm_count_mean$species <- rep("sugar_maple", nrow(sugarm_count_mean))
-  redm_count_mean$species <- rep("red_maple", nrow(redm_count_mean))
-  stripedm_count_mean$species <- rep("striped_maple", nrow(stripedm_count_mean))
-  ash_count_mean$species <- rep("ash", nrow(ash_count_mean))
-  beech_count_mean$species <- rep("beech", nrow(beech_count_mean))
-  whiteb_count_mean$species <- rep("white_birch", nrow(whiteb_count_mean))
-  yellowb_count_mean$species <- rep("yellow_birch", nrow(yellowb_count_mean))
-  pcherry_count_mean$species <- rep("pin_cherry", nrow(pcherry_count_mean))
-  aspen_count_mean$species <- rep("aspen", nrow(aspen_count_mean))
+  sugarm_count_mean$species <- rep("Sugar Maple", nrow(sugarm_count_mean))
+  redm_count_mean$species <- rep("Red Maple", nrow(redm_count_mean))
+  stripedm_count_mean$species <- rep("Striped Maple", nrow(stripedm_count_mean))
+  ash_count_mean$species <- rep("Ash", nrow(ash_count_mean))
+  beech_count_mean$species <- rep("Beech", nrow(beech_count_mean))
+  whiteb_count_mean$species <- rep("White Birch", nrow(whiteb_count_mean))
+  yellowb_count_mean$species <- rep("Yellow Birch", nrow(yellowb_count_mean))
+  pcherry_count_mean$species <- rep("Pin Cherry", nrow(pcherry_count_mean))
+  aspen_count_mean$species <- rep("Aspen", nrow(aspen_count_mean))
   
   #rename columns to be just "count" in order to merge into long df rather than wide
   sugarm_count_mean<-plyr::rename(sugarm_count_mean, c("sugarm_count_mean"="count"))
@@ -349,10 +351,7 @@ shinyServer(function(session, input, output) {
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = solute_palette) +
       scale_linetype_manual(values = watershed_linetypes)
-      
-    #  theme()
-    
-    
+
     ggplotly(  
       final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
@@ -393,19 +392,26 @@ shinyServer(function(session, input, output) {
   })
   
   #plot of paper birch and sugar maple decline after ice storm
-  ##BB and W1 show decline at 1998
-  #W5 seems to have loads of missing data in the plot but idk if that's the data's fault...
-  #TF also has missing data but shows decline at 1998
-  #all together (no filtering for SITE) shows the 1998 decline
   #also there's a weirdly large spike in 2011...
-  output$tree_decline <- renderPlotly({
-
-    tree_decline <- ggplot(count_means, aes(x=YEAR, y=count, color = species))+
-      geom_line()
-     # geom_smooth(method=lm,se=F)+
-     # facet_wrap(~SITE)  #would need to add back the site data that got lost in merging...
+  output$leaf_count <- renderPlotly({
+    count_means<-count_means[count_means$SITE != "W5",]
+    leaf_count <- ggplot(count_means, aes(x=YEAR, y=count, color = species))+
+      geom_line()+ my_theme+
+     facet_wrap(~SITE, ncol = 1)+
+      theme(legend.title = element_text("Tree Species", family = "Helvetica"),
+            strip.text = element_text(size = 10))+
+      labs(x=" ", y="Leaf counts")
     
-    ggplotly(tree_decline)
+    leaf_count <- ggplotly(leaf_count, tooltip = "text") %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
+
+    leaf_count$x$layout$width <- NULL
+    leaf_count$y$layout$height <- NULL
+    leaf_count$width <- NULL
+    leaf_count$height <- NULL
+    leaf_count %>%
+      layout(autosize = TRUE)
   })
   
   #plot to generally show how the ice storm affected NO3 (conc or flux?)
