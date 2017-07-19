@@ -55,8 +55,6 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
-watersheds6 <- list("Watershed 6" = "6")
-
 water_sources <- list("Precipitation (P)" = "precipitation",
                       "Discharge (Q)" = "streamflow")
 
@@ -232,7 +230,7 @@ shinyUI(
                                                                  selected = "linear"))))),
                             ######## PLOT 
                             tabPanel(shiny::icon("circle"),
-                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Water Chemistry")),
+                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Water Chemistry (ws6)")),
                                     ##Granularity
                                     column(3,  offset = 4, selectInput("granularity2", label = "",
                                                                        choices = granularity,
@@ -269,13 +267,7 @@ shinyUI(
                            column(12, checkboxGroupInput("solutes_H2", label = h4(""),
                                                          choices = solutes_H,
                                                          selected = ""))),
-                         ##Watersheds
-                         fluidRow(
-                           column(12, h4("Watersheds"), 
-                                  selectInput("watersheds2", label = "",
-                                              choices = watersheds6,
-                                              selected = "6"))),
-                         
+
                          ##Water Sources
                          fluidRow(
                            column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
@@ -328,7 +320,7 @@ shinyUI(
             
             ########### TITLE ####################
             fluidRow(tags$div(class = "container_question", 
-                              tags$h3("How have policies altered the effects of acid rain?")) 
+                              tags$h3("How have policies altered the effects of acid rain? (As seen in ws6)")) 
             ),
             
             #############################################
@@ -439,14 +431,6 @@ shinyUI(
               ######## SIDEBAR
               column(3, 
                      box(width = 13, height = "600px", id = "sidebar",
-                        
-                         ##Watersheds
-                         fluidRow(
-                           column(12, h4("Watersheds"), 
-                                  selectInput("watersheds3", label = "",
-                                              choices = watersheds6,
-                                              selected = "6"))),
-                         
                          ##Water Sources
                          fluidRow(
                            column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
