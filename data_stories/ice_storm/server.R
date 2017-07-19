@@ -125,11 +125,61 @@ shinyServer(function(session, input, output) {
   
   lai_data <- read_csv("lai.txt")
   fine_litter_data <- read_csv("fine_litter.txt")
-  #fine_litter <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/fine_litter.txt")
+  #fine_litter_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/fine_litter.txt")
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
-  #Matt normalization####################
+  #Cleaning vegetation data######################
+  
+  #Replacing missing data values with NA #####
+  fine_litter_data[fine_litter_data == -9999] <- NA
+  fine_litter_data[fine_litter_data == -9999.9] <- NA
+  fine_litter_data[fine_litter_data == -9999.99] <- NA
+  
+  #try filtering by SITE... can't do this after bc merging deletes it... FIX
+  #fine_litter_data <- fine_litter_data[fine_litter_data$SITE %in% c("TF"),]
+  
+  #Average all count columns by year
+  by_year <- fine_litter_data %>% group_by(YEAR)
+  sugarm_count_mean<-by_year %>% summarise(sugarm_count_mean = mean(M_COUNT, na.rm=T))
+  redm_count_mean<-by_year %>% summarise(redm_count_mean = mean(f_COUNT, na.rm=T))
+  stripedm_count_mean<-by_year %>% summarise(stripedm_count_mean = mean(t_COUNT, na.rm=T))
+  ash_count_mean<-by_year %>% summarise(ash_count_mean = mean(Q_COUNT, na.rm=T))
+  beech_count_mean<-by_year %>% summarise(beech_count_mean = mean(B_COUNT, na.rm=T))
+  whiteb_count_mean<-by_year %>% summarise(whiteb_count_mean = mean(W_COUNT, na.rm=T))
+  yellowb_count_mean<-by_year %>% summarise(yellowb_count_mean = mean(Y_COUNT, na.rm=T))
+  pcherry_count_mean<-by_year %>% summarise(pcherry_count_mean = mean(P_COUNT, na.rm=T))
+  aspen_count_mean<-by_year %>% summarise(aspen_count_mean = mean(a_COUNT, na.rm=T))
+  
+  #paste a new column called species in each df
+  sugarm_count_mean$species <- rep("sugar_maple", nrow(sugarm_count_mean))
+  redm_count_mean$species <- rep("red_maple", nrow(redm_count_mean))
+  stripedm_count_mean$species <- rep("striped_maple", nrow(stripedm_count_mean))
+  ash_count_mean$species <- rep("ash", nrow(ash_count_mean))
+  beech_count_mean$species <- rep("beech", nrow(beech_count_mean))
+  whiteb_count_mean$species <- rep("white_birch", nrow(whiteb_count_mean))
+  yellowb_count_mean$species <- rep("yellow_birch", nrow(yellowb_count_mean))
+  pcherry_count_mean$species <- rep("pin_cherry", nrow(pcherry_count_mean))
+  aspen_count_mean$species <- rep("aspen", nrow(aspen_count_mean))
+  
+  #rename columns to be just "count" in order to merge into long df rather than wide
+  sugarm_count_mean<-plyr::rename(sugarm_count_mean, c("sugarm_count_mean"="count"))
+  redm_count_mean<-plyr::rename(redm_count_mean, c("redm_count_mean"="count"))
+  stripedm_count_mean<-plyr::rename(stripedm_count_mean, c("stripedm_count_mean"="count"))
+  ash_count_mean<-plyr::rename(ash_count_mean, c("ash_count_mean"="count"))
+  beech_count_mean<-plyr::rename(beech_count_mean, c("beech_count_mean"="count"))
+  whiteb_count_mean<-plyr::rename(whiteb_count_mean, c("whiteb_count_mean"="count"))
+  yellowb_count_mean<-plyr::rename(yellowb_count_mean, c("yellowb_count_mean"="count"))
+  pcherry_count_mean<-plyr::rename(pcherry_count_mean, c("pcherry_count_mean"="count"))
+  aspen_count_mean<-plyr::rename(aspen_count_mean, c("aspen_count_mean"="count"))
+  
+  #Merge all count column averages into one df with three total columns (year, species, count)
+  count_means <- Reduce(function(...) merge(..., all=T), 
+                        list(sugarm_count_mean, redm_count_mean, stripedm_count_mean, 
+                             ash_count_mean, beech_count_mean, whiteb_count_mean, 
+                             yellowb_count_mean, pcherry_count_mean, aspen_count_mean))
+
+  #Matt normalization of flux####################
   #####YEARLY#####
   ws_cast_year <- imported_data %>%
     filter(granularity=='year') %>% 
@@ -211,10 +261,9 @@ shinyServer(function(session, input, output) {
   
   #add granularity column with "week"
   ws_cast_week$granularity <- rep("week", nrow(ws_cast_week))
-  #####
-  #merge all ws_cast s together
-  ws_cast <- merge(ws_cast_month, ws_cast_year, all = T)
-  ws_cast <- merge(ws_cast, ws_cast_week, all = T)
+  #####MERGE
+  #merge all ws_casts together
+  ws_cast <- Reduce(function(...) merge(..., all=T), list(ws_cast_month, ws_cast_year, ws_cast_week))
   data_norm <- merge(imported_data, ws_cast, all = T)
   
   ########### END OF DATA IMPORT #############################################
@@ -341,6 +390,22 @@ shinyServer(function(session, input, output) {
     lai_plot$height <- NULL
     lai_plot %>%
       layout(autosize = TRUE)
+  })
+  
+  #plot of paper birch and sugar maple decline after ice storm
+  ##BB and W1 show decline at 1998
+  #W5 seems to have loads of missing data in the plot but idk if that's the data's fault...
+  #TF also has missing data but shows decline at 1998
+  #all together (no filtering for SITE) shows the 1998 decline
+  #also there's a weirdly large spike in 2011...
+  output$tree_decline <- renderPlotly({
+
+    tree_decline <- ggplot(count_means, aes(x=YEAR, y=count, color = species))+
+      geom_line()
+     # geom_smooth(method=lm,se=F)+
+     # facet_wrap(~SITE)  #would need to add back the site data that got lost in merging...
+    
+    ggplotly(tree_decline)
   })
   
   #plot to generally show how the ice storm affected NO3 (conc or flux?)
