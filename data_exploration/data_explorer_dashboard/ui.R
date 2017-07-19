@@ -192,7 +192,28 @@ shinyUI(
                                ##Units - Y Axis Log
                                column(6, selectInput("log_time", label = "Y Axis",
                                                      choices = c("linear", "log"), 
-                                                     selected = "linear"))))),
+                                                     selected = "linear")))),
+                ### Animation
+                fluidRow(
+                  box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
+                      
+                      ##Animate?
+                      column(12, selectInput("animate_time", label = ("Animate"),
+                                             choices = c("Animate", "Still"), 
+                                             selected = "Still")),  
+                      ##Leave trace
+                      column(12, selectInput("trace_time", label = ("Leave Trace"),
+                                             choices = c("Leave Trace", "No Trace"), 
+                                             selected = "Leave Trace")),
+                      ##Animation Speed
+                      column(12, sliderInput("animation_speed_time", label = h4("Speed"),
+                                             min = 0.25,
+                                             max = 2, 
+                                             step = 0.25,
+                                             post = "x",
+                                             value = 1))))),
+                
+                
                 ######## PLOT 
                 tabPanel(shiny::icon("circle"),
                          div(class = "titleRow", fluidRow(column(5, tags$h2("Time Series Data")),
@@ -277,7 +298,27 @@ shinyUI(
                          ##Units - Y Axis Log
                          column(6, selectInput("log_flux", label = "Y Axis",
                                                choices = c("linear", "log"), 
-                                               selected = "linear"))))),
+                                               selected = "linear")))),
+                   ### Animation
+                   fluidRow(
+                     box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
+                         
+                         ##Animate?
+                         column(12, selectInput("animate_flux", label = ("Animate"),
+                                                choices = c("Animate", "Still"), 
+                                                selected = "Still")),  
+                         ##Leave trace
+                         column(12, selectInput("trace_flux", label = ("Leave Trace"),
+                                                choices = c("Leave Trace", "No Trace"), 
+                                                selected = "Leave Trace")),
+                         ##Animation Speed
+                         column(12, sliderInput("animation_speed_flux", label = h4("Speed"),
+                                                min = 0.25,
+                                                max = 2, 
+                                                step = 0.25,
+                                                post = "x",
+                                                value = 1))))),
+          
           ######## PLOT 
           tabPanel(shiny::icon("circle"),
           div(class = "titleRow", fluidRow(column(5, tags$h2("Flux")),
