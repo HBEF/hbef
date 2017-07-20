@@ -258,5 +258,4 @@ plot = ggplotly(ggplot(data = wsDF)+
 
 
 shinyServer(function(input, output) {
-  output$map.plot = renderPlotly(plot)
 })
