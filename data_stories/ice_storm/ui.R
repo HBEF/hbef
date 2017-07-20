@@ -141,7 +141,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                                                          selected = "linear"))))),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
-                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Sudden decline in leaf counts after ice storm")))
+                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Decline in leaf counts across species after ice storm")))
                                                                  ),
                                                              ## Time Plot
                                                              plotlyOutput("leaf_count")
