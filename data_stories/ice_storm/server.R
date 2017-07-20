@@ -33,6 +33,8 @@ shinyServer(function(session, input, output) {
   color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
   color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
+  ws_palette <- c("1" = "#fae550", "2" = "#a8db40", "3" = "#62c74a", "4" = "#408b77", 
+                  "5" = "#27517b", "6" = "#303475", "7" = "#351042", "8" = "#79276e", "9" = "#b63462")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
   source_shapes <- c("streamflow" = 16, "precipitation"= 21)
@@ -123,20 +125,22 @@ shinyServer(function(session, input, output) {
   
   ########### DATA IMPORT ####################################################
   
+  #load vegetation data
   lai_data <- read_csv("lai.txt")
   fine_litter_data <- read_csv("fine_litter.txt")
-  fine_litter_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/fine_litter.txt")
-  
-  #save as RDS file
+  #save as RDS files
+  saveRDS(lai_data, file="lai_data.rds")
+  lai_data<- readRDS("lai_data.rds")
   saveRDS(fine_litter_data, file="fine_litter_data.rds")
   fine_litter_data <- readRDS("fine_litter_data.rds")
   
+  #load pq data
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
   #Cleaning vegetation data######################
   
-  #Replacing missing data values with NA #####
+  #Replacing missing data values with NA
   fine_litter_data[fine_litter_data == -9999] <- NA
   fine_litter_data[fine_litter_data == -9999.9] <- NA
   fine_litter_data[fine_litter_data == -9999.99] <- NA
@@ -180,9 +184,15 @@ shinyServer(function(session, input, output) {
                         list(sugarm_count_mean, redm_count_mean, stripedm_count_mean, 
                              ash_count_mean, beech_count_mean, whiteb_count_mean, 
                              yellowb_count_mean, pcherry_count_mean, aspen_count_mean))
+  site_names <- c(
+    'BB'="Bear Brook Watershed site",
+    'TF'="Throughfall site",
+    'W1'="Watershed 1",
+    'W5'="Watershed 5"
+  )
 
   #Matt normalization of flux####################
-  #####YEARLY#####
+  #YEARLY
   ws_cast_year <- imported_data %>%
     filter(granularity=='year') %>% 
     filter(source=='streamflow') %>%
@@ -210,7 +220,7 @@ shinyServer(function(session, input, output) {
   ws_cast_year$granularity <- rep("year", nrow(ws_cast_year))
   
   #repeat for month and week
-  #####MONTHLY#####
+  #MONTHLY
   ws_cast_month <- imported_data %>%
     filter(granularity=='month') %>% 
     filter(source=='streamflow') %>%
@@ -237,7 +247,7 @@ shinyServer(function(session, input, output) {
   #add granularity column with "month"
   ws_cast_month$granularity <- rep("month", nrow(ws_cast_month))
   
-  #####WEEKLY#####
+  #WEEKLY
   ws_cast_week <- imported_data %>%
     filter(granularity=='week') %>% 
     filter(source=='streamflow') %>%
@@ -397,15 +407,24 @@ shinyServer(function(session, input, output) {
     count_means<-count_means[count_means$SITE != "W5",]
     leaf_count <- ggplot(count_means, aes(x=YEAR, y=count, color = species))+
       geom_line()+ my_theme+
-     facet_wrap(~SITE, ncol = 1)+
+     facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
       theme(legend.title = element_text("Tree Species", family = "Helvetica"),
             strip.text = element_text(size = 10))+
-      labs(x=" ", y="Leaf counts")
-    
+      xlab(" ")+
+      ylab("\n Leaf counts")+ 
+      geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
+      annotate("text", label = "   Ice storm", x = 1998, y = 120, color = "black")
+      
+    #Wrap in plotly and hide unnecessary plotly toolbar
     leaf_count <- ggplotly(leaf_count, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
-
+    
+    #manually adjust margins so labs aren't cut off
+    leaf_count$x$layout$margin$l <- leaf_count$x$layout$margin$l + 30
+    leaf_count$x$layout$margin$b <- leaf_count$x$layout$margin$b + 30
+    
+    #makes plot readjust correctly to window
     leaf_count$x$layout$width <- NULL
     leaf_count$y$layout$height <- NULL
     leaf_count$width <- NULL
