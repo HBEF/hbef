@@ -343,19 +343,18 @@ shinyServer(function(session, input, output) {
         labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x= get(x), y= get(y), color= solute, shape= source, linetype= ws))+
+      plot <- ggplot(data=data, aes(x= get(x), y= get(y), linetype= ws, color= solute, shape= source))+
         labs(x = "Water Year", y = units)}
     
     final <- plot+ my_theme + geom_line(size = 0.5) + 
       geom_point(size = 1.3, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Watershed: ", ws, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+                 aes(text = paste("Watershed: ", ws, "<br>", "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(date_range[1]), max(date_range[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
-      scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_linetype_manual(values = watershed_linetypes)
+      scale_shape_manual(labels=NULL,values = source_shapes) +
+      scale_color_manual(labels = NULL, values = solute_palette) +
+      scale_linetype_manual(labels = c("ws1","ws2","ws3","ws4","ws5","ws6","ws7","ws8","ws9"), values = watershed_linetypes)
 
     ggplotly(  
       final, tooltip = "text") %>%
@@ -401,12 +400,14 @@ shinyServer(function(session, input, output) {
   output$leaf_count <- renderPlotly({
     count_means<-count_means[count_means$SITE != "W5",]
     leaf_count <- ggplot(count_means, aes(x=YEAR, y=count, color = species))+
-      geom_line()+ my_theme+
+      geom_line(size=0.5)+ my_theme+
+      geom_point(size=1.3, aes(text = paste("Species: ", species, "<br>", 
+                                            "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
      facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
       theme(legend.title = element_text("Tree Species", family = "Helvetica"),
             strip.text = element_text(size = 10))+
-      xlab(" ")+
-      ylab("\n Leaf counts")+ 
+      xlim(min(input$date_range_count[1]), max(input$date_range_count[2]))+
+      xlab(" ")+ ylab("\n Leaf counts")+
       geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = 1998, y = 120, color = "black")
       
@@ -448,7 +449,7 @@ shinyServer(function(session, input, output) {
     NO3_output$width <- NULL
     NO3_output$height <- NULL
     NO3_output %>%
-      layout(autosize = TRUE#, showlegend = T
+      layout(autosize = TRUE, legend = guides(shape = F, color = F)
              )
   })
 
@@ -464,3 +465,32 @@ shinyServer(function(session, input, output) {
       )
     })
 })
+
+
+#  my_theme <- theme_fivethirtyeight() +
+#    theme(rect = element_rect(fill = NA), panel.grid.major = element_line(colour = "#dddddd"), text = element_text(family = "Helvetica", size = 12),
+#        legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
+#          strip.text = element_text(hjust = 1, size = 20, face = "bold"),
+#        axis.title= element_text(NULL), axis.title.x= element_blank(),
+#          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
+# 
+#  color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
+#  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
+#  watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
+# 
+#  dataa <- imported_data
+#  dataa <- dataa[dataa$granularity == "year",]
+#  dataa <- dataa[dataa$source %in% c("streamflow"),]
+#  dataa <- dataa[dataa$ws %in% c("1", "6"),]
+#  dataa <- dataa[dataa$solute %in% c("NO3"),]
+# 
+# p<-ggplot(dataa, aes(x= water_year, y= flux, linetype= ws, color= solute, shape= source))+
+#    labs(x = "Water Year", y = "flux")+    geom_line(size = 0.5) + my_theme + 
+#    geom_point(size = 1.3, fill = "white", stroke = 0.5,
+#               aes(text = paste("Watershed: ", ws, "<br>", "Value:", flux, "<br>", "Date: ", water_year))) +
+#    geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
+#    annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
+#    scale_shape_manual(values = source_shapes) +
+#    scale_color_manual(values = color_anion)+ guides(shape = F, color = F)
+#    scale_linetype_manual(labels = c("ws1","ws2","ws3","ws4","ws5","ws6","ws7","ws8","ws9"), values = watershed_linetypes)
+# ggplotly(p)
