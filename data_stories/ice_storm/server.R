@@ -126,12 +126,7 @@ shinyServer(function(session, input, output) {
   ########### DATA IMPORT ####################################################
   
   #load vegetation data
-  lai_data <- read_csv("lai.txt")
-  fine_litter_data <- read_csv("fine_litter.txt")
-  #save as RDS files
-  saveRDS(lai_data, file="lai_data.rds")
   lai_data<- readRDS("lai_data.rds")
-  saveRDS(fine_litter_data, file="fine_litter_data.rds")
   fine_litter_data <- readRDS("fine_litter_data.rds")
   
   #load pq data
