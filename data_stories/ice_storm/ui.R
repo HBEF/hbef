@@ -1,8 +1,8 @@
 library(ggplot2)
 #library(lubridate)
-library(readr)
-library(tidyr)
-library(dplyr)
+#library(readr) #If this is only run once to create the ui, then I don't think these are needed...
+#library(tidyr)
+#library(dplyr)
 library(shiny)
 library(plotly)
 library(ggthemes)
@@ -75,104 +75,8 @@ shinyUI(  dashboardPage(skin = "black",
                           
                           tabItems(
                             
-                            
                             ###############################################################################
-                            #### ------------  Vegetation  Tab ------------------------------------ #######
-                            ###############################################################################
-                            
-                            tabItem(tabName = "vegetation",
-                                    
-                                    ########### TITLE ####################
-                                    fluidRow(tags$div(class = "container_question",
-                                                      tags$h3("How do ice storms affect vegetation?"))
-                                    ),
-                                    
-                                    #############################################
-                                    
-                                    ########### GRAPH FOR QUESTION #1 ##########
-                                    
-                                    fluidRow(
-                                      column(9,
-                                             #------ Box 1 --------#
-                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
-                                                    ######## OPTIONS
-                                                    ######## PLOT 
-                                                    tabPanel(shiny::icon("circle"),
-                                                             div(class = "titleRow", fluidRow(column(6, tags$h2("Vegetation increase after ice storm by plot")),
-                                                                                              ##Granularity
-                                                                                              column(3, offset = 2, h4("Watersheds"),
-                                                                                                     selectInput("watersheds1", label = "",
-                                                                                                                 choices = watersheds1,
-                                                                                                                 selected = "1"))
-                                                             )
-                                                             ),
-                                                             ## Plot
-                                                             plotlyOutput("lai_plot")
-                                                    ) #Closes tabpanel
-                                                    
-                                             ),# Closes tab Box
-                                             
-                                             #------ End of Box 1 --------#
-                                             
-                                             #------ Box 2 --------#
-                                             
-                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
-                                                    ######## OPTIONS
-                                                    ###Units - Axis Log
-                                                    tabPanel(shiny::icon("gear"),
-                                                             fluidRow(
-                                                               box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                                                                   
-                                                                   ##Units - Y Axis Log
-                                                                   column(6, selectInput("log_counts", label = "Y Axis",
-                                                                                         choices = c("linear", "log"), 
-                                                                                         selected = "linear"))))),
-                                                    ######## PLOT 
-                                                    tabPanel(shiny::icon("circle"),
-                                                             div(class = "titleRow", fluidRow(column(7, tags$h2("Decline in leaf counts across species after ice storm"),
-                                                                                                     p("(click on key to view specific species)")
-                                                             ))),
-                                                             ## Time Plot
-                                                             plotlyOutput("leaf_count"),
-                                                             p(" "),
-                                                             ##Date Range
-                                                             sliderInput("date_range_count", label = h4(" "),
-                                                                         min = 1993,
-                                                                         max = 2013,
-                                                                         value = c(1997, 2001),
-                                                                         sep = "")
-                                                    ) #Closes tabpanel
-                                                    
-                                             ) # Closes tab Box
-                                             
-                                             #------ End of Box 2 --------#
-                                             
-                                      ) #Closes the column
-                                      
-                                      ######## SIDEBAR
-                                      
-                                    ),#Closes graph row
-                                    
-                                    ########### END OF GRAPH FOR QUESTION #1 ##########
-                                    
-                                    ########### TEXT FOR QUESTION #1 ##########
-                                    
-                                    tags$div(class = "",
-                                             fluidRow(column(width = 9,
-                                                             p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
-                                that damaged the experimental watersheds.  The leaf area index
-                                       (LAI) is one way to track the regrowth of the canopy."))))
-                                    ########### END OF QUESTION #1 ##########
-                            ), # Closes Intro Tab
-                            
-                            ###############################################################################
-                            #### ------------  End of Vegetation Tab ------------------------------ #######
-                            ###############################################################################
-                            
-                            
-                            
-                            ###############################################################################
-                            #### ------------  NO3  trends  Tab ---------------------------------- #######
+                            #### ------------  NO3  trends  Tab ----------------------------------- #######
                             ###############################################################################
                             
                             tabItem(tabName = "trends",
@@ -188,7 +92,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     fluidRow(
                                       column(9,
-                                             tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ###Units - Axis Log
                                                     tabPanel(shiny::icon("gear"),
@@ -264,12 +168,12 @@ shinyUI(  dashboardPage(skin = "black",
                             ),# Closes Intro Tab
                             
                             ###############################################################################
-                            #### ------------ End of NO3 trends Tab ------------------------------ #######
+                            #### ------------ End of NO3 trends Tab ------------------------------- #######
                             ###############################################################################  
                             
                             
                             ###############################################################################
-                            #### ------------  Flux Tab  ---------------------------------------- #######
+                            #### ------------  Flux Tab  ------------------------------------------ #######
                             ###############################################################################
                             
                             tabItem(tabName = "flux",
@@ -285,7 +189,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     fluidRow(
                                       column(9,
                                              #------ Box 1 --------#
-                                             tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ###Units - Axis Log
                                                     tabPanel(shiny::icon("gear"),
@@ -308,10 +212,9 @@ shinyUI(  dashboardPage(skin = "black",
                                              
                                              #------ End of Box 1 --------#
                                              
+                                             #------ Box 2 --------#
                                              
-                                             #------ Box 3 --------#
-                                             
-                                             tabBox(width = 12, height = "690px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "620px", side="right", selected = shiny::icon("circle"),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
                                                              div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux (ws2, ws4, ws5)")))),
@@ -324,6 +227,8 @@ shinyUI(  dashboardPage(skin = "black",
                                                     
                                              )# Closes tab Box
                                              
+                                             #------ End of Box 2 --------#
+
                                       ), #Closes the column
                                       
                                       ######## SIDEBAR
@@ -357,11 +262,103 @@ shinyUI(  dashboardPage(skin = "black",
                                        storm can be tracked by the NO3 flux data."))))
                                     
                                     ########### END OF QUESTION #1 ##########
-                            )# Closes Intro Tab
+                            ),# Closes Flux Tab
                             
                             ###############################################################################
-                            #### ------------  End of Flux Tab ------------------------------- #######
-                            ###############################################################################    
+                            #### ------------  End of Flux Tab ------------------------------------ #######
+                            ############################################################################### 
+                            
+                            
+                            ###############################################################################
+                            #### ------------  Vegetation  Tab ------------------------------------ #######
+                            ###############################################################################
+                            
+                            tabItem(tabName = "vegetation",
+                                    
+                                    ########### TITLE ####################
+                                    fluidRow(tags$div(class = "container_question",
+                                                      tags$h3("How do ice storms affect vegetation?"))
+                                    ),
+                                    
+                                    #############################################
+                                    
+                                    ########### GRAPH FOR QUESTION #1 ##########
+                                    
+                                    fluidRow(
+                                      column(9,
+                                             #------ Box 1 --------#
+                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                                                    ######## OPTIONS
+                                                    ######## PLOT 
+                                                    tabPanel(shiny::icon("circle"),
+                                                             div(class = "titleRow", fluidRow(column(6, tags$h2("Vegetation increase after ice storm by plot")),
+                                                                                              ##Granularity
+                                                                                              column(3, offset = 2, h4("Watersheds"),
+                                                                                                     selectInput("watersheds1", label = "",
+                                                                                                                 choices = watersheds1,
+                                                                                                                 selected = "1"))
+                                                             )
+                                                             ),
+                                                             ## Plot
+                                                             plotlyOutput("lai_plot")
+                                                    ) #Closes tabpanel
+                                                    
+                                             ),# Closes tab Box
+                                             
+                                             #------ End of Box 1 --------#
+                                             
+                                             #------ Box 2 --------#
+                                             
+                                             tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
+                                                    ######## OPTIONS
+                                                    ###Units - Axis Log
+                                                    tabPanel(shiny::icon("gear"),
+                                                             fluidRow(
+                                                               box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                                                   
+                                                                   ##Units - Y Axis Log
+                                                                   column(6, selectInput("log_counts", label = "Y Axis",
+                                                                                         choices = c("linear", "log"), 
+                                                                                         selected = "linear"))))),
+                                                    ######## PLOT 
+                                                    tabPanel(shiny::icon("circle"),
+                                                             div(class = "titleRow", fluidRow(column(7, tags$h2("Decline in leaf counts across species due to ice storm"),
+                                                                                                     p("(click on key to view specific species)")
+                                                             ))),
+                                                             ## Time Plot
+                                                             plotlyOutput("leaf_count"),
+                                                             p(" "),
+                                                             ##Date Range
+                                                             sliderInput("date_range_count", label = h4(" "),
+                                                                         min = 1993,
+                                                                         max = 2013,
+                                                                         value = c(1997, 2001),
+                                                                         sep = "")
+                                                    ) #Closes tabpanel
+                                                    
+                                             ) # Closes tab Box
+                                             
+                                             #------ End of Box 2 --------#
+                                             
+                                      ) #Closes the column
+                                      
+                                    ),#Closes graph row
+                                    
+                                    ########### END OF GRAPH FOR QUESTION #1 ##########
+                                    
+                                    ########### TEXT FOR QUESTION #1 ##########
+                                    
+                                    tags$div(class = "",
+                                             fluidRow(column(width = 9,
+                                                             p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+                                                               that damaged the experimental watersheds.  The leaf area index
+                                                               (LAI) is one way to track the regrowth of the canopy."))))
+                                    ########### END OF QUESTION #1 ##########
+                                                             ) # Closes Vegetation Tab
+                            
+                            ###############################################################################
+                            #### ------------  End of Vegetation Tab ------------------------------ #######
+                            ###############################################################################
                             
                           )# Closes Tabset Panel for Main Tabs
                         )#Closes Dashboard Body
