@@ -32,9 +32,9 @@ shinyServer(function(session, input, output) {
           panel.grid.major.x = element_line(colour = NA),
           text = element_text(family = "Helvetica", size = 12), 
           legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
-          strip.text = element_text(margin = margin(20)),
-          axis.title= element_text(size = 10, margin = margin(20)), 
-          plot.margin = margin(1, 1, 0, 1, "cm"))
+          #strip.text = element_text(margin = margin(20)),
+          axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
+          plot.margin = margin(1, 1, 1, 1, "cm"))
   
   color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
   color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
@@ -156,22 +156,23 @@ shinyServer(function(session, input, output) {
         labs(x = " ", y = "pH")}
     
     final <- plot+ my_theme + 
-      geom_ribbon(aes(ymin=4, ymax= 5), fill = "grey", alpha = 0.2)+
+      #geom_ribbon(aes(ymin=4, ymax= 5), fill = "grey", alpha = 0.2)+
       geom_hline(size = 0.5, yintercept = 4.2, alpha = 0.5, linetype="dashed", color = "red")+
-      geom_ribbon(aes(ymin=5,ymax=5.4), fill="blue", alpha=0.3)+
+      geom_hline(size = 0.5, yintercept = 5, alpha = 0.5, linetype="dashed", color = "red")+
+      #geom_ribbon(aes(ymin=5,ymax=5.4), fill="blue", alpha=0.3)+
       geom_line(size = 0.5) + 
       geom_point(size = 1.3, fill = "white", stroke = 0.5, 
                  aes(text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range1[1]), max(input$date_range1[2]))+ 
-      geom_vline(size = 0.5, xintercept = -5, alpha = 0.5)+
-      annotate("text", label = "Clean Air Act", x = as.Date("1970-01-01"), y = 4.02, alpha = 0.7, color = "black")+
-      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.5)+
-      annotate("text", label = "Clean Air Act Amendment  ", x = as.Date("1990-01-01"), y = 4.02, alpha = 0.7, color = "black")+
-      annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.21, alpha = 0.7, color = "black")+
-      annotate("text", label = "Normal (clean) rain pH", x = as.Date("1979-01-01"), y = 5.01, alpha = 0.7, color = "black")+
-      scale_shape_manual(values = source_shapes) +
+      geom_vline(size = 0.5, xintercept = -5, alpha = 0.2)+
+      annotate("text", label = "Clean Air Act", x = as.Date("1970-01-01"), y = 4, alpha = 0.7, color = "black", angle = 20)+
+      geom_vline(size = 0.5, xintercept = 7300, alpha = 0.2)+
+      annotate("text", label = "Clean Air Act Amendment  ", x = as.Date("1990-01-01"), y = 4, alpha = 0.7, color = "black", angle = 20)+
+      annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.25, alpha = 0.7, color = "black", hjust=2)+
+      annotate("text", label = "Normal (clean) rain pH", x = as.Date("2005-01-01"), y = 5.05, alpha = 0.7, color = "black", angle = 20, hjust=2)+
       scale_color_manual(values = grey_palette)
+      #scale_colour_gradient2(low = "red", mid = "orange" , high = "green", midpoint = 4)
     
     ggplotly(final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
@@ -332,8 +333,7 @@ shinyServer(function(session, input, output) {
     pH_intro$y$layout$height <- NULL
     pH_intro$width <- NULL
     pH_intro$height <- NULL
-    pH_intro %>%
-      layout(autosize = TRUE)
+    pH_intro 
     })
   
   #plot of any compound conc
@@ -344,7 +344,7 @@ shinyServer(function(session, input, output) {
     chemistry$width <- NULL
     chemistry$height <- NULL
     chemistry %>%
-      layout(autosize = TRUE)
+      layout(autosize = TRUE, height = 500)
   })
 
   #plot of SO4 and NO3 to complement pH increase - shows decreasing trend

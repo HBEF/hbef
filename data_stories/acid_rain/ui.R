@@ -106,9 +106,8 @@ shinyUI(
   tabItem(tabName = "introduction",
        
     ########### TITLE ####################
-    fluidRow(tags$div(class = "container_question", 
-                      tags$h3("How does pH change when acid rain is mitigated?")) #acid rain intro and annotated pH graph
-                      ),
+    fluidRow(column(9,tags$h1("How does pH change when acid rain is mitigated?")) #acid rain intro and annotated pH graph
+            ),
                        
     #############################################
                        
@@ -116,17 +115,17 @@ shinyUI(
                        
     fluidRow(
       column(9,
-      tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+      tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"), 
       ######## OPTIONS
              ###Units - Axis Log
              tabPanel(shiny::icon("gear"),
                       fluidRow(
-                        box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                        column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
                             
                   ##Units - Y Axis Log
-                  column(6, selectInput("log1", label = "Y Axis",
+                  column(5, selectInput("log1", label = "Y Axis",
                                         choices = c("linear", "log"), 
-                                        selected = "linear"))))),
+                                        selected = "linear")))))),
       ######## PLOT 
              tabPanel(shiny::icon("circle"),
                       div(class = "titleRow", fluidRow(column(5, tags$h2("pH")),
@@ -148,16 +147,16 @@ shinyUI(
          box(width = 13, height = "600px", id = "sidebar",
              ##Water Sources
              fluidRow(
-               column(12, checkboxGroupInput("water_sources1", label = h4("Water Sources"),
+               column(12, checkboxGroupInput("water_sources1", label = h4("Select Water Sources"),
                                              choices = water_sources,
                                              selected = "precipitation"))),
              
              ##Date Range
              fluidRow(
-             sliderInput("date_range1", label = h4("Date Range"),
+             sliderInput("date_range1", label = h4("Select Date Range"),
                          min = as.Date("1962-01-01"),
                          max = as.Date("2014-01-01"),
-                         value = c(as.Date("1962-01-01"), as.Date("2014-01-01")), timeFormat = "%b %Y")))
+                         value = c(as.Date("1962-01-01"), as.Date("2013-01-01")), timeFormat = "%b %Y")))
              
       )#Closes the column
       
@@ -168,7 +167,7 @@ shinyUI(
     
     ########### TEXT FOR QUESTION #1 ##########
     
-    tags$div(class = "",
+    tags$div(class = "text-container",
              fluidRow(column(width = 9,
                              p("Air pollution amplifies acid rain, which washes nutrients out of the 
                                soil and releases toxins into the streamflow that inhibit ecosystem 
@@ -189,7 +188,7 @@ shinyUI(
                                policies are implemented to address air quality (see plot above.)"))),
              fluidRow(column(width = 9,
                              #insert widget that links to a quizlet or something here
-                             h4("Let's see how much you know offhand about acid rain... Click",
+                             p("Let's see how much you know offhand about acid rain... Click",
                                 tags$a(href = "https://www.surveymonkey.com/r/RGNNTMH", "here"),
                                 "to take the acid rain quiz."))))
     ########### END OF QUESTION #1 ##########
@@ -207,8 +206,7 @@ shinyUI(
     tabItem(tabName = "chemistry",
             
             ########### TITLE ####################
-            fluidRow(tags$div(class = "container_question", 
-                              tags$h3("What does acid rain do to the different solutes in the water?")) 
+            fluidRow(column(9,tags$h1("What does acid rain do to the different solutes in the water?"))
             ),
             
             #############################################
@@ -217,17 +215,17 @@ shinyUI(
             
             fluidRow(
               column(9,
-                     tabBox(width = 12, height = "620px", side="right", selected = shiny::icon("circle"),
+                     tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
                             ######## OPTIONS
                             ###Units - Axis Log
                             tabPanel(shiny::icon("gear"),
                                      fluidRow(
-                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
                                            
                                            ##Units - Y Axis Log
-                                           column(6, selectInput("log2", label = "Y Axis",
+                                           column(5, selectInput("log2", label = "Y Axis",
                                                                  choices = c("linear", "log"), 
-                                                                 selected = "linear"))))),
+                                                                 selected = "linear")))))),
                             ######## PLOT 
                             tabPanel(shiny::icon("circle"),
                                      div(class = "titleRow", fluidRow(column(5, tags$h2("Water Chemistry (ws6)")),
@@ -236,7 +234,7 @@ shinyUI(
                                                                        choices = granularity,
                                                                        selected = "year")))),
                                      ## Time Plot
-                                     plotlyOutput("chemistry")
+                                     fluidRow(plotlyOutput("chemistry"))
                             ) #Closes tabpanel
                             
                      )# Closes tab Box
@@ -245,43 +243,43 @@ shinyUI(
               
               ######## SIDEBAR
               column(3, 
-                     box(width = 13, height = "920px", id = "sidebar",
+                     box(width = 13, height = "650px", id = "sidebar",
                          #Solutes
                          fluidRow(
-                           column(12, actionLink("select_all_ions2", h4("Solutes")),
-                           
+                                  actionLink("select_all_ions2", h4("Select Solutes")),
+                                  div(class = "scrollbox",
                            #Cations
                                   actionLink("select_all_cations2", h5("Cations")),
-                                  checkboxGroupInput("solutes_cations2", label = "",
+                                  checkboxGroupInput("solutes_cations2", label = p(""),
                                                      choices = solutes_cations,
                                                      selected = "Ca"),
                            
+                           #Hydrogen  
+                           checkboxGroupInput("solutes_H2", label = h4(""),
+                                              choices = solutes_H,
+                                              selected = ""),
+                           
                            #Anions
                                   actionLink("select_all_anions2", h5("Anions")),
-                                  checkboxGroupInput("solutes_anions2", label = "",
+                                  checkboxGroupInput("solutes_anions2", label = p(""),
                                                      choices = solutes_anions,
                                                      selected = ""))),
-                         #Hydrogen  
-                         
-                         fluidRow(
-                           column(12, checkboxGroupInput("solutes_H2", label = h4(""),
-                                                         choices = solutes_H,
-                                                         selected = ""))),
+                      
 
                          ##Water Sources
                          fluidRow(
-                           column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
+                           column(12, checkboxGroupInput("water_sources2", label = h4("Select Water Sources"),
                                                          choices = water_sources,
                                                          selected = c("precipitation", "streamflow")))),
                          
                          ##Units  
                          fluidRow(
-                           column(12, selectInput("units2", label = h4("Units"),
+                           column(12, selectInput("units2", label = h4("Select Units"),
                                                   choices = units,
                                                   selected = "mg/L"))),
                          
                          ##Date Range
-                         sliderInput("date_range2", label = h4("Date Range"),
+                         sliderInput("date_range2", label = h4("Select Date Range"),
                                      min = as.Date("1962-01-01"),
                                      max = as.Date("2014-01-01"),
                                      value = c(as.Date("1965-01-01"), as.Date("2013-01-01")),
@@ -296,7 +294,7 @@ shinyUI(
             
             ########### TEXT FOR QUESTION #1 ##########
             
-            tags$div(class = "",
+            tags$div(class = "text-container",
                      fluidRow(column(width = 9,
                                      p("Air pollution amplifies acid rain, which washes nutrients out of the 
                                        soil and releases toxins into the streamflow that inhibit ecosystem 
@@ -319,8 +317,7 @@ shinyUI(
     tabItem(tabName = "policy",
             
             ########### TITLE ####################
-            fluidRow(tags$div(class = "container_question", 
-                              tags$h3("How have policies altered the effects of acid rain? (As seen in ws6)")) 
+            fluidRow(column(9, tags$h1("How have policies altered the effects of acid rain? (As seen in ws6)")) 
             ),
             
             #############################################
@@ -330,17 +327,17 @@ shinyUI(
             fluidRow(
               column(9,
                      #------ Box 1 --------#
-                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
                             ######## OPTIONS
                             ###Units - Axis Log
                             tabPanel(shiny::icon("gear"),
                                      fluidRow(
-                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
                                            
                                            ##Units - Y Axis Log
-                                           column(6, selectInput("log3", label = "Y Axis",
+                                           column(5, selectInput("log3", label = "Y Axis",
                                                                  choices = c("linear", "log"), 
-                                                                 selected = "linear"))))),
+                                                                 selected = "linear")))))),
                             ######## PLOT 
                             tabPanel(shiny::icon("circle"),
                                      div(class = "titleRow", fluidRow(column(9, tags$h2("Decrease in SOx and NOx")),
@@ -355,7 +352,7 @@ shinyUI(
                                                          inline = TRUE))),
                                       
                                      ## Time Plot
-                                     plotlyOutput("policy_SO4_NO3")
+                                     fluidRow(column(12,plotlyOutput("policy_SO4_NO3")))
                             ) #Closes tabpanel
                             
                      ),# Closes tab Box
@@ -364,17 +361,17 @@ shinyUI(
                      
                      #------ Box 2 --------#
                      
-                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
                             ######## OPTIONS
                             ###Units - Axis Log
                             tabPanel(shiny::icon("gear"),
                                      fluidRow(
-                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
                                            
                                            ##Units - Y Axis Log
-                                           column(6, selectInput("log4", label = "Y Axis",
+                                           column(5, selectInput("log4", label = "Y Axis",
                                                                  choices = c("linear", "log"), 
-                                                                 selected = "linear"))))),
+                                                                 selected = "linear")))))),
                             ######## PLOT 
                             tabPanel(shiny::icon("circle"),
                                      div(class = "titleRow", fluidRow(column(9, tags$h2("Decrease in loss of base cations")),
@@ -387,7 +384,7 @@ shinyUI(
                                                                 selected = c("K", "Na", "Ca", "Mg"), 
                                                                 inline = TRUE)), 
                                     ## Time Plot
-                                     plotlyOutput("policy_base_cations")
+                                     fluidRow(plotlyOutput("policy_base_cations"))
                             ) #Closes tabpanel
                             
                      ), # Closes tab Box
@@ -396,17 +393,17 @@ shinyUI(
                      
                      #------ Box 3 --------#
                      
-                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                     tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
                             ######## OPTIONS
                             ###Units - Axis Log
                             tabPanel(shiny::icon("gear"),
                                      fluidRow(
-                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
                                            
                                            ##Units - Y Axis Log
-                                           column(6, selectInput("log5", label = "Y Axis",
+                                           column(5, selectInput("log5", label = "Y Axis",
                                                                  choices = c("linear", "log"), 
-                                                                 selected = "linear"))))),
+                                                                 selected = "linear")))))),
                             ######## PLOT 
                             tabPanel(shiny::icon("circle"),
                                      div(class = "titleRow", fluidRow(column(9, tags$h2("Decrease in toxic Al streamflow")),
@@ -420,7 +417,7 @@ shinyUI(
                                                                 selected = c("Al"), 
                                                                 inline = TRUE)),
                                      ## Time Plot
-                                     plotlyOutput("policy_Al")
+                                     fluidRow(plotlyOutput("policy_Al"))
                             ) #Closes tabpanel
                             
                      )# Closes tab Box
@@ -459,7 +456,7 @@ shinyUI(
             
             ########### TEXT FOR QUESTION #1 ##########
             
-            tags$div(class = "",
+            tags$div(class = "text-container",
                      fluidRow(column(width = 9,
                                      p("Air pollution amplifies acid rain, which washes nutrients out of the 
                                        soil and releases toxins into the streamflow that inhibit ecosystem 
