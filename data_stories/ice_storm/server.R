@@ -1,20 +1,42 @@
 library(ggplot2)
-library(lubridate)
+#library(lubridate)
 library(gridExtra)
 library(readr)
 library(tidyr)
 library(dplyr)
 library(shiny)
 library(plotly)
-library(utils)
+#library(utils)
 library(grid)
 library(ggthemes)
 library(reshape2)
 
+#detach("package:<packageName>", unload=TRUE)
+
+########### DATA IMPORT ####################################################
+
+#load vegetation data
+lai_data<- readRDS("lai_data.rds")
+yearly_count_means <- readRDS("yearly_count_means.rds")
+
+#load pq data
+load("precip_streamflow_dfs.RData")
+imported_data <- precip_streamflow_long
+data_norm <- readRDS("normalized_flux.rds")
+
+#create vector to rename facets in leaf count plot
+site_names <- c(
+  'BB'="Bear Brook Watershed site",
+  'TF'="Throughfall site",
+  'W1'="Watershed 1",
+  'W5'="Watershed 5"
+  )
+########### END OF DATA IMPORT #############################################
+
+
 #######################################################################################
 ########### SHINY SERVER ##############################################################
 #######################################################################################
-
 
 shinyServer(function(session, input, output) {
   
@@ -30,159 +52,15 @@ shinyServer(function(session, input, output) {
           axis.title= element_text(NULL), axis.title.x= element_blank(), 
           axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
   
-  color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
-  color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
-  color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
-  ws_palette <- c("1" = "#fae550", "2" = "#a8db40", "3" = "#62c74a", "4" = "#408b77", 
-                  "5" = "#27517b", "6" = "#303475", "7" = "#351042", "8" = "#79276e", "9" = "#b63462")
+  color_anion <- c("NO3" = "#BF1616")
   
-  solute_palette <- c(color_cation, color_anion, color_hydro)
   source_shapes <- c("streamflow" = 16, "precipitation"= 21)
   watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
   
   ### End of Theme ################
   
-  ###  Lists for the sidebar  ######
-  #Edit if there are values that do not appear or are not relevant to your data. 
-  #Should be the same as the lists in the UI file.
-  
-  watersheds <- list("Watershed 1" = "1",
-                     "Watershed 2" = "2", 
-                     "Watershed 3" = "3",
-                     "Watershed 4" = "4",
-                     "Watershed 5" = "5",
-                     "Watershed 6" = "6",
-                     "Watershed 7" = "7",
-                     "Watershed 8" = "8",
-                     "Watershed 9" = "9")
-  
-  solutes_cations <- list("Aluminum (Al)" = "Al",
-                          "Magnesium (Mg)" = "Mg",
-                          "Calcium (Ca)" = "Ca",
-                          "Sodium (Na)" = "Na",
-                          "Potassium (K)" = "K")
-  
-  solutes_anions <- list("Phosphate (PO4)" = "PO4",
-                         "Sulfate (SO4)" = "SO4",
-                         "Nitrate (NO3)" = "NO3",
-                         "Silicon Dioxide (SiO2)" = "SiO2",
-                         "Chloride (Cl)" = "Cl",
-                         "Bicarbonate (HCO3)" = "HCO3")
-  
-  solutes_H <- list("Hydrogen (H)" = "H",
-                    "pH" = "pH")
-  
-  all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
-  
   ########### END OF IMPORTANT PRELIMINARY INFO #############################################
- 
-  ########### DATA IMPORT ####################################################
-  
-  #load vegetation data
-  lai_data<- readRDS("lai_data.rds")
-  yearly_count_means <- readRDS("yearly_count_means.rds")
-  
-  #load pq data
-  load("precip_streamflow_dfs.RData")
-  imported_data <- precip_streamflow_long
-  
-  site_names <- c(
-    'BB'="Bear Brook Watershed site",
-    'TF'="Throughfall site",
-    'W1'="Watershed 1",
-    'W5'="Watershed 5"
-  )
 
-  #Matt normalization of flux####################
-  #YEARLY
-  ws_cast_year <- imported_data %>%
-    filter(granularity=='year') %>% 
-    filter(source=='streamflow') %>%
-    filter(solute=='NO3') %>%
-    dcast(.,date+water_year+solute~ws,value.var='flux')
-  
-  #normalize data by subtracting ws6 from each
-  ws_cast_year$"n2" <- ws_cast_year$"2"-ws_cast_year$"6"
-  ws_cast_year$"n4" <- ws_cast_year$"4"-ws_cast_year$"6"
-  ws_cast_year$"n5" <- ws_cast_year$"5"-ws_cast_year$"6"
-  
-  #rename ws columns so I can name normalized columns just numbers to make merging easier
-  names(ws_cast_year)[names(ws_cast_year) == "2"] <- "ws2"
-  names(ws_cast_year)[names(ws_cast_year) == "4"] <- "ws4"
-  names(ws_cast_year)[names(ws_cast_year) == "5"] <- "ws5"
-  names(ws_cast_year)[names(ws_cast_year) == "n2"] <- "2"
-  names(ws_cast_year)[names(ws_cast_year) == "n4"] <- "4"
-  names(ws_cast_year)[names(ws_cast_year) == "n5"] <- "5"
-  
-  #melt function to get them all back together (new tidyr version is spread)
-  ws_cast_year <- melt(ws_cast_year, id.vars = c("date","water_year","solute"), measure.vars = c("2","4","5"),
-       variable.name = "ws", value.name = "normalized_flux")
-  
-  #add granularity column with "year"
-  ws_cast_year$granularity <- rep("year", nrow(ws_cast_year))
-  
-  #repeat for month and week
-  #MONTHLY
-  ws_cast_month <- imported_data %>%
-    filter(granularity=='month') %>% 
-    filter(source=='streamflow') %>%
-    filter(solute=='NO3') %>%
-    dcast(.,date+water_year+solute~ws,value.var='flux')
-  
-  #normalize data by subtracting ws6 from each
-  ws_cast_month$"n2" <- ws_cast_month$"2"-ws_cast_month$"6"
-  ws_cast_month$"n4" <- ws_cast_month$"4"-ws_cast_month$"6"
-  ws_cast_month$"n5" <- ws_cast_month$"5"-ws_cast_month$"6"
-  
-  #rename ws columns so I can name normalized columns just numbers to make merging easier
-  names(ws_cast_month)[names(ws_cast_month) == "2"] <- "ws2"
-  names(ws_cast_month)[names(ws_cast_month) == "4"] <- "ws4"
-  names(ws_cast_month)[names(ws_cast_month) == "5"] <- "ws5"
-  names(ws_cast_month)[names(ws_cast_month) == "n2"] <- "2"
-  names(ws_cast_month)[names(ws_cast_month) == "n4"] <- "4"
-  names(ws_cast_month)[names(ws_cast_month) == "n5"] <- "5"
-  
-  #melt function to get them all back together (new tidyr version is spread)
-  ws_cast_month <- melt(ws_cast_month, id.vars = c("date","water_year","solute"), measure.vars = c("2","4","5"),
-                       variable.name = "ws", value.name = "normalized_flux")
-  
-  #add granularity column with "month"
-  ws_cast_month$granularity <- rep("month", nrow(ws_cast_month))
-  
-  #WEEKLY
-  ws_cast_week <- imported_data %>%
-    filter(granularity=='week') %>% 
-    filter(source=='streamflow') %>%
-    filter(solute=='NO3') %>%
-    dcast(.,date+water_year+solute~ws,value.var='flux')
-  
-  #normalize data by subtracting ws6 from each
-  ws_cast_week$"n2" <- ws_cast_week$"2"-ws_cast_week$"6"
-  ws_cast_week$"n4" <- ws_cast_week$"4"-ws_cast_week$"6"
-  ws_cast_week$"n5" <- ws_cast_week$"5"-ws_cast_week$"6"
-  
-  #rename ws columns so I can name normalized columns just numbers to make merging easier
-  names(ws_cast_week)[names(ws_cast_week) == "2"] <- "ws2"
-  names(ws_cast_week)[names(ws_cast_week) == "4"] <- "ws4"
-  names(ws_cast_week)[names(ws_cast_week) == "5"] <- "ws5"
-  names(ws_cast_week)[names(ws_cast_week) == "n2"] <- "2"
-  names(ws_cast_week)[names(ws_cast_week) == "n4"] <- "4"
-  names(ws_cast_week)[names(ws_cast_week) == "n5"] <- "5"
-  
-  #melt function to get them all back together (new tidyr version is spread)
-  ws_cast_week <- melt(ws_cast_week, id.vars = c("date","water_year","solute"), measure.vars = c("2","4","5"),
-                        variable.name = "ws", value.name = "normalized_flux")
-  
-  #add granularity column with "week"
-  ws_cast_week$granularity <- rep("week", nrow(ws_cast_week))
-  #####MERGE
-  #merge all ws_casts together
-  ws_cast <- Reduce(function(...) merge(..., all=T), list(ws_cast_month, ws_cast_year, ws_cast_week))
-  data_norm <- merge(imported_data, ws_cast, all = T)
-  
-  ########### END OF DATA IMPORT #############################################
-  
-  
   ########### REACTIVE DATA AND X Y #########################################
   
   #Reactive Data for NO3 trends
@@ -208,7 +86,7 @@ shinyServer(function(session, input, output) {
     else if(input$units =="uMole/L"){"concentration_umol"}
     else if(input$units =="flux"){"flux"}
   })
-
+  
   #Reactive flux data  
   reactive_data_flux <- reactive({
     data <- imported_data
@@ -217,13 +95,13 @@ shinyServer(function(session, input, output) {
     data <- data[data$ws %in% c("1", "6"),]
     data <- data[data$solute %in% c("NO3"),] 
   })
-
+  
   yflux <- reactive({
     {"flux"}
   })
   
-    #Reactive normalized flux data
-    reactive_data_norm <- reactive({
+  #Reactive normalized flux data
+  reactive_data_norm <- reactive({
     data_norm <- data_norm[data_norm$granularity %in% input$granularity3,]
     data_norm <- data_norm[data_norm$source %in% c("streamflow"),]
     data_norm <- data_norm[data_norm$ws %in% c("2", "4", "5"),]
@@ -239,7 +117,7 @@ shinyServer(function(session, input, output) {
   ynorm <- reactive({
     {"normalized_flux"}
   })
-
+  
   ########### PLOT FUNCTION #########################################
   
   ## GGPLOT TIME FUNCTION
@@ -260,16 +138,16 @@ shinyServer(function(session, input, output) {
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
       scale_shape_manual(labels=NULL,values = source_shapes) +
-      scale_color_manual(labels = NULL, values = solute_palette) +
+      scale_color_manual(labels = NULL, values = color_anion) +
       scale_linetype_manual(labels = c("ws1","ws2","ws3","ws4","ws5","ws6","ws7","ws8","ws9"), values = watershed_linetypes)
-
+    
     ggplotly(  
       final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
   }
-
+  
   
   #############################################################
   ########### OUTPUTS #########################################
@@ -310,14 +188,14 @@ shinyServer(function(session, input, output) {
       geom_line(size=0.5)+ my_theme+
       geom_point(size=1.3, aes(text = paste("Species: ", species, "<br>", 
                                             "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
-     facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
+      facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
       theme(legend.title = element_text("Tree Species", family = "Helvetica"),
             strip.text = element_text(size = 10))+
       xlim(min(input$date_range_count[1]), max(input$date_range_count[2]))+
       xlab(" ")+ ylab("\n Leaf counts")+
       geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = 1998, y = 120, color = "black")
-      
+    
     #Wrap in plotly and hide unnecessary plotly toolbar
     leaf_count <- ggplotly(leaf_count, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
@@ -357,9 +235,9 @@ shinyServer(function(session, input, output) {
     NO3_output$height <- NULL
     NO3_output %>%
       layout(autosize = TRUE, legend = guides(shape = F, color = F)
-             )
+      )
   })
-
+  
   #NO3 excess
   output$NO3_excess <- renderPlotly({
     NO3_excess <- ggplot_function(reactive_data_norm(), xflux(), ynorm(), log="linear", units="moles/ha-yr", date_range=input$date_range3)
@@ -370,7 +248,7 @@ shinyServer(function(session, input, output) {
     NO3_excess %>%
       layout(autosize = TRUE#, showlegend=T
       )
-    })
+  })
 })
 
 

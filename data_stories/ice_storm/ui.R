@@ -1,5 +1,5 @@
 library(ggplot2)
-library(lubridate)
+#library(lubridate)
 library(readr)
 library(tidyr)
 library(dplyr)
@@ -12,26 +12,8 @@ library(shinydashboard)
 
 ########### IMPORTANT LISTS ############
 
-
 ###  Lists for the sidebar  ###
 #Edit if there are values that do not appear or are not relevant to your data. 
-
-solutes_cations <- list("Aluminum (Al)" = "Al",
-                        "Magnesium (Mg)" = "Mg",
-                        "Calcium (Ca)" = "Ca",
-                        "Sodium (Na)" = "Na",
-                        "Potassium (K)" = "K")
-
-solutes_anions <- list("Phosphate (PO4)" = "PO4",
-                       "Sulfate (SO4)" = "SO4",
-                       "Nitrate (NO3)" = "NO3",
-                       "Silicon Dioxide (SiO2)" = "SiO2",
-                       "Chloride (Cl)" = "Cl",
-                       "Bicarbonate (HCO3)" = "HCO3")
-solutes_H <- list("Hydrogen (H)" = "H",
-                  "pH" = "pH")
-
-all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
 
 solutes_NO3 <- list("Nitrate (NO3)" = "NO3")
 
@@ -76,8 +58,8 @@ shinyUI(  dashboardPage(skin = "black",
                           width = 150,
                           sidebarMenu(
                             menuItem("NO3 trends", tabName = "trends", icon = icon("line-chart")),
-                            menuItem("Flux", tabName = "Flux", icon = icon("arrows-v")),
-                            menuItem("LAI", tabName = "LAI", icon = icon("leaf"))
+                            menuItem("NO3 flux (Q)", tabName = "flux", icon = icon("arrows-v")),
+                            menuItem("Vegetation", tabName = "vegetation", icon = icon("leaf"))
                           )
                         ),
                         dashboardBody(
@@ -95,10 +77,10 @@ shinyUI(  dashboardPage(skin = "black",
                             
                             
                             ###############################################################################
-                            #### ------------  LAI  Tab ------------------------------------------- #######
+                            #### ------------  Vegetation  Tab ------------------------------------ #######
                             ###############################################################################
                             
-                            tabItem(tabName = "LAI",
+                            tabItem(tabName = "vegetation",
                                     
                                     ########### TITLE ####################
                                     fluidRow(tags$div(class = "container_question",
@@ -112,12 +94,12 @@ shinyUI(  dashboardPage(skin = "black",
                                     fluidRow(
                                       column(9,
                                              #------ Box 1 --------#
-                                             tabBox(width = 12, height = "730px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
                                                              div(class = "titleRow", fluidRow(column(6, tags$h2("Vegetation increase after ice storm by plot")),
-                                                                                                     ##Granularity
+                                                                                              ##Granularity
                                                                                               column(3, offset = 2, h4("Watersheds"),
                                                                                                      selectInput("watersheds1", label = "",
                                                                                                                  choices = watersheds1,
@@ -149,7 +131,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                     tabPanel(shiny::icon("circle"),
                                                              div(class = "titleRow", fluidRow(column(7, tags$h2("Decline in leaf counts across species after ice storm"),
                                                                                                      p("(click on key to view specific species)")
-                                                                                                     ))),
+                                                             ))),
                                                              ## Time Plot
                                                              plotlyOutput("leaf_count"),
                                                              p(" "),
@@ -168,7 +150,7 @@ shinyUI(  dashboardPage(skin = "black",
                                       ) #Closes the column
                                       
                                       ######## SIDEBAR
-
+                                      
                                     ),#Closes graph row
                                     
                                     ########### END OF GRAPH FOR QUESTION #1 ##########
@@ -184,7 +166,7 @@ shinyUI(  dashboardPage(skin = "black",
                             ), # Closes Intro Tab
                             
                             ###############################################################################
-                            #### ------------  End of LAI Tab ------------------------------------- #######
+                            #### ------------  End of Vegetation Tab ------------------------------ #######
                             ###############################################################################
                             
                             
@@ -290,7 +272,7 @@ shinyUI(  dashboardPage(skin = "black",
                             #### ------------  Flux Tab  ---------------------------------------- #######
                             ###############################################################################
                             
-                            tabItem(tabName = "Flux",
+                            tabItem(tabName = "flux",
                                     
                                     ########### TITLE ####################
                                     fluidRow(tags$div(class = "container_question", 
@@ -314,76 +296,75 @@ shinyUI(  dashboardPage(skin = "black",
                                                                    column(6, selectInput("log_flux", label = "Y Axis",
                                                                                          choices = c("linear", "log"), 
                                                                                          selected = "linear"))
-                                                                   ))),
+                                                               ))),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
                                                              div(class = "titleRow", fluidRow(column(9, tags$h2("Streamflow flux (ws1, ws6)")))),
-                                                                                              ## Time Plot
-                                                                                              plotlyOutput("NO3_output")
-                                                             ) #Closes tabpanel
-                                                             
-                                                             ),# Closes tab Box
-                                                             
-                                                             #------ End of Box 1 --------#
-                                                             
-                                                             
-                                                             #------ Box 3 --------#
-                                                             
-                                                             tabBox(width = 12, height = "690px", side="right", selected = shiny::icon("circle"),
-                                                                    ######## PLOT 
-                                                                    tabPanel(shiny::icon("circle"),
-                                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux (ws2, ws4, ws5)")))),
-                                                                             ## Time Plot
-                                                                             p("*Note the 1966 devegetation spike (ws2) and the 1983 whole tree harvest spike (ws4)."),
-                                                                             p("To better see the effects of the
+                                                             ## Time Plot
+                                                             plotlyOutput("NO3_output")
+                                                    ) #Closes tabpanel
+                                                    
+                                             ),# Closes tab Box
+                                             
+                                             #------ End of Box 1 --------#
+                                             
+                                             
+                                             #------ Box 3 --------#
+                                             
+                                             tabBox(width = 12, height = "690px", side="right", selected = shiny::icon("circle"),
+                                                    ######## PLOT 
+                                                    tabPanel(shiny::icon("circle"),
+                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux (ws2, ws4, ws5)")))),
+                                                             ## Time Plot
+                                                             p("*Note the 1966 devegetation spike (ws2) and the 1983 whole tree harvest spike (ws4)."),
+                                                             p("To better see the effects of the
                                                                                ice storm, click and drag to zoom in."),
-                                                                             plotlyOutput("NO3_excess")
-                                                                    ) #Closes tabpanel
-                                                                    
-                                                             )# Closes tab Box
-
-                                                    ), #Closes the column
+                                                             plotlyOutput("NO3_excess")
+                                                    ) #Closes tabpanel
                                                     
-                                                    ######## SIDEBAR
-                                                    column(3, 
-                                                           box(width = 13, height = "600px", id = "sidebar",
-                                                               
-                                                               ##Granularity
-                                                               fluidRow(
-                                                                 column(12, selectInput("granularity3", label = h4("Granularity"),
-                                                                                        choices = granularity,
-                                                                                        selected = "year"))),
-                                                               ##Date Range
-                                                               sliderInput("date_range3", label = h4("Date Range"),
-                                                                           min = as.Date("1962-01-01"),
-                                                                           max = as.Date("2014-01-01"),
-                                                                           value = c(as.Date("1963-01-01"), as.Date("2004-01-01")),
-                                                                           timeFormat = "%b %Y"))
-                                                           
-                                                    )#Closes the column
-                                                    
-                                             ),#Closes graph row
+                                             )# Closes tab Box
                                              
-                                             ########### END OF GRAPH FOR QUESTION #1 ##########
+                                      ), #Closes the column
+                                      
+                                      ######## SIDEBAR
+                                      column(3, 
+                                             box(width = 13, height = "600px", id = "sidebar",
+                                                 
+                                                 ##Granularity
+                                                 fluidRow(
+                                                   column(12, selectInput("granularity3", label = h4("Granularity"),
+                                                                          choices = granularity,
+                                                                          selected = "year"))),
+                                                 ##Date Range
+                                                 sliderInput("date_range3", label = h4("Date Range"),
+                                                             min = as.Date("1962-01-01"),
+                                                             max = as.Date("2014-01-01"),
+                                                             value = c(as.Date("1963-01-01"), as.Date("2004-01-01")),
+                                                             timeFormat = "%b %Y"))
                                              
-                                             ########### TEXT FOR QUESTION #1 ##########
-                                             
-                                             tags$div(class = "",
-                                                      fluidRow(column(width = 9,
-                                                                      p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+                                      )#Closes the column
+                                      
+                                    ),#Closes graph row
+                                    
+                                    ########### END OF GRAPH FOR QUESTION #1 ##########
+                                    
+                                    ########### TEXT FOR QUESTION #1 ##########
+                                    
+                                    tags$div(class = "",
+                                             fluidRow(column(width = 9,
+                                                             p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
                                 that damaged the experimental watersheds.  Some effects of the 
                                        storm can be tracked by the NO3 flux data."))))
-                                             
-                                             ########### END OF QUESTION #1 ##########
-                                      )# Closes Intro Tab
-                                      
-                                      ###############################################################################
-                                      #### ------------  End of Flux Tab ------------------------------- #######
-                                      ###############################################################################    
-                                      
-                                    )# Closes Tabset Panel for Main Tabs
-                            )#Closes Dashboard Body
-                          )#closes FluidPage
-                        ) #closes ShinyUI
-                        
-                        
+                                    
+                                    ########### END OF QUESTION #1 ##########
+                            )# Closes Intro Tab
+                            
+                            ###############################################################################
+                            #### ------------  End of Flux Tab ------------------------------- #######
+                            ###############################################################################    
+                            
+                          )# Closes Tabset Panel for Main Tabs
+                        )#Closes Dashboard Body
+)#closes FluidPage
+) #closes ShinyUI
+
