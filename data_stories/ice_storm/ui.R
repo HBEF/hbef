@@ -112,7 +112,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     fluidRow(
                                       column(9,
                                              #------ Box 1 --------#
-                                             tabBox(width = 12, height = "620px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "730px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
@@ -152,6 +152,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                                                                      ))),
                                                              ## Time Plot
                                                              plotlyOutput("leaf_count"),
+                                                             p(" "),
                                                              ##Date Range
                                                              sliderInput("date_range_count", label = h4(" "),
                                                                          min = 1993,
@@ -205,7 +206,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     fluidRow(
                                       column(9,
-                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ###Units - Axis Log
                                                     tabPanel(shiny::icon("gear"),
@@ -302,7 +303,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     fluidRow(
                                       column(9,
                                              #------ Box 1 --------#
-                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ###Units - Axis Log
                                                     tabPanel(shiny::icon("gear"),
@@ -328,7 +329,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                              
                                                              #------ Box 3 --------#
                                                              
-                                                             tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
+                                                             tabBox(width = 12, height = "690px", side="right", selected = shiny::icon("circle"),
                                                                     ######## PLOT 
                                                                     tabPanel(shiny::icon("circle"),
                                                                              div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux (ws2, ws4, ws5)")))),

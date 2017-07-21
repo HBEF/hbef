@@ -75,110 +75,17 @@ shinyServer(function(session, input, output) {
   all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
   
   ########### END OF IMPORTANT PRELIMINARY INFO #############################################
-  
-  
-  
-  
-  ########### SIDEBAR FUNCTIONS ##############################################################
-  ###  allow 'select all' interactivity, do not edit
-  
-  observeEvent(input$select_all_ions, {
-    if(input$select_all_ions == 0) {}
-    else if (input$select_all_ions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")
-      updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
-    else{
-      updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
-      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
-  })
-  
-  observeEvent(input$select_all_anions, {
-    if(input$select_all_anions == 0) {}
-    else if (input$select_all_anions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")}
-    else{updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)}
-  })
-  
-  observeEvent(input$select_all_cations, {
-    if(input$select_all_cations == 0) {}
-    else if (input$select_all_cations%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
-    else{updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
-  })
-  
-  observeEvent(input$select_all_ws, {
-    if(input$select_all_ws == 0) {updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
-    else if (input$select_all_ws%%2 == 0){updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
-    else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
-  })
-  
-  observeEvent(input$select_all_ws2, {
-    if(input$select_all_ws2 == 0) {updateCheckboxGroupInput(session, "watersheds2", selected = "ws1")}
-    else if (input$select_all_ws2%%2 == 0){updateCheckboxGroupInput(session, "watersheds2", selected = "ws1")}
-    else{updateCheckboxGroupInput(session, "watersheds2", selected = watersheds)}
-  })
-  
-  solutes_NO3 <- reactive({c(input$solutes_NO3)})
-  solutes_NO33 <- reactive({c(input$solutes_NO33)})
-  
-  ########### END OF SIDEBAR FUNCTIONS ####################################################
-  
-  
-  
-  
+ 
   ########### DATA IMPORT ####################################################
   
   #load vegetation data
   lai_data<- readRDS("lai_data.rds")
-  fine_litter_data <- readRDS("fine_litter_data.rds")
+  yearly_count_means <- readRDS("yearly_count_means.rds")
   
   #load pq data
   load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   
-  #Cleaning vegetation data######################
-  
-  #Replacing missing data values with NA
-  fine_litter_data[fine_litter_data == -9999] <- NA
-  fine_litter_data[fine_litter_data == -9999.9] <- NA
-  fine_litter_data[fine_litter_data == -9999.99] <- NA
-  
-  #Average all count columns by year
-  by_year <- fine_litter_data %>% group_by(YEAR, SITE)
-  sugarm_count_mean<-by_year %>% summarise(sugarm_count_mean = mean(M_COUNT, na.rm=T))
-  redm_count_mean<-by_year %>% summarise(redm_count_mean = mean(f_COUNT, na.rm=T))
-  stripedm_count_mean<-by_year %>% summarise(stripedm_count_mean = mean(t_COUNT, na.rm=T))
-  ash_count_mean<-by_year %>% summarise(ash_count_mean = mean(Q_COUNT, na.rm=T))
-  beech_count_mean<-by_year %>% summarise(beech_count_mean = mean(B_COUNT, na.rm=T))
-  whiteb_count_mean<-by_year %>% summarise(whiteb_count_mean = mean(W_COUNT, na.rm=T))
-  yellowb_count_mean<-by_year %>% summarise(yellowb_count_mean = mean(Y_COUNT, na.rm=T))
-  pcherry_count_mean<-by_year %>% summarise(pcherry_count_mean = mean(P_COUNT, na.rm=T))
-  aspen_count_mean<-by_year %>% summarise(aspen_count_mean = mean(a_COUNT, na.rm=T))
-  
-  #paste a new column called species in each df
-  sugarm_count_mean$species <- rep("Sugar Maple", nrow(sugarm_count_mean))
-  redm_count_mean$species <- rep("Red Maple", nrow(redm_count_mean))
-  stripedm_count_mean$species <- rep("Striped Maple", nrow(stripedm_count_mean))
-  ash_count_mean$species <- rep("Ash", nrow(ash_count_mean))
-  beech_count_mean$species <- rep("Beech", nrow(beech_count_mean))
-  whiteb_count_mean$species <- rep("White Birch", nrow(whiteb_count_mean))
-  yellowb_count_mean$species <- rep("Yellow Birch", nrow(yellowb_count_mean))
-  pcherry_count_mean$species <- rep("Pin Cherry", nrow(pcherry_count_mean))
-  aspen_count_mean$species <- rep("Aspen", nrow(aspen_count_mean))
-  
-  #rename columns to be just "count" in order to merge into long df rather than wide
-  sugarm_count_mean<-plyr::rename(sugarm_count_mean, c("sugarm_count_mean"="count"))
-  redm_count_mean<-plyr::rename(redm_count_mean, c("redm_count_mean"="count"))
-  stripedm_count_mean<-plyr::rename(stripedm_count_mean, c("stripedm_count_mean"="count"))
-  ash_count_mean<-plyr::rename(ash_count_mean, c("ash_count_mean"="count"))
-  beech_count_mean<-plyr::rename(beech_count_mean, c("beech_count_mean"="count"))
-  whiteb_count_mean<-plyr::rename(whiteb_count_mean, c("whiteb_count_mean"="count"))
-  yellowb_count_mean<-plyr::rename(yellowb_count_mean, c("yellowb_count_mean"="count"))
-  pcherry_count_mean<-plyr::rename(pcherry_count_mean, c("pcherry_count_mean"="count"))
-  aspen_count_mean<-plyr::rename(aspen_count_mean, c("aspen_count_mean"="count"))
-  
-  #Merge all count column averages into one df with three total columns (year, species, count)
-  count_means <- Reduce(function(...) merge(..., all=T), 
-                        list(sugarm_count_mean, redm_count_mean, stripedm_count_mean, 
-                             ash_count_mean, beech_count_mean, whiteb_count_mean, 
-                             yellowb_count_mean, pcherry_count_mean, aspen_count_mean))
   site_names <- c(
     'BB'="Bear Brook Watershed site",
     'TF'="Throughfall site",
@@ -398,8 +305,8 @@ shinyServer(function(session, input, output) {
   #plot of paper birch and sugar maple decline after ice storm
   #also there's a weirdly large spike in 2011...
   output$leaf_count <- renderPlotly({
-    count_means<-count_means[count_means$SITE != "W5",]
-    leaf_count <- ggplot(count_means, aes(x=YEAR, y=count, color = species))+
+    yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",]
+    leaf_count <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
       geom_line(size=0.5)+ my_theme+
       geom_point(size=1.3, aes(text = paste("Species: ", species, "<br>", 
                                             "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
