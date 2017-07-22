@@ -1,12 +1,12 @@
 library(ggplot2)
-#library(lubridate)
+library(lubridate)
 library(gridExtra)
 library(readr)
 library(tidyr)
 library(dplyr)
 library(shiny)
 library(plotly)
-#library(utils)
+library(utils)
 library(grid)
 library(ggthemes)
 library(reshape2)
@@ -34,32 +34,33 @@ site_names <- c(
 ########### END OF DATA IMPORT #############################################
 
 
+########### IMPORTANT PRELIMINARY INFO #############################################
+
+###  Theme  ################
+my_theme <- theme_fivethirtyeight() + 
+  theme(rect = element_rect(fill = NA),
+        panel.grid.major = element_line(colour = "#dddddd"), 
+        text = element_text(family = "Helvetica", size = 12), 
+        legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
+        strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
+        axis.title= element_text(NULL), axis.title.x= element_blank(), 
+        axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
+
+color_anion <- c("NO3" = "#BF1616")
+
+source_shapes <- c("streamflow" = 16, "precipitation"= 21)
+watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
+
+### End of Theme ################
+
+########### END OF IMPORTANT PRELIMINARY INFO #########################################
+
+
 #######################################################################################
 ########### SHINY SERVER ##############################################################
 #######################################################################################
 
 shinyServer(function(session, input, output) {
-  
-  ########### IMPORTANT PRELIMINARY INFO #############################################
-  
-  ###  Theme  ################
-  my_theme <- theme_fivethirtyeight() + 
-    theme(rect = element_rect(fill = NA),
-          panel.grid.major = element_line(colour = "#dddddd"), 
-          text = element_text(family = "Helvetica", size = 12), 
-          legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
-          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
-          axis.title= element_text(NULL), axis.title.x= element_blank(), 
-          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
-  
-  color_anion <- c("NO3" = "#BF1616")
-  
-  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-  watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
-  
-  ### End of Theme ################
-  
-  ########### END OF IMPORTANT PRELIMINARY INFO #############################################
 
   ########### REACTIVE DATA AND X Y #########################################
   
@@ -145,28 +146,23 @@ shinyServer(function(session, input, output) {
       final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
-    
-  }
-  
+    }
   
   #############################################################
   ########### OUTPUTS #########################################
   #############################################################
   
-  #ggplotly that shows most plots increase in lai following the ice storm
+  #ggplotly that shows most plots increase in tree lai following the ice storm
   output$lai_plot <- renderPlotly({
-    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], ####THIS PLOT SHOULD BE DONE WITH fine_litter.txt HBEF DATA!!
-                       aes(x = YEAR, y = LAIT, color = ELEVATION_M))+ my_theme+ ###ALSO make more plots from said data
-      theme(legend.title = element_text("Plot Elevation", family = "Helvetica"),
-            strip.text = element_text(size = 10))+
+    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,],
+                       aes(x = YEAR, y = LAIT, color = ELEVATION_M))+ my_theme+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
-      labs(color="Plot Elevation")+
-      xlab(" ")+
-      ylab("LAI (meter-squared per meter-squared)")+ 
-      facet_wrap(~PLOT)+
-      coord_cartesian(ylim = c(2,11))+
-      theme(axis.text.x = element_text(angle = 90, hjust = 1))
+      labs(color="Plot Elevation", x=" ", y="LAIT (meter-squared per meter-squared)")+ 
+      facet_wrap(~PLOT)+ coord_cartesian(ylim = c(2,11))+
+      theme(axis.text.x = element_text(angle = 90, hjust = 1), 
+            legend.title = element_text("Plot Elevation", family = "Helvetica"),
+            strip.text = element_text(size = 10))
     
     lai_plot <- ggplotly(lai_plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
@@ -181,7 +177,7 @@ shinyServer(function(session, input, output) {
   })
   
   #plot of paper birch and sugar maple decline after ice storm
-  #also there's a weirdly large spike in 2011...
+  #(also there's a weirdly large spike in 2011...)
   output$leaf_count <- renderPlotly({
     yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",]
     leaf_count <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
@@ -192,7 +188,7 @@ shinyServer(function(session, input, output) {
       theme(legend.title = element_text("Tree Species", family = "Helvetica"),
             strip.text = element_text(size = 10))+
       xlim(min(input$date_range_count[1]), max(input$date_range_count[2]))+
-      xlab(" ")+ ylab("\n Leaf counts")+
+      xlab(" ")+ ylab("Leaf counts")+
       geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = 1998, y = 120, color = "black")
     
@@ -201,7 +197,7 @@ shinyServer(function(session, input, output) {
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
     
-    #manually adjust margins so labs aren't cut off
+    #manually adjust margins so axis labs aren't cut off
     leaf_count$x$layout$margin$l <- leaf_count$x$layout$margin$l + 30
     leaf_count$x$layout$margin$b <- leaf_count$x$layout$margin$b + 30
     
@@ -251,7 +247,7 @@ shinyServer(function(session, input, output) {
   })
 })
 
-
+#####efforts to figure out legend display#####
 #  my_theme <- theme_fivethirtyeight() +
 #    theme(rect = element_rect(fill = NA), panel.grid.major = element_line(colour = "#dddddd"), text = element_text(family = "Helvetica", size = 12),
 #        legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
