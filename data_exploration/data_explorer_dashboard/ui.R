@@ -69,16 +69,20 @@ shinyUI(
       width = 50,
       sidebarMenu(
         menuItem(" ", tabName = "dashboard", icon = icon("home")),
-        menuItem(" ", tabName = "exploratory", icon = icon("search-plus"))
-      )
-    ),
+        menuItem(" ", tabName = "exploratory", icon = icon("search-plus")))
+      ),
     dashboardBody(
       tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
       tags$script('
         $(document).on("keydown", function (e) {
         if (e.keyCode === 13) {
-          $("#go").click()};
+          $("#go_bubble").click()};
         });
+
+        $(document).on("keydown", function (e) {
+        if (e.keyCode === 13) {
+                  $("#go_exploratory").click()};
+                  });
         '),
       tags$head(includeScript(system.file('www', 'ajax.js'))),
       tags$head(includeScript(system.file('www', 'iframeResizer.contentWindow.min.js'))),
@@ -87,248 +91,223 @@ shinyUI(
         "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
       
       tabItems(
-        ##########################################################
-        #### ------------  Dashboard Tab Content  ----------- ####
-        ##########################################################
+        
+        ################################################################################################
+        #### ------------  Dashboard Tab Content  ------------------------------------------------------ 
+        #################################################################################################
         
         tabItem(tabName = "dashboard",
-        
-        ####### ---- Global Settings
-        
-        fluidRow(
-          tabBox(width = 12, side="right", selected = shiny::icon("circle"),
+        # Global Settings Box >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> --------
+            fluidRow( 
+              tabBox(width = 12, side="right", selected = shiny::icon("circle"),
+                     
+        ## ---- Global Settings Tab -----------------------------------------------------------------
              tabPanel(shiny::icon("gear"),
-                      div(class = "settingsRow", fluidRow(column(11, tags$h3("Global Settings")))),
-                      fluidRow(column(6, offset = 5,
-                      fluidRow(
+                      div(class = "settingsRow", fluidRow(column(6, offset = 6, tags$h3("Global Settings")))),
+                      #### Color Mode =================================
+                      fluidRow(column(6, offset = 6,
                         box(width = 12, title = "Color Mode", collapsible = TRUE, collapsed = TRUE, 
-                            ##Color Mode
-                            column(6, selectInput("colormode_global", label = "",
-                                                  choices = c("Compare Watersheds" = "ws","Compare Solutes"="solute"),
-                                                  selected = "solute")))),
-                      fluidRow(
-                        box(width = 12, title = "Granularity", collapsible = TRUE, collapsed = TRUE, 
-                          ##Granularity
-                          column(6, selectInput("granularity_global", label = "",
+                            column(12, selectInput("colormode_global", label = "",
+                                                  choices = c("Compare Watersheds" = "ws",
+                                                              "Compare Solutes"="solute"),
+                                                  selected = "solute"))))),
+                      #### Granularity =================================
+                      fluidRow(column(6, offset = 6,
+                        box(width = 12, title = "Granularity", collapsible = TRUE, collapsed = TRUE,
+                          column(12, selectInput("granularity_global", label = "",
                                                 choices = granularity,
-                                                selected = "year")))), 
-                      fluidRow(
-                        box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                            ##Units - Y Axis Log
-                            column(6, selectInput("log_global_y", label = "Y Axis",
+                                                selected = "year"))))), 
+                      #### Axis =================================
+                      fluidRow(column(6, offset = 6,
+                        box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE,
+                            column(12, selectInput("log_global_y", label = "Y Axis",
                                                   choices = c("linear", "log"), 
-                                                  selected = "linear")))),
-                       fluidRow(
+                                                  selected = "linear"))))),
+                      #### Animation =================================
+                      fluidRow(column(6, offset = 6,
                          box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
-                             
-                             ##Animate?
-                             column(4, selectInput("animate_global", label = ("Animate"),
+                             ##Animate ? ############################# 
+                             column(5, selectInput("animate_global", label = ("Animate"),
                                                    choices = c("Animate", "Still"), 
                                                    selected = "Still")),  
-                             ##Leave trace
+                             ##Leave trace ############################# 
                              column(6, selectInput("trace_global", label = ("Leave Trace"),
                                                    choices = c("Leave Trace", "No Trace"), 
                                                    selected = "Leave Trace")),
-                             ##Animation Speed
+                             ##Animation Speed ############################# 
                              column(12, sliderInput("animation_speed_global", label = h4("Speed"),
                                                     min = 0.25,
                                                     max = 2, 
                                                     step = 0.25,
                                                     post = "x",
-                                                    value = 1))))))),
-             ######## Main
+                                                    value = 1))
+                             )))
+                      ),
+        
+        
+        ####### ---- Main Choose Watershed Tab -----------------------------------------------------
              tabPanel(shiny::icon("circle"),
-                # Watersheds
+                #### Watersheds  =================================
                 fluidRow(column(4, tags$h3("Select a Watershed")),
-                  column(5, selectInput("watersheds", label = "",
+                  column(5, selectizeInput("watersheds", label = "",
                                       choices = watersheds, multiple = TRUE,
-                                      selected = "6")))))),
+                                      selected = "6", 
+                                      options = list(maxItems = 5))))
+                )
+        )),
         
-        ####  ---- PQ GRAPH
-        fluidRow(
-            tabBox(width = 12, side="right", selected = shiny::icon("circle"),
-                   ######## OPTIONS
-                   ##Units - Axis Log
-                   tabPanel(shiny::icon("gear"),
-                            fluidRow(
-                              box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                                  
-                                  ##Units - Y Axis Log
-                                  column(6, selectInput("log_pq", label = "Y Axis",
-                                                        choices = c("linear", "log"), 
-                                                        selected = "linear"))))),
-                   ######## PLOT 
-                   tabPanel(shiny::icon("circle"),
-                            div(class = "titleRow", fluidRow(column(5, tags$h2("Hydrologic Flux")),
-                             ##Granularity
-                             column(3,  offset = 4, selectInput("granularity", label = "",
-                                                                choices = granularity,
-                                                                selected = "year")))
-                            ),
-                            ## Time Plot
-                            plotlyOutput("plot_pq")
-                   ) #Closes tabpanel
-                   
-            )# Closes tab Box
+        
+      # PQ Graph Box >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>--------
+        fluidRow(column(9,    
+           fluidRow(
+              tabBox(width = 12, side="right", selected = shiny::icon("circle"),
+        
+        ####### ---- PQ Settings Tab -----------------------------------------------------
+            tabPanel(shiny::icon("gear"),
+                    #### Axis =================================
+                    fluidRow(column(6, offset = 6,
+                                    box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE,
+                                        column(6, selectInput("log_pq", label = "Y Axis",
+                                                              choices = c("linear", "log"),
+                                                              selected = "linear")))))),
+        ####### ---- PQ Plot Tab -----------------------------------------------------
+            tabPanel(shiny::icon("circle"),
+                     div(class = "titleRow", fluidRow(column(5, tags$h2("Hydrologic Flux")),
+                    #### Granularity =================================
+                     column(3,  offset = 4, selectInput("granularity", label = "",
+                                                        choices = granularity,
+                                                        selected = "year")))),
+                    #### PQ Plot =================================
+                      plotlyOutput("plot_pq")
             
-          ),# Closes Time Row
+           ) #Closes PQ Plot Tab
+        )# Closes PQ Tab Box
+      )# Closes PQ Row
+      )),# Closes PQ Row and Column
       
-      
-        ###  ---- PQ GRAPH END -----
         
-        
-        fluidRow(
-        ###  ---- TIME GRAPH
-        #### Main area
-        column(9,   
-        fluidRow(
-         tabBox(width = 12, side="right", selected = shiny::icon("circle"),
-                ######## OPTIONS
-                ##Units - Axis Log
+      # Time Graph Box >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>--------
+        fluidRow(column(9,    
+            fluidRow(
+              tabBox(width = 12, side="right", selected = shiny::icon("circle"),
+      ####### ---- Time Settings Tab -----------------------------------------------------
                 tabPanel(shiny::icon("gear"),
-                         fluidRow(
-                           box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                               
-                               ##Units - Y Axis Log
-                               column(6, selectInput("log_time", label = "Y Axis",
-                                                     choices = c("linear", "log"), 
-                                                     selected = "linear")))),
-                ### Animation
-                fluidRow(
-                  box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
-                      
-                      ##Animate?
-                      column(12, selectInput("animate_time", label = ("Animate"),
+                     #### Axis =================================
+                      fluidRow(column(6, offset = 6,
+                                      box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE,
+                                          column(6, selectInput("log_time", label = "Y Axis",
+                                                                choices = c("linear", "log"),
+                                                                selected = "linear"))))),
+                     #### Animation =================================
+                     fluidRow(column(6, offset = 6,
+                                     box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE,
+                        ##Animate ? ############################# 
+                        column(12, selectInput("animate_time", label = ("Animate"),
                                              choices = c("Animate", "Still"), 
-                                             selected = "Still")),  
-                      ##Leave trace
-                      column(12, selectInput("trace_time", label = ("Leave Trace"),
-                                             choices = c("Leave Trace", "No Trace"), 
-                                             selected = "Leave Trace")),
-                      ##Animation Speed
-                      column(12, sliderInput("animation_speed_time", label = h4("Speed"),
-                                             min = 0.25,
-                                             max = 2, 
-                                             step = 0.25,
-                                             post = "x",
-                                             value = 1))))),
-                
-                
-                ######## PLOT 
+                                             selected = "Still")),
+                        ##Leave trace #############################
+                        column(12, selectInput("trace_time", label = ("Leave Trace"),
+                                               choices = c("Leave Trace", "No Trace"),
+                                               selected = "Leave Trace")),
+                        ##Animation Speed #############################
+                        column(12, sliderInput("animation_speed_time", label = h4("Speed"),
+                                               min = 0.25, max = 2,step = 0.25,
+                                               post = "x", value = 1)))))),
+      ####### ---- Time Plot Tab -----------------------------------------------------
                 tabPanel(shiny::icon("circle"),
                          div(class = "titleRow", fluidRow(column(5, tags$h2("Time Series Data")),
-                          ##Granularity
-                          column(4,  offset = 2, selectInput("granularity_time", label = "",
-                                                             choices = granularity,
-                                                             selected = "year")))
-                         ),
-                         ## Time Plot
-                         conditionalPanel(condition = "input.yaxis_time != 'chargebalance'", plotlyOutput("plot_time")),
-                         conditionalPanel(condition = "input.yaxis_time == 'chargebalance'", plotlyOutput("plot_charge"))
+                    #### Granularity =================================
+                    column(3,  offset = 4, selectInput("granularity_time", label = "",
+                                                       choices = granularity,
+                                                       selected = "year")))),
+                    #### Time or Charge Plot =================================
+                    conditionalPanel(condition = "input.yaxis_time != 'chargebalance'", plotlyOutput("plot_time")),
+                    conditionalPanel(condition = "input.yaxis_time == 'chargebalance'", plotlyOutput("plot_charge"))
                          
-                ) #Closes tabpanel
+                ) #Closes Time Plot Tab Panel
                 
-            )# Closes tab Box
+            )# Closes Time Tab Box
          
-            ),# Closes Time Row
+      ),# Closes Time Row
         
-        
+      # CQ Graph Box >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>--------  
         fluidRow(
-          
-          ###  ---- CQ GRAPH
-          
           tabBox(width = 6, side="right", selected = shiny::icon("circle"),
-          ######## OPTIONS
-             ##Units - Axis Log
-             tabPanel(shiny::icon("gear"),
-                      fluidRow(
-                        box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                    
-                      ##Units - X Axis Log
-                          column(6, selectInput("log_cq_x", label = "X Axis",
-                                                                 choices = c("linear", "log"), 
-                                                                 selected = "linear")),  
-                      ##Units - Y Axis Log
-                      column(6, selectInput("log_cq_y", label = "Y Axis",
+      ####### ---- CQ Settings Tab -----------------------------------------------------
+              tabPanel(shiny::icon("gear"),
+                    #### Axis =================================
+                    fluidRow(column(12, offset = 0,
+                                    box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE,
+                                        # x axis
+                                        column(5, selectInput("log_cq_x", label = "X Axis",
+                                              choices = c("linear", "log"),
+                                              selected = "linear")),
+                                        # y axis
+                                        column(5, selectInput("log_cq_y", label = "Y Axis",
                                             choices = c("linear", "log"), 
-                                            selected = "linear")))),
-                      fluidRow(
-                        box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
-                      
-                      ##Animate?
-                      column(12, selectInput("animate_cq", label = ("Animate"),
-                                            choices = c("Animate", "Still"), 
-                                            selected = "Still")),  
-                      ##Leave trace
-                        column(12, selectInput("trace_cq", label = ("Leave Trace"),
+                                            selected = "linear"))))),
+                    #### Animation =================================
+                      fluidRow(column(12, offset = 0,
+                        box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE,
+                        ##Animate ? #############################
+                            column(5, selectInput("animate_cq", label = ("Animate"),
+                                                  choices = c("Animate", "Still"),
+                                                  selected = "Still")),
+                        ##Leave trace #############################
+                            column(5, selectInput("trace_cq", label = ("Leave Trace"),
                                                choices = c("Leave Trace", "No Trace"), 
                                                selected = "Leave Trace")),
-                      ##Animation Speed
-                        column(12, sliderInput("animation_speed_cq", label = h4("Speed"),
-                                                min = 0.25,
-                                                max = 2, 
-                                                step = 0.25,
-                                                post = "x",
-                                                value = 1))))),
-                 
-              ######## PLOT
+                        ##Animation Speed #############################
+                            column(5, sliderInput("animation_speed_cq", label = h4("Speed"),
+                                                  min = 0.25, max = 2, step = 0.25, post = "x",value = 1)))))),
+      ####### ---- CQ Plot Tab -----------------------------------------------------
               tabPanel(shiny::icon("circle"),
               div(class = "titleRow", fluidRow(column(5, tags$h2("c-Q")),
-                  ##Granularity
+                  #### Granularity =================================
                   column(4, offset = 2,selectInput("granularity_cq", label = "",
                                                    choices = granularity,
-                                                   selected = "year")))),         
-              ## CQ plot
+                                                   selected = "year")))),
+                  #### CQ Plot =================================
               fluidRow(
-                conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'chargebalance'", plotlyOutput("plot_cq")))
-              
-              )#Closes Row
-              
-              
+                conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'chargebalance'", 
+                                 plotlyOutput("plot_cq")))
+              )#Closes Row  
           ),
-          
-          ###  ---- FLUX GRAPH
+      
+      # Flux Graph Box >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>--------
           tabBox(width = 6, side="right", selected = shiny::icon("circle"),
-          ######## OPTIONS
-          ##Units - Axis Log
+          ####### ---- Flux Settings Tab -----------------------------------------------------
           tabPanel(shiny::icon("gear"),
+                   #### Axis =================================
                    fluidRow(
-                     box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                         
-                         ##Units - Y Axis Log
+                     box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE,
                          column(6, selectInput("log_flux", label = "Y Axis",
                                                choices = c("linear", "log"), 
                                                selected = "linear")))),
-                   ### Animation
+                   #### Animation =================================
                    fluidRow(
-                     box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
-                         
-                         ##Animate?
+                     box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE,
+                         ##Animate ? #############################
                          column(12, selectInput("animate_flux", label = ("Animate"),
                                                 choices = c("Animate", "Still"), 
                                                 selected = "Still")),  
-                         ##Leave trace
+                         ## Leave Trace #############################
                          column(12, selectInput("trace_flux", label = ("Leave Trace"),
                                                 choices = c("Leave Trace", "No Trace"), 
                                                 selected = "Leave Trace")),
-                         ##Animation Speed
+                         ##Animation Speed #############################
                          column(12, sliderInput("animation_speed_flux", label = h4("Speed"),
-                                                min = 0.25,
-                                                max = 2, 
-                                                step = 0.25,
-                                                post = "x",
-                                                value = 1))))),
+                                                min = 0.25, max = 2, step = 0.25,post = "x",value = 1))))),
           
-          ######## PLOT 
+          ####### ---- Flux Plot Tab -----------------------------------------------------
           tabPanel(shiny::icon("circle"),
           div(class = "titleRow", fluidRow(column(5, tags$h2("Flux")),
-                ##Granularity
-                column(4,  offset = 2, selectInput("granularity_flux", label = "",
-                                                   choices = granularity,
-                                                   selected = "year")))
-              ),
-              ## Flux Plot
-          conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'chargebalance'", 
+                 #### Granularity =================================
+                 column(4,  offset = 2, selectInput("granularity_flux", label = "",
+                                                    choices = granularity,
+                                                    selected = "year")))),
+                #### Flux Plot =================================
+                conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'chargebalance'", 
                            plotlyOutput("plot_flux"))
           ) #Closes tabpanel
           
@@ -336,163 +315,139 @@ shinyUI(
         
         )# Closes CQ and Flux Row
         
-        ),#Closes timegraph and flux and pq column. 
-        
+      ),#Closes timegraph and flux and pq column. 
+       
+      # Sidebar >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-------- 
         column(3,
-        
-          #### Side Bar Area
           box(width = 13, height = "1050px", id = "sidebar",
-              #Y Axis
+              #### Y_axis time =================================
               fluidRow(column(12,
                               selectInput("yaxis_time", label = "",
                                           choices = time_variables,
                                           selected = "flux"))),
-              ##Water Sources
+              #### Water Sources =================================
               fluidRow(
                 column(12, checkboxGroupInput("water_sources", label = h4("Water Sources"),
                                               choices = water_sources,
                                               selected = c("precipitation", "streamflow"),
                                               inline = FALSE))),
-              ##Units  
+              #### Units  =================================  
               fluidRow(
                 column(12, conditionalPanel(condition = "input.yaxis_time == 'concentration'",
                        selectInput("units", label = h4("Units"),
                                        choices = units,
-                                       selected = "uEquivalent/L"))),
+                                       selected = "uEquivalent/L")))),
               
-              #Solutes
-            
+              #### Solutes =================================
+              fluidRow(
                 column(12, conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'chargebalance'", 
                                             actionLink("select_all_ions", h4("Solutes")),
-                
-                #Cations
-               
-                       actionLink("select_all_cations", h5("Cations")),
-                       checkboxGroupInput("solutes_cations", label = "",
-                                          choices = solutes_cations,
-                                          selected = "Na"),
-                
-                #Anions
-                
-                actionLink("select_all_anions", h5("Anions")),
-                       checkboxGroupInput("solutes_anions", label = "",
-                                          choices = solutes_anions,
-                                          selected = "SO4)"),
-              #Hydrogen  
-              
-            
-                checkboxGroupInput("solutes_H", label = h4(""),
-                                              choices = solutes_H,
-                                              selected = ""))))
+                  ##Cations #############################
+                  actionLink("select_all_cations", h5("Cations")),
+                  checkboxGroupInput("solutes_cations", label = "",
+                                     choices = solutes_cations,
+                                     selected = "Na"),
+                  ##Anions #############################
+                  actionLink("select_all_anions", h5("Anions")),
+                  checkboxGroupInput("solutes_anions", label = "",
+                                     choices = solutes_anions,
+                                     selected = "SO4)"),
+                  ##Hydrogen #############################
+                  checkboxGroupInput("solutes_H", label = h4(""),
+                                     choices = solutes_H,
+                                     selected = "")))),
+              fluidRow(
+                column(12, actionButton("go_exploratory", "UPDATE")))
               
             ) #Closes sidebar box
         )
-          ) #Closes Time Graph Row.
-      
-          ###  ---- TIME GRAPH END -----
-      
-        
-        
-        
-      ),#Closes Dashboard tab item
-      
-      ##########################################################
-      #### -------  End of Dashboard Tab Content  --------- ####
-      ##########################################################
+  ) #Closes Time Graph Row.
       
       
-      ##########################################################
-      #### ---------  Exploratory Bubble Content  --------- ####
-      ##########################################################
+),#Closes Dashboard tab item
       
+      
+      ################################################################################################
+      #### ------------  End of Dashboard Tab Content  -----------------------------------------------
+      #################################################################################################
+      
+
+
+      
+      ################################################################################################
+      #### ------------  Exploratory Bubble Tab Content  ----------------------------------------------
+      #################################################################################################
       
       tabItem(tabName = "exploratory",
-              
             fluidRow(
+      # Exploratory Bubble Graph Box >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
               tabBox(width = 9, side="right", selected = shiny::icon("circle"),
-                     ######## OPTIONS
-                     ##Units - Axis Log
-                     tabPanel(shiny::icon("gear"),
-                              fluidRow(
-                                box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                                    
-                                    ##Units - X Axis Log
-                                    column(6, selectInput("log_bubble_x", label = "X Axis",
-                                                          choices = c("linear", "log"), 
-                                                          selected = "linear")),  
-                                    ##Units - Y Axis Log
-                                    column(6, selectInput("log_bubble_y", label = "Y Axis",
-                                                          choices = c("linear", "log"), 
-                                                          selected = "linear")))),
-                              fluidRow(
-                                box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE, 
-                                    ##Animate?
-                                    column(4, selectInput("animate_bubble", label = ("Animate"),
-                                                          choices = c("Animate", "Still"), 
-                                                          selected = "Still")),
-                                    ##Leave trace
-                                    column(12, selectInput("trace_bubble", label = ("Leave Trace"),
-                                                           choices = c("Leave Trace", "No Trace"), 
-                                                           selected = "Leave Trace")),
-                                    ##Animation Speed
-                                    column(12, sliderInput("animation_speed_bubble", label = h4("Speed"),
-                                                           min = 0.25,
-                                                           max = 2, 
-                                                           step = 0.25,
-                                                           post = "x",
-                                                           value = 1))))),
-                     
-                     ######## PLOT
-                     tabPanel(shiny::icon("circle"),
-                              div(class = "titleRow", fluidRow(column(5, tags$h2("Exploratory Bubble Graph")), 
-                                 ##Granularity
-                                 column(4, offset = 2,selectInput("granularity_bubble", label = "",
-                                                                  choices = granularity,
-                                                                  selected = "year")))),
-              
-              
-                    ## Main Plot Area
-                      #Solutes Y Input
-                      fluidRow(column(4, textInput("solutesy_formula", label = "", value = "Ca + Na + Mg", 
+               ####### ---- Bubble Graph Settings Tab -------------------------------------------------
+               tabPanel(shiny::icon("gear"),
+                        fluidRow(box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE,
+                         #### Axis =================================
+                        column(6, selectInput("log_bubble_x", label = "X Axis",
+                                              choices = c("linear", "log"),
+                                              selected = "linear")),
+                        column(6, selectInput("log_bubble_y", label = "Y Axis",
+                                              choices = c("linear", "log"),
+                                              selected = "linear")))),
+                        #### Animation =================================
+                        fluidRow(
+                          box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE,
+                              ##Animate ? #############################
+                              column(4, selectInput("animate_bubble", label = ("Animate"),
+                                                    choices = c("Animate", "Still"),
+                                                    selected = "Still")),
+                              ##Leave trace #############################
+                              column(12, selectInput("trace_bubble", label = ("Leave Trace"),
+                                                     choices = c("Leave Trace", "No Trace"),
+                                                     selected = "Leave Trace")),
+                              ##Animation Speed #############################
+                              column(12, sliderInput("animation_speed_bubble", label = h4("Speed"),
+                                                     min = 0.25, max = 2, step = 0.25, post = "x", value = 1))))),
+               
+               ####### ---- Bubble Graph Plot Tab -------------------------------------------------
+                tabPanel(shiny::icon("circle"),
+                         div(class = "titleRow", fluidRow(column(5, tags$h2("Exploratory Bubble Graph")),
+                         #### Granularity =================================
+                         column(4, offset = 2,selectInput("granularity_bubble", label = "",
+                                                          choices = granularity,
+                                                          selected = "year")))),
+                         #### Bubble Plot =================================
+                         #Solutes Y Input
+                         fluidRow(column(4, offset = 1,textInput("solutesy_formula", label = "", value = "Ca + Na + Mg", 
                                                    placeholder = "type in desired formula")),
                                column(2, selectInput("solutesy_source", label = "", choices = c("P" = "precipitation", "Q" = "streamflow"),
                                                                  selected = "streamflow")), 
-                               column(1, offset = 4, actionButton("go", "PLOT"))
-                      ),
-                      #Bubble Plot
-                      fluidRow(plotlyOutput("bubblePlot")),
-                      
-                      #Solutes X Input
-                      fluidRow(column(4, offset = 3, textInput("solutesx_formula", label = "", value = "SO4 + NO3", 
-                                                               placeholder = "type in desired formula")), 
-                              column(2, offset = 0, selectInput("solutesx_source", label = "", choices = c("P" = "precipitation", "Q" = "streamflow"),
-                                                                selected = "streamflow"))
-                      ))),
-                    
-                    ## Sidebar Area
-                    box(width = 3,
-                        ##Watersheds
-                        fluidRow(
-                          column(12, actionLink("select_all_ws", h4("Watersheds")), 
-                                 selectInput("watersheds_bubble", label = "",
-                                             choices = watersheds, multiple = TRUE,
-                                             selected = "6"))),
-                        ##Units  
-                        fluidRow(
-                          column(12, selectInput("units_bubble", label = h4("Units"),
-                                                 choices = c(units, "flux"),
-                                                 selected = "uEquivalent/L"))),
-                  
-                        ##Date Range
-                        fluidRow(
-                          column(12, sliderInput("date_range_bubble", label = h4("Date Range"),
-                                                 min = as.Date("1962-01-01"),
-                                                 max = as.Date("2014-01-01"),
-                                                 value = c(as.Date("1962-01-01"), as.Date("2014-01-01"))))),
-                        
-                        ##Sizing
-                        fluidRow(
-                          column(12, selectInput("sizing_bubble", label = h4("Bubble Size"),
+                               column(1, offset = 3, actionButton("go_bubble", "PLOT"))),
+                         #Bubble Plot
+                         fluidRow(plotlyOutput("bubblePlot")),
+                         #Solutes X Input
+                         fluidRow(column(4, offset = 3, textInput("solutesx_formula", label = "", value = "SO4 + NO3",
+                                                                  placeholder = "type in desired formula")),
+                                  column(2, offset = 0, selectInput("solutesx_source", label = "", 
+                                                                    choices = c("P" = "precipitation", "Q" = "streamflow"),
+                                                                    selected = "streamflow"))))),
+       # Sidebar >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>--------
+                box(width = 3,
+                    #### Watersheds =================================
+                    fluidRow(column(12, actionLink("select_all_ws", h4("Watersheds")),
+                                    selectInput("watersheds_bubble", label = "",
+                                                choices = watersheds, multiple = TRUE,
+                                                selected = "6"))),
+                    #### Units =================================
+                    fluidRow(column(12, selectInput("units_bubble", label = h4("Units"),
+                                                    choices = c(units, "flux"),
+                                                    selected = "uEquivalent/L"))),
+                    #### Date Range =================================
+                    fluidRow(column(12, sliderInput("date_range_bubble", label = h4("Date Range"),
+                                                    min = as.Date("1962-01-01"),
+                                                    max = as.Date("2014-01-01"),
+                                                    value = c(as.Date("1962-01-01"), 
+                                                              as.Date("2014-01-01"))))),
+                    #### Sizing =================================
+                    fluidRow(column(12, selectInput("sizing_bubble", label = h4("Bubble Size"),
                                                  choices = c("None" = 1, 
                                                              "Precipitation (P)" = "water_mm_precipitation", 
                                                              "Streamflow (Q)" = "water_mm_streamflow"))))
@@ -501,9 +456,9 @@ shinyUI(
             ) #Closes Fluid Row
           )#Closes Exploratory Bubble tab
       
-      ##########################################################
-      #### ------  End of Exploratory Bubble Content  ----- ####
-      ##########################################################
+        ################################################################################################
+        #### ------------  End of Exploratory Bubble Tab Content  --------------------------------------
+        #################################################################################################
       
       )#Closes TabItems
     )#Closes Dashboard Body
