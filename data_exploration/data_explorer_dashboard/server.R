@@ -360,10 +360,11 @@ shinyServer(function(input, output, session) {
     }})
   
   ###### >>>>>>> Reactive Charge Plot <<<<<<<<<< #####
-  reactive_data_charge <- eventReactive({input$go_exploratory |
+  
+  eventReactive_data_charge <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
-    data <- data[data$granularity %in% input$granularity_time,]
+    #data <- data[data$granularity %in% input$granularity_time,]
     data <- data[data$source %in% "precipitation",]
     data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
     data <- data[data$ws %in% input$watersheds,]
@@ -371,19 +372,30 @@ shinyServer(function(input, output, session) {
       mutate(charge_ueq = ifelse(solute %in% solutes_anions, -1*(concentration_ueq), concentration_ueq))
   
   })
+  
+  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
+  reactive_data_charge <- reactive({
+    data <- eventReactive_data_charge()[eventReactive_data_charge()$granularity %in% input$granularity_time,]
+  })
 
   ###### >>>>>>> End of Reactive Charge Plot <<<<<<<<<< #####
   
   
   
   ###### >>>>>>> Reactive PQ Plot <<<<<<<<<< #####
-  reactive_data_pq <- eventReactive({input$go_exploratory |
+  eventReactive_data_pq <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
-    data <- data[data$granularity %in% input$granularity,]
+    #data <- data[data$granularity %in% input$granularity,]
     data <- data[data$solute %in% "Ca",] #filter so that they only appear once. 
     data <- data[data$ws %in% input$watersheds,]
   })
+  
+  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
+  reactive_data_pq <- reactive({
+    data <- eventReactive_data_pq()[eventReactive_data_pq()$granularity %in% input$granularity,]
+  })
+  
   
   coloring_pq <- reactive({
     if(input$colormode_global == "solute"){grey_palette}
@@ -392,42 +404,51 @@ shinyServer(function(input, output, session) {
   
   
   ###### >>>>>>> Reactive cQ Plot <<<<<<<<<< #####
-  reactive_data_cq <- eventReactive({input$go_exploratory |
+  eventReactive_data_cq <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data <- imported_data
     d <- event_data("plotly_selected")
-    data <- data[data$granularity %in% input$granularity_cq,] 
+    #data <- data[data$granularity %in% input$granularity_cq,] 
     data <- data[data$solute %in% solutes(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds,]
     data <- data[data$source %in% "streamflow",]
     
-    if (!is.null(d$x)){
-    data <- data[as.numeric(as.POSIXct(data$date)) >= min(d$x) & as.numeric(as.POSIXct(data$date)) <= max(d$x),]}
-  
     if(input$trace_cq == "Leave Trace"){data <- accumulate_by(data, ~framey)}
     else{data}
     
+  })
+  
+  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
+  reactive_data_cq <- reactive({
+    d <- event_data("plotly_selected")
+    data <- eventReactive_data_cq()
+    if (!is.null(d$x)){
+      data <- data[eventReactive_data_cq()$granularity %in% input$granularity_cq,]
+      data <- data[as.numeric(as.POSIXct(data$date)) >= min(d$x) & as.numeric(as.POSIXct(data$date)) <= max(d$x),]
+      }
+    else{
+      data <- eventReactive_data_cq()[eventReactive_data_cq()$granularity %in% input$granularity_cq,]
+    }
   })
   
   #Animation Speed cQ Plot
   animation_speed_cq <- reactive({
     (80)*(1/(input$animation_speed_cq))^2
   })
-  
-  
+
   
   ###### >>>>>>> End of Reactive cQ Plot <<<<<<<<<< #####
   
   
   
   ###### >>>>>>> Reactive Flux Plot <<<<<<<<<< #####
-  reactive_data_flux <- eventReactive({input$go_exploratory |
+  eventReactive_data_flux <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
     data$date<- as.POSIXct(data$date)
     data$water_year<- as.POSIXct(data$water_year)
-    data <- data[data$granularity %in% input$granularity_flux,]
+    #data <- data[data$granularity %in% input$granularity_flux,]
     data <- data[data$source %in% input$water_sources,]
     data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
     data <- data[data$ws %in% input$watersheds,]
@@ -435,6 +456,11 @@ shinyServer(function(input, output, session) {
     if(input$trace_flux == "Leave Trace"){data <- accumulate_by(data, ~framey)}
     else{data}
 
+  })
+  
+  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
+  reactive_data_flux <- reactive({
+    data <- eventReactive_data_flux()[eventReactive_data_flux()$granularity %in% input$granularity_flux,]
   })
   
   ## X axis for Flux Plot
@@ -799,8 +825,7 @@ try typing Q and matching the dropdown menu by selecting Q"
       theplot %>%
         layout(xaxis = list(range = c(min(d$x)- 4000000, max(d$x)+ 4000000)))} 
         #must convert from POSIXct (s) to JavaScript equivalent (ms) 
-    else{theplot %>% 
-        layout(xaxis = list(tickformat = "%y"))}
+    else{theplot}
   }) 
   
   output$plot_charge <- renderPlotly({
