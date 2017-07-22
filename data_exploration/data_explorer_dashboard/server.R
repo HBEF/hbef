@@ -46,7 +46,7 @@ shinyServer(function(input, output, session) {
   ws_palette <- c("1" = "#fae550", "2" = "#a8db40", "3" = "#62c74a", "4" = "#408b77", 
                   "5" = "#27517b", "6" = "#303475", "7" = "#351042", "8" = "#79276e", "9" = "#b63462")
   source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-  source_color <- c("streamflow_Al" = "#162338", "streamflow_Mg" = "#273D64", "streamflow_Ca" = "#3B5C95", "streamflow_NH4" = "#4E7AC7" , 
+  source_color_solutemd <- c("streamflow_Al" = "#162338", "streamflow_Mg" = "#273D64", "streamflow_Ca" = "#3B5C95", "streamflow_NH4" = "#4E7AC7" , 
                     "streamflow_Na" = "#7195D2", "streamflow_K" = "#95AFDD","streamflow_PO4" = "#600B0B", "streamflow_SO4" = "#8F1010", 
                     "streamflow_NO3" = "#BF1616", "streamflow_SiO2"= "#CC4545", "streamflow_Cl" = "#D97373", "streamflow_HCO3" = "#E5A2A2",
                      "streamflow_H" = "#FFE79C", 
@@ -56,8 +56,10 @@ shinyServer(function(input, output, session) {
                     "precipitation_H" = "#FFFFFF",
                     "precipitation"= "#FFFFFF")
   
-  source_color_2 <- c("streamflow_1" = "#fae550", "streamflow_2" = "#a8db40", "streamflow_3" = "#62c74a", "streamflow_4" = "#408b77", 
-  "streamflow_5" = "#27517b", "streamflow_6" = "#303475", "streamflow_7" = "#351042", "streamflow_8" = "#79276e", "streamflow_9" = "#b63462")
+  source_color_wsmd <- c("streamflow_1" = "#fae550", "streamflow_2" = "#a8db40", "streamflow_3" = "#62c74a", "streamflow_4" = "#408b77", 
+  "streamflow_5" = "#27517b", "streamflow_6" = "#303475", "streamflow_7" = "#351042", "streamflow_8" = "#79276e", "streamflow_9" = "#b63462",
+  "precipitation_1" = "#FFFFFF", "precipitation_2" = "#FFFFFF", "precipitation_3" = "#FFFFFF", "precipitation_4" = "#FFFFFF", 
+  "precipitation_5" = "#FFFFFF", "precipitation_6" = "#FFFFFF", "precipitation_7" = "#FFFFFF", "precipitation_8" = "#FFFFFF", "precipitation_9" = "#FFFFFF")
   
   grey_palette <- c("#505050", "#CCCDD9")
   
@@ -244,7 +246,8 @@ shinyServer(function(input, output, session) {
   
   imported_data <- precip_streamflow_long
   imported_data %<>% 
-    mutate(fill_color = paste(source, solute, sep = '_'))
+    mutate(fill_color_solutemd = paste(source, solute, sep = '_')) %>% 
+    mutate(fill_color_wsmd = paste(source, ws, sep = '_'))
   imported_data_wide<- precip_streamflow_wide
   imported_data_super_wide<- precip_streamflow_super_wide
   levels(as.factor(imported_data$solute))
@@ -330,9 +333,6 @@ shinyServer(function(input, output, session) {
   
   })
 
-  
-  
-  
   ###### >>>>>>> End of Reactive Charge Plot <<<<<<<<<< #####
   
   
@@ -569,24 +569,22 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   
   #### ---------  GGPLOT TIME FUNCTION-----------------------
-  ggplot_time_function <- function(data, x, y, log, y_label, animate, speed, trace, color, color_scale, shape = "ws", fill = "fill_color"){
+  ggplot_time_function <- function(data, x, y, log, y_label, animate, speed, trace, color, color_scale, shape = "ws"){
     
     if(animate == "Animate"){
       if(trace == "Leave Trace"){
-        plot <- ggplot(data=data, aes_string(x = x, y = y, frame = "frame", color = color, alpha = "ws", group = "solute"))}
+        plot <- ggplot(data=data, aes_string(x = x, y = y, frame = "frame", color = color))}
 
       else{
-        plot <- ggplot(data=data, aes_string(x = x, y = y, frame = "framey", color = color, alpha = "ws", group = "solute"))}
+        plot <- ggplot(data=data, aes_string(x = x, y = y, frame = "framey", color = color))}
       }
     
     else{
-      plot <- ggplot(data=data, aes_string(x = x, y = y, color = color, shape = shape, fill = fill, alpha = "ws", group = "solute"))
+      plot <- ggplot(data=data, aes_string(x = x, y = y, color = color))
     } 
     
     plot <- plot +
       my_theme + 
-      geom_line(size = 0.5) + 
-      scale_fill_manual(values = source_color) +
       scale_shape_manual(values = c(21, 22, 23, 24, 25)) + 
       scale_color_manual(values = color_scale) +
       scale_alpha_discrete(range = c(0.9, 0.5))+
@@ -594,11 +592,16 @@ try typing Q and matching the dropdown menu by selecting Q"
     
     if(color == "ws"){
       plot <- plot + 
-        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("solute"), fill = get("fill_color"), text = paste(solute,":", round(get(y), 4))))
+        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("solute"),fill = get("fill_color_wsmd"), 
+                                                 text = paste(solute,":", round(get(y), 4))))+
+        geom_line(size = 0.5, aes_string(fill = "source", group = "solute")) + 
+        scale_fill_manual(values = source_color_wsmd)
     }
     else{
       plot <- plot + 
-        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("ws"), fill = get("fill_color"), text = paste(solute,":", round(get(y), 4))))
+        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("ws"), fill = get("fill_color_solutemd"), text = paste(solute,":", round(get(y), 4))))+
+        geom_line(size = 0.5, aes_string(group = "fill_color_solutemd")) + 
+        scale_fill_manual(values = source_color_solutemd)
     }
 
       
