@@ -64,7 +64,7 @@ shinyServer(function(session, input, output) {
   reactive_data <- reactive({
     data <- water_chem_data
     data <- data[data$granularity %in% input$granularity,]
-    data <- data[data$source %in% input$water_sources2,]
+    data <- data[data$source %in% c("streamflow"),]
     data <- data[data$solute %in% c("NO3"),] 
     data <- data[data$ws %in% input$watersheds2,]
   })
@@ -120,21 +120,21 @@ shinyServer(function(session, input, output) {
   ggplot_function <- function(data, x, y, log, units, date_range){
     
     if(log == "log") {
-      plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), linetype= ws, color= solute, shape= source))+
+      plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), linetype= ws))+
         labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x= get(x), y= get(y), linetype= ws, color= solute, shape= source))+
+      plot <- ggplot(data=data, aes(x= get(x), y= get(y), linetype= ws))+
         labs(x = "Water Year", y = units)}
     
-    final <- plot+ my_theme + geom_line(size = 0.5) + 
+    final <- plot+ my_theme + geom_line(size = 0.5, color = "#BF1616") + 
       geom_point(size = 1.3, fill = "white", stroke = 0.5, 
-                 aes(text = paste("Watershed: ", ws, "<br>", "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+                 aes(text = paste("Watershed: ", ws, "<br>", "Value:", get(y), "<br>", "Date: ", get(x))),
+                 color = "#BF1616", shape = "21", fill = "#BF1616") + 
       xlim(min(date_range[1]), max(date_range[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
       scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = color_anion) +
       scale_linetype_manual(values = watershed_linetypes)
     
     ggplotly(  

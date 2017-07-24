@@ -125,13 +125,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                           selectInput("watersheds2", label = "",
                                                                       choices = watersheds, multiple = T,
                                                                       selected = "6"))),
-                                                 
-                                                 ##Water Sources
-                                                 fluidRow(
-                                                   column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
-                                                                                 choices = water_sources,
-                                                                                 selected = "streamflow"))),
-                                                 
+
                                                  ##Units  
                                                  fluidRow(
                                                    column(12, selectInput("units", label = h4("Units"),
