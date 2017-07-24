@@ -9,9 +9,7 @@ library(plotly)
 library(utils)
 library(grid)
 library(ggthemes)
-library(reshape2)
 
-#detach("package:<packageName>", unload=TRUE)
 
 ########### DATA IMPORT ####################################################
 
@@ -19,10 +17,8 @@ library(reshape2)
 lai_data<- readRDS("lai_data.rds")
 yearly_count_means <- readRDS("yearly_count_means.rds")
 
-#load pq data
-load("precip_streamflow_dfs.RData")
-imported_data <- precip_streamflow_long
-data_norm <- readRDS("normalized_flux.rds")
+#load water chemistry data
+water_chem_data <- readRDS("normalized_flux.rds")
 
 #create vector to rename facets in leaf count plot
 site_names <- c(
@@ -66,11 +62,10 @@ shinyServer(function(session, input, output) {
   
   #Reactive Data for NO3 trends
   reactive_data <- reactive({
-    data <- imported_data
+    data <- water_chem_data
     data <- data[data$granularity %in% input$granularity,]
     data <- data[data$source %in% input$water_sources2,]
     data <- data[data$solute %in% c("NO3"),] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds2,]
   })
   
@@ -90,7 +85,7 @@ shinyServer(function(session, input, output) {
   
   #Reactive flux data  
   reactive_data_flux <- reactive({
-    data <- imported_data
+    data <- water_chem_data
     data <- data[data$granularity %in% input$granularity3,]
     data <- data[data$source %in% c("streamflow"),]
     data <- data[data$ws %in% c("1", "6"),]
@@ -103,10 +98,10 @@ shinyServer(function(session, input, output) {
   
   #Reactive normalized flux data
   reactive_data_norm <- reactive({
-    data_norm <- data_norm[data_norm$granularity %in% input$granularity3,]
-    data_norm <- data_norm[data_norm$source %in% c("streamflow"),]
-    data_norm <- data_norm[data_norm$ws %in% c("2", "4", "5"),]
-    data_norm <- data_norm[data_norm$solute %in% c("NO3"),]
+    data <- water_chem_data[water_chem_data$granularity %in% input$granularity3,]
+    data <- data[data$source %in% c("streamflow"),]
+    data <- data[data$ws %in% c("2", "4", "5"),]
+    data <- data[data$solute %in% c("NO3"),]
   })
   
   xflux <- reactive({
@@ -125,7 +120,7 @@ shinyServer(function(session, input, output) {
   ggplot_function <- function(data, x, y, log, units, date_range){
     
     if(log == "log") {
-      plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), color= solute, shape= source, linetype= ws))+
+      plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), linetype= ws, color= solute, shape= source))+
         labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
     else{
@@ -138,9 +133,9 @@ shinyServer(function(session, input, output) {
       xlim(min(date_range[1]), max(date_range[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
-      scale_shape_manual(labels=NULL,values = source_shapes) +
-      scale_color_manual(labels = NULL, values = color_anion) +
-      scale_linetype_manual(labels = c("ws1","ws2","ws3","ws4","ws5","ws6","ws7","ws8","ws9"), values = watershed_linetypes)
+      scale_shape_manual(values = source_shapes) +
+      scale_color_manual(values = color_anion) +
+      scale_linetype_manual(values = watershed_linetypes)
     
     ggplotly(  
       final, tooltip = "text") %>%
@@ -176,8 +171,7 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE)
   })
   
-  #plot of paper birch and sugar maple decline after ice storm
-  #(also there's a weirdly large spike in 2011...)
+  #plot of paper birch and sugar maple, etc. decline due to ice storm
   output$leaf_count <- renderPlotly({
     yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",]
     leaf_count <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
@@ -259,7 +253,7 @@ shinyServer(function(session, input, output) {
 #  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
 #  watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
 # 
-#  dataa <- imported_data
+#  dataa <- water_chem_data
 #  dataa <- dataa[dataa$granularity == "year",]
 #  dataa <- dataa[dataa$source %in% c("streamflow"),]
 #  dataa <- dataa[dataa$ws %in% c("1", "6"),]
