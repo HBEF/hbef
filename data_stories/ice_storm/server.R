@@ -240,32 +240,3 @@ shinyServer(function(session, input, output) {
       )
   })
 })
-
-#####efforts to figure out legend display#####
-#  my_theme <- theme_fivethirtyeight() +
-#    theme(rect = element_rect(fill = NA), panel.grid.major = element_line(colour = "#dddddd"), text = element_text(family = "Helvetica", size = 12),
-#        legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
-#          strip.text = element_text(hjust = 1, size = 20, face = "bold"),
-#        axis.title= element_text(NULL), axis.title.x= element_blank(),
-#          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
-# 
-#  color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
-#  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-#  watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
-# 
-#  dataa <- water_chem_data
-#  dataa <- dataa[dataa$granularity == "year",]
-#  dataa <- dataa[dataa$source %in% c("streamflow"),]
-#  dataa <- dataa[dataa$ws %in% c("1", "6"),]
-#  dataa <- dataa[dataa$solute %in% c("NO3"),]
-# 
-# p<-ggplot(dataa, aes(x= water_year, y= flux, linetype= ws, color= solute, shape= source))+
-#    labs(x = "Water Year", y = "flux")+    geom_line(size = 0.5) + my_theme + 
-#    geom_point(size = 1.3, fill = "white", stroke = 0.5,
-#               aes(text = paste("Watershed: ", ws, "<br>", "Value:", flux, "<br>", "Date: ", water_year))) +
-#    geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
-#    annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
-#    scale_shape_manual(values = source_shapes) +
-#    scale_color_manual(values = color_anion)+ guides(shape = F, color = F)
-#    scale_linetype_manual(labels = c("ws1","ws2","ws3","ws4","ws5","ws6","ws7","ws8","ws9"), values = watershed_linetypes)
-# ggplotly(p)
