@@ -4,6 +4,7 @@ library(readr)
 library(tidyr)
 library(dplyr)
 library(shiny)
+library(shinyjs)
 library(plotly)
 library(shinydashboard)
 
@@ -62,8 +63,8 @@ units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_u
 
 
 shinyUI(
-  
-  dashboardPage(skin = "black",
+  dashboardPage(
+    skin = "black",
     dashboardHeader(title = "Exploratory Dashboard"),
     dashboardSidebar(
       width = 50,
@@ -72,6 +73,7 @@ shinyUI(
         menuItem(" ", tabName = "exploratory", icon = icon("search-plus")))
       ),
     dashboardBody(
+      useShinyjs(),  # Set up shinyjs
       tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
       tags$script('
         $(document).on("keydown", function (e) {
@@ -174,7 +176,7 @@ shinyUI(
             tabPanel(shiny::icon("circle"),
                      div(class = "titleRow", fluidRow(column(5, tags$h2("Hydrologic Flux")),
                     #### Granularity =================================
-                     column(3,  offset = 4, selectInput("granularity", label = "",
+                     column(3,  offset = 4, selectInput("granularity_pq", label = "",
                                                         choices = granularity,
                                                         selected = "year")))),
                     #### PQ Plot =================================
@@ -223,7 +225,7 @@ shinyUI(
                     #### Time or Charge Plot =================================
                     conditionalPanel(condition = "input.yaxis_time != 'chargebalance'", plotlyOutput("plot_time")),
                     conditionalPanel(condition = "input.yaxis_time == 'chargebalance'", plotlyOutput("plot_charge"))
-                         
+                    #verbatimTextOutput("brush")     
                 ) #Closes Time Plot Tab Panel
                 
             )# Closes Time Tab Box
@@ -340,22 +342,22 @@ shinyUI(
               
               #### Solutes =================================
               fluidRow(
-                column(12, conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'chargebalance'", 
+                div(class="solutes_solutesmd", id = "solutes_col", column(12, conditionalPanel(condition = "input.yaxis_time == 'concentration' || input.yaxis_time == 'chargebalance'", 
                                             actionLink("select_all_ions", h4("Solutes")),
                   ##Cations #############################
                   actionLink("select_all_cations", h5("Cations")),
                   checkboxGroupInput("solutes_cations", label = "",
                                      choices = solutes_cations,
-                                     selected = "Na"),
+                                     selected = c("Na", "K")),
                   ##Anions #############################
                   actionLink("select_all_anions", h5("Anions")),
                   checkboxGroupInput("solutes_anions", label = "",
                                      choices = solutes_anions,
-                                     selected = "SO4)"),
+                                     selected = c("SO4")),
                   ##Hydrogen #############################
                   checkboxGroupInput("solutes_H", label = h4(""),
                                      choices = solutes_H,
-                                     selected = "")))),
+                                     selected = ""))))),
               fluidRow(
                 column(12, actionButton("go_exploratory", "UPDATE")))
               
@@ -384,16 +386,17 @@ shinyUI(
               tabBox(width = 9, side="right", selected = shiny::icon("circle"),
                ####### ---- Bubble Graph Settings Tab -------------------------------------------------
                tabPanel(shiny::icon("gear"),
-                        fluidRow(box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE,
+                        fluidRow(column(6, offset = 6,
+                                        box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE,
                          #### Axis =================================
                         column(6, selectInput("log_bubble_x", label = "X Axis",
                                               choices = c("linear", "log"),
                                               selected = "linear")),
                         column(6, selectInput("log_bubble_y", label = "Y Axis",
                                               choices = c("linear", "log"),
-                                              selected = "linear")))),
+                                              selected = "linear"))))),
                         #### Animation =================================
-                        fluidRow(
+                        fluidRow(column(6, offset = 6,
                           box(width = 12, title = "Animation", collapsible = TRUE, collapsed = TRUE,
                               ##Animate ? #############################
                               column(4, selectInput("animate_bubble", label = ("Animate"),
@@ -405,7 +408,7 @@ shinyUI(
                                                      selected = "Leave Trace")),
                               ##Animation Speed #############################
                               column(12, sliderInput("animation_speed_bubble", label = h4("Speed"),
-                                                     min = 0.25, max = 2, step = 0.25, post = "x", value = 1))))),
+                                                     min = 0.25, max = 2, step = 0.25, post = "x", value = 1)))))),
                
                ####### ---- Bubble Graph Plot Tab -------------------------------------------------
                 tabPanel(shiny::icon("circle"),
@@ -432,25 +435,31 @@ shinyUI(
        # Sidebar >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>--------
                 box(width = 3,
                     #### Watersheds =================================
-                    fluidRow(column(12, actionLink("select_all_ws", h4("Watersheds")),
+                    fluidRow(column(12, actionLink("select_all_ws", h4("Select Watersheds")),
                                     selectInput("watersheds_bubble", label = "",
                                                 choices = watersheds, multiple = TRUE,
                                                 selected = "6"))),
                     #### Units =================================
-                    fluidRow(column(12, selectInput("units_bubble", label = h4("Units"),
+                    fluidRow(column(12, selectInput("units_bubble", label = h4("Select Units"),
                                                     choices = c(units, "flux"),
                                                     selected = "uEquivalent/L"))),
                     #### Date Range =================================
-                    fluidRow(column(12, sliderInput("date_range_bubble", label = h4("Date Range"),
+                    fluidRow(column(12, sliderInput("date_range_bubble", label = h4("Select Date Range"),
                                                     min = as.Date("1962-01-01"),
                                                     max = as.Date("2014-01-01"),
                                                     value = c(as.Date("1962-01-01"), 
                                                               as.Date("2014-01-01"))))),
                     #### Sizing =================================
-                    fluidRow(column(12, selectInput("sizing_bubble", label = h4("Bubble Size"),
+                    fluidRow(column(12, selectInput("sizing_bubble", label = h4("Select Bubble Size"),
                                                  choices = c("None" = 1, 
                                                              "Precipitation (P)" = "water_mm_precipitation", 
-                                                             "Streamflow (Q)" = "water_mm_streamflow"))))
+                                                             "Streamflow (Q)" = "water_mm_streamflow")))),
+                    
+                    #### Coloring =================================
+                    fluidRow(column(12, selectInput("coloring_bubble", label = h4("Select Bubble Color"),
+                                                    choices = c("None" = 1, 
+                                                                "Date" = "date", 
+                                                                "Watershed" = "ws"))))
                     
               )#Closes Sidebar Box 
             ) #Closes Fluid Row

@@ -30,9 +30,11 @@ shinyServer(function(input, output, session) {
           panel.grid.major.x = element_line(colour = NA),
           text = element_text(family = "Helvetica", size = 12), 
           legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
-          #strip.text = element_text(margin = margin(20)),
           axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
-          plot.margin = margin(1, 1, 1, 1, "cm"))
+          plot.margin = margin(1, 1, 1, 1, "cm"),
+          strip.background = element_rect(colour = NA, fill = NA),
+          strip.text = element_text(hjust = 1, size = 10, face = "bold", lineheight = 20))
+  
   
   color_cation <- c("Al" = "#240085", "Mg" = "#1D267A", "Ca" = "#164C6F", "NH4" = "#0F7364" , "Na" = "#089959", "K" = "#02C04E")
   color_anion <- c("PO4" = "#BB1D4C", "SO4" = "#BB1D4C", "NO3" = "#C83239", "SiO2"= "#D54726", "Cl" = "#E25C13", "HCO3" = "#F07100")
@@ -111,6 +113,19 @@ shinyServer(function(input, output, session) {
   
   all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
   
+  
+  
+  observe({
+    # Change the following line for more examples
+    if(input$colormode_global == "ws"){
+      addClass("solutes_col", "solutes_wsmd")
+      removeClass("solutes_col", "solutes_solutesmd")}
+    else{
+      removeClass("solutes_col", "solutes_wsmd")
+      addClass("solutes_col", "solutes_solutesmd")
+    }
+  })
+  
 
   ############ FUNCTIONS ##################################
   
@@ -143,7 +158,7 @@ shinyServer(function(input, output, session) {
     split_each <- str_split(trim, " ")
     include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x , sep=""), x))
     p_q_replace <- sapply(include_units, function(x) gsub("^[P|Q]", "water_mm", x, fixed = FALSE))
-    add_source <- sapply(p_q_replace, function(x) ifelse(str_detect(x, "date"), x, paste(x, paste("_", input$solutesx_source, sep=""), sep="")))    
+    add_source <- sapply(p_q_replace, function(x) ifelse(str_detect(x, "date"), x, (ifelse(str_detect(x, "[[:alpha:]]"), paste(x, paste("_", input$solutesx_source, sep=""), sep = ""), x))))    
     formula <- paste(add_source, collapse=' ' )
     formula
   })
@@ -155,7 +170,7 @@ shinyServer(function(input, output, session) {
     include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
     trim <- str_trim(include_space)
     split_each <- str_split(trim, " ")
-    include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x , sep=""), x))
+    include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x, sep=""), x))
     p_q_replace <- sapply(include_units, function(x) gsub("^[P|Q]", "water_mm", x, fixed = FALSE))
     add_source <- sapply(p_q_replace, function(x) ifelse(str_detect(x, "[[:alpha::]]"), paste(x, paste("_", input$solutesy_source, sep=""), sep=""), x))    
     formula <- paste(add_source, collapse=' ' )
@@ -386,14 +401,23 @@ shinyServer(function(input, output, session) {
   eventReactive_data_pq <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
-    #data <- data[data$granularity %in% input$granularity,]
+    data$date<- as.POSIXct(data$date)
+    data$water_year<- as.POSIXct(data$water_year)
+    #data <- data[data$granularity %in% input$granularity_pq,]
     data <- data[data$solute %in% "Ca",] #filter so that they only appear once. 
     data <- data[data$ws %in% input$watersheds,]
   })
   
   #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
   reactive_data_pq <- reactive({
-    data <- eventReactive_data_pq()[eventReactive_data_pq()$granularity %in% input$granularity,]
+    data <- eventReactive_data_pq()[eventReactive_data_pq()$granularity %in% input$granularity_pq,]
+  })
+  
+  ## X axis for PQ Plot
+  x_pq <- reactive({
+    if(input$granularity_pq == "week"){"date"}
+    else if(input$granularity_pq == "month"){"date"}
+    else if(input$granularity_pq == "year"){"water_year"}
   })
   
   
@@ -593,20 +617,28 @@ try typing Q and matching the dropdown menu by selecting Q"
   ########### PLOT FUNCTIONS #########################################
   
   #### ---------  GGPLOT BASIC PQ PLOT FUNCTION-----------------------
-  basic_ggplot_function <- function(data, x, y, log, color_scale){
+  basic_ggplot_function <- function(data, x, y, log, color_scale, date_breaks, date_labels){
     
     data_stream <- data[data$source %in% c("streamflow"),]
     data_precip <- data[data$source %in% c("precipitation"),]
     
     
     #Streamflow Plot
-    streamflow <- ggplot(data=data_stream, aes(x = as.POSIXct(date), y = water_mm, color = ws)) + 
+    streamflow <- ggplot(data=data_stream, aes(x = get(x), y = water_mm, color = ws)) + 
       my_theme +
       geom_line()+
-      geom_point(size = 1.3, fill = "white", stroke = 0.2, aes(text= paste(framey, ":",water_mm)))+
+      geom_point(size = 1.3, fill = "white", stroke = 0.2, 
+                 aes(text= {
+                   if(input$granularity_pq == "year"){
+                     paste(ws, " • ", "(",strftime(get(x), "%Y"), ", ",water_mm, ")", sep="")}
+                   else if(input$granularity_pq == "month"){
+                     paste(ws, " • ", "(",strftime(get(x), "%Y-%b"), ", ",water_mm, ")", sep="")}
+                   else{
+                     paste(ws, " • ", "(",strftime(get(x), "%Y-%b-%d"), ", ",water_mm, ")", sep="")}}))+
       labs(x = "", y = "Q (mm)")+
       scale_color_manual(values = color_scale)+
-      scale_fill_manual(values = color_scale)
+      scale_fill_manual(values = color_scale)+
+      scale_x_datetime(date_breaks = date_breaks, date_labels = date_labels)
       
     
     if(log == "log"){
@@ -617,10 +649,15 @@ try typing Q and matching the dropdown menu by selecting Q"
     #Precipitation Plot
     precipitation <- ggplot()+ 
       my_theme + 
-      geom_bar(data=data_precip, aes(x = as.POSIXct(date), y = water_mm, fill = ws, text= paste(framey, ":", water_mm)), 
+      geom_bar(data=data_precip, aes(x = get(x), y = water_mm, fill = ws, 
+                                     text={
+                                       if(input$granularity_pq == "year"){paste(ws, " • ", "(",strftime(get(x), "%Y"), ", ",water_mm, ")", sep="")}
+                                       else if(input$granularity_pq == "month"){paste(ws, " • ", "(",strftime(get(x), "%Y-%b"), ", ",water_mm, ")", sep="")}
+                                       else{paste(ws, " • ", "(",strftime(get(x), "%Y-%b-%d"), ", ",water_mm, ")", sep="")}}), 
                stat = "identity", position = "dodge", key = date)+ 
       scale_y_reverse() + labs(x = "", y = "P (mm)")+
-      scale_fill_manual(values = color_scale)
+      scale_fill_manual(values = color_scale)+
+      scale_x_datetime(date_breaks = date_breaks, date_labels = date_labels)
     
     
     streamflow <- ggplotly(streamflow, showlegend = FALSE, tooltip = "text")
@@ -637,7 +674,10 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   
   #### ---------  GGPLOT TIME FUNCTION-----------------------
-  ggplot_time_function <- function(data, x, y, log, y_label, animate, speed, trace, color, line_color_scale, fill_color_scale, granularity = "year"){
+  ggplot_time_function <- function(data, x, y, log, y_label, 
+                                   animate, speed, trace, 
+                                   color, line_color_scale, fill_color_scale,
+                                   date_breaks = "5 years", date_labels = "%Y", granularity){
     
     if(animate == "Animate"){
       if(trace == "Leave Trace"){
@@ -657,18 +697,27 @@ try typing Q and matching the dropdown menu by selecting Q"
       scale_color_manual(values = line_color_scale) +
       scale_fill_manual(values = fill_color_scale)+
       scale_alpha_discrete(range = c(0.9, 0.5))+
-      labs(x = "", y = y_label)
+      labs(x = "", y = y_label)+
+      scale_x_datetime(date_breaks = date_breaks, date_labels = date_labels)
     
     if(color == "ws"){
       plot <- plot + 
         geom_line(size = 0.5, aes_string(shape = "solute", group = "source")) + 
         geom_point(size = 1.3, stroke = 0.2, aes(shape = get("solute"),fill = get("fill_color_wsmd"), 
-                                                 text = paste(solute,":", round(get(y), 4))))
+                                                 text={
+                                                   if(granularity == "year"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y"), ", ", round(get(y),2), ")", sep="")}
+                                                   else if(granularity == "month"){paste(ws, " • ", strftime(get(x), "%Y-%b"), " • ", solute, " • ", round(get(y),2), sep="")}
+                                                   else{paste(ws, " • ", strftime(get(x), "%Y-%b-%d"), " • ", solute, " • ", round(get(y),2), sep="")}}))
     }
     else{
       plot <- plot + 
         geom_line(size = 0.5, aes_string(fill = "source", shape = "ws", group = "solute")) + 
-        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("ws"), fill = get("fill_color_solutemd"), text = paste(solute,":", round(get(y), 4))))
+        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("ws"), fill = get("fill_color_solutemd"), 
+                                                 text={
+                                                   if(granularity == "year"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y"), ", ", round(get(y),2), ")", sep="")}
+                                                   else if(granularity == "month"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y-%b"), ", ", round(get(y),2), ")", sep="")}
+                                                   else{paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y-%b-%d"), ", ", round(get(y),2), ")", sep="")}}))
+       
     }
 
       
@@ -691,7 +740,7 @@ try typing Q and matching the dropdown menu by selecting Q"
       ggplotly(plot, tooltip = "text") %>%
         config(displayModeBar = FALSE) %>%
         config(showLink = FALSE) %>% 
-        layout(hovermode = "x")%>%
+        layout(hovermode = "closest")%>%
         layout(dragmode = "select")
     }
   }
@@ -699,14 +748,14 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   #### ---------  GGPLOT CHARGE BALANCE FUNCTION-----------------------
   ggplot_charge_function <- function(data, x, y, log, y_label, color_scale){
-    plot <- ggplot(data=data, aes(x = as.POSIXct(get(x)), y = get(y), color = solute, fill = solute, shape = source, alpha = ws))+
+    plot <- ggplot(data=data, aes(x = as.POSIXct(get(x)), y = get(y), color = solute, fill = solute, shape = source))+
       my_theme + 
       geom_area() + 
       facet_grid(ws ~ .)+
       scale_color_manual(values = color_scale) +
       scale_fill_manual(values = color_scale) +
       scale_alpha_discrete(range = c(0.9, 0.5))+
-      labs(x = "Water Year", y = y_label)
+      labs(x = "", y = y_label)
     
     if(log == "log"){
       plot <- plot + scale_y_continuous(trans='log2')+
@@ -724,35 +773,33 @@ try typing Q and matching the dropdown menu by selecting Q"
   #### ---------  GGPLOT BUBBLE FUNCTION-----------------------
   
   ggplot_bubble_function <- function(data, x, y, log_x, log_y, x_label, y_label,
-                                     animate, speed, trace, color = NA, color_scale = NA, size = NA, size_range, text = NA, shape = NA){
+                                     animate, speed, trace, 
+                                     color = NA, color_scale = NA, 
+                                     size = NA, size_range, 
+                                     text = NA, cq = "no", granularity){
     
-    if(animate == "Animate"){
-      if(trace == "Leave Trace"){
-        plot <- ggplot(data=data, aes(frame = frame, text = paste(frame, ": (", round(get(x)), ", ",round(get(y)), ")", sep = ""))) + my_theme +
-          scale_size(range = size_range)}
-      
-      else{
-        plot <- ggplot(data=data, aes(frame = framey, text = paste(framey, ": (", round(get(x)), ", ", round(get(y)), ")", sep = ""))) + my_theme+
-          scale_size(range = size_range)}}
     
-    else{
-      plot <- ggplot(data=data, aes(text = paste(framey, ": (", round(get(x)), ", ",round(get(y)), ")", sep = ""))) + my_theme +
-        scale_size(range = size_range)}
-
-    if(is.na(color)){
-    plot <- plot + geom_point(aes_string(x = x, y = y, size = size), stroke= 0.2, alpha = 0.8)}
-    
-    else{
-    plot <- plot + geom_point(aes_string(x = x, y = y, size = size, color = color, fill = color, shape = (c("ws", "solute")[c("ws", "solute") != color])), stroke= 0.2, alpha = 0.8)}
-    
-    if(color == input$colormode_global){
+     
+   plot <- ggplot(data=data, aes(frame = ifelse(trace == "Leave Trace","frame", "framey"), 
+                                 text = {
+                                   if(granularity == "year"){
+                                     paste(ws,", ", ifelse(cq == "yes", solute, ""), ifelse(cq == "yes", ", ", ""), strftime(date, "%Y"), " • ", "(", round(get(x),2), ", ", round(get(y),2), ")", sep="")}
+                                   else if(granularity == "month"){
+                                     paste(ws,", ", ifelse(cq == "yes", solute, ""), ifelse(cq == "yes", ", ", ""), strftime(date, "%Y-%b"), " • ", "(", round(get(x),2), ", ", round(get(y),2), ")", sep="")}
+                                   else{
+                                     paste(ws,", ", ifelse(cq == "yes", solute, ""), ifelse(cq == "yes", ", ", ""), strftime(date, "%Y-%b-%d"), " • ", "(", round(get(x),2), ", ", round(get(y),2), ")", sep="")}}))
+  
+  
+    if(cq == "yes"){
       plot <- plot + 
-        scale_color_manual(values = color_scale)+
+        geom_point(aes_string(x = x, y = y, size = size, color = color, fill = color, shape = ifelse(color == "ws","solute", "ws")), stroke= 0.2, alpha = 0.5)+
+        scale_color_manual(values = color_scale) +
         scale_fill_manual(values = color_scale)
     }
     else{
       plot <- plot+ 
-        scale_color_gradient()
+        geom_point(aes_string(x = x, y = y, size = size, color = color, fill = color, shape = NA), stroke= 0.2, alpha = 0.5)
+        scale_colour_brewer()
     }
     
     if(log_x == "log"){
@@ -763,7 +810,8 @@ try typing Q and matching the dropdown menu by selecting Q"
       plot <- plot + scale_y_continuous(trans='log2')
     }
     
-    plot <- plot + 
+    plot <- plot + my_theme + 
+      scale_size(range = size_range)+
       scale_alpha_discrete(range = c(0.9, 0.5))+
       scale_shape_manual(values = c(21, 22, 23, 24, 25)) + 
       labs(x= x_label, y = y_label)
@@ -792,15 +840,27 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   output$plot_pq <- renderPlotly({
     d <- event_data("plotly_selected")
-    theplot <- basic_ggplot_function(reactive_data_pq(), x, y, 
-                                     log = input$log_pq, coloring_pq()) 
+    # Make x axis reactive to the user's selection and to granularity
+    if(is.null(d)){
+      breaks<- "5 years"
+      ldates<- "%Y"}
+    else if(input$granularity_pq== "year"){
+      breaks<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"5 years","1 year")
+      ldates<-ifelse(max(d$x) - min(d$x) > 1*(31557600),"%Y","%Y")}
+    else{
+      breaks<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"5 years","4 months")
+      ldates<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"%Y","%b%y")
+    }
+    
+    theplot <- basic_ggplot_function(reactive_data_pq(), x_pq(), y, 
+                                     log = input$log_pq, coloring_pq(), breaks, ldates) 
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
     theplot$width <- NULL
     theplot$height <- NULL
     theplot %>%
-      layout(autosize = TRUE, legend = list(orientation = 'h', x = 0, y = 1.2))
+      layout(autosize = TRUE, legend = list(orientation = 'h'))
     if(!is.null(d$x)){
       theplot %>%
         layout(xaxis = list(range = c(min(d$x) - 4000000, max(d$x) + 4000000)))} 
@@ -810,10 +870,25 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   output$plot_time <- renderPlotly({
     d <- event_data("plotly_selected")
+    
+    # Make x axis reactive to the user's selection and to granularity
+    if(is.null(d)){
+    breaks<- "5 years"
+    ldates<- "%Y"}
+    else if(input$granularity_time == "year"){
+      breaks<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"5 years","1 year")
+      ldates<-ifelse(max(d$x) - min(d$x) > 1*(31557600),"%Y","%Y")}
+    else{
+      breaks<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"5 years","4 months")
+      ldates<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"%Y","%b%y")
+    }
+    
+    # Plot 
     theplot <- ggplot_time_function(reactive_data_time(), x_time(), y_time(),
-                                    log = input$log_time, y_labs(), input$animate_time, animation_speed_time(), 
-                                    input$trace_time, input$colormode_global, line_coloring(), fill_coloring(), 
-                                    input$granularity_time)
+                                    log = input$log_time, y_labs(), 
+                                    input$animate_time, animation_speed_time(), input$trace_time, 
+                                    input$colormode_global, line_coloring(), fill_coloring(), 
+                                    breaks, ldates, granularity = input$granularity_time)
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -848,12 +923,11 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   })
   
-  
-  
   output$plot_cq <- renderPlotly({
     theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, 
-                                      input$log_cq_x,input$log_cq_y, "mm", y_labs(), input$animate_cq, animation_speed_cq(), 
-                                      input$trace_cq, input$colormode_global, line_coloring(), 1, c(1, 2), shape = "ws")
+                                      input$log_cq_x,input$log_cq_y, "mm", y_labs(), 
+                                      input$animate_cq, animation_speed_cq(), input$trace_cq, 
+                                      input$colormode_global, line_coloring(), 1, c(1, 2), cq = "yes")
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -867,9 +941,25 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   output$plot_flux <- renderPlotly({
     d <- event_data("plotly_selected")
+    
+    # Make x axis reactive to the user's selection and to granularity
+    if(is.null(d)){
+      breaks<- "5 years"
+      ldates<- "'%y"}
+    else if(input$granularity_flux == "year"){
+      breaks<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"5 years","1 year")
+      ldates<-ifelse(max(d$x) - min(d$x) > 1*(31557600),"'%y","'%y")}
+    else{
+      breaks<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"5 years","4 months")
+      ldates<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"'%y","%b%y")
+    }
+    
+    # Plot
     theplot <- ggplot_time_function(reactive_data_flux(), x_flux(), "flux", 
-                                    log = input$log_flux, "Equivalent / Hectare", input$animate_flux, animation_speed_flux(), input$trace_flux, 
-                                    input$colormode_global, line_coloring(), fill_coloring())
+                                    log = input$log_flux, "Equivalent / Hectare", 
+                                    input$animate_flux, animation_speed_flux(), input$trace_flux, 
+                                    input$colormode_global, line_coloring(), fill_coloring(), 
+                                    breaks, ldates, granularity = input$granularity_flux)
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -885,14 +975,14 @@ try typing Q and matching the dropdown menu by selecting Q"
     else{theplot}
   })
   
-
   output$bubblePlot <- renderPlotly({
     input$go_bubble
     input$lastkeypresscode
     theplot <- isolate(ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", 
                                       input$log_bubble_x, input$log_bubble_y, "", "",
-                                      input$animate_bubble, animation_speed_bubble(), 
-                                      input$trace_bubble, "framey", NA, input$sizing_bubble, sizing()))
+                                      input$animate_bubble, animation_speed_bubble(), input$trace_bubble, 
+                                      input$coloring_bubble, NA, 
+                                      input$sizing_bubble, sizing()))
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
