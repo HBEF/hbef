@@ -65,13 +65,21 @@ units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_u
 shinyUI(
   dashboardPage(
     skin = "black",
-    dashboardHeader(title = "Exploratory Dashboard"),
+    dashboardHeader(title = tags$a(href="http://vcm-192.vm.duke.edu/","HB-WER Viz"), titleWidth = 200),
     dashboardSidebar(
-      width = 50,
+      width = 200,
       sidebarMenu(
-        menuItem(" ", tabName = "dashboard", icon = icon("home")),
-        menuItem(" ", tabName = "exploratory", icon = icon("search-plus")))
-      ),
+        menuItem("Dashboard", tabName = "dashboard", icon = icon("home")),
+        menuItem("Bubble Plot", tabName = "exploratory", icon = icon("search-plus")),
+        # footer here
+        tags$div(class = "footer",tags$ul(
+          tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#menu", "HOME")),
+          tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#datastories","DATA STORIES")),
+          tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#exploratory","EXPLORATORY TOOLS")),
+          tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#aboutus","ABOUT US")))
+        ))
+      
+    ),
     dashboardBody(
       useShinyjs(),  # Set up shinyjs
       tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
@@ -150,7 +158,7 @@ shinyUI(
         ####### ---- Main Choose Watershed Tab -----------------------------------------------------
              tabPanel(shiny::icon("circle"),
                 #### Watersheds  =================================
-                fluidRow(column(4, tags$h3("Select a Watershed")),
+                fluidRow(column(4, tags$h3("Select Watershed")),
                   column(5, selectizeInput("watersheds", label = "",
                                       choices = watersheds, multiple = TRUE,
                                       selected = "6", 

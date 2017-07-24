@@ -152,7 +152,7 @@ shinyServer(function(input, output, session) {
   
 
   solutesx_formula <- reactive({
-    capitalized <-"(^[[:upper:]][[:alpha:]])|^H"
+    capitalized <-"(^[[:upper:]][[:alpha:]])|^H|^K"
     strip_spaces <- gsub(" ", "", input$solutesx_formula, fixed = TRUE)
     include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
     trim <- str_trim(include_space)
@@ -166,7 +166,7 @@ shinyServer(function(input, output, session) {
   
   
   solutesy_formula <- reactive({
-    capitalized<-"^[[:upper:]][[:alpha:]]|^H"
+    capitalized<-"^[[:upper:]][[:alpha:]]|^H|^K"
     strip_spaces <- gsub(" ", "", input$solutesy_formula, fixed = TRUE)
     include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
     trim <- str_trim(include_space)
