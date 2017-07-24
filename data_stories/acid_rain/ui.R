@@ -78,14 +78,21 @@ units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 shinyUI(
   
   dashboardPage(skin = "black",
-                dashboardHeader(title = "Acid Rain"),
+                dashboardHeader(title = tags$a(href="http://vcm-192.vm.duke.edu/","HB-WER Viz")),
                 dashboardSidebar(
-                  width = 150,
+                  width = 200,
                   sidebarMenu(
                     menuItem("Introduction", tabName = "introduction", icon = icon("home")),
                     menuItem("Chemistry", tabName = "chemistry", icon = icon("flask")),
-                    menuItem("Policy", tabName = "policy", icon = icon("book"))
-                  )
+                    menuItem("Policy", tabName = "policy", icon = icon("book")),
+                    # footer here
+                      tags$div(class = "footer",tags$ul(
+                        tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#menu", "HOME")),
+                        tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#datastories","DATA STORIES")),
+                        tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#exploratory","EXPLORATORY TOOLS")),
+                        tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#aboutus","ABOUT US")))
+                      ))
+                  
                 ),
   dashboardBody(
   ########### HEAD - DO NOT EDIT ################################################
