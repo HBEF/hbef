@@ -317,10 +317,17 @@ nav{
 
 .box_text {
 	padding:10%;
+	padding-top: 20%;
 	min-height: 60vh;
 }
 
+.box_text button{
+	margin-top: 15%;
+}
 
+.box_text h3{
+	text-align: right;
+}
 
 .stories_menu_link {
 	width: 50%;
