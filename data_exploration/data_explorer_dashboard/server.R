@@ -127,6 +127,7 @@ shinyServer(function(input, output, session) {
   })
   
 
+
   ############ FUNCTIONS ##################################
   
   accumulate_by <- function(dat, var) {

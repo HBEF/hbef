@@ -76,7 +76,6 @@ units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 ########################################################################################
 
 shinyUI(
-  
   dashboardPage(skin = "black",
                 dashboardHeader(title = tags$a(href="http://vcm-192.vm.duke.edu/","HB-WER Viz")),
                 dashboardSidebar(
