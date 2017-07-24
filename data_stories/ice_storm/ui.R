@@ -1,5 +1,5 @@
 library(ggplot2)
-#library(lubridate)
+#library(lubridate) #detach("package:<packageName>", unload=TRUE)
 #library(readr) #If this is only run once to create the ui, then I don't think these are needed...
 #library(tidyr)
 #library(dplyr)
@@ -36,15 +36,12 @@ water_sources <- list("Precipitation (P)" = "precipitation",
 granularity <- list("Year (VWC)" = "year",
                     "Month (VWC)" = "month",
                     "Week" = "week")
-granularity3 <- list("Year (VWC)" = "year",
-                     "Month (VWC)" = "month",
-                     "Week" = "week")
 
 units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 
 units3 <- list("uEquivalent/L","uMole/L", "mg/L", "flux", "normalized_flux")
 
-units_lai <- list("meterSquaredPerMeterSquared", ("NO^2"))
+units_lai <- list("meterSquaredPerMeterSquared")
 
 units_flux <- list("flux")
 

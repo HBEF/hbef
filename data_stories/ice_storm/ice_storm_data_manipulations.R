@@ -154,3 +154,4 @@ data_norm <- merge(imported_data, ws_cast, all = T)
 saveRDS(data_norm, file="normalized_flux.rds")
 data_norm <- readRDS("normalized_flux.rds")
 
+#End normalization data cleaning##########################
