@@ -1,11 +1,134 @@
 @charset "UTF-8";
 
+/*///////// GENERAL SETTINGS //////////*/
+
+/*/// Typography ///*/
+
+body {
+	font-family: 'Montserrat', sans-serif;
+}
+
+a{
+	color: #363229;
+	text-decoration:none;
+}
+
+a:hover {
+	color: #363229;
+}
+
+a:visited {
+	color: #363229;
+}
+
+
+h1 {
+	color: #6C7A89;
+	font-size: 2em;
+	font-family: 'Montserrat', sans-serif;
+	text-align: left;
+	font-style: normal;
+	letter-spacing: 2px;
+	line-height: 1em;
+	margin: 2em 1em;
+	text-transform: uppercase;
+}
+
+
+h2 {
+	color: #363229;
+	text-transform: uppercase;
+	font-family: 'Montserrat', sans-serif;
+	margin-left: 10pt;
+}
+
+
+h3 {
+	font-size: 1em;
+	font-family: 'Montserrat', sans-serif;
+	text-align: left;
+	font-style: normal;
+	font-weight: 400;
+	
+}
+
+
+p{
+	font-size: 12pt;
+	font-family: Gotham, 'Helvetica Neue', Helvetica, Arial, 'sans-serif';
+	text-align: justify;
+}
+
+
+
+.text-container {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 10vh;
+	padding-bottom: 10vh;
+}
+
+
+
+/*///////// Boxes /////////*/
+
+/* This code makes the padding around the boxes smaller*/
+
+[class*="col-lg-"],[class*="col-md-"],
+[class*="col-sm-"],[class*="col-xs-"]{
+    padding-right:2pt !important;
+    padding-left:2pt !important;
+}
+
+/* this code changes the background color of the entire app */
+
+.content-wrapper{
+	background-color: #f2f6f7;
+}
+
+/*//////// MAIN HEADER AND MAIN SIDEBAR ///////*/
+
+.main-header{
+	position: fixed;
+	width:100%;
+}
+
+.main-sidebar{
+	background: red; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(#171A1E, #30363F); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#171A1E, #30363F); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#171A1E, #30363F); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(#171A1E, #30363F); /* Standard syntax */
+	position: fixed; 
+	overflow: visible;
+}
+
+
+.main-sidebar .sidebar .sidebar-menu a:hover{
+	background-color: #1E2226 !important;
+}
+
+.main-sidebar .sidebar .sidebar-menu .active a{
+	background-color: #1E2226 !important;
+}
+
+
+/* This code makes sure the content is seen even when the header is fixed */
+.content {
+	padding-top: 60px;
+}
+
+
+
+/*//////// FOOTER ////////*/
+
 .footer{
 	position:fixed;
 	bottom:0;  
 	right:0;
 	left:0;
-	background:#4a545e;
+	background:#1E2226;
 	padding: 20px 0 ;
 	font-size: 10pt;
 	color: #fefefe;
@@ -29,16 +152,11 @@
 	background:rgba(125,57,58,0.00);
 	color: #4a545e;}
 
-[class*="col-lg-"],[class*="col-md-"],
-[class*="col-sm-"],[class*="col-xs-"]{
-    padding-right:2pt !important;
-    padding-left:2pt !important;
-}
 
-.content-wrapper{
-	background-color: #f9f9f9;
-}
+/*//////// WITHIN EACH TAB ////////*/
 
+
+/* Title Row */
 
 .titleRow{
 	border-bottom: 1px solid #8C8C8C;
@@ -51,56 +169,14 @@
 }
 
 
-#pq.box-body{
-	background: #f9f9f9;
-}
-
-#time.box-body{
-	background: #f9f9f9;
-}
-
-#sidebar.box-body{
-	padding: 20pt;
-}
-
-/*.main-header{
-	display: none;
-}*/
-
-.main-sidebar{
-	background-color: #6C7A89 !important;
-}
 
 
-.main-sidebar .sidebar .sidebar-menu a:hover{
-	background-color: #BDC3C7 !important;
-}
-
-.main-sidebar .sidebar .sidebar-menu .active a{
-	background-color: #BDC3C7 !important;
-}
-
-.tabpane{
-	border-radius: 0;
-}
+/*//////// Boxes ////////*/
 
 .box{
 	background-color: #E9EDF0 !important;
 	border-top: none;
 	border-radius: 0;
-}
-
-.box .row{
-	border-bottom: 1px solid #CED1D4;
-	padding: 10% 7%;
-}
-
-
-.box.box-solid{
-border-bottom-color:#FF0004;
-border-left-color:#FF0004;
-border-right-color:#FF0004;
-border-top-color:#FF0004;
 }
 
 .box h4 {
@@ -130,6 +206,12 @@ border-top-color:#FF0004;
 }
 
 
+
+/*//// Tab Sidebar -- Reactivity Sidebar //////*/
+
+#sidebar.box-body{
+	padding: 20pt;
+}
 
 /* SLIDER */
 .irs-bar {
@@ -164,6 +246,7 @@ border-top-color:#FF0004;
     height: 0px;}
       
 
+/* Selectize */
 
 #solutes ~ .selectize-control.single .selectize-dropdown [data-value=pH] { color: #FFC408 }
 #solutes ~ .selectize-control.single .selectize-dropdown [data-value=H] { color: #FFE79C }
@@ -185,6 +268,8 @@ border-top-color:#FF0004;
 	float: right;
 	margin-right: 5%;
 }
+
+/* Checkboxes */
 
 input[type="checkbox"]:after {
 		width: 20px;
@@ -297,239 +382,5 @@ input[value = "Al"]:checked:after {
 
 
 
-/* /////// top navigation for sections of the story //////*/
 
-#top{
-	margin-bottom: 5%;
-}
 
-
-#top.nav-tabs.nav-pills{
-	border: none;
-	float:none;
-    display:inline-block;
-}
-
-
-#top.nav-tabs > li, .nav-pills > li {
-    background-color: rgba(0,0,0,0);
-	border: none;
-	float:none;
-    display:inline-block;
-    *display:inline; /* ie7 fix */
-     zoom:1; /* hasLayout ie7 trigger */
-	font-size: 14pt;
-	text-transform: uppercase;
-}
-
-
-#top.nav-tabs > li > a:hover, .nav-pills > li> a:hover {
-	background-color: rgba(0,0,0,0);
-	font-weight: bold;
-}
-
-#top.nav-tabs, .nav-pills {
-    text-align:center;
-}
-
-#top.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus{
-	background-color: rgba(0,0,0,0);
-	color: #181818;
-	font-weight: bold;
-}
-
-
-
-/* /////// plot tabs //////*/
-
-
-#plot_tab.nav-tabs {
-	border-bottom: none;
-}
-
-#plot_tab.nav-tabs > li {
-    background-color: rgba(0,0,0,0);
-	border: none;
-	float:none;
-    display:inline-block;
-    *display:inline; /* ie7 fix */
-     zoom:1; /* hasLayout ie7 trigger */
-	font-size: 12pt;
-}
-
-
-#plot_tab.nav-tabs > li > a:hover {
-	background-color: rgba(0,0,0,0);
-	border: none;
-	border-bottom: medium solid #363229;
-}
-
-
-#plot_tab.nav-tabs>li.active>a{
-	background-color: rgba(0,0,0,0);
-	color: #181818;
-	border: none;
-	border-bottom: medium solid  #363229;
-}
-
-
-
-/* /////// sidebar //////*/
-/* this gives the sidebar a specified height and enables the scrollbar*/
-
-form.well { 
-	max-height: 900px; 
-	overflow-y: auto;
-	overflow-x:none;
-	background: #EBEBEB;
-	border: none;
-	border-radius: 0;
-	padding: 40pt;}
-
-
-/*////// General Settings //////*/
-
-/*/// Framework ///*/
-
-
-body {
-	margin-top: 0px;
-	margin-right: 0px;
-	margin-bottom: 0px;
-	margin-left: 0px;
-	font-family: 'Montserrat', sans-serif;
-	width: 100%;
-	background-color: #fafafa;
-}
-
-section{
-	display: block;
-	min-height: 100%;
-	width: 100%;
-}
-
-
-.container_question {
-	width: 90%;
-	margin: 5%;
-}
-
-
-.text-container {
-	width: 90%;
-	margin-left: auto;
-	margin-right: auto;
-	padding-top: 10vh;
-	padding-bottom: 10vh;
-}
-
-.container_graph {
-	margin-left: 5%;
-}
-
-@media (max-width: 375px){
-.container {
-	width: 90%;
-	margin-left: auto;
-	margin-right: auto;
-	padding-top: 5%;
-	padding-bottom: 5%;
-}
-}
-
-
-/*/// Typography ///*/
-
-a{
-	color: #363229;
-	text-decoration:none;
-}
-
-a:hover {
-	color: #363229;
-}
-
-a:visited {
-	color: #363229;
-}
-
-
-
-h1 {
-	color: #6C7A89;
-	font-size: 2em;
-	font-family: 'Montserrat', sans-serif;
-	text-align: left;
-	font-style: normal;
-	letter-spacing: 2px;
-	line-height: 1em;
-	margin: 2em 1em;
-	text-transform: uppercase;
-}
-
-
-h2 {
-	color: #363229;
-	text-transform: uppercase;
-	font-family: 'Montserrat', sans-serif;
-	margin-left: 10pt;
-}
-
-
-h3 {
-	font-size: 1em;
-	font-family: 'Montserrat', sans-serif;
-	text-align: left;
-	font-style: normal;
-	font-weight: 400;
-	
-}
-
-
-
-
-p{
-	font-size: 12pt;
-	font-family: Gotham, 'Helvetica Neue', Helvetica, Arial, 'sans-serif';
-	text-align: justify;
-}
-
-
-@media (max-width: 550px) {
-h1{ font-size: 1em;}}
-
-
-@media (max-width: 375px) {
-h1{ font-size: 1em;}
-h3 {font-size: 1.5em;}
-h4 {font-size: 1em;}
-p{font-size: 12pt;}}
-
-
-
-
-body{
-	font-size: 10pt;
-}
-
-
-/*use for ligth fonts */
-.dark_background {
-	color: #fafafa;
-}
-
-.dark_background h1{
-	color: #fafafa;
-}
-
-.dark_background a{
-	color: #fafafa;
-}
-
-.dark_background a:hover{
-	color: #fafafa;
-}
-
-.dark_background a:visited {
-	color: #fafafa;
-}
