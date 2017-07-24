@@ -246,8 +246,8 @@ precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_
 
 streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
 
-lapply_and_save(precip_df_list, create_water_year_date, 06, a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, create_water_year_date, 06, a_name = "_streamflow_chem")
+lapply_and_save(precip_df_list, create_water_year_date, 01, a_name = "_precip_chem")
+lapply_and_save(streamflow_df_list, create_water_year_date, 01, a_name = "_streamflow_chem")
 
 ```
 
