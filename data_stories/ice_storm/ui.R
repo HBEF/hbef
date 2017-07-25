@@ -80,7 +80,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     ########### TITLE ####################
                                     fluidRow(tags$div(class = "container_question", 
-                                                      tags$h3("How do NO3 concentrations change following an ice storm?")) 
+                                                      tags$h1("How do NO3 concentrations change following an ice storm?")) 
                                     ),
                                     
                                     #############################################
@@ -171,7 +171,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     ########### TITLE ####################
                                     fluidRow(tags$div(class = "container_question", 
-                                                      tags$h3("Post-ice storm NO3 flux Plots Replication (Bernhardt et. al, 2003)")) 
+                                                      tags$h1("Post-ice storm NO3 flux Plots Replication (Bernhardt et. al, 2003)")) 
                                     ),
                                     
                                     #############################################
@@ -210,7 +210,8 @@ shinyUI(  dashboardPage(skin = "black",
                                                     tabPanel(shiny::icon("circle"),
                                                              div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux")))),
                                                              ## Time Plot
-                                                             p("*Note the 1966 devegetation spike (ws2) and the 1983 whole tree harvest spike (ws5)."),
+                                                             p("*Note the 1966 devegetation spike (ws2), the 1971 stripcutting spike (ws4), 
+                                                               and the 1983 whole tree harvest spike (ws5)."),
                                                              p("To better see the effects of the
                                                                                ice storm, click and drag to zoom in."),
                                                              plotlyOutput("NO3_excess")
@@ -268,7 +269,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     ########### TITLE ####################
                                     fluidRow(tags$div(class = "container_question",
-                                                      tags$h3("How do ice storms affect vegetation?"))
+                                                      tags$h1("How do ice storms affect vegetation?"))
                                     ),
                                     
                                     #############################################
@@ -318,12 +319,14 @@ shinyUI(  dashboardPage(skin = "black",
                                                              ))),
                                                              ## Time Plot
                                                              plotlyOutput("leaf_count"),
+                                                             p(" "),
                                                              ##Date Range
-                                                             fluidRow(column(7, sliderInput("date_range_count", label = h4(" "),
+                                                             sliderInput("date_range_count", label = h4(" "),
                                                                          min = 1993,
                                                                          max = 2013,
                                                                          value = c(1997, 2001),
-                                                                         sep = "")))
+                                                                         sep = ""),
+                                                             p(" ")
                                                     ) #Closes tabpanel
                                                     
                                              ) # Closes tab Box

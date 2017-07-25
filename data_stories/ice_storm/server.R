@@ -45,7 +45,7 @@ my_theme <- theme_fivethirtyeight() +
 color_anion <- c("NO3" = "#BF1616")
 
 source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
+watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 5,"5"= 4,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
 
 ### End of Theme ################
 
@@ -182,7 +182,7 @@ shinyServer(function(session, input, output) {
     #filter for all but w5 since it has so much missing data
     yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",]
     #filter for all but Aspen and Pin Cherry since they are always zero
-    yearly_count_means<-yearly_count_means[yearly_count_means$species != "Aspen",]
+    #yearly_count_means<-yearly_count_means[yearly_count_means$species !%in% c("Aspen", "Pin Cherry"),]
     yearly_count_means<-yearly_count_means[yearly_count_means$species != "Pin Cherry",]
     
     if(input$log_counts == "log") {
