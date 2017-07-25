@@ -179,16 +179,28 @@ shinyServer(function(session, input, output) {
   
   #plot of paper birch and sugar maple, etc. decline due to ice storm
   output$leaf_count <- renderPlotly({
+    #filter for all but w5 since it has so much missing data
     yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",]
-    leaf_count <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
-      geom_line(size=0.5)+ my_theme+
+    #filter for all but Aspen and Pin Cherry since they are always zero
+    yearly_count_means<-yearly_count_means[yearly_count_means$species != "Aspen",]
+    yearly_count_means<-yearly_count_means[yearly_count_means$species != "Pin Cherry",]
+    
+    if(input$log_counts == "log") {
+      plot <- ggplot(yearly_count_means, aes(x=YEAR, y=logb(count, base=exp(1)), color = species))+
+        labs(x = " ", y = paste("log", "(Leaf counts)"))+
+        coord_cartesian(ylim = c(-1,5))}
+    
+    else{
+      plot <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
+        labs(x = " ", y = "Leaf Counts")}
+    
+    leaf_count <- plot + geom_line(size=0.5)+ my_theme+
       geom_point(size=1.3, aes(text = paste("Species: ", species, "<br>", 
                                             "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
       facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
       theme(legend.title = element_text("Tree Species", family = "Helvetica"),
             strip.text = element_text(size = 10))+
       xlim(min(input$date_range_count[1]), max(input$date_range_count[2]))+
-      xlab(" ")+ ylab("Leaf counts")+
       geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = 1998, y = 120, color = "black")
     

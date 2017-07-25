@@ -171,7 +171,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     ########### TITLE ####################
                                     fluidRow(tags$div(class = "container_question", 
-                                                      tags$h3("Post-ice storm NO3 flux Plots Replication (Bernhardt, 2003)")) 
+                                                      tags$h3("Post-ice storm NO3 flux Plots Replication (Bernhardt et. al, 2003)")) 
                                     ),
                                     
                                     #############################################
