@@ -102,7 +102,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                                                          selected = "linear"))))),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
-                                                             div(class = "titleRow", fluidRow(column(5, tags$h2("Water Chemistry")),
+                                                             div(class = "titleRow", fluidRow(column(5, tags$h2("")),
                                                                                               ##Granularity
                                                                                               column(3,  offset = 4, selectInput("granularity", label = "",
                                                                                                                                  choices = granularity,
@@ -194,7 +194,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                                ))),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
-                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Streamflow flux (ws1, ws6)")))),
+                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Streamflow flux")))),
                                                              ## Time Plot
                                                              plotlyOutput("NO3_output")
                                                     ) #Closes tabpanel
@@ -208,9 +208,9 @@ shinyUI(  dashboardPage(skin = "black",
                                              tabBox(width = 12, height = "620px", side="right", selected = shiny::icon("circle"),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
-                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux (ws2, ws4, ws5)")))),
+                                                             div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux")))),
                                                              ## Time Plot
-                                                             p("*Note the 1966 devegetation spike (ws2) and the 1983 whole tree harvest spike (ws4)."),
+                                                             p("*Note the 1966 devegetation spike (ws2) and the 1983 whole tree harvest spike (ws5)."),
                                                              p("To better see the effects of the
                                                                                ice storm, click and drag to zoom in."),
                                                              plotlyOutput("NO3_excess")
@@ -318,13 +318,12 @@ shinyUI(  dashboardPage(skin = "black",
                                                              ))),
                                                              ## Time Plot
                                                              plotlyOutput("leaf_count"),
-                                                             p(" "),
                                                              ##Date Range
-                                                             sliderInput("date_range_count", label = h4(" "),
+                                                             fluidRow(column(7, sliderInput("date_range_count", label = h4(" "),
                                                                          min = 1993,
                                                                          max = 2013,
                                                                          value = c(1997, 2001),
-                                                                         sep = "")
+                                                                         sep = "")))
                                                     ) #Closes tabpanel
                                                     
                                              ) # Closes tab Box
