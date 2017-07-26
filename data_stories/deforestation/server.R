@@ -12,6 +12,21 @@ library(grid)
 
 source_shapes <- c("Streamflow (Q)" = 16, "Precipitation (P)"= 21)
 
+
+#my theme
+
+my_theme <- 
+  theme(rect = element_rect(fill = NA),
+        panel.background = element_rect("transparent", colour = NA),
+        panel.grid.major = element_line(colour = "#dddddd"), 
+        panel.grid.major.x = element_line(colour = NA),
+        text = element_text(family = "Helvetica", size = 12), 
+        legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
+        axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
+        plot.margin = margin(1, 1, 1, 1, "cm"),
+        strip.background = element_rect(colour = NA, fill = NA),
+        strip.text = element_text(hjust = 1, vjust = 0, size = 10, face = "bold", lineheight = 20))
+
 #read in the data
 load("precip_streamflow_dfs.RData")
 imported_data <- precip_streamflow_long
@@ -45,7 +60,6 @@ source_change <- function(df){
 
 #Function to plot the formatted data frame in ggplot2
 plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab, logarithm, ecological){
-  theme <- theme(legend.position = "none", legend.direction = "vertical", legend.title = element_blank())
   
   color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", 
                     "Ammonium" = "#4E7AC7" , "Calcium" = "#3B5C95",
@@ -89,7 +103,7 @@ plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab
                  aes(xintercept = vals),
                  linetype = 1,
                  show.legend = T) +
-      theme_bw() + theme
+      theme_bw() + my_theme
     plot <- ggplotly(p,tooltip = "text",
                      width = 400, height = 600) %>%
       layout(margin = list(b = 90)) %>%
@@ -101,8 +115,7 @@ plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab
 
 
 plot.dis.df <- function(df, x.r, date.input, y.lab, title.lab, logarithm){
-  theme <- theme(legend.position = "none", legend.direction = "vertical", legend.title = element_blank())
-  
+
   color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", 
                     "Ammonium" = "#4E7AC7" , "Calcium" = "#3B5C95",
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
@@ -141,7 +154,7 @@ plot.dis.df <- function(df, x.r, date.input, y.lab, title.lab, logarithm){
                aes(xintercept = vals),
                linetype = 1,
                show.legend = T) +
-    theme_bw() + theme
+    theme_bw() + my_theme
   plot <- ggplotly(p, tooltip = "text",
                    height = 600, width = 400)%>%
     layout(margin = list(b = 90)) %>%
@@ -198,13 +211,32 @@ shinyServer(function(session, input, output) {
   
   
   solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
+ 
   
+  # The following reactivity prevents the user from deselecting streamflow. 
+  #The can add precipitation but not remove streamflow
+  observe({
+    if((length(input$p.dis) < 2) & "precipitation" %in% input$p.dis){
+      updateCheckboxGroupInput(session, "p.dis", selected = c("streamflow", "precipitation"))}
+    else if(length(input$p.dis) < 2){
+      updateCheckboxGroupInput(session, "p.dis", selected = c("streamflow")) 
+    }
+  })
+  
+  observe({
+    if((length(input$p) < 2) & "precipitation" %in% input$p){
+      updateCheckboxGroupInput(session, "p", selected = c("streamflow", "precipitation"))}
+    else if(length(input$p) < 2){
+      updateCheckboxGroupInput(session, "p", selected = c("streamflow")) 
+    }
+  })
+  
+   
   sources <- reactive({
-    if (input$p == "precip"){
+    if (("precipitation" %in% input$p)){
       c("Precipitation (P)", "Streamflow (Q)")
     }else{
-      c("Streamflow (Q)")
-    }
+      c("Streamflow (Q)")}
   })
   
   solute_data <- reactive({
@@ -234,7 +266,7 @@ shinyServer(function(session, input, output) {
   })
   
   sources.dis <- reactive({
-    if (input$p.dis == "precip"){
+    if (("precipitation" %in% input$p.dis)){
       c("Precipitation (P)", "Streamflow (Q)")
     }else{
       c("Streamflow (Q)")
@@ -295,7 +327,7 @@ shinyServer(function(session, input, output) {
   
   #Plot output for discharge quantity
   output$d.plot <- renderPlotly({
-    if (input$p.dis == "precip"){
+    if ("precipitation" %in% input$p.dis){
       if (input$ln.dis == "linear"){
         y <- "mm"
         title <- "Streamflow and Precipitation Quantities"

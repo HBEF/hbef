@@ -25,7 +25,7 @@ granularity <- list("Year (VWC)" = "year",
 shinyUI(dashboardPage(skin = "black",
                       dashboardHeader(title = tags$a(href="http://vcm-192.vm.duke.edu/","HB-WER Viz"), titleWidth = 200),
                       dashboardSidebar(
-                        width = 150,
+                        width = 200,
                         sidebarMenu(
                           menuItem("Concentration", tabName = "solutes", icon = icon("home")),
                           menuItem("Quantities", tabName = "streamflow", icon = icon("search-plus")),
@@ -38,7 +38,7 @@ shinyUI(dashboardPage(skin = "black",
                       ),
   dashboardBody(
   ########### HEAD - DO NOT EDIT ################################################
-  theme = "app.css",
+  tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
   tags$head(includeScript(system.file('www', 'ajax.js'))),
   tags$head(includeScript(system.file('www', 'hubbard.js'))),
   tags$head(tags$style(HTML(
@@ -49,10 +49,10 @@ shinyUI(dashboardPage(skin = "black",
   
   tabItems(
               tabItem(tabName = "solutes",
-                       fluidRow(column(9,tags$h2("Effects of Deforestation"))),
+                       fluidRow(column(9,tags$h1("Effects of Deforestation"))),
                        fluidRow(column(9, 
                          tags$div(class = "container_question",
-                          tags$h3("What effect does deforestation have on 
+                          tags$h1("What effect does deforestation have on 
                                  solute concentrations in streamwater?")))
                          ),
                       fluidRow(column(9,
@@ -68,14 +68,17 @@ shinyUI(dashboardPage(skin = "black",
                                                                                   choices = c("linear", "log"), 
                                                                                   selected = "linear"))))),
                                              tabPanel(shiny::icon("circle"),
-                                                      
-                                                      column(3, offset = 9, selectInput("granularity", label = h4("Granularity"),
-                                                                                        choices = granularity,
-                                                                                        selected = "year")),
+                                                      div(class = "titleRow", fluidRow(column(5, tags$h2("")),
+                                                                                       ##Granularity
+                                                                                       column(3,  offset = 4, selectInput("granularity", label = "",
+                                                                                                                          choices = granularity,
+                                                                                                                          selected = "year")))
+                                                      ),
+                                                    
                                                       fluidRow(
-                                                        column(8, plotlyOutput("s.plot", width = "100%", height = "100%")),
-                                                        column(1),
-                                                        column(3, img(src = "source.png", height = 75, width = 100)))
+                                                        column(12, plotlyOutput("s.plot", width = "100%", height = "100%")))
+                                                       
+                                                        #column(3, img(src = "source.png", height = 75, width = 100)))
                                              ))),
                        column(3,
                                   box(width = 13, height = "1100px", id = "sidebar",
@@ -113,10 +116,10 @@ shinyUI(dashboardPage(skin = "black",
                                                                    selected = "ueq/L"))),
                                        
                                        fluidRow(column(12,
-                                                       selectInput("p", label = h3("Adding Precipitation"),
-                                                                   choices = list("Without Precipitation" = "noprecip",
-                                                                                  "With Precipitation" = "precip"),
-                                                                   selected = "noprecip"))),
+                                                       checkboxGroupInput("p", label = h3("Adding Precipitation"),
+                                                                          choices = list("Streamflow" = "streamflow",
+                                                                                         "Precipitation" = "precipitation"),
+                                                                          selected = "streamflow"))),
                                       
                                        fluidRow(column(12, 
                                                        sliderInput("dates", label = h3("Date Range"),
@@ -128,10 +131,10 @@ shinyUI(dashboardPage(skin = "black",
                        
                                        )), #end of fluidRow
               tabItem(tabName = "streamflow",
-                      fluidRow(column(9, tags$h2("Effects of Deforestation"))),
+                      fluidRow(column(9, tags$h1("Effects of Deforestation"))),
                       fluidRow(column(9,
                         tags$div(class = "container_question",
-                                 tags$h3("What effect does deforestation have on 
+                                 tags$h1("What effect does deforestation have on 
                                  streamflow?")))
                       ),
                       fluidRow(column(9,
@@ -147,22 +150,25 @@ shinyUI(dashboardPage(skin = "black",
                                                                                   choices = c("linear", "log"), 
                                                                                   selected = "linear"))))),
                                              tabPanel(shiny::icon("circle"),
-                                                      column(3, offset = 9, selectInput("granularity2", label = h4("Granularity"),
-                                                                                        choices = granularity,
-                                                                                        selected = "year")),
+                                                      div(class = "titleRow", fluidRow(column(5, tags$h2("")),
+                                                                                       ##Granularity
+                                                                                       column(3,  offset = 4, selectInput("granularity2", label = "",
+                                                                                                                          choices = granularity,
+                                                                                                                          selected = "year")))
+                                                      ),
+                                                      
                                                       fluidRow(
-                                                        column(8, plotlyOutput("d.plot", width = "100%", height = "100%")),
-                                                        column(1),
-                                                        column(3, img(src = "source.png", height = 75, width = 100)))
+                                                        column(12, plotlyOutput("d.plot", width = "100%", height = "100%")))
+                                                        #column(3, img(src = "source.png", height = 75, width = 100)))
                                              ))),
                         column(3,
                                     box(width = 13, height = "600px", id = "sidebar",
                                        
                                        fluidRow(column(12, 
-                                                       selectInput("p.dis", label = h3("Adding Precipitation"),
-                                                                   choices = list("Without Precipitation" = "noprecip",
-                                                                                  "With Precipitation" = "precip"),
-                                                                   selected = "noprecip"))),
+                                                       checkboxGroupInput("p.dis", label = h3("Adding Precipitation"),
+                                                                   choices = list("Streamflow" = "streamflow",
+                                                                                  "Precipitation" = "precipitation"),
+                                                                   selected = "streamflow"))),
                                        fluidRow(column(12, 
                                                        sliderInput("dates.dis", label = h3("Date Range"),
                                                                    min = as.Date("1962-01-01"),
