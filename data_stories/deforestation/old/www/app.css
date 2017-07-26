@@ -1,0 +1,375 @@
+@charset "UTF-8";
+
+
+
+
+
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=pH] { color: #FFC408 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=H] { color: #FFE79C }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=NO3] { color: #BF1616 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=SiO2] { color: #CC4545 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=PO4] { color: #600B0B }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=SO4] { color: #8F1010 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Cl] { color: #D97373 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=HCO3] { color: #E5A2A2 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=K] { color: #95AFDD }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Na] { color: #7195D2 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=NH4] { color: #4E7AC7 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Ca] { color: #3B5C95 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Mg] { color: #273D64 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Al] { color: #162338 }
+
+input[type="checkbox"]:after {
+		width: 20px;
+        height: 20px;
+	 	top: -2px;
+        right: 5px;
+        border-radius: 15px;
+        position: relative;
+        background-color: #d1d3d1;
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
+}
+
+
+input[type='checkbox']:checked:after {
+        width: 20px;
+        height: 20px;
+        border-radius: 15px;
+        position: relative;
+        background-color: #828282;
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
+    }
+
+
+
+/* WATER SOURCES */
+
+input[value = "precip"]:checked:after {
+    background-color: #EBEBEB;
+	border: 5px solid #3E3D3D;
+    }
+
+input[value = "flow"]:checked:after {
+    background-color: #3E3D3D;
+    }
+
+
+
+/* HYDROGEN */
+
+input[value = "pH"]:checked:after {
+      background-color: #FFC408;
+    }
+
+input[value = "Hydrogen Ion"]:checked:after {
+      background-color: #FFE79C;
+    }
+
+
+
+/* ANIONS */
+
+input[value = "Nitrate"]:checked:after {
+      background-color: #BF1616;
+    }
+
+input[value = "Silicon Dioxide"]:checked:after {
+      background-color: #CC4545;
+    }
+
+input[value = "Phosphate"]:checked:after {
+      background-color: #600B0B;
+    }
+
+input[value = "Sulfate"]:checked:after {
+      background-color: #8F1010;
+    }
+
+
+input[value = "Chloride"]:checked:after {
+      background-color: #D97373;
+    }
+
+input[value = "Bicarbonate"]:checked:after {
+      background-color: #E5A2A2;
+    }
+
+
+/* CATIONS */
+
+input[value = "Potassium"]:checked:after {
+      background-color: #95AFDD;
+    }
+
+input[value = "Sodium"]:checked:after {
+      background-color: #7195D2;
+    }
+
+input[value = "Ammonium"]:checked:after {
+      background-color: #4E7AC7;
+    }
+
+input[value = "Calcium"]:checked:after {
+      background-color: #3B5C95;
+    }
+
+input[value = "Magnesium"]:checked:after {
+      background-color: #273D64;
+    }
+
+input[value = "Aluminum"]:checked:after {
+      background-color: #162338;
+    }
+
+
+
+
+/* /////// top navigation for sections of the story //////*/
+
+#top{
+	margin-bottom: 5%;
+}
+
+
+#top.nav-tabs.nav-pills{
+	border: none;
+	float:none;
+    display:inline-block;
+}
+
+
+#top.nav-tabs > li, .nav-pills > li {
+    background-color: rgba(0,0,0,0);
+	border: none;
+	float:none;
+    display:inline-block;
+    *display:inline; /* ie7 fix */
+     zoom:1; /* hasLayout ie7 trigger */
+	font-size: 14pt;
+	text-transform: uppercase;
+}
+
+
+#top.nav-tabs > li > a:hover, .nav-pills > li> a:hover {
+	background-color: rgba(0,0,0,0);
+	font-weight: bold;
+}
+
+#top.nav-tabs, .nav-pills {
+    text-align:center;
+}
+
+#top.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus{
+	background-color: rgba(0,0,0,0);
+	color: #181818;
+	font-weight: bold;
+}
+
+
+
+/* /////// plot tabs //////*/
+
+
+#plot_tab.nav-tabs {
+	border-bottom: none;
+}
+
+#plot_tab.nav-tabs > li {
+    background-color: rgba(0,0,0,0);
+	border: none;
+	float:none;
+    display:inline-block;
+    *display:inline; /* ie7 fix */
+     zoom:1; /* hasLayout ie7 trigger */
+	font-size: 12pt;
+}
+
+
+#plot_tab.nav-tabs > li > a:hover {
+	background-color: rgba(0,0,0,0);
+	border: none;
+	border-bottom: medium solid #363229;
+}
+
+
+#plot_tab.nav-tabs>li.active>a{
+	background-color: rgba(0,0,0,0);
+	color: #181818;
+	border: none;
+	border-bottom: medium solid  #363229;
+}
+
+
+
+/* /////// sidebar //////*/
+/* this gives the sidebar a specified height and enables the scrollbar*/
+
+form.well { 
+	max-height: 700px; 
+	overflow-y: auto;
+	overflow-x:none;
+	background: #EBEBEB;
+	border: none;
+	border-radius: 0;
+	padding: 40pt;}
+
+
+/*////// General Settings //////*/
+
+/*/// Framework ///*/
+
+
+body {
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	font-family: 'Montserrat', sans-serif;
+	width: 100%;
+	background-color: #fafafa;
+}
+
+section{
+	display: block;
+	min-height: 100%;
+	width: 100%;
+}
+
+
+.container_question {
+	width: 90%;
+	margin: 5%;
+}
+
+
+.container_paragraph {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 10vh;
+	padding-bottom: 10vh;
+	-webkit-column-count: 2; /* Chrome, Safari, Opera */
+    -moz-column-count: 2; /* Firefox */
+    column-count: 2;
+	-webkit-column-gap: 60px; /* Chrome, Safari, Opera */
+    -moz-column-gap: 60px; /* Firefox */
+    column-gap: 60px;
+}
+
+.container_graph {
+	margin-left: 5%;
+}
+
+@media (max-width: 375px){
+.container {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 5%;
+	padding-bottom: 5%;
+}
+}
+
+
+/*/// Typography ///*/
+
+a{
+	color: #363229;
+	text-decoration:none;
+}
+
+a:hover {
+	color: #363229;
+}
+
+a:visited {
+	color: #363229;
+}
+
+
+
+h1 {
+	color: #363229;
+	font-size: 5em;
+	font-family: 'Montserrat', sans-serif;
+	text-align: left;
+	font-style: normal;
+	letter-spacing: 2px;
+	line-height: 1em;
+}
+
+
+h2 {
+	
+	text-transform: uppercase;
+}
+
+
+h3 {
+	font-size: 2em;
+	font-family: 'Montserrat', sans-serif;
+	text-align: left;
+	font-style: normal;
+	font-weight: 400;
+}
+
+
+h4 {
+	font-size: 1.5em;
+	font-weight: 200;
+	font-family: 'Montserrat', sans-serif;
+	text-align: left;
+	letter-spacing: 2px;
+	line-height: 1em;
+}
+
+p{
+	font-size: 14pt;
+	font-family: Gotham, 'Helvetica Neue', Helvetica, Arial, 'sans-serif';
+	text-align: justify;
+}
+
+
+@media (max-width: 765px) {
+h1{ font-size: 4em;}}
+
+@media (max-width: 550px) {
+h1{ font-size: 2.5em;}}
+
+
+@media (max-width: 375px) {
+h1{ font-size: 2em;}
+h3 {font-size: 1.5em;}
+h4 {font-size: 1em;}
+p{font-size: 12pt;}}
+
+
+
+
+
+/*use for ligth fonts */
+.dark_background {
+	color: #fafafa;
+}
+
+.dark_background h1{
+	color: #fafafa;
+}
+
+.dark_background a{
+	color: #fafafa;
+}
+
+.dark_background a:hover{
+	color: #fafafa;
+}
+
+.dark_background a:visited {
+	color: #fafafa;
+}
