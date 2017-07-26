@@ -55,6 +55,7 @@ shinyUI(
                 dashboardSidebar(
                   width = 200,
                   sidebarMenu(
+                    menuItem("Intro", tabName = "intro", icon = icon("home")),
                     menuItem("NO3 trends", tabName = "trends", icon = icon("line-chart")),
                     menuItem("NO3 flux (Q)", tabName = "flux", icon = icon("arrows-v")),
                     menuItem("Vegetation", tabName = "vegetation", icon = icon("leaf")),
@@ -79,7 +80,45 @@ shinyUI(
                   ########### BODY ##############################################################
                   
                   tabItems(
+
                     
+                    
+                    
+                    ###############################################################################
+                    #### ------------  Intro  Tab ----------------------------------------- #######
+                    ###############################################################################
+                    
+                    tabItem(tabName = "intro",
+
+                            #############################################
+                            
+                            ########### IMAGE FOR QUESTION #1 ##########
+                            
+                            fluidRow(img(src='icestorm.jpg', width = "1400px")
+
+                            ),#Closes graph row
+                            
+                            
+                            ########### END OF IMAGE FOR QUESTION #1 ##########
+                            
+                            
+                            ########### TEXT FOR QUESTION #1 ##########
+                            
+                            tags$div(class = "",
+                                     fluidRow(column(width = 9,
+                                                     p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+                                                       that damaged the experimental watersheds.  Some effects of the 
+                                                       storm can be tracked by the NO3 streamflow data."))))
+                            
+                            ########### END OF QUESTION #1 ##########
+                                                     ),# Closes Intro Tab
+                    
+                    ###############################################################################
+                    #### ------------ End of Intro Tab ------------------------------- #######
+                    ###############################################################################  
+                    
+                    
+                                        
                     ###############################################################################
                     #### ------------  NO3  trends  Tab ----------------------------------- #######
                     ###############################################################################
@@ -164,7 +203,7 @@ shinyUI(
                                        storm can be tracked by the NO3 streamflow data."))))
                             
                             ########### END OF QUESTION #1 ##########
-                    ),# Closes Intro Tab
+                    ),# Closes trends Tab
                     
                     ###############################################################################
                     #### ------------ End of NO3 trends Tab ------------------------------- #######
@@ -260,7 +299,7 @@ shinyUI(
                                                      p("On January 7-8, 1998 the HBEF was hit by a powerful ice 
                                                                storm that damaged the experimental watersheds.  Some 
                                                                effects of the storm can be tracked by the NO3 flux data. 
-                                                               The above plots were recreated from the paper 'In-stream 
+                                                               The above plots were recreated from the 2003 paper 'In-stream 
                                                                uptake dampens effects of major forest disturbance on 
                                                                watershed nitrogen export' by Emily Bernhardt, Gene Likens, 
                                                                and Donald Buso."))))
@@ -330,22 +369,31 @@ shinyUI(
                                                                                              p("(click on key to view specific species)")
                                                      ))),
                                                      ## Time Plot
-                                                     plotlyOutput("leaf_count"),
-                                                     p(" "),
-                                                     ##Date Range
-                                                     sliderInput("date_range_count", label = h4(" "),
-                                                                 min = 1993,
-                                                                 max = 2013,
-                                                                 value = c(1997, 2001),
-                                                                 sep = ""),
-                                                     p(" ")
+                                                     plotlyOutput("leaf_count")
+
                                             ) #Closes tabpanel
                                             
                                      ) # Closes tab Box
                                      
                                      #------ End of Box 2 --------#
                                      
-                              ) #Closes the column
+                              ), #Closes the column
+                              
+                              ######## SIDEBAR
+                              column(3, 
+                                     box(width = 13, height = "700px", id = "sidebar",
+                                         
+                                         ##Date Range
+                                         sliderInput("date_range_count", label = h4(" "),
+                                                     min = 1993,
+                                                     max = 2013,
+                                                     value = c(1997, 2001),
+                                                     sep = "")
+                                         
+                                         )
+                                     
+                              )#Closes the column
+                              
                               
                             ),#Closes graph row
                             
