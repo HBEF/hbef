@@ -45,7 +45,7 @@ my_theme <- theme_fivethirtyeight() +
 color_anion <- c("NO3" = "#BF1616")
 
 source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
+watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 5,"5"= 4,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
 
 ### End of Theme ################
 
@@ -64,7 +64,7 @@ shinyServer(function(session, input, output) {
   reactive_data <- reactive({
     data <- water_chem_data
     data <- data[data$granularity %in% input$granularity,]
-    data <- data[data$source %in% input$water_sources2,]
+    data <- data[data$source %in% c("streamflow"),]
     data <- data[data$solute %in% c("NO3"),] 
     data <- data[data$ws %in% input$watersheds2,]
   })
@@ -120,11 +120,11 @@ shinyServer(function(session, input, output) {
   ggplot_function <- function(data, x, y, log, units, date_range){
     
     if(log == "log") {
-      plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), linetype= ws, color= solute, shape= source))+
+      plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), linetype= ws, color = solute, shape = source))+
         labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x= get(x), y= get(y), linetype= ws, color= solute, shape= source))+
+      plot <- ggplot(data=data, aes(x= get(x), y= get(y), color = solute, shape = source, linetype= ws))+
         labs(x = "Water Year", y = units)}
     
     final <- plot+ my_theme + geom_line(size = 0.5) + 
@@ -140,7 +140,13 @@ shinyServer(function(session, input, output) {
     ggplotly(  
       final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
+      config(showLink = FALSE) 
+    # %>%
+    #   add_annotations(text="Watershed", xref="paper", yref="paper",
+    #                    x=1, xanchor="left",
+    #                    y=0.8, yanchor="bottom",    # Same y as legend below
+    #                    legendtitle=TRUE, showarrow=FALSE) %>%
+    #   layout(legend=list(y=0.8, yanchor="top"))
     }
   
   #############################################################
@@ -173,16 +179,28 @@ shinyServer(function(session, input, output) {
   
   #plot of paper birch and sugar maple, etc. decline due to ice storm
   output$leaf_count <- renderPlotly({
+    #filter for all but w5 since it has so much missing data
     yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",]
-    leaf_count <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
-      geom_line(size=0.5)+ my_theme+
+    #filter for all but Aspen and Pin Cherry since they are always zero
+    #yearly_count_means<-yearly_count_means[yearly_count_means$species !%in% c("Aspen", "Pin Cherry"),]
+    yearly_count_means<-yearly_count_means[yearly_count_means$species != "Pin Cherry",]
+    
+    if(input$log_counts == "log") {
+      plot <- ggplot(yearly_count_means, aes(x=YEAR, y=logb(count, base=exp(1)), color = species))+
+        labs(x = " ", y = paste("log", "(Leaf counts)"))+
+        coord_cartesian(ylim = c(-1,5))}
+    
+    else{
+      plot <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
+        labs(x = " ", y = "Leaf Counts")}
+    
+    leaf_count <- plot + geom_line(size=0.5)+ my_theme+
       geom_point(size=1.3, aes(text = paste("Species: ", species, "<br>", 
                                             "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
       facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
       theme(legend.title = element_text("Tree Species", family = "Helvetica"),
             strip.text = element_text(size = 10))+
       xlim(min(input$date_range_count[1]), max(input$date_range_count[2]))+
-      xlab(" ")+ ylab("Leaf counts")+
       geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = 1998, y = 120, color = "black")
     
@@ -212,60 +230,64 @@ shinyServer(function(session, input, output) {
     NO3_plot$width <- NULL
     NO3_plot$height <- NULL
     NO3_plot %>%
-      layout(autosize = TRUE)
+      layout(autosize = TRUE, showlegend = FALSE)
+    #manually code what shows in the legend
+    # NO3_plot[['x']][['data']][[1]][['name']] <- input$watersheds2[1]
+    # NO3_plot[['x']][['data']][[2]][['name']] <- input$watersheds2[2]
+    # NO3_plot[['x']][['data']][[3]][['name']] <- input$watersheds2[3]
+    # NO3_plot[['x']][['data']][[4]][['name']] <- input$watersheds2[4]
+    # NO3_plot[['x']][['data']][[5]][['name']] <- input$watersheds2[5]
+    # NO3_plot[['x']][['data']][[6]][['name']] <- input$watersheds2[6]
+    # NO3_plot[['x']][['data']][[7]][['name']] <- input$watersheds2[7]
+    # NO3_plot[['x']][['data']][[8]][['name']] <- input$watersheds2[8]
+    # NO3_plot[['x']][['data']][[9]][['name']] <- input$watersheds2[9]
+    # NO3_plot
   })
   
-  #make a plot of nitrates like in the 2003 paper
+  #make plots of nitrates like in the 2003 paper
   #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function(reactive_data_flux(), xflux(), yflux(), log=input$log_flux, units="moles/ha-yr", date_range=input$date_range3)
+    NO3_output <- ggplot_function(reactive_data_flux(), xflux(), yflux(), log=input$log_flux, units="moles/ha-yr", date_range=input$date_range3)%>%
+      #annotate legend title so that it is connected to the legend itself
+      add_annotations(text="Watershed", xref="paper", yref="paper",
+                       x=1, xanchor="left",
+                       y=0.8, yanchor="bottom",    # Same y as legend below
+                       legendtitle=TRUE, showarrow=FALSE) %>%
+      layout(legend=list(y=0.8, yanchor="top"))
+    
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
     NO3_output$height <- NULL
     NO3_output %>%
-      layout(autosize = TRUE, legend = guides(shape = F, color = F)
-      )
+      layout(autosize = TRUE)
+    #manually code what shows in the legend
+    NO3_output[['x']][['data']][[1]][['name']] <- '1'
+    NO3_output[['x']][['data']][[2]][['name']] <- '6'
+    NO3_output
+    
   })
   
   #NO3 excess
   output$NO3_excess <- renderPlotly({
-    NO3_excess <- ggplot_function(reactive_data_norm(), xflux(), ynorm(), log="linear", units="moles/ha-yr", date_range=input$date_range3)
+    NO3_excess <- ggplot_function(reactive_data_norm(), xflux(), ynorm(), log="linear", units="moles/ha-yr", date_range=input$date_range3)%>%
+      #annotate legend title so that it is connected to the legend itself
+      add_annotations(text="Watershed", xref="paper", yref="paper",
+                      x=1, xanchor="left",
+                      y=0.8, yanchor="bottom",    # Same y as legend below
+                      legendtitle=TRUE, showarrow=FALSE) %>%
+      layout(legend=list(y=0.8, yanchor="top"))
+    
     NO3_excess$x$layout$width <- NULL
     NO3_excess$y$layout$height <- NULL
     NO3_excess$width <- NULL
     NO3_excess$height <- NULL
     NO3_excess %>%
-      layout(autosize = TRUE#, showlegend=T
-      )
+      layout(autosize = TRUE)
+    #manually code what shows in the legend
+    NO3_excess[['x']][['data']][[1]][['name']] <- '2'
+    NO3_excess[['x']][['data']][[2]][['name']] <- '4'
+    NO3_excess[['x']][['data']][[3]][['name']] <- '5'
+    NO3_excess
   })
 })
-
-#####efforts to figure out legend display#####
-#  my_theme <- theme_fivethirtyeight() +
-#    theme(rect = element_rect(fill = NA), panel.grid.major = element_line(colour = "#dddddd"), text = element_text(family = "Helvetica", size = 12),
-#        legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
-#          strip.text = element_text(hjust = 1, size = 20, face = "bold"),
-#        axis.title= element_text(NULL), axis.title.x= element_blank(),
-#          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
-# 
-#  color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
-#  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-#  watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 4,"5"= 5,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
-# 
-#  dataa <- water_chem_data
-#  dataa <- dataa[dataa$granularity == "year",]
-#  dataa <- dataa[dataa$source %in% c("streamflow"),]
-#  dataa <- dataa[dataa$ws %in% c("1", "6"),]
-#  dataa <- dataa[dataa$solute %in% c("NO3"),]
-# 
-# p<-ggplot(dataa, aes(x= water_year, y= flux, linetype= ws, color= solute, shape= source))+
-#    labs(x = "Water Year", y = "flux")+    geom_line(size = 0.5) + my_theme + 
-#    geom_point(size = 1.3, fill = "white", stroke = 0.5,
-#               aes(text = paste("Watershed: ", ws, "<br>", "Value:", flux, "<br>", "Date: ", water_year))) +
-#    geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
-#    annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
-#    scale_shape_manual(values = source_shapes) +
-#    scale_color_manual(values = color_anion)+ guides(shape = F, color = F)
-#    scale_linetype_manual(labels = c("ws1","ws2","ws3","ws4","ws5","ws6","ws7","ws8","ws9"), values = watershed_linetypes)
-# ggplotly(p)
