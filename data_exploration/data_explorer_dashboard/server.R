@@ -20,9 +20,9 @@ library(magrittr)
 
 shinyServer(function(input, output, session) {
 
-  ########### IMPORTANT PRELIMINARY INFO #############################################
-  
-  ###  Theme  ################
+ 
+  #######################################################################################
+  ############## THEME  ##################################################################
   my_theme <- 
     theme(rect = element_rect(fill = NA),
           panel.background = element_rect("transparent", colour = NA),
@@ -79,9 +79,9 @@ shinyServer(function(input, output, session) {
   water_sources <- list("Streamflow (Q)" = "streamflow", 
                         "Precipitation (P)" = "precipitation")
   
-  ### End of Theme ################
-  
-  ###  Lists for the sidebar  ######
+ 
+  ############################################################################################## 
+  ###  SIDEBAR LISTS  ##########################################################################
   #Edit if there are values that do not appear or are not relevant to your data. 
   #Should be the same as the lists in the UI file.
   
@@ -112,11 +112,12 @@ shinyServer(function(input, output, session) {
   
   
   all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
-  
-  
+
+  # Changing legend depending on the color mode.
+  # If colormode is solutes, the checkboxes for solutes will have solute colors if selected 
+  # If colormode is ws, the checkboxes for solutes will be grey if selected
   
   observe({
-    # Change the following line for more examples
     if(input$colormode_global == "ws"){
       addClass("solutes_col", "solutes_wsmd")
       removeClass("solutes_col", "solutes_solutesmd")}
@@ -127,9 +128,11 @@ shinyServer(function(input, output, session) {
   })
   
 
-
-  ############ FUNCTIONS ##################################
+  ###########################################################################################
+  ############ FUNCTIONS ####################################################################
   
+  ## This function is used to duplicate rows and allow for cummulative animations
+  ## See https://plot.ly/r/cumulative-animations/
   accumulate_by <- function(dat, var) {
     var <- lazyeval::f_eval(var, dat)
     lvls <- plotly:::getLevels(var)
@@ -139,62 +142,42 @@ shinyServer(function(input, output, session) {
     dplyr::bind_rows(dats)
   }
   
+  
+  ## These functions are used to allow for formulas as input in the exploratory bubble graph
+  ## See https://stackoverflow.com/questions/22908050/formula-evaluation-with-mutate
+  
+  # creates column with name temporary_x
   formula_function_x <- function(df, s){
     q = quote(mutate(df, temporary_x = s))
     eval(parse(text=sub("s", s, deparse(q))))}
   
+  # creates column with name temporary_y
   formula_function_y <- function(df, s){
     q = quote(mutate(df, temporary_y = s))
     eval(parse(text=sub("s", s, deparse(q))))}
 
-  #Solutesx_formula and solutesy_formula parse the formula inputed 
-  #by the user in the bubble plot to match column names
+  ############ END OF FUNCTIONS ##############################################################
   
 
-  solutesx_formula <- reactive({
-    capitalized <-"(^[[:upper:]][[:alpha:]])|^H|^K"
-    strip_spaces <- gsub(" ", "", input$solutesx_formula, fixed = TRUE)
-    include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
-    trim <- str_trim(include_space)
-    split_each <- str_split(trim, " ")
-    include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x , sep=""), x))
-    p_q_replace <- sapply(include_units, function(x) gsub("^[P|Q]", "water_mm", x, fixed = FALSE))
-    add_source <- sapply(p_q_replace, function(x) ifelse(str_detect(x, "date"), x, (ifelse(str_detect(x, "[[:alpha:]]"), paste(x, paste("_", input$solutesx_source, sep=""), sep = ""), x))))    
-    formula <- paste(add_source, collapse=' ' )
-    formula
-  })
   
   
-  solutesy_formula <- reactive({
-    capitalized<-"^[[:upper:]][[:alpha:]]|^H|^K"
-    strip_spaces <- gsub(" ", "", input$solutesy_formula, fixed = TRUE)
-    include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
-    trim <- str_trim(include_space)
-    split_each <- str_split(trim, " ")
-    include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x, sep=""), x))
-    p_q_replace <- sapply(include_units, function(x) gsub("^[P|Q]", "water_mm", x, fixed = FALSE))
-    add_source <- sapply(p_q_replace, function(x) ifelse(str_detect(x, "[[:alpha::]]"), paste(x, paste("_", input$solutesy_source, sep=""), sep=""), x))    
-    formula <- paste(add_source, collapse=' ' )
-    formula
-  })
+  ############################################################################################
+  ########### GENERAL SIDEBAR REACTIVITY ######################################################
   
-  ########### END OF IMPORTANT PRELIMINARY INFO #############################################
+  # Global input reactivity. 
+  # The following reactive functions allow the user to modify 
+  # settings for all plots in the dashboard from the general settings tab. 
   
-  
-  
-  
-  ########### SIDEBAR FUNCTIONS ##############################################################
-  ###  allow 'select all' interactivity, do not edit
-  
-  
+  #Global granularity
   observeEvent(input$granularity_global, {
     choices <- input$granularity_global
-    updateSelectInput(session, "granularity", selected = choices)
+    updateSelectInput(session, "granularity_pq", selected = choices)
     updateSelectInput(session, "granularity_time", selected = choices)
     updateSelectInput(session, "granularity_cq", selected = choices)
     updateSelectInput(session, "granularity_flux", selected = choices)
   })
   
+  #Global log transformation
   observeEvent(input$log_global_y, {
     choices <- input$log_global_y
     updateSelectInput(session, "log_pq", selected = choices)
@@ -203,6 +186,7 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "log_flux", selected = choices)
   })
   
+  #Global animation
   observeEvent(input$animate_global, {
     value <- input$animate_global
     updateSelectInput(session, "animate_cq", selected = value)
@@ -210,6 +194,7 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "animate_flux", selected = value)
   })
 
+  #Global animation speed
   observeEvent(input$animation_speed_global, {
     value <- input$animation_speed_global 
     updateSelectInput(session, "animation_speed_cq", selected = value)
@@ -217,6 +202,7 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "animation_speed_flux", selected = value)
   })
   
+  #Global animation trace
   observeEvent(input$trace_global, {
     value <- input$trace_global
     updateSelectInput(session, "trace_cq", selected = value)
@@ -224,7 +210,9 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "trace_flux", selected = value)
   })
   
-  
+  # The following reactivity prevents the user from selecting more than 5 ws when viewing the
+  # data in solute mode. This is because there are only 5 shapes that the program can assign to differentiate ws. 
+
   observeEvent(input$colormode_global, {
     if(input$colormode_global == "ws") {
       updateSelectizeInput(session, "watersheds", options = list(maxItems = 9))
@@ -234,12 +222,17 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  # The following reactivity prevents the user from selecting more than 5 solutes when viewing the
+  # data in ws mode. This is because there are only 5 shapes that the program can assign to differentiate solutes. 
   observe({
     if(input$colormode_global == "ws" & length(input$solutes_cations) + length(input$solutes_anions) + length(input$solutes_H)> 5){
       updateCheckboxGroupInput(session, "solutes_cations", selected=head(input$solutes_cations,length(input$solutes_cations)))
       updateCheckboxGroupInput(session, "solutes_anions", selected= head(input$solutes_anions,5-length(input$solutes_cations)))
       updateCheckboxGroupInput(session, "solutes_H", selected= head(input$solutes_H,5-length(input$solutes_cations)-length(input$solutes_anions)))}
       })
+  
+  
+  ###  The following function allow 'select all' interactivity 
   
   observeEvent(input$select_all_ions, {
     if(input$select_all_ions == 0) {}
@@ -263,12 +256,6 @@ shinyServer(function(input, output, session) {
     else{updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
   })
   
-  observeEvent(input$select_all_ws, {
-    if(input$select_all_ws == 0) {updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
-    else if (input$select_all_ws%%2 == 0){updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
-    else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
-  })
-  
   solutes <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
   
   
@@ -277,52 +264,70 @@ shinyServer(function(input, output, session) {
   
   
   
-  ########### DATA IMPORT ####################################################
+  ###########################################################################################
+  ############## DATA IMPORT ################################################################
   
   load("precip_streamflow_dfs.RData")
   
+  # LONG DATA
   imported_data <- precip_streamflow_long
+  # Add fill_color_solutemd and fill_color_wsmd columns so that fill color 
+  # can depend on both source and solute and source and ws. 
   imported_data %<>% 
     mutate(fill_color_solutemd = paste(source, solute, sep = '_')) %>% 
     mutate(fill_color_wsmd = paste(source, ws, sep = '_'))
+  
+  # WIDE DATA
   imported_data_wide<- precip_streamflow_wide
+  
+  # SUPER WIDE DATA
   imported_data_super_wide<- precip_streamflow_super_wide
-  levels(as.factor(imported_data$solute))
-  levels(as.factor(imported_data$solute))
-  
-  ########### END OF DATA IMPORT #############################################
   
   
-  ########### REACTIVE DATA FOR EACH PLOT #########################################
   
-  ###### >>>>>>> Reactive Time Plot <<<<<<<<<< #####
+  ###########################################################################################
+  ############ REACTIVE FUNCTIONS AND REACTIVE DATA FOR EACH PLOT ###########################
+  
+  
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Reactive Time Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
+  #Reactive data filtering for time plot. Even reactive to update (go_exploratory) button
+  # Even reactive so that the app is not as slow.
+  
   eventReactive_data_time <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
     data$date<- as.POSIXct(data$date)
     data$water_year<- as.POSIXct(data$water_year)
-    #data <- data[data$granularity %in% input$granularity_time,]
     data <- data[data$source %in% input$water_sources,]
     data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
     data <- data[data$ws %in% input$watersheds,]
-    
-    if(input$trace_time == "Leave Trace"){data <- accumulate_by(data, ~framey)}
+  })
+  
+  # Data is reactive to granularity and animation/trace, not event reactive to those
+  # This separation is done so that people can change granularity when zoomed in 
+  # without replotting and zooming out.
+  
+  reactive_data_time <- reactive({
+    data <- eventReactive_data_time()[eventReactive_data_time()$granularity %in% input$granularity_time,]
+    if(input$animate_time == "Animate" & input$trace_time == "Leave Trace"){data <- accumulate_by(data, ~framey)}
     else{data}
   })
   
-  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
-  reactive_data_time <- reactive({
-    data <- eventReactive_data_time()[eventReactive_data_time()$granularity %in% input$granularity_time,]
-  })
+  ## X axis for Time Plot reactive to granularity. 
+  #This is done because We want o plot water_year when it's yearly data 
+  # e.g. have Jan. 2013 as part of 2012 water year 
   
-  # X axis for Time Plot
   x_time <- reactive({
     if(input$granularity_time == "week"){"date"}
     else if(input$granularity_time == "month"){"date"}
     else if(input$granularity_time == "year"){"water_year"}
   })
   
-  # Y axis for Time Plot
+  ## Y axis for Flux Plot reactive input where the person can choose what kind 
+  # of graph they want to look at, either concentration, or  
+  # temperature, or pH etc. 
+  
   y_time <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     if(input$yaxis_time == "concentration"){as.character(input$units)}
@@ -347,7 +352,8 @@ shinyServer(function(input, output, session) {
   })
   
   
-  #Coloring for Time pLot
+  #Coloring for Time Plot
+  #Line coloring
   line_coloring <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     if(input$yaxis_time %in% c("concentration", "chargebalance") & input$colormode_global == "solute"){solute_palette}
@@ -355,6 +361,7 @@ shinyServer(function(input, output, session) {
     else{grey_palette}    
   })
   
+  #Line coloring
   fill_coloring <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
         if(input$yaxis_time %in% c("concentration", "chargebalance") & input$colormode_global == "solute"){source_color_solutemd}
@@ -362,11 +369,17 @@ shinyServer(function(input, output, session) {
         else{grey_palette_2}   
       })
   
+  # Change granularity to week if user is looking at temperature, anc, or spcond
+  # Since these only exist in weekly format. 
   observeEvent({input$go_exploratory |
       input$lastkeypresscode},{if(!(input$yaxis_time %in% c("concentration", "pH", "chargebalance"))){
     updateSelectInput(session, "granularity_time",
                       selected = "week")}})
-    
+  
+  
+  # Change water sources to streamflow only if user is looking at charge balance,
+  # temperature, anc, or spcond since these only exist for streamflow
+  
   observe({if(!(input$yaxis_time %in% c("concentration", "pH"))){
     updateSelectInput(session, "water_sources",
                       selected = "streamflow")}
@@ -375,41 +388,57 @@ shinyServer(function(input, output, session) {
                       selected = c("streamflow", "precipitation"))
     }})
   
-  ###### >>>>>>> Reactive Charge Plot <<<<<<<<<< #####
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> End of Reactive Time Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
+  
+  
+  
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Reactive Charge Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
+  #Reactive data filtering for charge plot. Even reactive to update (go_exploratory) button
+  # Even reactive so that the app is not as slow.
   
   eventReactive_data_charge <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
-    #data <- data[data$granularity %in% input$granularity_time,]
-    data <- data[data$source %in% "precipitation",]
-    data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
+    data <- data[data$source %in% "precipitation",] #Charge plot is only done for precip data. 
+    data <- data[data$solute %in% solutes(),] 
     data <- data[data$ws %in% input$watersheds,]
     data %<>% 
       mutate(charge_ueq = ifelse(solute %in% solutes_anions, -1*(concentration_ueq), concentration_ueq))
   
   })
   
-  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
+  # Data is reactie to granularity, not event reactive to granularity 
+  # This separation is done so that people can change granularity when zoomed in 
+  # without replotting and zooming out. 
+  
   reactive_data_charge <- reactive({
     data <- eventReactive_data_charge()[eventReactive_data_charge()$granularity %in% input$granularity_time,]
   })
-
-  ###### >>>>>>> End of Reactive Charge Plot <<<<<<<<<< #####
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> End of Reactive Charge Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
   
   
-  ###### >>>>>>> Reactive PQ Plot <<<<<<<<<< #####
+  
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Reactive PQ Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
+  #Reactive data filtering for PQ plot. Even reactive to update (go_exploratory) button
+  # Even reactive so that the app is not as slow.
+  
   eventReactive_data_pq <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
     data$date<- as.POSIXct(data$date)
     data$water_year<- as.POSIXct(data$water_year)
-    #data <- data[data$granularity %in% input$granularity_pq,]
-    data <- data[data$solute %in% "Ca",] #filter so that they only appear once. 
+    data <- data[data$solute %in% "Ca",] #filter so that they only appear once. Df structure has same P and Q data for all solutes.  
     data <- data[data$ws %in% input$watersheds,]
   })
   
-  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
+  # Data is reactie to granularity, not event reactive to granularity 
+  # This separation is done so that people can change granularity when zoomed in 
+  # without replotting and zooming out. 
+  
   reactive_data_pq <- reactive({
     data <- eventReactive_data_pq()[eventReactive_data_pq()$granularity %in% input$granularity_pq,]
   })
@@ -421,40 +450,51 @@ shinyServer(function(input, output, session) {
     else if(input$granularity_pq == "year"){"water_year"}
   })
   
+  # Reactive coloring for pQ plot depending on global colormode. 
+  # Data should be grey scale if looking at solute mode, but colored by 
+  # watershed if looking at ws mode. 
   
   coloring_pq <- reactive({
     if(input$colormode_global == "solute"){grey_palette}
     else{ws_palette}
   })
   
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> End of Reactive PQ Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
-  ###### >>>>>>> Reactive cQ Plot <<<<<<<<<< #####
+  
+  
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Reactive cQ Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
+  #Reactive data filtering for cQ plot. Even reactive to update (go_exploratory) button
+  # Even reactive so that the app is not as slow.
+  
   eventReactive_data_cq <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data <- imported_data
-    d <- event_data("plotly_selected")
-    #data <- data[data$granularity %in% input$granularity_cq,] 
     data <- data[data$solute %in% solutes(),] 
     #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds,]
     data <- data[data$source %in% "streamflow",]
-    
-    if(input$trace_cq == "Leave Trace"){data <- accumulate_by(data, ~framey)}
-    else{data}
-    
   })
   
-  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
+  # Data is reactive to granularity and animation/trace, not event reactive to these
+  # This separation is done so that people can change granularity when zoomed in 
+  # without replotting and zooming out. Also, so that animation happens without having to replot. 
+  # In cQ plot, the data also has to be reactively updated 
+  # to match the date range selected when brushing in other plots. 
+
   reactive_data_cq <- reactive({
     d <- event_data("plotly_selected")
     data <- eventReactive_data_cq()
     if (!is.null(d$x)){
-      data <- data[eventReactive_data_cq()$granularity %in% input$granularity_cq,]
+      data <- data[data$granularity %in% input$granularity_cq,]
       data <- data[as.numeric(as.POSIXct(data$date)) >= min(d$x) & as.numeric(as.POSIXct(data$date)) <= max(d$x),]
       }
     else{
-      data <- eventReactive_data_cq()[eventReactive_data_cq()$granularity %in% input$granularity_cq,]
+      data <- data[data$granularity %in% input$granularity_cq,]
     }
+    if(input$animate_cq == "Animate" & input$trace_cq == "Leave Trace"){data <- accumulate_by(data, ~framey)}
+    else{data}
   })
   
   #Animation Speed cQ Plot
@@ -463,11 +503,13 @@ shinyServer(function(input, output, session) {
   })
 
   
-  ###### >>>>>>> End of Reactive cQ Plot <<<<<<<<<< #####
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> End of Reactive cQ Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Reactive Flux Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
+  #Reactive data filtering for flux plot. Even reactive to update (go_exploratory) button
+  # Even reactive so that the app is not as slow. 
   
-  ###### >>>>>>> Reactive Flux Plot <<<<<<<<<< #####
   eventReactive_data_flux <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
@@ -478,146 +520,112 @@ shinyServer(function(input, output, session) {
     data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
     data <- data[data$ws %in% input$watersheds,]
     
-    if(input$trace_flux == "Leave Trace"){data <- accumulate_by(data, ~framey)}
+    if(input$animate_flux == "Animate" & input$trace_flux == "Leave Trace"){data <- accumulate_by(data, ~framey)}
     else{data}
 
   })
   
-  #This separation is done so that people can change granularity when zoomed in without replotting and zooming out. 
+  # Data is reactie to granularity, not event reactive to granularity 
+  #This separation is done so that people can change granularity when zoomed in 
+  #without replotting and zooming out. 
+  
   reactive_data_flux <- reactive({
     data <- eventReactive_data_flux()[eventReactive_data_flux()$granularity %in% input$granularity_flux,]
   })
   
-  ## X axis for Flux Plot
+  ## X axis for Flux Plot reactive to granularity. 
+  #This is done because We want o plot water_year when it's yearly data 
+  # e.g. have Jan. 2013 as part of 2012 water year 
+  
   x_flux <- reactive({
     if(input$granularity_flux == "week"){"date"}
     else if(input$granularity_flux == "month"){"date"}
     else if(input$granularity_flux == "year"){"water_year"}
   })
   
-  #Animation Speed Flux
+  #Animation Speed for Flux
   animation_speed_flux <- reactive({
     (80)*(1/(input$animation_speed_flux))^2
   })
   
   
-  ###### >>>>>>> End of Reactive Flux Plot <<<<<<<<<< #####
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> End of Reactive Flux Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
   
   
-  ###### >>>>>>> Reactive Bubble Plot <<<<<<<<<< #####
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Reactive Bubble Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
+  
+  ## solutesx_formula and solutesy_formula parse the formula inputed into the 
+  #by the user in the bubble plot to match column names
+  
+  solutesx_formula <- reactive({
+    capitalized <-"(^[[:upper:]][[:alpha:]])|^H|^K"
+    strip_spaces <- gsub(" ", "", input$solutesx_formula, fixed = TRUE)
+    include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
+    trim <- str_trim(include_space)
+    split_each <- str_split(trim, " ")
+    include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x , sep=""), x))
+    p_q_replace <- sapply(include_units, function(x) gsub("^[P|Q]", "water_mm", x, fixed = FALSE))
+    add_source <- sapply(p_q_replace, function(x) ifelse(str_detect(x, "date"), x, (ifelse(str_detect(x, "[[:alpha:]]"), paste(x, paste("_", input$solutesx_source, sep=""), sep = ""), x))))    
+    formula <- paste(add_source, collapse=' ' )
+    formula
+  })
+  
+  solutesy_formula <- reactive({
+    capitalized<-"^[[:upper:]][[:alpha:]]|^H|^K"
+    strip_spaces <- gsub(" ", "", input$solutesy_formula, fixed = TRUE)
+    include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
+    trim <- str_trim(include_space)
+    split_each <- str_split(trim, " ")
+    include_units <- sapply(split_each, function(x) ifelse(str_detect(x, capitalized), paste(paste(input$units_bubble, "_", sep=""), x, sep=""), x))
+    p_q_replace <- sapply(include_units, function(x) gsub("^[P|Q]", "water_mm", x, fixed = FALSE))
+    add_source <- sapply(p_q_replace, function(x) ifelse(str_detect(x, "[[:alpha::]]"), paste(x, paste("_", input$solutesy_source, sep=""), sep=""), x))    
+    formula <- paste(add_source, collapse=' ' )
+    formula
+  })
+  
+  
+  #Reactive data filtering according to inputs for bubble plot
+  
   reactive_data_bubble <- eventReactive(input$go_bubble, {
     data <- imported_data_super_wide
     data$framey <- as.numeric(data$framey)
     data <- data[data$granularity %in% input$granularity_bubble,]
     data <- data[data$ws %in% input$watersheds_bubble,]
     data <- data[data$date >= input$date_range_bubble[1] & data$date <= input$date_range_bubble[2]]
-    
-    #code below creates temporary_x and temporary_y
-    #there are the columns that have the appropriate data 
-    #given the column
-    
-    text_no_x <- "PLEASE TYPE A FORMULA FOR THE X AXIS IN THE BOX BELOW.
-
-    Try any of the following possibilities:
-    
-    Solutes: 
-    • Al, Ca, Cl, H, HCO3, K, Mg, Na, NO3, PO4, SiO2, SO4
-    
-    Hydrologic Flux:
-    • P for precipitation in mm
-    • Q for streamflow in mm
-    
-    Others: 
-    • pH for pH
-    • anc for acid neutralizing capacity (only available for streamflow)
-    • spcond for specific conductivity (only available for streamflow)
-    • temp for temperature (only available for streamflow)
-    
-    You can also perform arithmetic operations on the solutes using: +, - , *, /, ^
-    
-    For example, try typing: Na + Mg"
-    
-    text_no_y <- "PLEASE TYPE A FORMULA FOR THE Y AXIS IN THE BOX ABOVE.
-
-    Try any of the following possibilities:
-    
-    Solutes: 
-    • Al, Ca, Cl, H, HCO3, K, Mg, Na, NO3, PO4, SiO2, SO4
-    
-    Hydrologic Flux:
-    • P for precipitation in mm
-    • Q for streamflow in mm
-    
-    Others: 
-    • pH for pH
-    • anc for acid neutralizing capacity (only available for streamflow)
-    • spcond for specific conductivity (only available for streamflow)
-    • temp for temperature (only available for streamflow)
-    
-    You can also perform arithmetic operations on the solutes using: +, - , *, /, ^
-    
-    For example, try typing: Na + Mg"
-    
-    text_pq_conflict <- "When looking at precipitation (P) you can't see streamflow (Q) in mm. 
-When looking at streamflow (Q) you can't see precipitation (P) in mm. 
-
-Try typing P and matching the dropdown menu by selecting P or
-try typing Q and matching the dropdown menu by selecting Q"
-    
-    #X axis validation
-    if(input$solutesx_source == "precipitation") {
-      validate(
-        need(input$solutesx_formula != "", text_no_x),
-        need(input$solutesx_formula != "Q", text_pq_conflict), 
-        need(input$solutesx_formula != "q", text_pq_conflict))}
-    if(input$solutesx_source == "streamflow") {
-      validate(
-        need(input$solutesx_formula != "", text_no_x),
-        need(input$solutesx_formula != "P",text_pq_conflict),
-        need(input$solutesx_formula != "p", text_pq_conflict))}
-    
-    #Y axis validation
-    if(input$solutesy_source == "precipitation") {
-      validate(
-        need(input$solutesy_formula != "", text_no_y),
-        need(input$solutesy_formula != "Q", text_pq_conflict),
-        need(input$solutesx_formula != "q", text_pq_conflict))}
-    if(input$solutesy_source == "streamflow") {
-      validate(
-        need(input$solutesy_formula != "", text_no_y),
-        need(input$solutesy_formula != "P", text_pq_conflict),
-        need(input$solutesx_formula != "p", text_pq_conflict))}
-    
-    
     data <- formula_function_x(data, solutesx_formula())
     data <- formula_function_y(data, solutesy_formula())
     
-    if(input$trace_bubble == "Leave Trace"){data <- accumulate_by(data, ~framey)}
+    if(input$animate_bubble == "Animate" & input$trace_bubble == "Leave Trace"){data <- accumulate_by(data, ~framey)}
     else{data}
     
   })
 
-  #Animation Speed Bubble Plot
+  # Animation Speed for Bubble Plot
   animation_speed_bubble <- reactive({
     (80)*(1/(input$animation_speed_bubble))^2
   })
   
-  #sizing for Bubble plot
+  # Sizing for Bubble plot
   sizing <- reactive({
     if(input$sizing_bubble == 1){c(2,2)}
     else{c(1,6)}
   })
   
-  ###### >>>>>>> End of Reactive Bubble Plot <<<<<<<<<< #####
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> End of Reactive Bubble Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
   ########### END OF REACTIVE DATA FOR EACH PLOT #########################################
   
   
   
-  ########### PLOT FUNCTIONS #########################################
   
-  #### ---------  GGPLOT BASIC PQ PLOT FUNCTION-----------------------
+  ######################################################################################################
+  ########### PLOTTING  FUNCTIONS ###########################################################################
+  
+  
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> BASIC PQ PLOT FUNCTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
   basic_ggplot_function <- function(data, x, y, log, color_scale, date_breaks, date_labels){
     
     data_stream <- data[data$source %in% c("streamflow"),]
@@ -674,23 +682,56 @@ try typing Q and matching the dropdown menu by selecting Q"
   }
   
   
-  #### ---------  GGPLOT TIME FUNCTION-----------------------
-  ggplot_time_function <- function(data, x, y, log, y_label, 
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> BASIC TIME PLOT FUNCTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
+  ggplot_time_function <- function(data, x, y, 
+                                   log, y_label, 
                                    animate, speed, trace, 
-                                   color, line_color_scale, fill_color_scale,
+                                   colormode, line_color_scale, fill_color_scale,
                                    date_breaks = "5 years", date_labels = "%Y", granularity){
     
-    if(animate == "Animate"){
-      if(trace == "Leave Trace"){
-        plot <- ggplot(data=data, aes_string(x = x, y = y, frame = "frame", color = color))}
-
-      else{
-        plot <- ggplot(data=data, aes_string(x = x, y = y, frame = "framey", color = color))}
-      }
+    # Animation 
+    # options where frame is the column with the year and framey is a column with the data point's year. 
+    # And frame is a column with the year after accumulating -- so each data point is duplicated various times, once
+    # for every year after they have appeared in the graph. 
     
+    if(animate == "Animate"){
+      plot <- ggplot(data=data, aes_string(x = x, y = y, 
+                                           frame = ifelse(trace == "Leave Trace","frame", "framey"), color = colormode))}
+
     else{
-      plot <- ggplot(data=data, aes_string(x = x, y = y, color = color))
+      plot <- ggplot(data=data, aes_string(x = x, y = y, color = colormode))
     } 
+    
+    # Color:
+    # If colormode is watershed, the line and point should be grouped according to source and solute
+    # Shape of the point reflects solute
+    # Line color reflects solute
+    # Fill color reflects both source. If precipitation, then white, 
+    # if stream water then the same color as the line
+    # Text in the tooltip also changes
+    
+    
+    if(colormode == "ws"){
+      plot <- plot + 
+        geom_line(size = 0.5, aes_string(shape = "solute", group = "source")) + 
+        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("solute"), fill = get("fill_color_wsmd"), group = "source",
+                                                 text={
+                                                   if(granularity == "year"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y"), ", ", round(get(y),2), ")", sep="")}
+                                                   else if(granularity == "month"){paste(ws, " • ", strftime(get(x), "%Y-%b"), " • ", solute, " • ", round(get(y),2), sep="")}
+                                                   else{paste(ws, " • ", strftime(get(x), "%Y-%b-%d"), " • ", solute, " • ", round(get(y),2), sep="")}}))
+    }
+    else{
+      plot <- plot + 
+        geom_line(size = 0.5, aes_string(shape = "ws", fill = "solute", group = "source")) + 
+        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("ws"), fill = get("fill_color_solutemd"), group = "source",
+                                                 text={
+                                                   if(granularity == "year"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y"), ", ", round(get(y),2), ")", sep="")}
+                                                   else if(granularity == "month"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y-%b"), ", ", round(get(y),2), ")", sep="")}
+                                                   else{paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y-%b-%d"), ", ", round(get(y),2), ")", sep="")}}))
+       
+    }
+
     
     plot <- plot +
       my_theme + 
@@ -701,31 +742,16 @@ try typing Q and matching the dropdown menu by selecting Q"
       labs(x = "", y = y_label)+
       scale_x_datetime(date_breaks = date_breaks, date_labels = date_labels)
     
-    if(color == "ws"){
-      plot <- plot + 
-        geom_line(size = 0.5, aes_string(shape = "solute", group = "source")) + 
-        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("solute"),fill = get("fill_color_wsmd"), 
-                                                 text={
-                                                   if(granularity == "year"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y"), ", ", round(get(y),2), ")", sep="")}
-                                                   else if(granularity == "month"){paste(ws, " • ", strftime(get(x), "%Y-%b"), " • ", solute, " • ", round(get(y),2), sep="")}
-                                                   else{paste(ws, " • ", strftime(get(x), "%Y-%b-%d"), " • ", solute, " • ", round(get(y),2), sep="")}}))
-    }
-    else{
-      plot <- plot + 
-        geom_line(size = 0.5, aes_string(fill = "source", shape = "ws", group = "solute")) + 
-        geom_point(size = 1.3, stroke = 0.2, aes(shape = get("ws"), fill = get("fill_color_solutemd"), 
-                                                 text={
-                                                   if(granularity == "year"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y"), ", ", round(get(y),2), ")", sep="")}
-                                                   else if(granularity == "month"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y-%b"), ", ", round(get(y),2), ")", sep="")}
-                                                   else{paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y-%b-%d"), ", ", round(get(y),2), ")", sep="")}}))
-       
-    }
-
-      
-      if(log == "log"){
-        plot <- plot + scale_y_continuous(trans='log2')+
+    
+    # y axis transformation 
+    
+    if(log == "log"){
+      plot <- plot + scale_y_continuous(trans='log2')+
         labs(x = "", y = paste("log", "(",y_label, ")"))
-      }
+    }
+    
+    
+    # ggplotly
       
     if(animate == "Animate"){
       ggplotly(plot, tooltip = "text") %>%
@@ -747,9 +773,10 @@ try typing Q and matching the dropdown menu by selecting Q"
   }
 
   
-  #### ---------  GGPLOT CHARGE BALANCE FUNCTION-----------------------
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> CHARGE BALANCE PLOT FUNCTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
   ggplot_charge_function <- function(data, x, y, log, y_label, color_scale){
-    plot <- ggplot(data=data, aes(x = as.POSIXct(get(x)), y = get(y), color = solute, fill = solute, shape = source))+
+    plot <- ggplot(data=data, aes(x = as.POSIXct(get(x)), y = get(y), color = solute, fill = solute, shape = source)) +
       my_theme + 
       geom_area() + 
       facet_grid(ws ~ .)+
@@ -758,11 +785,15 @@ try typing Q and matching the dropdown menu by selecting Q"
       scale_alpha_discrete(range = c(0.9, 0.5))+
       labs(x = "", y = y_label)
     
+    # y axis transformation 
+    
     if(log == "log"){
       plot <- plot + scale_y_continuous(trans='log2')+
         labs(x = "Water Year", y = paste("log", "(",y_label, ")"))
     }
     
+    
+    #ggplotly
     ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) %>% 
@@ -771,38 +802,48 @@ try typing Q and matching the dropdown menu by selecting Q"
   }
   
   
-  #### ---------  GGPLOT BUBBLE FUNCTION-----------------------
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> CHARGE BUBBLE PLOT FUNCTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
-  ggplot_bubble_function <- function(data, x, y, log_x, log_y, x_label, y_label,
+  ggplot_bubble_function <- function(data, x, y, 
+                                     log_x, log_y, x_label, y_label,
                                      animate, speed, trace, 
                                      color = NA, color_scale = NA, 
                                      size = NA, size_range, 
                                      text = NA, cq = "no", granularity){
+  
+    # Animation 
+    # options where frame is the column with the year and framey is a column with the data point's year. 
+    # And frame is a column with the year after accumulating -- so each data point is duplicated various times, once
+    # for every year after they have appeared in the graph. 
+    
+    if(animate == "Animate"){
+      if(trace == "Leave Trace"){
+        plot <- ggplot(data=data, aes(frame = frame, alpha = ws, text = paste(frame, ": (", round(get(x)), ", ",round(get(y)), ")", sep = "")))}
+      
+      else{
+        plot <- ggplot(data=data, aes(frame = framey, alpha = ws, text = paste(framey, ": (", round(get(x)), ", ", round(get(y)), ")", sep = "")))}}
+    
+    else{
+      plot <- ggplot(data=data, aes(alpha = ws, text = paste(framey, ": (", round(get(x)), ", ",round(get(y)), ")", sep = "")))}
     
     
-     
-   plot <- ggplot(data=data, aes(frame = ifelse(trace == "Leave Trace","frame", "framey"), 
-                                 text = {
-                                   if(granularity == "year"){
-                                     paste(ws,", ", ifelse(cq == "yes", solute, ""), ifelse(cq == "yes", ", ", ""), strftime(date, "%Y"), " • ", "(", round(get(x),2), ", ", round(get(y),2), ")", sep="")}
-                                   else if(granularity == "month"){
-                                     paste(ws,", ", ifelse(cq == "yes", solute, ""), ifelse(cq == "yes", ", ", ""), strftime(date, "%Y-%b"), " • ", "(", round(get(x),2), ", ", round(get(y),2), ")", sep="")}
-                                   else{
-                                     paste(ws,", ", ifelse(cq == "yes", solute, ""), ifelse(cq == "yes", ", ", ""), strftime(date, "%Y-%b-%d"), " • ", "(", round(get(x),2), ", ", round(get(y),2), ")", sep="")}}))
-  
-  
+    #Some additional options for bubble graph if it is the cq plot
+    
     if(cq == "yes"){
       plot <- plot + 
-        geom_point(aes_string(x = x, y = y, size = size, color = color, fill = color, shape = ifelse(color == "ws","solute", "ws")), stroke= 0.2, alpha = 0.5)+
+        geom_point(aes_string(x = x, y = y, size = size, color = color, fill = color, shape = ifelse(color == "ws","solute", "ws")), stroke= 0.2, alpha = 0.8)+
         scale_color_manual(values = color_scale) +
         scale_fill_manual(values = color_scale)
     }
+   
     else{
       plot <- plot+ 
-        geom_point(aes_string(x = x, y = y, size = size, color = color, fill = color, shape = NA), stroke= 0.2, alpha = 0.5)
+        geom_point(aes_string(x = x, y = y, size = size, color = color, fill = color, shape = NA), stroke= 0.2, alpha = 0.8)
         scale_colour_brewer()
     }
     
+    
+    # x and y axis transformations
     if(log_x == "log"){
       plot <- plot + scale_x_continuous(trans='log2')
     }
@@ -817,6 +858,8 @@ try typing Q and matching the dropdown menu by selecting Q"
       scale_shape_manual(values = c(21, 22, 23, 24, 25)) + 
       labs(x= x_label, y = y_label)
       
+    #ggplotly
+    
     if(animate == "Animate"){
     ggplotly(plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
@@ -835,9 +878,10 @@ try typing Q and matching the dropdown menu by selecting Q"
   
   
   
-  #############################################################
-  ########### OUTPUTS #########################################
-  #############################################################
+  ###############################################################################################
+  ########### OUTPUTS ###########################################################################
+  
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> PQ <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
   output$plot_pq <- renderPlotly({
     d <- event_data("plotly_selected")
@@ -853,8 +897,10 @@ try typing Q and matching the dropdown menu by selecting Q"
       ldates<-ifelse(max(d$x) - min(d$x) > 5*(31557600),"%Y","%b%y")
     }
     
+    # Plot
     theplot <- basic_ggplot_function(reactive_data_pq(), x_pq(), y, 
                                      log = input$log_pq, coloring_pq(), breaks, ldates) 
+    
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically. 
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -868,6 +914,8 @@ try typing Q and matching the dropdown menu by selecting Q"
     else{theplot} 
     
     })
+  
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Time Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
   output$plot_time <- renderPlotly({
     d <- event_data("plotly_selected")
@@ -890,6 +938,7 @@ try typing Q and matching the dropdown menu by selecting Q"
                                     input$animate_time, animation_speed_time(), input$trace_time, 
                                     input$colormode_global, line_coloring(), fill_coloring(), 
                                     breaks, ldates, granularity = input$granularity_time)
+    
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
     theplot$x$layout$width <- NULL
     theplot$y$layout$height <- NULL
@@ -904,8 +953,11 @@ try typing Q and matching the dropdown menu by selecting Q"
     else{theplot}
   }) 
   
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Charge Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
   output$plot_charge <- renderPlotly({
     d <- event_data("plotly_selected")
+    # Plot
     theplot <- ggplot_charge_function(reactive_data_charge(), x_time(), "charge_ueq",
                                     log = input$log_time, "uEquivalent/L", solute_palette)
     #the code below fixes an issue where the plotly width argument doesn't adjust automatically.
@@ -925,6 +977,7 @@ try typing Q and matching the dropdown menu by selecting Q"
   })
   
   output$plot_cq <- renderPlotly({
+    # Plot
     theplot <- ggplot_bubble_function(reactive_data_cq(), "water_mm", input$units, 
                                       input$log_cq_x,input$log_cq_y, "mm", y_labs(), 
                                       input$animate_cq, animation_speed_cq(), input$trace_cq, 
@@ -938,7 +991,7 @@ try typing Q and matching the dropdown menu by selecting Q"
   })
   
   
-  
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Flux Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
   output$plot_flux <- renderPlotly({
     d <- event_data("plotly_selected")
@@ -976,9 +1029,12 @@ try typing Q and matching the dropdown menu by selecting Q"
     else{theplot}
   })
   
+  ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> Bubble Plot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
+  
   output$bubblePlot <- renderPlotly({
     input$go_bubble
     input$lastkeypresscode
+    # Plot
     theplot <- isolate(ggplot_bubble_function(reactive_data_bubble(), "temporary_x", "temporary_y", 
                                       input$log_bubble_x, input$log_bubble_y, "", "",
                                       input$animate_bubble, animation_speed_bubble(), input$trace_bubble, 
@@ -992,11 +1048,6 @@ try typing Q and matching the dropdown menu by selecting Q"
     theplot %>%
       layout(autosize = TRUE)
     
-  })
-
-  output$brush <- renderPrint({
-    d <- event_data("plotly_selected")
-    if (is.null(d)) "Click and drag events (i.e., select/lasso) appear here (double-click to clear)" else{d}
   })
   
 })
