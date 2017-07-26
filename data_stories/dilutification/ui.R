@@ -42,14 +42,28 @@ water_sources <- list("Add Precipitation" = "precip",
 granularity <- list("Year (VWC)" = "year",
                     "Month (VWC)" = "month")
 
-units <- list("ueq/L","umol/L", "umg/L")
+units <- list("ueq/L" = "ueq/L","umol/L" ="umol/L", "mg/L" = "mg/L")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
 ########################################################################################
 
-shinyUI(fluidPage(
-  
+shinyUI(dashboardPage(skin = "black",
+                      dashboardHeader(title = tags$a(href="http://vcm-192.vm.duke.edu/","HB-WER Viz"), titleWidth = 200),
+                      dashboardSidebar(
+                        width = 200,
+                        sidebarMenu(
+                          menuItem("By Watershed", tabName = "watersheds", icon = icon("home")),
+                          menuItem("By Solute", tabName = "solutes", icon = icon("search-plus")),
+                        # footer here
+                          tags$div(class = "footer",tags$ul(
+                            tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#menu", "HOME")),
+                            tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#datastories","DATA STORIES")),
+                            tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#exploratory","EXPLORATORY TOOLS")),
+                            tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#aboutus","ABOUT US")))
+                        ))
+                      ),
+  dashboardBody(
   ########### HEAD - DO NOT EDIT ################################################
   theme = "app.css",
   tags$head(includeScript(system.file('www', 'ajax.js'))),
@@ -59,15 +73,38 @@ shinyUI(fluidPage(
   ###############################################################################
   
   ########### BODY ##############################################################
- tabsetPanel(id = "top", type = "pills",
-   tabPanel("Compare Watersheds",
-            titlePanel("Dilutification of Streamwater"),
-            fluidRow( 
+ tabItems(
+    tabItem(tabName = "watersheds", 
+            fluidRow(column(9,tags$h2("Dilutification of Streamwater"))),
+            fluidRow(column(9, tags$div(class = "container_question",
               tags$h3("How are solute concentrations in 
-                      streamwater changing over time?")
+                      streamwater changing over time?")))
               ),
-            sidebarLayout(position = "right",
-              sidebarPanel(
+            
+            fluidRow(column(9,
+                            tabBox(width = 12, height = "600px", side="right", 
+                                   selected = shiny::icon("circle"),
+                                   ###Units - Axis Log
+                                   tabPanel(shiny::icon("gear"),
+                                            fluidRow(
+                                              box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                                  
+                                                  ##Units - Y Axis Log
+                                                  column(6, selectInput("log1", label = "Y Axis",
+                                                                        choices = c("linear", "log"), 
+                                                                        selected = "linear"))))),
+                                  tabPanel(shiny::icon("circle"),
+                                   
+                                   column(3, offset = 9, selectInput("granularity", label = h4("Granularity"),
+                                                                     choices = granularity,
+                                                                     selected = "year")),
+                                   fluidRow(
+                                    column(8, plotlyOutput("plot1", width = "100%", height = "100%")),
+                                    column(1),
+                                    column(3, img(src = "source.png", height = 75, width = 100)))
+                                  ))),
+            column(3,
+              box(width = 13, height = "1100px", id = "sidebar",
                            #Solutes
                            fluidRow(
                              column(12, 
@@ -80,7 +117,7 @@ shinyUI(fluidPage(
                            
                            ##Watersheds
                            fluidRow(
-                             column(12, actionLink("select_all_ws", h4("Watersheds")), 
+                             column(12, actionLink("select_all_ws", h4("Watersheds")),
                                     selectInput("watersheds", label = "",
                                                 choices = watersheds, multiple = TRUE,
                                                 selected = 6))),
@@ -97,58 +134,70 @@ shinyUI(fluidPage(
                              column(12, selectInput("units", label = h4("Units"),
                                                     choices = units,
                                                     selected = "ueq/L"))),
-                           fluidRow(h4("Applying the Natural Logarithm"),
-                                    column(12, checkboxInput("log", label = ("ln"),
-                                                             value = FALSE))),
-                           ##Granularity
-                           fluidRow(
-                             column(12, selectInput("granularity", label = h4("Granularity"),
-                                                    choices = granularity,
-                                                    selected = "year"))),
                            
                            ##Date Range
                            sliderInput("date_range", label = h4("Date Range"),
                                        min = as.Date("1962-01-01"),
                                        max = as.Date("2014-01-01"),
-                                       value = c(as.Date("1965-01-01"), as.Date("2013-01-01")))),
-                           
-                         mainPanel(fluidRow(
-                           column(8, plotlyOutput("plot1", width = "100%", height = "100%")),
-                           column(4, img(src = "source.png", height = 150, width = 200))))
-            )#End of sidebarLayout
+                                       value = c(as.Date("1965-01-01"), as.Date("2013-01-01"))))
+
+            )#end of sidebar column
     
    
-   ),#End of tabPanel
-   tabPanel("Compare Solutes",
-            titlePanel("Dilutification of Streamwater"),
-            fluidRow( 
+   )#End of fluidRow
+    ), #end of tabItem
+   tabItem(tabName = "solutes",
+            fluidRow(column(9,tags$h2("Dilutification of Streamwater"))),
+            fluidRow(column(9,tags$div(class = "container_question", 
               tags$h3("How are solute concentrations in 
-                      streamwater changing over time?")
+                      streamwater changing over time?")))
               ),
-            sidebarLayout(position = "right",
-                          sidebarPanel(
+           fluidRow(column(9,
+           tabBox(width = 12, height = "600px", side="right", 
+                  selected = shiny::icon("circle"),
+                  ###Units - Axis Log
+                  tabPanel(shiny::icon("gear"),
+                           fluidRow(
+                             box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
+                                 
+                                 ##Units - Y Axis Log
+                                 column(6, selectInput("log2", label = "Y Axis",
+                                                       choices = c("linear", "log"), 
+                                                       selected = "linear"))))),
+                  tabPanel(shiny::icon("circle"),
+                           column(3, offset = 9, selectInput("granularity2", label = h4("Granularity"),
+                                                             choices = granularity,
+                                                             selected = "year")),
+                           fluidRow(
+                             column(8, plotlyOutput("plot2", width = "100%", height = "100%")),
+                             column(1),
+                             column(3, img(src = "source.png", height = 75, width = 100)))
+                  ))),
+            column(3,
+                      box(width = 13, height = "1100px", id = "sidebar",
                             #Solutes
                             fluidRow(
-                              column(12, actionLink("select_all_ions", h4("Solutes"))),
+                              column(12, actionLink("select_all_ions", h4("Solutes")),
                               
                               #Cations
-                              column(6,
+                              
                                      actionLink("select_all_cations", h5("Cations")),
                                      checkboxGroupInput("solutes_cations", label = "",
                                                         choices = solutes_cations,
-                                                        selected = "Na")),
+                                                        selected = "Na"),
                               
                               #Anions
                               
-                              column(6, actionLink("select_all_anions", h5("Anions")),
+                                     actionLink("select_all_anions", h5("Anions")),
                                      checkboxGroupInput("solutes_anions", label = "",
                                                         choices = solutes_anions,
-                                                        selected = "SO4)"))),
+                                                        selected = "SO4"))),
                             #Hydrogen  
                             
                             fluidRow(
-                              column(12, checkboxGroupInput("solutes_H", 
-                                                            label = h5("Hydrogen"),
+                              column(12, actionLink("select_all_H", h5("Hydrogen")),
+                                     checkboxGroupInput("solutes_H", 
+                                                            label = "",
                                                             choices = solutes_H,
                                                             selected = ""))),
                             
@@ -156,7 +205,7 @@ shinyUI(fluidPage(
                             fluidRow(
                               column(12, 
                                      selectInput("watersheds2", label = h4("Watersheds"),
-                                                 choices = watersheds, multiple = TRUE,
+                                                 choices = watersheds,
                                                  selected = 6))),
                             
                             ##Water Sources
@@ -171,35 +220,24 @@ shinyUI(fluidPage(
                               column(12, selectInput("units2", label = h4("Units"),
                                                      choices = units,
                                                      selected = "ueq/L"))),
-                            fluidRow(h4("Applying the Natural Logarithm"),
-                              column(12, checkboxInput("log2", label = ("ln"),
-                                                       value = FALSE))),
-                            ##Granularity
-                            fluidRow(
-                              column(12, selectInput("granularity2", label = h4("Granularity"),
-                                                     choices = granularity,
-                                                     selected = "year"))),
+                          
                             
                             ##Date Range
+                           fluidRow(column(12,
                             sliderInput("date_range2", label = h4("Date Range"),
                                         min = as.Date("1962-01-01"),
                                         max = as.Date("2014-01-01"),
-                                        value = c(as.Date("1965-01-01"), as.Date("2013-01-01")))
+                                        value = c(as.Date("1965-01-01"), as.Date("2013-01-01")))))
                             
                             
-                          ),#End of sidebarPanel 
+                          )#End of box 
                           
-                          mainPanel(
-                            fluidRow(
-                              column(8, plotlyOutput("plot2", width = "100%", height = "100%")),
-                              column(4, img(src = "source.png",
-                                            height = 150, width = 200)))
-                          
-                            
-                            
-                          )#End of mainPanel
-            )#End of sidebarLayout
+                    
+            )#End of column
             
-            )#End of tabPanel
- )#End of tabsetPanel
-))#End of shinyUI and fluidPage
+            )#End of fluidRow
+ )#End of tabItem
+)#End of tabItems
+)#End of dashboard body
+)#End of dashboardPage
+)#End of shinyUI
