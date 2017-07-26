@@ -89,7 +89,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     fluidRow(
                                       column(9,
-                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ###Units - Axis Log
                                                     tabPanel(shiny::icon("gear"),
@@ -117,7 +117,7 @@ shinyUI(  dashboardPage(skin = "black",
                                       
                                       ######## SIDEBAR
                                       column(3, 
-                                             box(width = 13, height = "600px", id = "sidebar",
+                                             box(width = 13, height = "700px", id = "sidebar",
                                                  
                                                  ##Watersheds
                                                  fluidRow(
@@ -125,7 +125,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                           selectInput("watersheds2", label = "",
                                                                       choices = watersheds, multiple = T,
                                                                       selected = "6"))),
-
+                                                 
                                                  ##Units  
                                                  fluidRow(
                                                    column(12, selectInput("units", label = h4("Units"),
@@ -180,7 +180,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     fluidRow(
                                       column(9,
                                              #------ Box 1 --------#
-                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ###Units - Axis Log
                                                     tabPanel(shiny::icon("gear"),
@@ -205,7 +205,7 @@ shinyUI(  dashboardPage(skin = "black",
                                              
                                              #------ Box 2 --------#
                                              
-                                             tabBox(width = 12, height = "620px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
                                                              div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux")))),
@@ -220,12 +220,12 @@ shinyUI(  dashboardPage(skin = "black",
                                              )# Closes tab Box
                                              
                                              #------ End of Box 2 --------#
-
+                                             
                                       ), #Closes the column
                                       
                                       ######## SIDEBAR
                                       column(3, 
-                                             box(width = 13, height = "600px", id = "sidebar",
+                                             box(width = 13, height = "700px", id = "sidebar",
                                                  
                                                  ##Granularity
                                                  fluidRow(
@@ -249,9 +249,13 @@ shinyUI(  dashboardPage(skin = "black",
                                     
                                     tags$div(class = "",
                                              fluidRow(column(width = 9,
-                                                             p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
-                                that damaged the experimental watersheds.  Some effects of the 
-                                       storm can be tracked by the NO3 flux data."))))
+                                                             p("On January 7-8, 1998 the HBEF was hit by a powerful ice 
+                                                               storm that damaged the experimental watersheds.  Some 
+                                                               effects of the storm can be tracked by the NO3 flux data. 
+                                                               The above plots were recreated from the paper 'In-stream 
+                                                               uptake dampens effects of major forest disturbance on 
+                                                               watershed nitrogen export' by Emily Bernhardt, Gene Likens, 
+                                                               and Donald Buso."))))
                                     
                                     ########### END OF QUESTION #1 ##########
                             ),# Closes Flux Tab
@@ -279,7 +283,7 @@ shinyUI(  dashboardPage(skin = "black",
                                     fluidRow(
                                       column(9,
                                              #------ Box 1 --------#
-                                             tabBox(width = 12, height = "600px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ######## PLOT 
                                                     tabPanel(shiny::icon("circle"),
@@ -301,7 +305,7 @@ shinyUI(  dashboardPage(skin = "black",
                                              
                                              #------ Box 2 --------#
                                              
-                                             tabBox(width = 12, height = "650px", side="right", selected = shiny::icon("circle"),
+                                             tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                                                     ######## OPTIONS
                                                     ###Units - Axis Log
                                                     tabPanel(shiny::icon("gear"),
@@ -347,7 +351,7 @@ shinyUI(  dashboardPage(skin = "black",
                                                                that damaged the experimental watersheds.  The leaf area index
                                                                (LAI) is one way to track the regrowth of the canopy."))))
                                     ########### END OF QUESTION #1 ##########
-                                                             ) # Closes Vegetation Tab
+                            ) # Closes Vegetation Tab
                             
                             ###############################################################################
                             #### ------------  End of Vegetation Tab ------------------------------ #######
