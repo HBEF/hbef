@@ -394,7 +394,7 @@ shinyServer(function(session, input, output) {
   
   #output an interactive timeline for the history of acid rain
   output$timeline <- renderTimevis({
-    timevis(historyData) #possibly use groups in order to contextualize
+    timevis(historyData) #possibly create/use groups in order to contextualize
   })
   
 
