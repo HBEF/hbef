@@ -156,10 +156,8 @@ shinyServer(function(session, input, output) {
         labs(x = " ", y = "pH")}
     
     final <- plot+ my_theme + 
-      #geom_ribbon(aes(ymin=4, ymax= 5), fill = "grey", alpha = 0.2)+
       geom_hline(size = 0.5, yintercept = 4.2, alpha = 0.5, linetype="dashed", color = "red")+
-      geom_hline(size = 0.5, yintercept = 5, alpha = 0.5, linetype="dashed", color = "red")+
-      #geom_ribbon(aes(ymin=5,ymax=5.4), fill="blue", alpha=0.3)+
+      geom_hline(size = 0.5, yintercept = 5.1, alpha = 0.5, linetype="dashed", color = "red")+
       geom_line(size = 0.5) + 
       geom_point(size = 1.3, fill = "white", stroke = 0.5, 
                  aes(text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
@@ -169,8 +167,8 @@ shinyServer(function(session, input, output) {
       annotate("text", label = "Clean Air Act", x = as.Date("1970-01-01"), y = 4, alpha = 0.7, color = "black", angle = 20)+
       geom_vline(size = 0.5, xintercept = 7300, alpha = 0.2)+
       annotate("text", label = "Clean Air Act Amendment  ", x = as.Date("1990-01-01"), y = 4, alpha = 0.7, color = "black", angle = 20)+
-      annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.25, alpha = 0.7, color = "black", hjust=2)+
-      annotate("text", label = "Normal (clean) rain pH", x = as.Date("2005-01-01"), y = 5.05, alpha = 0.7, color = "black", angle = 20, hjust=2)+
+      annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.22, alpha = 0.7, color = "black", hjust=2)+
+      annotate("text", label = "Normal (clean) rain pH", x = as.Date("2005-01-01"), y = 5.12, alpha = 0.7, color = "black", angle = 20, hjust=2)+
       scale_color_manual(values = grey_palette)
       #scale_colour_gradient2(low = "red", mid = "orange" , high = "green", midpoint = 4)
     

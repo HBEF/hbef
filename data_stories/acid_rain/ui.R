@@ -25,6 +25,7 @@ solutes_cations <- list("Potassium (K)" = "K",
                         "Magnesium (Mg)" = "Mg",
                         "Aluminum (Al)" = "Al")
 
+#solutes list specifically for the base cations plot in the policy tab
 solutes_base_cations <- list("Potassium (K)" = "K",
                              "Sodium (Na)" = "Na",
                              "Calcium (Ca)" = "Ca",
@@ -36,9 +37,12 @@ solutes_anions <- list("Phosphate (PO4)" = "PO4",
                        "Silicon Dioxide (SiO2)" = "SiO2",
                        "Chloride (Cl)" = "Cl",
                        "Bicarbonate (HCO3)" = "HCO3")
+
+#solutes list specifically for the SO4 NO3 graph in the policy tab
 solutes_anions3 <- list("Sulfate (SO4)" = "SO4",
                         "Nitrate (NO3)" = "NO3")
 
+#solutes list specifically for the Al graph in the policy tab
 solutes_Al_anions3 <- list("Sulfate (SO4)" = "SO4",
                            "Nitrate (NO3)" = "NO3",
                            "Aluminum (Al)" = "Al")
@@ -61,13 +65,6 @@ water_sources <- list("Precipitation (P)" = "precipitation",
 granularity <- list("Year (VWC)" = "year",
                     "Month (VWC)" = "month",
                     "Week" = "week")
-
-granularity1 <- list("Year (VWC)" = "year",
-                     "Month (VWC)" = "month")
-
-granularity3 <- list("Year (VWC)" = "year",
-                     "Month (VWC)" = "month",
-                     "Week" = "week")
 
 units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 
@@ -426,27 +423,9 @@ shinyUI(
                                                      fluidRow(plotlyOutput("policy_Al"))
                                             ) #Closes tabpanel
                                             
-                                     ),# Closes tab Box
+                                     )# Closes tab Box
                                      
                                      #------ End of Box 3 --------#
-                                     
-                                     #------ Box 4 --------#
-                                     
-                                     tabBox(width = 12, height = "400px", side="right", selected = shiny::icon("circle"),
-                                            ######## OPTIONS
-                                            ######## PLOT 
-                                            tabPanel(shiny::icon("circle"),
-                                                     div(class = "titleRow", fluidRow(column(9, tags$h2("Timeline of acid rain history"))
-                                                     )),
-                                                     
-                                                     ## Time Plot
-                                                     fluidRow(timevisOutput("timeline"))
-                                            ) #Closes tabpanel
-                                            
-                                     ) # Closes tab Box
-                                     
-                                     #------ End of Box 4 --------#
-                                     
                                      
                               ), #Closes the column
                               
@@ -482,6 +461,8 @@ shinyUI(
                             ########### TEXT FOR QUESTION #1 ##########
                             
                             tags$div(class = "text-container",
+                                     fluidRow(column(9, h4("Acid Rain Key Events Timeline"))),
+                                     fluidRow(column(9, timevisOutput("timeline"))),
                                      fluidRow(column(width = 9,
                                                      p("Air pollution amplifies acid rain, which washes nutrients out of the 
                                        soil and releases toxins into the streamflow that inhibit ecosystem 
