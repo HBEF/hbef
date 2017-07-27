@@ -55,7 +55,7 @@ shinyUI(
                 dashboardSidebar(
                   width = 200,
                   sidebarMenu(
-                    menuItem("Intro", tabName = "intro", icon = icon("home")),
+                    menuItem("Intro", tabName = "intro", icon = icon("snowflake-o")),
                     menuItem("NO3 trends", tabName = "trends", icon = icon("line-chart")),
                     menuItem("NO3 flux (Q)", tabName = "flux", icon = icon("arrows-v")),
                     menuItem("Vegetation", tabName = "vegetation", icon = icon("leaf")),
@@ -98,8 +98,9 @@ shinyUI(
                             fluidRow(tags$div(class = "intro-text",
                                      h1("understanding ice storms"),
                                       h3("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
-                                        that damaged the experimental watersheds.  Some effects of the 
-                                        storm can be tracked by the NO3 streamflow data.")))
+                                         that damaged the experimental watersheds.  Major effects of the 
+                                         storm can be tracked by the NO3 streamflow data and changes in 
+                                         vegetation.")))
                             
                             ########### END OF QUESTION #1 ##########
                                                      ),# Closes Intro Tab

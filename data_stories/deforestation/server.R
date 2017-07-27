@@ -9,6 +9,7 @@ library(shiny)
 library(plotly)
 library(utils)
 library(grid)
+library(shinydashboard)
 
 source_shapes <- c("Streamflow (Q)" = 16, "Precipitation (P)"= 21)
 
