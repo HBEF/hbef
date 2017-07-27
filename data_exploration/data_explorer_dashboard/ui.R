@@ -419,7 +419,7 @@ shinyUI(
                                                      min = 0.25, max = 2, step = 0.25, post = "x", value = 1)))))),
                
                ####### ---- Bubble Graph Plot Tab -------------------------------------------------
-                tabPanel(shiny::icon("circle"),
+                tabPanel(shiny::icon("circle"), 
                          div(class = "titleRow", fluidRow(column(5, tags$h2("Exploratory Bubble Graph")),
                          #### Granularity =================================
                          column(4, offset = 2,selectInput("granularity_bubble", label = "",
@@ -433,7 +433,7 @@ shinyUI(
                                                                  selected = "streamflow")), 
                                column(1, offset = 3, actionButton("go_bubble", "PLOT"))),
                          #Bubble Plot
-                         fluidRow(plotlyOutput("bubblePlot")),
+                         fluidRow(div(style = "height:500px;", (plotlyOutput("bubblePlot")))),
                          #Solutes X Input
                          fluidRow(column(4, offset = 3, textInput("solutesx_formula", label = "", value = "SO4 + NO3",
                                                                   placeholder = "type in desired formula")),
@@ -441,7 +441,7 @@ shinyUI(
                                                                     choices = c("P" = "precipitation", "Q" = "streamflow"),
                                                                     selected = "streamflow"))))),
        # Sidebar >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>--------
-                box(width = 3,
+                box(width = 3, height = 800,
                     #### Watersheds =================================
                     fluidRow(column(12, actionLink("select_all_ws", h4("Select Watersheds")),
                                     selectInput("watersheds_bubble", label = "",

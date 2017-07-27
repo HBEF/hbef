@@ -1047,7 +1047,7 @@ shinyServer(function(input, output, session) {
     theplot$width <- NULL
     theplot$height <- NULL
     theplot %>%
-      layout(autosize = TRUE)
+      layout(autosize = TRUE, height = 500)
     
   })
   
