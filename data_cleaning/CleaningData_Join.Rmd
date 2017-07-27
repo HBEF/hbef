@@ -51,9 +51,7 @@ rm(list=ls())
 load("precip_streamflow_wide.RData")
 load("precip_streamflow_super_wide.RData")
 load("precip_streamflow_long.RData")
-load("precip_streamflow_diff_data_long.RData")
 
 save(list = ls(all.names = TRUE), file = "precip_streamflow_dfs.RData", envir = .GlobalEnv)
-
 ```
 

@@ -5,7 +5,7 @@ output: html_document
 
 ```{r message=FALSE}
 #Libraries
-#detach(package:plyr) ### Run once.. Important to get the weighted average to work. 
+
 library(tidyr)
 library(lubridate)
 library(dplyr)
@@ -28,36 +28,9 @@ importf <- function(alist, extension, apath, dfname){
   dfList <- lapply(alist, function(x){
     return(read_csv(paste(apath, x, extension, sep = "")))
   })
-  for (i in seq(dfList))
-  assign(paste("w",i, dfname, sep = ""), dfList[[i]], envir=.GlobalEnv)
+  for (i in rev(seq(dfList)))
+  assign(paste("w", i, dfname, sep = ""), dfList[[i]], envir=.GlobalEnv)
 }
-
-
-#Applying lapply and then saving the output dfs back to the global environment Applies a function to each data frame in a list of data frames, and saves them to the global environment. 
-
-lapply_and_save <- function(a_df_list, a_function, optional_argument1, optional_argument2, optional_argument3, a_name) {
-  if(missing(optional_argument1) & missing(optional_argument2) & missing(optional_argument3)) {
-    temp_df <- lapply(a_df_list, a_function)
-    for (i in seq(temp_df))
-    assign(paste("w",i, a_name, sep = ""), temp_df[[i]], envir=.GlobalEnv)
-  }
-  else if(missing(optional_argument2) & missing(optional_argument3)){
-    temp_df <- lapply(a_df_list, a_function, optional_argument1)
-    for (i in seq(temp_df))
-    assign(paste("w",i, a_name, sep = ""), temp_df[[i]], envir=.GlobalEnv)
-  }
-  
-  else if(missing(optional_argument3)){
-    temp_df <- lapply(a_df_list, a_function, optional_argument1, optional_argument2)
-    for (i in seq(temp_df))
-    assign(paste("w",i, a_name, sep = ""), temp_df[[i]], envir=.GlobalEnv)
-  }
-  else {
-        temp_df <- lapply(a_df_list, a_function, optional_argument1,
-                          optional_argument2, optional_argument3) 
-        for (i in seq(temp_df))
-          assign(paste("w",i, a_name, sep = ""), temp_df[[i]], envir=.GlobalEnv)
-    }}
 
 
 #Replaces a value (by default -3) throughout a dataframe with another value (by default NA). 
@@ -65,17 +38,14 @@ lapply_and_save <- function(a_df_list, a_function, optional_argument1, optional_
 recodef <- function(df, replace_value = -3, replace_with = NA) {
         x <- df
         x[x == replace_value] <- replace_with
-        #return(x)
-        assign(deparse(substitute(df)), x, envir=.GlobalEnv)}
+        return(x)}
 
 
-#Replaces a value (by default -3) throughout a dataframe with another value (by default NA). 
-
+#Renames column in a df from a given name ot a new name.  
 renamecolf <- function(df, from, to) {
         x <- df
         names(x)[names(x) == from] <- to
-        #return(x)
-        assign(deparse(substitute(df)), x, envir=.GlobalEnv)}
+        return(x)}
 
 #Given year and month in two separate columns, creates a field called date that is in the format year, month, day with the day being the first day of the month (01)
 
@@ -84,7 +54,7 @@ create_date_field <- function(df){
   x <- unite(x, "date", c(`year`, `mo`), sep = "-")
   x["date"] <- apply(x[,c("date")],2, function(each){paste0(each, '-01')})
   x$date <- as.Date(x$date)
-  assign(deparse(substitute(df)), x, envir=.GlobalEnv)
+  return(x)
 }
 
 #Find Water year from date field, given water year starting month. 
@@ -95,8 +65,10 @@ get_water_date <- function(df, water_year_start = 06){
     mutate(water_date = date %m-% months(water_year_start - 1))
   assign(deparse(substitute(df)), x, envir=.GlobalEnv)}
 
-#Create Year Date
-create_water_year_date <- function(df, water_year_start = 06){
+
+# Create Year Date. 
+# Takes water_year and creates a column for january 1st of that year.  
+create_water_year_date <- function(df, water_year_start = 01){
   x <- df
   x %<>%
     mutate(water_year_date = water_date) %>%
@@ -107,16 +79,15 @@ create_water_year_date <- function(df, water_year_start = 06){
   }
 
 #Get H concentration from pH
-
 get_Hydrogen <- function(df){
   x <- df
   x %<>% 
     mutate(H = 10^(-pH_month)*1000)
-  #return(x)
-  assign(deparse(substitute(df)), x, envir=.GlobalEnv)}
+  return(x)}
 
 
 #Gather function that creates solute and concentration_mg columns. It understands all columns that have a capital letter as elements and puts them under the solute column. It takes their corresponding values and puts them under the concentration_mg column. 
+
 gather_concentration <- function(df){
   x <- df
   x <- gather(x, solute, concentration_mg_month, matches("^[A-Z]", ignore.case = FALSE))
@@ -131,20 +102,21 @@ gather_source <- function(df){
   assign(deparse(substitute(df)), x, envir=.GlobalEnv)
 }
 
+```
 
-#Function that filters by watershed and then finds the difference in each variable between Q and P (P-Q). 
-#We use desc in the function because we Precipitation - Streamflow so we need streamflow to be before precip in the rows. 
 
-get_differencef<- function(df, wsfilter, granularityfilter){
-df %>% 
-  filter(ws == wsfilter)%>% 
-  filter(granularity == granularityfilter)%>% 
-  group_by(ws, water_year, water_date, granularity, solute) %>%
-  arrange(desc(source)) %>%
-  summarise_each(funs(diff), concentration_mg, concentration_ueq,concentration_umol,flux)}
+#Prepare
 
+```{r}
+
+#List of precipitation file names with no extension
+precipList <- list("w9_precip_chem", "w8_precip_chem","w7_precip_chem", "w6_precip_chem", "w5_precip_chem", "w4_precip_chem", "w3_precip_chem", "w2_precip_chem", "w1_precip_chem")
+
+#List of stremflow file names with no extension
+streamflowList <- list("w9_streamflow_chem", "w8_streamflow_chem","w7_streamflow_chem", "w6_streamflow_chem", "w5_streamflow_chem", "w4_streamflow_chem", "w3_streamflow_chem", "w2_streamflow_chem", "w1_streamflow_chem")
 
 ```
+
 
 
 #Import All Data
@@ -153,32 +125,21 @@ df %>%
 
 #Import Data
 
-precipList <- list("w9_precip_chem", "w8_precip_chem","w7_precip_chem", "w6_precip_chem", "w5_precip_chem", "w4_precip_chem", "w3_precip_chem", "w2_precip_chem", "w1_precip_chem")
-
-streamflowList <- list("w9_streamflow_chem", "w8_streamflow_chem","w7_streamflow_chem", "w6_streamflow_chem", "w5_streamflow_chem", "w4_streamflow_chem", "w3_streamflow_chem", "w2_streamflow_chem", "w1_streamflow_chem")
-
-
 importf(precipList,".txt", "./data_original/", "_precip_chem")
 importf(streamflowList, ".txt", "./data_original/", "_streamflow_chem")
 
 
-streamflow_weekly <- read_csv("data_original/HBEF_stream_chemistry_1963-2013.csv")
-precipitation_weekly <- read_csv("data_original/HBEF_precipitation_chemistry_1963-2013.csv")
+precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
 
-load("public_data.Rdata", envir = parent.frame(), verbose = FALSE)
+streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
 
-#change charge for Al from NA to 3
-MW.data[4, "z"] <- 3
 
-#change charge for NH4 from NA to 1
-MW.data[5, "z"] <- 1
+#Concatenate all streamflow dfs and all precip dfs 
+streamflow_data_long <- do.call("rbind", streamflow_df_list)
+precip_data_long <- do.call("rbind", precip_df_list)
 
-#change charge for PO4 from NA to -3
-MW.data[11, "z"] <- -3
+load("MW.data.Rdata", envir = parent.frame(), verbose = FALSE)
 
-#change charge for HCO3 from NA to -3
-newrow <- data.frame("solute" = "HCO3", "MW" = 61.0168, "z"= -1, stringsAsFactors=FALSE)
-MW.data <- rbind(MW.data, newrow)
 
 ```
 
@@ -189,31 +150,17 @@ MW.data <- rbind(MW.data, newrow)
 
 #recode NA values from -3 to NA
 
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
-
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-lapply_and_save(precip_df_list, recodef, -3, NA, a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, recodef, -3, NA, a_name = "_streamflow_chem")
+streamflow_data_long <- recodef(streamflow_data_long, -3, NA)
+precip_data_long <- recodef(precip_data_long, -3, NA)
 
 
 #Change colnames to streamflow and precipitation --> this is important because we are trying to unify names. 
 
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
+streamflow_data_long <- renamecolf(streamflow_data_long, "flow", "streamflow")
+precip_data_long <- renamecolf(precip_data_long, "precip", "precipitation")
 
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-
-lapply_and_save(precip_df_list, renamecolf, "precip", "precipitation", a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, renamecolf, "flow", "streamflow", a_name = "_streamflow_chem")
-
-
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
-
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-lapply_and_save(precip_df_list, renamecolf, "pH", "pH_month", a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, renamecolf, "pH", "pH_month", a_name = "_streamflow_chem")
+streamflow_data_long <- renamecolf(streamflow_data_long, "pH", "pH_month")
+precip_data_long <- renamecolf(precip_data_long, "pH", "pH_month")
 
 ```
 
@@ -222,32 +169,18 @@ lapply_and_save(streamflow_df_list, renamecolf, "pH", "pH_month", a_name = "_str
 #Working with dates
 
 ```{r message = FALSE}
+
 #Create date field
+streamflow_data_long <- create_date_field(streamflow_data_long)
+precip_data_long <- create_date_field(precip_data_long)
 
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
+#Get water date - months since june
+streamflow_data_long <- get_water_date(streamflow_data_long, 06)
+precip_data_long <- get_water_date(precip_data_long, 06)
 
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-lapply_and_save(precip_df_list, create_date_field, a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, create_date_field, a_name = "_streamflow_chem")
-
-
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
-
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-lapply_and_save(precip_df_list, get_water_date, 06, a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, get_water_date, 06, a_name = "_streamflow_chem")
-
-
-
-
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
-
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-lapply_and_save(precip_df_list, create_water_year_date, 01, a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, create_water_year_date, 01, a_name = "_streamflow_chem")
+#create water_year_date (ignore the "too many values message")
+streamflow_data_long <- create_water_year_date(streamflow_data_long, 01)
+precip_data_long <- create_water_year_date(precip_data_long, 01)
 
 ```
 
@@ -257,13 +190,8 @@ lapply_and_save(streamflow_df_list, create_water_year_date, 01, a_name = "_strea
 ```{r}
 #Get H from pH
 
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
-
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-lapply_and_save(precip_df_list, get_Hydrogen, a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, get_Hydrogen, a_name = "_streamflow_chem")
-
+streamflow_data_long <- get_Hydrogen(streamflow_data_long)
+precip_data_long <- get_Hydrogen(precip_data_long)
 
 ```
 
@@ -274,28 +202,15 @@ lapply_and_save(streamflow_df_list, get_Hydrogen, a_name = "_streamflow_chem")
 ```{r}
 #Gather Solutes and Concentration_mg
 
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
-
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-lapply_and_save(precip_df_list, gather_concentration, a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, gather_concentration, a_name = "_streamflow_chem")
+streamflow_data_long <- gather_concentration(streamflow_data_long)
+precip_data_long <- gather_concentration(precip_data_long)
 
 
+#Gather Water source so that there's a column 
+#for water source (either precip or streamflow) and one for value
 
-#Gather Water source so that there's a column for water source (either precip or streamflow) and one for 
-
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
-
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
-
-lapply_and_save(precip_df_list, gather_source, a_name = "_precip_chem")
-lapply_and_save(streamflow_df_list, gather_source, a_name = "_streamflow_chem")
-
-
-precip_df_list <- list(w9_precip_chem, w8_precip_chem,w7_precip_chem, w6_precip_chem, w5_precip_chem, w4_precip_chem, w3_precip_chem, w2_precip_chem, w1_precip_chem)
-
-streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_chem, w6_streamflow_chem, w5_streamflow_chem, w4_streamflow_chem, w3_streamflow_chem, w2_streamflow_chem, w1_streamflow_chem)
+streamflow_data_long <- gather_source(streamflow_data_long)
+precip_data_long <- gather_source(precip_data_long)
 
 ```
 
@@ -303,10 +218,8 @@ streamflow_df_list <- list(w9_streamflow_chem, w8_streamflow_chem,w7_streamflow_
 
 ```{r}
 
-#Concatenate/ stack all 9 ws data frames  
-
-precip_streamflow_df_list <- append(precip_df_list, streamflow_df_list) 
-precip_streamflow_data_long <- do.call("rbind", precip_streamflow_df_list)
+#Concatenate/ stack precip and streamflow dfs
+precip_streamflow_data_long <- rbind(streamflow_data_long, precip_data_long)
 
 
 #Join new complete df with molecular weight data (MW.data) to calculate mol and eq values. 
@@ -316,11 +229,14 @@ precip_streamflow_data_long<- left_join(precip_streamflow_data_long, MW.data, by
 # Calculate ueq, umol, and flux. 
 precip_streamflow_data_long %<>% 
   mutate(concentration_ueq_month =
-          ifelse(is.na(precip_streamflow_data_long$MW), NA,(((concentration_mg_month/1000)/MW)*(abs(z))*10^6))) %>% 
+          ifelse(is.na(precip_streamflow_data_long$MW),NA,
+                 (((concentration_mg_month/1000)/MW)*(abs(z))*10^6))) %>% 
   mutate(concentration_umol_month = 
-           ifelse(is.na(precip_streamflow_data_long$MW), NA,(((concentration_mg_month/1000)/MW))*10^6)) %>% 
+           ifelse(is.na(precip_streamflow_data_long$MW), NA,
+                  (((concentration_mg_month/1000)/MW))*10^6)) %>% 
   mutate(flux_month = 
-           ifelse(is.na(precip_streamflow_data_long$MW), NA,(((concentration_mg_month/1000)/MW)*(abs(z))*water_mm_month*10000)))
+           ifelse(is.na(precip_streamflow_data_long$MW),NA,
+                  (((concentration_mg_month/1000)/MW)*(abs(z))*water_mm_month*10000)))
 
 
 #Calculate weighted averages. 
@@ -338,16 +254,18 @@ precip_streamflow_data_long$ws <- as.factor(precip_streamflow_data_long$ws)
 ```
 
 #Enlongate df. 
+
 After creating the new variables that find yearly data from month data, we are going to elongate the df so that granularity is a column that specifies if value is for year or month. 
 
 ```{r}
 
 #Gather for it to be long and then extract the granularity (month or year) from the column value
 
+basic <- c("ws", "date", "water_date", "water_year", "solute", "source", "MW", "z")
+unitcols <- setdiff(names(precip_streamflow_data_long), basic)
+
 data <- precip_streamflow_data_long %>%
-  gather(key, value, pH_month, concentration_mg_month, water_mm_month, concentration_ueq_month,
-         concentration_umol_month, flux_month, pH_year, concentration_mg_year, concentration_umol_year,
-         concentration_ueq_year, flux_year, water_mm_year) %>%
+  gather(key, value, which(colnames(precip_streamflow_data_long) %in% unitcols)) %>%
   tidyr::extract(key, c('unit', 'granularity'), "(.*)_(.*)") 
 
 #take month rows
@@ -365,6 +283,8 @@ year <- year[!duplicated(year[,c("ws", "water_year", "solute","source", "unit", 
 precip_streamflow_data_long <- rbind(month,year)%>% 
   spread(unit, value)
 
+#create framey which is a column with just the water year. This is useful for animation. 
+# (ignore the too many values warning)
 precip_streamflow_data_long$frame <- precip_streamflow_data_long$water_date
 precip_streamflow_data_long %<>% 
   separate("frame", c("framey") )
@@ -372,17 +292,11 @@ precip_streamflow_data_long %<>%
 ```
 
 
-
-
-
-
 #Export data to precip_stream_data.Rdata
 
 ```{r}
 
 #Export File
-
-
 save(precip_streamflow_data_long, file = "precip_streamflow_data_long.Rdata")
 
 
@@ -405,7 +319,8 @@ precip_streamflow_data_wide$ws <- as.factor(precip_streamflow_data_wide$ws)
 precip_streamflow_data_wide$source <- as.factor(precip_streamflow_data_wide$source)
 
 
-#add column with just year to be able to animate by frames
+#create framey which is a column with just the water year. This is useful for animation. 
+# (ignore the too many values warning)
 
 precip_streamflow_data_wide$frame <- precip_streamflow_data_wide$water_date
 precip_streamflow_data_wide %<>% 
@@ -416,46 +331,11 @@ save(precip_streamflow_data_wide, file = "precip_streamflow_data_wide.Rdata")
 ```
 
 
-#Differences df
-
-```{r}
-
-diff_ws1_m <- get_differencef(precip_streamflow_data_long, "1", "month")
-diff_ws1_y <- get_differencef(precip_streamflow_data_long, "1", "year")
-diff_ws2_m <- get_differencef(precip_streamflow_data_long, "2", "month")
-diff_ws2_y <- get_differencef(precip_streamflow_data_long, "2", "year")
-diff_ws3_m <- get_differencef(precip_streamflow_data_long, "3", "month")
-diff_ws3_y <- get_differencef(precip_streamflow_data_long, "3", "year")
-diff_ws4_m <- get_differencef(precip_streamflow_data_long, "4", "month")
-diff_ws4_y <- get_differencef(precip_streamflow_data_long, "4", "year")
-diff_ws5_m <- get_differencef(precip_streamflow_data_long, "5", "month")
-diff_ws5_y <- get_differencef(precip_streamflow_data_long, "5", "year")
-diff_ws6_m <- get_differencef(precip_streamflow_data_long, "6", "month")
-diff_ws6_y <- get_differencef(precip_streamflow_data_long, "6", "year")
-diff_ws7_m <- get_differencef(precip_streamflow_data_long, "7", "month")
-diff_ws7_y <- get_differencef(precip_streamflow_data_long, "7", "year")
-diff_ws8_m <- get_differencef(precip_streamflow_data_long, "8", "month")
-diff_ws8_y <- get_differencef(precip_streamflow_data_long, "8", "year")
-diff_ws9_m <- get_differencef(precip_streamflow_data_long, "9", "month")
-diff_ws9_y <- get_differencef(precip_streamflow_data_long, "9", "year")
-
-precip_streamflow_diff_data_long <- do.call("rbind", list(diff_ws1_m,diff_ws1_y, diff_ws2_m,diff_ws2_y,diff_ws3_m,diff_ws3_y,diff_ws4_m,diff_ws4_y,diff_ws5_m,diff_ws5_y,diff_ws6_m,diff_ws6_y,diff_ws7_m,diff_ws7_y,diff_ws8_m,diff_ws8_y,diff_ws9_m,diff_ws9_y))
-
-
-save(precip_streamflow_diff_data_long, file = "precip_streamflow_diff_data_long.Rdata")
-
-precip_streamflow_diff_data_long %>% 
-  filter(granularity == "year")
-
-```
-
-
 
 ```{r}
 
 rm(list=ls())
 
-load("precip_streamflow_diff_data_long.RData")
 load("precip_streamflow_data_long.RData")
 load("precip_streamflow_data_wide.RData")
 
