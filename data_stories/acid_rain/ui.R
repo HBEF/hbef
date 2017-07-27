@@ -185,7 +185,7 @@ shinyUI(
                                          
                                          ##Date Range
                                          fluidRow(
-                                           sliderInput("date_range1", label = h4("Select Date Range"),
+                                           sliderInput("date_range_pH", label = h4("Select Date Range"),
                                                        min = as.Date("1962-01-01"),
                                                        max = as.Date("2014-01-01"),
                                                        value = c(as.Date("1962-01-01"), as.Date("2013-01-01")), timeFormat = "%b %Y")))
@@ -311,7 +311,7 @@ shinyUI(
                                                                   selected = "mg/L"))),
                                          
                                          ##Date Range
-                                         sliderInput("date_range2", label = h4("Select Date Range"),
+                                         sliderInput("date_range_chem", label = h4("Select Date Range"),
                                                      min = as.Date("1962-01-01"),
                                                      max = as.Date("2014-01-01"),
                                                      value = c(as.Date("1965-01-01"), as.Date("2013-01-01")),
@@ -444,7 +444,7 @@ shinyUI(
                                                                                                             choices = granularity,
                                                                                                             selected = "year")))),
                                                      #Solutes
-                                                     fluidRow(column(12, checkboxGroupInput("solutes_anions_Al", label = "",
+                                                     fluidRow(column(9, offset = 6, checkboxGroupInput("solutes_anions_Al", label = "",
                                                                                  choices = solutes_anions_Al,
                                                                                  selected = c("Al"), 
                                                                                  inline = TRUE))),
@@ -474,7 +474,7 @@ shinyUI(
                                                                   selected = "mg/L"))),
                                          
                                          ##Date Range
-                                         sliderInput("date_range3", label = h4("Date Range"),
+                                         sliderInput("date_range_policy", label = h4("Date Range"),
                                                      min = as.Date("1962-01-01"),
                                                      max = as.Date("2014-01-01"),
                                                      value = c(as.Date("1965-01-01"), as.Date("2013-01-01")),
