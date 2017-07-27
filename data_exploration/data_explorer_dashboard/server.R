@@ -297,8 +297,8 @@ shinyServer(function(input, output, session) {
   eventReactive_data_time <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
-    data$date<- as.POSIXct(data$date)
-    data$water_year<- as.POSIXct(data$water_year)
+    data$date<- as.POSIXct(data$date) + (24*60*60) #Add one day because Posix counts January 1 as DOY 0
+    data$water_year<- as.POSIXct(data$water_year) + (24*60*60) #Add one day because Posix counts January 1 as DOY 0
     data <- data[data$source %in% input$water_sources,]
     data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 
     data <- data[data$ws %in% input$watersheds,]
@@ -429,8 +429,8 @@ shinyServer(function(input, output, session) {
   eventReactive_data_pq <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
-    data$date<- as.POSIXct(data$date)
-    data$water_year<- as.POSIXct(data$water_year)
+    data$date<- as.POSIXct(data$date)+ (24*60*60) #Add one day because Posix counts January 1 as DOY 0
+    data$water_year<- as.POSIXct(data$water_year)+ (24*60*60) #Add one day because Posix counts January 1 as DOY 0
     data <- data[data$solute %in% "Ca",] #filter so that they only appear once. Df structure has same P and Q data for all solutes.  
     data <- data[data$ws %in% input$watersheds,]
   })
@@ -513,8 +513,9 @@ shinyServer(function(input, output, session) {
   eventReactive_data_flux <- eventReactive({input$go_exploratory |
       input$lastkeypresscode},{
     data<- imported_data
-    data$date<- as.POSIXct(data$date)
-    data$water_year<- as.POSIXct(data$water_year)
+    data$date<- as.POSIXct(data$date) + (24*60*60) #Add one day because Posix counts January 1 as DOY 0 
+                                                  # See for more info: http://www.javacms.tech/questions/731962/r-as-posixctsys-date-returns-date-a-day-early
+    data$water_year<- as.POSIXct(data$water_year) + (24*60*60) #Add one day because Posix counts January 1 as DOY 0
     #data <- data[data$granularity %in% input$granularity_flux,]
     data <- data[data$source %in% input$water_sources,]
     data <- data[data$solute %in% solutes(),] #filter so that they only appear once. 

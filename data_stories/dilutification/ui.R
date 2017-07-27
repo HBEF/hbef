@@ -65,7 +65,7 @@ shinyUI(dashboardPage(skin = "black",
                       ),
   dashboardBody(
   ########### HEAD - DO NOT EDIT ################################################
-  theme = "app.css",
+  tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
   tags$head(includeScript(system.file('www', 'ajax.js'))),
   tags$head(includeScript(system.file('www', 'hubbard.js'))),
   tags$head(tags$style(HTML(
@@ -77,7 +77,7 @@ shinyUI(dashboardPage(skin = "black",
     tabItem(tabName = "watersheds", 
             fluidRow(column(9,tags$h2("Dilutification of Streamwater"))),
             fluidRow(column(9, tags$div(class = "container_question",
-              tags$h3("How are solute concentrations in 
+              tags$h1("How are solute concentrations in 
                       streamwater changing over time?")))
               ),
             
@@ -94,21 +94,22 @@ shinyUI(dashboardPage(skin = "black",
                                                                         choices = c("linear", "log"), 
                                                                         selected = "linear"))))),
                                   tabPanel(shiny::icon("circle"),
+                                   div(class = "titleRow", fluidRow(column(5, tags$h2("")),
+                                                                    ##Granularity
+                                                                    column(3,  offset = 4, selectInput("granularity", label = "",
+                                                                                                       choices = granularity,
+                                                                                                       selected = "year")))
+                                   ),
                                    
-                                   column(3, offset = 9, selectInput("granularity", label = h4("Granularity"),
-                                                                     choices = granularity,
-                                                                     selected = "year")),
                                    fluidRow(
-                                    column(8, plotlyOutput("plot1", width = "100%", height = "100%")),
-                                    column(1),
-                                    column(3, img(src = "source.png", height = 75, width = 100)))
+                                    column(12, plotlyOutput("plot1", width = "100%", height = "100%")))
                                   ))),
             column(3,
-              box(width = 13, height = "1100px", id = "sidebar",
+              box(width = 13, height = "700px", id = "sidebar",
                            #Solutes
                            fluidRow(
                              column(12, 
-                                    selectInput("sol", label = "Solutes",
+                                    selectInput("sol", label = h4("Solutes"),
                                                 choices = 
                                                   c(solutes_anions, solutes_cations,
                                                     solutes_H),
@@ -124,10 +125,12 @@ shinyUI(dashboardPage(skin = "black",
                            
                            ##Water Sources
                            fluidRow(
-                             column(12, selectInput("water_sources", 
-                                                    label = h4("Adding Precipitation"),
-                                                    choices = water_sources,
-                                                    selected = "flow"))),
+                             column(12, 
+                             checkboxGroupInput("water_sources", label = h4("Adding Precipitation"),
+                                                choices = list("Streamflow" = "flow",
+                                                               "Precipitation" = "precip"),
+                                                selected = "flow"))
+                             ),
                            
                            ##Units  
                            fluidRow(
@@ -149,7 +152,7 @@ shinyUI(dashboardPage(skin = "black",
    tabItem(tabName = "solutes",
             fluidRow(column(9,tags$h2("Dilutification of Streamwater"))),
             fluidRow(column(9,tags$div(class = "container_question", 
-              tags$h3("How are solute concentrations in 
+              tags$h1("How are solute concentrations in 
                       streamwater changing over time?")))
               ),
            fluidRow(column(9,
@@ -169,9 +172,7 @@ shinyUI(dashboardPage(skin = "black",
                                                              choices = granularity,
                                                              selected = "year")),
                            fluidRow(
-                             column(8, plotlyOutput("plot2", width = "100%", height = "100%")),
-                             column(1),
-                             column(3, img(src = "source.png", height = 75, width = 100)))
+                             column(12, plotlyOutput("plot2", width = "100%", height = "100%")))
                   ))),
             column(3,
                       box(width = 13, height = "1100px", id = "sidebar",
@@ -210,10 +211,11 @@ shinyUI(dashboardPage(skin = "black",
                             
                             ##Water Sources
                             fluidRow(
-                              column(12, selectInput("water_sources2", 
-                                                     label = h4("Adding Precipitation"),
-                                                     choices = water_sources,
-                                                     selected = "flow"))),
+                              column(12, 
+                                     checkboxGroupInput("water_sources2", label = h4("Adding Precipitation"),
+                                                        choices = list("Streamflow" = "flow",
+                                                                       "Precipitation" = "precip"),
+                                                        selected = "flow"))),
                             
                             ##Units  
                             fluidRow(
