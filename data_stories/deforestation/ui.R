@@ -5,6 +5,7 @@ library(tidyr)
 library(dplyr)
 library(shiny)
 library(plotly)
+library(shinydashboard)
 
 
 solutes_cations <- list("Potassium (K)" = "Potassium",
