@@ -78,7 +78,8 @@ shinyUI(
                 dashboardSidebar(
                   width = 200,
                   sidebarMenu(
-                    menuItem("Introduction", tabName = "introduction", icon = icon("home")),
+                    menuItem("Intro", tabName = "intro", icon = icon("tint")),
+                    menuItem("pH", tabName = "pH", icon = icon("list-alt")),
                     menuItem("Chemistry", tabName = "chemistry", icon = icon("flask")),
                     menuItem("Policy", tabName = "policy", icon = icon("book")),
                     # footer here
@@ -101,12 +102,39 @@ shinyUI(
                   
                   tabItems(
                     
+                    ###############################################################################
+                    #### ------------  Intro  Tab ----------------------------------------- #######
+                    ###############################################################################
+                    
+                    tabItem(tabName = "intro",
+                            
+                            #############################################
+                            
+                            
+                            ########### TEXT FOR QUESTION #1 ##########
+                            
+                            fluidRow(tags$div(class = "intro-text",
+                                              h1("understanding acid rain"),
+                                              h3("Chemical reactions caused by acid rain wash nutrients 
+                                                 out of the soil and release toxins into the streamflow 
+                                                 that inhibit ecosystem growth. Policies like the 
+                                                 Clean Air Act have largely mitigated these effects over
+                                                 the past sixty years.")))
+                            
+                            ########### END OF QUESTION #1 ##########
+                                              ),# Closes Intro Tab
                     
                     ###############################################################################
-                    #### ------------  Introduction  Tab ---------------------------------- #######
+                    #### ------------ End of Intro Tab ------------------------------- #######
+                    ###############################################################################  
+                    
+                    
+                    
+                    ###############################################################################
+                    #### ------------  pH  Tab ---------------------------------- #######
                     ###############################################################################
                     
-                    tabItem(tabName = "introduction",
+                    tabItem(tabName = "pH",
                             
                             ########### TITLE ####################
                             fluidRow(column(9,tags$h1("How does pH change when acid rain is mitigated?")) #acid rain intro and annotated pH graph
@@ -131,7 +159,7 @@ shinyUI(
                                                                                                        selected = "linear")))))),
                                             ######## PLOT 
                                             tabPanel(shiny::icon("circle"),
-                                                     div(class = "titleRow", fluidRow(column(5, tags$h2("pH")),
+                                                     div(class = "titleRow", fluidRow(column(5, tags$h2(" ")),
                                                                                       ##Granularity
                                                                                       column(3,  offset = 4, selectInput("granularity1", label = "",
                                                                                                                          choices = granularity,
@@ -198,7 +226,7 @@ shinyUI(
                     ), # Closes Intro Tab
                     
                     ###############################################################################
-                    #### ------------  End of Introduction Tab ---------------------------- #######
+                    #### ------------  End of pH Tab ---------------------------- #######
                     ###############################################################################                     
                     
                     
@@ -231,7 +259,7 @@ shinyUI(
                                                                                                        selected = "linear")))))),
                                             ######## PLOT 
                                             tabPanel(shiny::icon("circle"),
-                                                     div(class = "titleRow", fluidRow(column(5, tags$h2("Water Chemistry (ws6)")),
+                                                     div(class = "titleRow", fluidRow(column(5, tags$h2(" ")),
                                                                                       ##Granularity
                                                                                       column(3,  offset = 4, selectInput("granularity2", label = "",
                                                                                                                          choices = granularity,
