@@ -337,7 +337,7 @@ shinyUI(
                                             ######## PLOT 
                                             tabPanel(shiny::icon("circle"),
                                                      div(class = "titleRow", fluidRow(column(7, tags$h2("Decline in leaf counts across species due to ice storm"),
-                                                                                             p("(click on key to view specific species)")
+                                                                                             p("(click on key to focus on specific species)")
                                                      ))),
                                                      ## Time Plot
                                                      plotlyOutput("leaf_count")

@@ -31,8 +31,7 @@ shinyServer(function(session, input, output) {
           panel.grid.major = element_line(colour = "#dddddd"), 
           panel.grid.major.x = element_line(colour = NA),
           text = element_text(family = "Helvetica", size = 12), 
-          legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
-          #strip.text = element_text(margin = margin(20)),
+          legend.position="none", legend.direction = "horizontal", legend.title = element_blank(), #hides legend
           axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
           plot.margin = margin(1, 1, 1, 1, "cm"))
   
@@ -41,6 +40,7 @@ shinyServer(function(session, input, output) {
   color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
+  #palette used for pH plot
   grey_palette <- c("#505050", "#CCCDD9")
   source_shapes <- c("streamflow" = 16, "precipitation"= 21)
   
@@ -79,28 +79,28 @@ shinyServer(function(session, input, output) {
   ########### SIDEBAR FUNCTIONS 2 (chemistry tab) ############################################
   ###  allow 'select all' interactivity, do not edit
   
-  observeEvent(input$select_all_ions2, {
-    if(input$select_all_ions2 == 0) {}
-    else if (input$select_all_ions2%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions2", selected = "PO4")
-      updateCheckboxGroupInput(session, "solutes_cations2", selected = "K")}
+  observeEvent(input$select_all_ions, {
+    if(input$select_all_ions == 0) {}
+    else if (input$select_all_ions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")
+      updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
     else{
-      updateCheckboxGroupInput(session, "solutes_anions2", selected = solutes_anions)
-      updateCheckboxGroupInput(session, "solutes_cations2", selected = solutes_cations)}
+      updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
+      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
   })
   
-  observeEvent(input$select_all_anions2, {
-    if(input$select_all_anions2 == 0) {}
-    else if (input$select_all_anions2%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions2", selected = "PO4")}
-    else{updateCheckboxGroupInput(session, "solutes_anions2", selected = solutes_anions)}
+  observeEvent(input$select_all_anions, {
+    if(input$select_all_anions == 0) {}
+    else if (input$select_all_anions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")}
+    else{updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)}
   })
   
-  observeEvent(input$select_all_cations2, {
-    if(input$select_all_cations2 == 0) {}
-    else if (input$select_all_cations2%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations2", selected = "K")}
-    else{updateCheckboxGroupInput(session, "solutes_cations2", selected = solutes_cations)}
+  observeEvent(input$select_all_cations, {
+    if(input$select_all_cations == 0) {}
+    else if (input$select_all_cations%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
+    else{updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
   })
   
-  solutes2 <- reactive({c(input$solutes_cations2, input$solutes_anions2, input$solutes_H2)})
+  solutes2 <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
   
   ########### END OF SIDEBAR FUNCTIONS 2 ####################################################
 
@@ -160,7 +160,7 @@ shinyServer(function(session, input, output) {
       geom_hline(size = 0.5, yintercept = 5.1, alpha = 0.5, linetype="dashed", color = "red")+
       geom_line(size = 0.5) + 
       geom_point(size = 1.3, fill = "white", stroke = 0.5, 
-                 aes(text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
+                 aes(text = paste("Water Source: ", source, "<br>",
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range1[1]), max(input$date_range1[2]))+ 
       geom_vline(size = 0.5, xintercept = -5, alpha = 0.2)+
@@ -258,7 +258,7 @@ shinyServer(function(session, input, output) {
    
    #reactive variables for the SO4 NO3 plot, Al plot, and base cations plot
    anions3 <- reactive({input$solutes_anions3})
-   Al_anions3 <- reactive({input$solutes_Al_anions3})
+   Al_anions3 <- reactive({input$solutes_anions_Al})
    cations3 <- reactive({input$solutes_cations3})
    
   #Reactive Data for Al plot

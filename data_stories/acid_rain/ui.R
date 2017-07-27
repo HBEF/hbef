@@ -43,9 +43,9 @@ solutes_anions3 <- list("Sulfate (SO4)" = "SO4",
                         "Nitrate (NO3)" = "NO3")
 
 #solutes list specifically for the Al graph in the policy tab
-solutes_Al_anions3 <- list("Sulfate (SO4)" = "SO4",
-                           "Nitrate (NO3)" = "NO3",
-                           "Aluminum (Al)" = "Al")
+solutes_anions_Al <- list("Sulfate (SO4)" = "SO4",
+                          "Nitrate (NO3)" = "NO3",
+                          "Aluminum (Al)" = "Al")
 
 solutes_H <- list("Hydrogen (H)" = "H")
 
@@ -106,13 +106,14 @@ shinyUI(
                     #### ------------  Intro  Tab ----------------------------------------- #######
                     ###############################################################################
                     
+                    #If you change this, make sure to change it above in the menuItem
                     tabItem(tabName = "intro",
                             
                             #############################################
                             
+                            ########### TEXT ###########
                             
-                            ########### TEXT FOR QUESTION #1 ##########
-                            
+                            #title and text to overlay intro image
                             fluidRow(tags$div(class = "intro-text",
                                               h1("understanding acid rain"),
                                               h3("Chemical reactions caused by acid rain wash nutrients 
@@ -121,23 +122,23 @@ shinyUI(
                                                  Clean Air Act have largely mitigated these effects over
                                                  the past sixty years.")))
                             
-                            ########### END OF QUESTION #1 ##########
-                                              ),# Closes Intro Tab
+                            ########### END ###########
+                    ),# Closes Intro Tab
                     
                     ###############################################################################
-                    #### ------------ End of Intro Tab ------------------------------- #######
+                    #### ------------ End of Intro Tab ------------------------------------ #######
                     ###############################################################################  
                     
                     
                     
                     ###############################################################################
-                    #### ------------  pH  Tab ---------------------------------- #######
+                    #### ------------  pH  Tab -------------------------------------------- #######
                     ###############################################################################
                     
                     tabItem(tabName = "pH",
                             
                             ########### TITLE ####################
-                            fluidRow(column(9,tags$h1("How does pH change when acid rain is mitigated?")) #acid rain intro and annotated pH graph
+                            fluidRow(column(9,tags$h1("How does pH change when acid rain is mitigated?"))
                             ),
                             
                             #############################################
@@ -165,7 +166,7 @@ shinyUI(
                                                                                                                          choices = granularity,
                                                                                                                          selected = "year")))
                                                      ),
-                                                     ## Time Plot
+                                                     ## pH plot over time
                                                      plotlyOutput("pH_intro")
                                             ) #Closes tabpanel
                                             
@@ -218,7 +219,7 @@ shinyUI(
                                (de-acidifying) pH, as seen over the past 60+ years as new 
                                policies are implemented to address air quality (see plot above.)"))),
                                      fluidRow(column(width = 9,
-                                                     #insert widget that links to a quizlet or something here
+                                                     #link to a short quiz on acid rain
                                                      p("Let's see how much you know offhand about acid rain... Click",
                                                        tags$a(href = "https://www.surveymonkey.com/r/RGNNTMH", "here"),
                                                        "to take the acid rain quiz."))))
@@ -264,7 +265,7 @@ shinyUI(
                                                                                       column(3,  offset = 4, selectInput("granularity2", label = "",
                                                                                                                          choices = granularity,
                                                                                                                          selected = "year")))),
-                                                     ## Time Plot
+                                                     ## plot of solute conc in streamflow and precipitation over time in watershed 6
                                                      fluidRow(plotlyOutput("chemistry"))
                                             ) #Closes tabpanel
                                             
@@ -277,22 +278,22 @@ shinyUI(
                                      box(width = 13, height = "700px", id = "sidebar",
                                          #Solutes
                                          fluidRow(
-                                           actionLink("select_all_ions2", h4("Select Solutes")),
+                                           actionLink("select_all_ions", h4("Select Solutes")),
                                            div(class = "scrollbox",
                                                #Cations
-                                               actionLink("select_all_cations2", h5("Cations")),
-                                               checkboxGroupInput("solutes_cations2", label = p(""),
+                                               actionLink("select_all_cations", h5("Cations")),
+                                               checkboxGroupInput("solutes_cations", label = p(""),
                                                                   choices = solutes_cations,
                                                                   selected = "Ca"),
                                                
                                                #Hydrogen  
-                                               checkboxGroupInput("solutes_H2", label = h4(""),
+                                               checkboxGroupInput("solutes_H", label = h4(""),
                                                                   choices = solutes_H,
                                                                   selected = ""),
                                                
                                                #Anions
-                                               actionLink("select_all_anions2", h5("Anions")),
-                                               checkboxGroupInput("solutes_anions2", label = p(""),
+                                               actionLink("select_all_anions", h5("Anions")),
+                                               checkboxGroupInput("solutes_anions", label = p(""),
                                                                   choices = solutes_anions,
                                                                   selected = ""))),
                                          
@@ -443,10 +444,10 @@ shinyUI(
                                                                                                             choices = granularity,
                                                                                                             selected = "year")))),
                                                      #Solutes
-                                                     fluidRow(checkboxGroupInput("solutes_Al_anions3", label = "",
-                                                                                 choices = solutes_Al_anions3,
+                                                     fluidRow(column(12, checkboxGroupInput("solutes_anions_Al", label = "",
+                                                                                 choices = solutes_anions_Al,
                                                                                  selected = c("Al"), 
-                                                                                 inline = TRUE)),
+                                                                                 inline = TRUE))),
                                                      ## Time Plot
                                                      fluidRow(plotlyOutput("policy_Al"))
                                             ) #Closes tabpanel
@@ -486,7 +487,7 @@ shinyUI(
                             ########### END OF GRAPH FOR QUESTION #1 ##########
                             
                             
-                            ########### TEXT FOR QUESTION #1 ##########
+                            ########### TEXT & TIMELINE FOR QUESTION #1 ##########
                             
                             tags$div(class = "text-container",
                                      fluidRow(column(9, h4("Acid Rain Key Events Timeline"))),

@@ -182,7 +182,7 @@ shinyServer(function(session, input, output) {
     #filter for all but w5 since it has so much missing data
     yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",]
     #filter for all but Aspen and Pin Cherry since they are always zero
-    #yearly_count_means<-yearly_count_means[yearly_count_means$species !%in% c("Aspen", "Pin Cherry"),]
+    yearly_count_means<-yearly_count_means[yearly_count_means$species != "Aspen",]
     yearly_count_means<-yearly_count_means[yearly_count_means$species != "Pin Cherry",]
     
     if(input$log_counts == "log") {
@@ -195,19 +195,28 @@ shinyServer(function(session, input, output) {
         labs(x = " ", y = "Leaf Counts")}
     
     leaf_count <- plot + geom_line(size=0.5)+ my_theme+
-      geom_point(size=1.3, aes(text = paste("Species: ", species, "<br>", 
-                                            "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
+      geom_point(size=1.3, 
+                 #text/variables to display in the plotly tooltip hover
+                 aes(text = paste("Species: ", species, "<br>", "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
+      #facet by site and rename facets to be full site names
       facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
-      theme(legend.title = element_text("Tree Species", family = "Helvetica"),
-            strip.text = element_text(size = 10))+
+      theme(strip.text = element_text(size = 10))+
+      
       xlim(min(input$date_range_count[1]), max(input$date_range_count[2]))+
+      #Ice storm annotation
       geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
       annotate("text", label = "   Ice storm", x = 1998, y = 120, color = "black")
     
     #Wrap in plotly and hide unnecessary plotly toolbar
     leaf_count <- ggplotly(leaf_count, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
+      config(showLink = FALSE) %>%
+      #annotate legend title so that it's connected to the legend itself
+      add_annotations(text="Species", xref="paper", yref="paper",
+                      x=1, xanchor="left",
+                      y=0.8, yanchor="bottom",    # Same y as legend below
+                      legendtitle=TRUE, showarrow=FALSE) %>%
+      layout(legend=list(y=0.8, yanchor="top"))
     
     #manually adjust margins so axis labs aren't cut off
     leaf_count$x$layout$margin$l <- leaf_count$x$layout$margin$l + 30
@@ -231,17 +240,6 @@ shinyServer(function(session, input, output) {
     NO3_plot$height <- NULL
     NO3_plot %>%
       layout(autosize = TRUE, showlegend = FALSE)
-    #manually code what shows in the legend
-    # NO3_plot[['x']][['data']][[1]][['name']] <- input$watersheds2[1]
-    # NO3_plot[['x']][['data']][[2]][['name']] <- input$watersheds2[2]
-    # NO3_plot[['x']][['data']][[3]][['name']] <- input$watersheds2[3]
-    # NO3_plot[['x']][['data']][[4]][['name']] <- input$watersheds2[4]
-    # NO3_plot[['x']][['data']][[5]][['name']] <- input$watersheds2[5]
-    # NO3_plot[['x']][['data']][[6]][['name']] <- input$watersheds2[6]
-    # NO3_plot[['x']][['data']][[7]][['name']] <- input$watersheds2[7]
-    # NO3_plot[['x']][['data']][[8]][['name']] <- input$watersheds2[8]
-    # NO3_plot[['x']][['data']][[9]][['name']] <- input$watersheds2[9]
-    # NO3_plot
   })
   
   #make plots of nitrates like in the 2003 paper
