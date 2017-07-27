@@ -103,8 +103,7 @@ plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab
       geom_vline(data = v.line,
                  aes(xintercept = vals),
                  linetype = 1,
-                 show.legend = T) +
-      theme_bw() + my_theme
+                 show.legend = T) + my_theme
     plot <- ggplotly(p,tooltip = "text",
                      width = 400, height = 600) %>%
       layout(margin = list(b = 90)) %>%
@@ -137,8 +136,8 @@ plot.dis.df <- function(df, x.r, date.input, y.lab, title.lab, logarithm){
     gg <- ggplot(df,aes(x= get(x.r),y= water_mm, shape =source, label=date))
   }
   p <- gg +
-    geom_line(color = "red") +
-    geom_point(color = "blue", fill = "white",
+    geom_line(color = "#171A1E") +
+    geom_point(color = "#30363F", fill = "white",
                aes(text = paste("Water Source: ", source, "<br>",
                                 "Value:", round(water_mm, 2), "<br>", 
                                 "Date: ", get(x.r))))  +
@@ -154,8 +153,7 @@ plot.dis.df <- function(df, x.r, date.input, y.lab, title.lab, logarithm){
     geom_vline(data = v.line,
                aes(xintercept = vals),
                linetype = 1,
-               show.legend = T) +
-    theme_bw() + my_theme
+               show.legend = T) + my_theme
   plot <- ggplotly(p, tooltip = "text",
                    height = 600, width = 400)%>%
     layout(margin = list(b = 90)) %>%
