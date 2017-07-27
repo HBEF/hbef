@@ -330,27 +330,6 @@ shinyUI(
                             fluidRow(
                               column(9,
                                      #------ Box 1 --------#
-                                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
-                                            ######## OPTIONS
-                                            ######## PLOT 
-                                            tabPanel(shiny::icon("circle"),
-                                                     div(class = "titleRow", fluidRow(column(6, tags$h2("Vegetation increase after ice storm by plot")),
-                                                                                      ##Granularity
-                                                                                      column(3, offset = 2, h4("Watersheds"),
-                                                                                             selectInput("watersheds1", label = "",
-                                                                                                         choices = watersheds1,
-                                                                                                         selected = "1"))
-                                                     )
-                                                     ),
-                                                     ## Plot
-                                                     plotlyOutput("lai_plot")
-                                            ) #Closes tabpanel
-                                            
-                                     ),# Closes tab Box
-                                     
-                                     #------ End of Box 1 --------#
-                                     
-                                     #------ Box 2 --------#
                                      
                                      tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
                                             ######## OPTIONS
@@ -370,10 +349,31 @@ shinyUI(
                                                      ))),
                                                      ## Time Plot
                                                      plotlyOutput("leaf_count")
-
+                                                     
                                             ) #Closes tabpanel
                                             
-                                     ) # Closes tab Box
+                                     ), # Closes tab Box
+                                     
+                                     #------ End of Box 1 --------#
+                                     
+                                     #------ Box 2 --------#
+                                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                                            ######## OPTIONS
+                                            ######## PLOT 
+                                            tabPanel(shiny::icon("circle"),
+                                                     div(class = "titleRow", fluidRow(column(6, tags$h2("Vegetation increase after ice storm by plot")),
+                                                                                      ##Granularity
+                                                                                      column(3, offset = 2, h4("Watersheds"),
+                                                                                             selectInput("watersheds1", label = "",
+                                                                                                         choices = watersheds1,
+                                                                                                         selected = "1"))
+                                                     )
+                                                     ),
+                                                     ## Plot
+                                                     plotlyOutput("lai_plot")
+                                            ) #Closes tabpanel
+                                            
+                                     )# Closes tab Box
                                      
                                      #------ End of Box 2 --------#
                                      
@@ -384,13 +384,13 @@ shinyUI(
                                      box(width = 13, height = "700px", id = "sidebar",
                                          
                                          ##Date Range
-                                         sliderInput("date_range_count", label = h4(" "),
+                                         sliderInput("date_range_count", label = h4("Date Range"),
                                                      min = 1993,
                                                      max = 2013,
                                                      value = c(1997, 2001),
                                                      sep = "")
                                          
-                                         )
+                                         )#Closes the box
                                      
                               )#Closes the column
                               
