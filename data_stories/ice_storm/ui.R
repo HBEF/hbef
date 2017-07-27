@@ -95,9 +95,9 @@ shinyUI(
                   
                             ########### TEXT FOR QUESTION #1 ##########
                             
-                            tags$div(class = "intro-text",
-                                     fluidRow(h1("understanding ice storms"),
-                                    h3("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+                            fluidRow(tags$div(class = "intro-text",
+                                     h1("understanding ice storms"),
+                                      h3("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
                                         that damaged the experimental watersheds.  Some effects of the 
                                         storm can be tracked by the NO3 streamflow data.")))
                             

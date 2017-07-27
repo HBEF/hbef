@@ -413,7 +413,7 @@ input[value = "Al"]:checked:after {
 	text-align: left;
 	text-transform: none;
 	width: 80%;
-	margin-left: 10%;
+	margin: 1em 15vh;
 }
 
 
