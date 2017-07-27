@@ -16,6 +16,11 @@ library(directlabels)
 #######################################################################################
 ########### SHINY SERVER ##############################################################
 #######################################################################################
+
+
+
+
+
 #Write a function that converts the Source code from precip and 
 #flow to Precipitation and Streamwater Discharge
 watershed_change <- function(df){
@@ -49,10 +54,19 @@ shinyServer(function(session, input, output) {
   ########### IMPORTANT PRELIMINARY INFO #############################################
   
   ###  Theme  ################
-  my_theme <-theme(rect = element_rect(fill = NA),
-          panel.grid.major = element_line(colour = "#dddddd"),
-          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
-          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
+  #my theme
+  
+  my_theme <- 
+    theme(rect = element_rect(fill = NA),
+          panel.background = element_rect("transparent", colour = NA),
+          panel.grid.major = element_line(colour = "#dddddd"), 
+          panel.grid.major.x = element_line(colour = NA),
+          text = element_text(family = "Helvetica", size = 12), 
+          legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
+          axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
+          plot.margin = margin(1, 1, 1, 1, "cm"),
+          strip.background = element_rect(colour = NA, fill = NA),
+          strip.text = element_text(hjust = 1, vjust = 0, size = 10, face = "bold", lineheight = 30))
   
   color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", "Calcium" = "#3B5C95",
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
@@ -132,6 +146,23 @@ shinyServer(function(session, input, output) {
   })
   
   
+  # The following reactivity prevents the user from deselecting streamflow. 
+  #The can add precipitation but not remove streamflow
+  observe({
+    if((length(input$water_sources) < 2) & "precip" %in% input$water_sources){
+      updateCheckboxGroupInput(session, "water_sources", selected = c("flow", "precip"))}
+    else if(length(input$water_sources) < 2){
+      updateCheckboxGroupInput(session, "water_sources", selected = c("flow")) 
+    }
+  })
+  
+  observe({
+    if((length(input$water_sources2) < 2) & "precip" %in% input$input$water_sources2){
+      updateCheckboxGroupInput(session, "water_sources2", selected = c("flow", "precip"))}
+    else if(length(input$water_sources2) < 2){
+      updateCheckboxGroupInput(session, "water_sources2", selected = c("flow")) 
+    }
+  })
   
   solutes2 <- reactive({c(input$solutes_cations, input$solutes_anions, input$solutes_H)})
   
@@ -152,24 +183,16 @@ shinyServer(function(session, input, output) {
   
   ########### REACTIVE DATA AND X Y  #########################################
   #Reactive Data Normal
-  add_precip <- reactive({
-    if (input$water_sources == "precip"){
-      c("precip", "flow")
-    }else{
-      "flow"
-    }
-  })
-  
-  add_precip2 <- reactive({
-    if (input$water_sources2 == "precip"){
-      c("precip", "flow")
-    }else{
-      "flow"
-    }
-  })
+  # add_precip2 <- reactive({
+  #   if (input$water_sources2 == "precip"){
+  #     c("precip", "flow")
+  #   }else{
+  #     "flow"
+  #   }
+  # })
   reactive_data <- reactive({
     data <- imported_data
-    data <- data[data$source %in% add_precip(),]
+    data <- data[data$source %in% input$water_sources,]
     data <- data[data$solute %in% input$sol,] 
     data <- data[data$ws %in% input$watersheds,]
     data <- solute_change(data)
@@ -178,7 +201,7 @@ shinyServer(function(session, input, output) {
   
   reactive_data2 <- reactive({
     data <- imported_data
-    data <- data[data$source %in% add_precip2(),]
+    data <- data[data$source %in% input$water_sources2,]
     data <- data[data$solute %in% solutes2(),] 
     #note that solutes2 is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds2,]
@@ -275,7 +298,7 @@ shinyServer(function(session, input, output) {
     
     if(log == "log") {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), 
-                                   shape = source, color = solute))+
+                                   shape = source, color = solute))+ 
         labs(x = "Water Year", y = paste("log", "(",units, ")", sep = ""))
     
     }else{
@@ -297,7 +320,6 @@ shinyServer(function(session, input, output) {
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5)) +
-          theme_bw() +
           scale_x_date(date_breaks = "10 years", date_labels = "%Y")
         
       }else{
@@ -314,7 +336,6 @@ shinyServer(function(session, input, output) {
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5))+
-          theme_bw() +
           scale_x_date(date_breaks = ifelse(col1 %in% c(2,3), "20 years", 
                               "10 years"),
                        date_labels = "%Y")
@@ -322,7 +343,7 @@ shinyServer(function(session, input, output) {
       }
     }else{
       if (length(ion) <= 1){
-        final <- plot+ geom_line(size = 1,aes(color = solute)) + 
+        final <- plot+ geom_line(size = 1,aes(color = solute)) +
           geom_point(size = 1.5, fill = "white", stroke = 0.5, 
                      aes(color = solute, shape = source,
                          text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
@@ -334,7 +355,6 @@ shinyServer(function(session, input, output) {
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5)) +
-          theme_bw() +
           scale_x_date(date_breaks = "10 years", date_labels = "%Y")
       }else{
         final <- plot+ geom_line(size = 1,aes(color = solute)) + 
@@ -350,16 +370,18 @@ shinyServer(function(session, input, output) {
           scale_shape_manual(values = source_shapes) +
           scale_color_manual(values = solute_palette) +
           scale_alpha_discrete(range = c(0.9, 0.5))+
-          theme_bw() +
           scale_x_date(date_breaks = ifelse(col2 %in% c(2,3), "20 years", 
                               "10 years"),
                        date_labels = "%Y")
       }
     }
     
+    final <- final + my_theme
     p = hide_guides(ggplotly(  
       final, tooltip = "text",
-      width = 1000, height = h))
+      width = 1000, height = h))%>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE)
   
     return(p)
     
