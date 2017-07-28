@@ -28,6 +28,7 @@ shinyUI(dashboardPage(skin = "black",
                       dashboardSidebar(
                         width = 200,
                         sidebarMenu(
+                          menuItem("Intro", tabName = "intro", icon = icon("home")),
                           menuItem("Concentration", tabName = "solutes", icon = icon("home")),
                           menuItem("Quantities", tabName = "streamflow", icon = icon("search-plus")),
                           tags$div(class = "footer",tags$ul(
@@ -49,6 +50,24 @@ shinyUI(dashboardPage(skin = "black",
   ########### BODY ##############################################################
   
   tabItems(
+    tabItem(tabName = "intro",
+            
+            #############################################
+            
+            ########### TEXT ###########
+            
+            #title and text to overlay intro image
+            fluidRow(tags$div(class = "intro-text",
+                              h1("understanding deforestation"),
+                              h3("Deforestation is the cutting and removal of trees, 
+                                 which has harmful effects on the environment. At Hubbard Brook,
+                                 data has shown that solute concentrations in streamwater increase
+                                 after deforestation, and streamwater quantities increase as well.")))
+            
+            
+            ########### END ###########
+                              ),# Closes Intro Tab
+    
               tabItem(tabName = "solutes",
                        fluidRow(column(9,tags$h1("Effects of Deforestation"))),
                        fluidRow(column(9, 

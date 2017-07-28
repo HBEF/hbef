@@ -52,7 +52,8 @@ shinyUI(dashboardPage(skin = "black",
                       dashboardSidebar(
                         width = 200,
                         sidebarMenu(
-                          menuItem("By Watershed", tabName = "watersheds", icon = icon("home")),
+                          menuItem("Intro", tabName = "intro", icon = icon("home")),
+                          menuItem("By Watershed", tabName = "watersheds", icon = icon("search-plus")),
                           menuItem("By Solute", tabName = "solutes", icon = icon("search-plus")),
                         # footer here
                           tags$div(class = "footer",tags$ul(
@@ -73,6 +74,23 @@ shinyUI(dashboardPage(skin = "black",
   
   ########### BODY ##############################################################
  tabItems(
+   tabItem(tabName = "intro",
+           
+           #############################################
+           
+           ########### TEXT ###########
+           
+           #title and text to overlay intro image
+           fluidRow(tags$div(class = "intro-text",
+                             h1("understanding dilutification"),
+                             h3("Dilutification is the gradual decrease of nutrient
+                                concentrations in streamwater over time. Dilutification
+                                can negatively impact aquatic organisms adapted to certain
+                                solute concentrations.")))
+                             
+           
+           ########### END ###########
+                             ),# Closes Intro Tab
     tabItem(tabName = "watersheds", 
             fluidRow(column(9,tags$h2("Dilutification of Streamwater"))),
             fluidRow(column(9, tags$div(class = "container_question",

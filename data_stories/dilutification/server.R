@@ -80,7 +80,7 @@ shinyServer(function(session, input, output) {
   color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", "Calcium" = "#3B5C95",
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
   color_anion <- c("Sulfate" = "#8F1010", "Nitrate" = "#BF1616", "Chloride" = "#D97373")
-  color_hydro <- c("Hydrogen" = "#FFE79C")
+  color_hydro <- c("Hydrogen Ion" = "#FFE79C")
   
   solute_palette <- c(color_cation, color_anion, color_hydro)
   source_shapes <- c("Streamflow (Q)" = 16, "Precipitation (P)"= 21)
