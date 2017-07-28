@@ -13,7 +13,7 @@ library(ggthemes)
 
 ########### DATA IMPORT ####################################################
 
-#load vegetation data
+#load vegetation data - LAI and leaf counts
 lai_data<- readRDS("lai_data.rds")
 yearly_count_means <- readRDS("yearly_count_means.rds")
 
@@ -38,12 +38,11 @@ my_theme <- theme_fivethirtyeight() +
         panel.grid.major = element_line(colour = "#dddddd"), 
         text = element_text(family = "Helvetica", size = 12), 
         legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
-        strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
+        strip.text = element_text(size = 10),
         axis.title= element_text(NULL), axis.title.x= element_blank(), 
         axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
 
 color_anion <- c("NO3" = "#BF1616")
-
 source_shapes <- c("streamflow" = 16, "precipitation"= 21)
 watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 5,"5"= 4,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
 
@@ -68,8 +67,7 @@ shinyServer(function(session, input, output) {
     data <- data[data$solute %in% c("NO3"),] 
     data <- data[data$ws %in% input$watersheds2,]
   })
-  
-  
+
   x <- reactive({
     if(input$granularity == "week"){"water_date"}
     else if(input$granularity == "month"){"water_date"}
@@ -98,7 +96,8 @@ shinyServer(function(session, input, output) {
   
   #Reactive normalized flux data
   reactive_data_norm <- reactive({
-    data <- water_chem_data[water_chem_data$granularity %in% input$granularity3,]
+    data <- water_chem_data
+    data <- data[data$granularity %in% input$granularity3,]
     data <- data[data$source %in% c("streamflow"),]
     data <- data[data$ws %in% c("2", "4", "5"),]
     data <- data[data$solute %in% c("NO3"),]
@@ -119,6 +118,7 @@ shinyServer(function(session, input, output) {
   ## GGPLOT TIME FUNCTION
   ggplot_function <- function(data, x, y, log, units, date_range){
     
+    #if statement to make log Y axis and define plot basics
     if(log == "log") {
       plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), linetype= ws, color = solute, shape = source))+
         labs(x = "Water Year", y = paste("log", "(",units, ")"))}
@@ -127,6 +127,7 @@ shinyServer(function(session, input, output) {
       plot <- ggplot(data=data, aes(x= get(x), y= get(y), color = solute, shape = source, linetype= ws))+
         labs(x = "Water Year", y = units)}
     
+    #create rest of basic plot format
     final <- plot+ my_theme + geom_line(size = 0.5) + 
       geom_point(size = 1.3, fill = "white", stroke = 0.5, 
                  aes(text = paste("Watershed: ", ws, "<br>", "Value:", get(y), "<br>", "Date: ", get(x)))) + 
@@ -136,17 +137,10 @@ shinyServer(function(session, input, output) {
       scale_shape_manual(values = source_shapes) +
       scale_color_manual(values = color_anion) +
       scale_linetype_manual(values = watershed_linetypes)
-    
-    ggplotly(  
-      final, tooltip = "text") %>%
+    #wrap in plotly
+    ggplotly(final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE) 
-    # %>%
-    #   add_annotations(text="Watershed", xref="paper", yref="paper",
-    #                    x=1, xanchor="left",
-    #                    y=0.8, yanchor="bottom",    # Same y as legend below
-    #                    legendtitle=TRUE, showarrow=FALSE) %>%
-    #   layout(legend=list(y=0.8, yanchor="top"))
     }
   
   #############################################################
@@ -155,20 +149,19 @@ shinyServer(function(session, input, output) {
   
   #ggplotly that shows most plots increase in tree lai following the ice storm
   output$lai_plot <- renderPlotly({
-    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,],
+    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], #filtered by WS1 becuase it showed trends more clearly
                        aes(x = YEAR, y = LAIT, color = ELEVATION_M))+ my_theme+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
-      labs(color="Plot Elevation", x=" ", y="LAIT (meter-squared per meter-squared)")+ 
+      labs(color="Plot Elevation", x=" ", y="LAIT (meter-squared per meter-squared)")+ #LAIT = LAI of only trees
       facet_wrap(~PLOT)+ coord_cartesian(ylim = c(2,11))+
       theme(axis.text.x = element_text(angle = 90, hjust = 1), 
-            legend.title = element_text("Plot Elevation", family = "Helvetica"),
-            strip.text = element_text(size = 10))
-    
+            legend.title = element_text("Plot Elevation", family = "Helvetica"))
+    #wrap in plotly
     lai_plot <- ggplotly(lai_plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
-    
+    #make plot readjust consistently to fill window
     lai_plot$x$layout$width <- NULL
     lai_plot$y$layout$height <- NULL
     lai_plot$width <- NULL
@@ -177,14 +170,14 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE)
   })
   
-  #plot of paper birch and sugar maple, etc. decline due to ice storm
+  #plot of beech, sugar maple, etc. leaf count decline due to ice storm
   output$leaf_count <- renderPlotly({
-    #filter for all but w5 since it has so much missing data
-    yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",]
+    yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",] #filter for all but w5 since w5 has so much missing data
     #filter for all but Aspen and Pin Cherry since they are always zero
     yearly_count_means<-yearly_count_means[yearly_count_means$species != "Aspen",]
     yearly_count_means<-yearly_count_means[yearly_count_means$species != "Pin Cherry",]
     
+    #if statement for log Y axis
     if(input$log_counts == "log") {
       plot <- ggplot(yearly_count_means, aes(x=YEAR, y=logb(count, base=exp(1)), color = species))+
         labs(x = " ", y = paste("log", "(Leaf counts)"))+
@@ -194,14 +187,13 @@ shinyServer(function(session, input, output) {
       plot <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
         labs(x = " ", y = "Leaf Counts")}
     
+    #rest of plot
     leaf_count <- plot + geom_line(size=0.5)+ my_theme+
       geom_point(size=1.3, 
                  #text/variables to display in the plotly tooltip hover
                  aes(text = paste("Species: ", species, "<br>", "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
       #facet by site and rename facets to be full site names
       facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
-      theme(strip.text = element_text(size = 10))+
-      
       xlim(min(input$date_range_count[1]), max(input$date_range_count[2]))+
       #Ice storm annotation
       geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
@@ -234,6 +226,7 @@ shinyServer(function(session, input, output) {
   #plot to generally show how the ice storm affected NO3 (conc or flux?)
   output$NO3_plot <- renderPlotly({
     NO3_plot <- ggplot_function(reactive_data(), x(), y(), log=input$log, units=input$units, date_range=input$date_range2)
+    #readjusts plot size to consistently fill window
     NO3_plot$x$layout$width <- NULL
     NO3_plot$y$layout$height <- NULL
     NO3_plot$width <- NULL
@@ -242,8 +235,8 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE, showlegend = FALSE)
   })
   
-  #make plots of nitrates like in the 2003 paper
-  #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
+  #recreate plots of nitrate fluxes (Bernhardt et. al, 2003)
+  #(moles/ha-yr (flux) vs water year, faceted into NO3 streamflow for ws1,6 and excess (normalized) for ws2,4,5)
   output$NO3_output <- renderPlotly({
     NO3_output <- ggplot_function(reactive_data_flux(), xflux(), yflux(), log=input$log_flux, units="moles/ha-yr", date_range=input$date_range3)%>%
       #annotate legend title so that it is connected to the legend itself
@@ -252,7 +245,7 @@ shinyServer(function(session, input, output) {
                        y=0.8, yanchor="bottom",    # Same y as legend below
                        legendtitle=TRUE, showarrow=FALSE) %>%
       layout(legend=list(y=0.8, yanchor="top"))
-    
+    #readjusts plot size to consistently fill window
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
@@ -263,10 +256,9 @@ shinyServer(function(session, input, output) {
     NO3_output[['x']][['data']][[1]][['name']] <- '1'
     NO3_output[['x']][['data']][[2]][['name']] <- '6'
     NO3_output
-    
   })
   
-  #NO3 excess
+  #NO3 excess plot
   output$NO3_excess <- renderPlotly({
     NO3_excess <- ggplot_function(reactive_data_norm(), xflux(), ynorm(), log="linear", units="moles/ha-yr", date_range=input$date_range3)%>%
       #annotate legend title so that it is connected to the legend itself
@@ -276,6 +268,7 @@ shinyServer(function(session, input, output) {
                       legendtitle=TRUE, showarrow=FALSE) %>%
       layout(legend=list(y=0.8, yanchor="top"))
     
+    #readjusts plot size to consistently fill window
     NO3_excess$x$layout$width <- NULL
     NO3_excess$y$layout$height <- NULL
     NO3_excess$width <- NULL

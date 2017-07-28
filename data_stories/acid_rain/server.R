@@ -173,9 +173,9 @@ shinyServer(function(session, input, output) {
 
   ########### REACTIVE DATA #########################################
   
-  ########## Reactive Data 1
+  ########## Reactive Data 1 (pH)
   #Reactive Data for intro pH plot
-  reactive_data1 <- reactive({
+  reactive_data_pH <- reactive({
     data <- imported_data
     data <- data[data$granularity %in% input$granularity1,]
     data <- data[data$ws %in% c("6"),]
@@ -193,9 +193,9 @@ shinyServer(function(session, input, output) {
     {"pH"}
   })
   
-  ########## Reactive Data 2
+  ########## Reactive Data 2 (chemistry)
   #Reactive Data for Water Chemistry plot
-  reactive_data2 <- reactive({
+  reactive_data_chem <- reactive({
     data <- imported_data
     data <- data[data$granularity %in% input$granularity2,]
     data <- data[data$source %in% input$water_sources2,]
@@ -276,7 +276,6 @@ shinyServer(function(session, input, output) {
     else if(input$units3 =="uMole/L"){"concentration_umol"}
     else if(input$units3 =="flux"){"flux"}
   })
- 
   
   ########### END REACTIVE DATA #########################################
   
@@ -288,19 +287,21 @@ shinyServer(function(session, input, output) {
   
 
   #intro pH plot with annotations
-  output$pH_intro <- renderPlotly({
+  output$pH <- renderPlotly({
 
-    pH_intro <- ggplot_function_pH(reactive_data1(), x1(), y1(), log = input$log1)
-    pH_intro$x$layout$width <- NULL
-    pH_intro$y$layout$height <- NULL
-    pH_intro$width <- NULL
-    pH_intro$height <- NULL
-    pH_intro 
+    pH <- ggplot_function_pH(reactive_data_pH(), x1(), y1(), log = input$log1)
+    #code to make the plot readjust to consistently fit the screen well
+    pH$x$layout$width <- NULL
+    pH$y$layout$height <- NULL
+    pH$width <- NULL
+    pH$height <- NULL
+    pH 
     })
   
-  #plot of any compound conc
+  #plot of any solute concentration over time
   output$chemistry <- renderPlotly({
-    chemistry <- ggplot_function(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range_chem, solute_palette)
+    chemistry <- ggplot_function(reactive_data_chem(), x2(), y2(), log = input$log2, input$units2, input$date_range_chem, solute_palette)
+    #code to make the plot readjust to consistently fit the screen well
     chemistry$x$layout$width <- NULL
     chemistry$y$layout$height <- NULL
     chemistry$width <- NULL
@@ -312,6 +313,7 @@ shinyServer(function(session, input, output) {
   #plot of SO4 and NO3 to complement pH increase - shows decreasing trend
   output$policy_SO4_NO3 <- renderPlotly({
     policy_SO4_NO3 <- ggplot_function(reactive_data3_anions(), x3(), y3(), log = input$log3, input$units3, input$date_range_policy, solute_palette)
+    #code to make the plot readjust to consistently fit the screen well
     policy_SO4_NO3$x$layout$width <- NULL
     policy_SO4_NO3$y$layout$height <- NULL
     policy_SO4_NO3$width <- NULL
@@ -323,6 +325,7 @@ shinyServer(function(session, input, output) {
   #base cation trends plot 
   output$policy_base_cations <- renderPlotly({
     policy_base_cations <- ggplot_function(reactive_data3_cations(), x4(), y3(), log = input$log4, input$units3, input$date_range_policy, solute_palette)
+    #code to make the plot readjust to consistently fit the screen well
     policy_base_cations$x$layout$width <- NULL
     policy_base_cations$y$layout$height <- NULL
     policy_base_cations$width <- NULL
@@ -334,6 +337,7 @@ shinyServer(function(session, input, output) {
   #Al plot to show decrease in acids mean less Al released from soil
   output$policy_Al <- renderPlotly({
     policy_Al <- ggplot_function(reactive_data3_Al(), x5(), y3(), log = input$log5, input$units3, input$date_range_policy, solute_palette)
+    #code to make the plot readjust to consistently fit the screen well
     policy_Al$x$layout$width <- NULL
     policy_Al$y$layout$height <- NULL
     policy_Al$width <- NULL
@@ -342,25 +346,9 @@ shinyServer(function(session, input, output) {
       layout(autosize = TRUE)
     })
 
-  #in progress plot of Al and acid flux and conc... should be on seperate tab so has a diff sidebar!
-  output$chemistry_flux <- renderPlotly({
-    chemistry_flux <- ggplot_function(reactive_data2(), x2(), y2(), log = input$log2, input$units2, input$date_range_chem, solute_palette)
-    chemistry_flux$x$layout$width <- NULL
-    chemistry_flux$y$layout$height <- NULL
-    chemistry_flux$width <- NULL
-    chemistry_flux$height <- NULL
-    chemistry_flux %>%
-      layout(autosize = TRUE)
-    
-  })
-  
   #output an interactive timeline for the history of acid rain
   output$timeline <- renderTimevis({
     timevis(timeline_data) #possibly create/use groups in order to contextualize
   })
   
-
-  
 })
-
-
