@@ -181,7 +181,7 @@ shinyServer(function(session, input, output) {
   
   
   ########### DATA IMPORT ####################################################
-  load("precip_streamflow_dfs.Rdata")
+  load("precip_streamflow_dfs.RData")
   imported_data <- precip_streamflow_long
   imported_data <- watershed_change(imported_data)
   

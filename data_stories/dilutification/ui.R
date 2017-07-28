@@ -35,8 +35,8 @@ watersheds <- list("Watershed 1" = 1,
                    "Watershed 8" = 8,
                    "Watershed 9" = 9)
 
-water_sources <- list("Add Precipitation" = "precip",
-                      "No Precipitation" = "flow")
+water_sources <- list("Add Precipitation" = "precipitation",
+                      "No Precipitation" = "streamflow")
 
 granularity <- list("Year (VWC)" = "year",
                     "Month (VWC)" = "month")
