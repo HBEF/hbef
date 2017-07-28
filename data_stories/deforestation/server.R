@@ -11,6 +11,7 @@ library(utils)
 library(grid)
 library(shinydashboard)
 
+#Establish shapes for the water sources for graphing later
 source_shapes <- c("Streamflow (Q)" = 16, "Precipitation (P)"= 21)
 
 
@@ -32,12 +33,14 @@ my_theme <-
 load("precip_streamflow_dfs.RData")
 imported_data <- precip_streamflow_long
 
+#Function that creates a column of watershed data written in words, such as
+#"Watershed 1"
 watershed_change <- function(df){
   df$ws2 <- paste("Watershed", df$ws, sep = " ")
   return(df)
 }
 
-#Write a function that converts the solute labels to their full written name
+#Function that converts the solute labels to their full written name
 solute_change <- function(df){
   df[df$solute == "K", "solute"] = "Potassium"
   df[df$solute == "Na", "solute"] = "Sodium"
@@ -52,6 +55,8 @@ solute_change <- function(df){
   
 }
 
+#Function that converts the water source designators to more descriptive
+#labels
 source_change <- function(df){
   df[df$source == "streamflow", "source"] = "Streamflow (Q)"
   df[df$source == "precipitation", "source"] = "Precipitation (P)"
@@ -59,9 +64,10 @@ source_change <- function(df){
 }
 
 
-#Function to plot the formatted data frame in ggplot2
+#Function to plot the formatted solute concentration data frame in ggplot2
 plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab, logarithm, ecological){
   
+  #Vectors of colors for plotting lines and points associated with solutes
   color_cation <- c("Potassium" = "#95AFDD", "Sodium" = "#7195D2", 
                     "Ammonium" = "#4E7AC7" , "Calcium" = "#3B5C95",
                     "Magnesium" = "#273D64", "Aluminum" = "#162338")
@@ -70,13 +76,19 @@ plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab
                    "Chloride" = "#D97373", "Bicarbonate" = "#E5A2A2")
   color_hydro <- c("pH" = "#FFC408", "Hydrogen Ion" = "#FFE79C")
   
+  #Solute palette that groups together above vectors
   solutes_palette <- c(color_cation, color_anion, color_hydro)
+  
+  #Establish shapes for the water sources for graphing 
   source_shapes <- c("Streamflow (Q)" = 16, "Precipitation (P)"= 21)
-  m <- max(df$value, na.rm = TRUE)
+  
+  #Information for plotting a vertical line in the different watershed 
+  #graphs at the time of cutting
   v.line <- data.frame(ws2 = c("Watershed 2", "Watershed 4",
                                "Watershed 5", "Watershed 6"), 
                        vals = c(-1675, 92, 4926, NA))
 
+  
     if (logarithm == "log") {
       gg <- ggplot(df,aes(x= get(x.r),y= log(get(y.r)), shape =source, 
                           color = solute, label=date))

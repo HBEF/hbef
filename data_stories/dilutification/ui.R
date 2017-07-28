@@ -5,8 +5,7 @@ library(tidyr)
 library(dplyr)
 library(shiny)
 library(plotly)
-library(ggthemes)
-library(directlabels)
+library(shinydashboard)
 
 
 ########### IMPORTANT LISTS #############
@@ -82,7 +81,7 @@ shinyUI(dashboardPage(skin = "black",
               ),
             
             fluidRow(column(9,
-                            tabBox(width = 12, height = "600px", side="right", 
+                            tabBox(width = 12, height = "1000px", side="right", 
                                    selected = shiny::icon("circle"),
                                    ###Units - Axis Log
                                    tabPanel(shiny::icon("gear"),
@@ -127,9 +126,9 @@ shinyUI(dashboardPage(skin = "black",
                            fluidRow(
                              column(12, 
                              checkboxGroupInput("water_sources", label = h4("Adding Precipitation"),
-                                                choices = list("Streamflow" = "flow",
-                                                               "Precipitation" = "precip"),
-                                                selected = "flow"))
+                                                choices = list("Streamflow" = "streamflow",
+                                                               "Precipitation" = "precipitation"),
+                                                selected = "streamflow"))
                              ),
                            
                            ##Units  
@@ -213,9 +212,9 @@ shinyUI(dashboardPage(skin = "black",
                             fluidRow(
                               column(12, 
                                      checkboxGroupInput("water_sources2", label = h4("Adding Precipitation"),
-                                                        choices = list("Streamflow" = "flow",
-                                                                       "Precipitation" = "precip"),
-                                                        selected = "flow"))),
+                                                        choices = list("Streamflow" = "streamflow",
+                                                                       "Precipitation" = "precipitation"),
+                                                        selected = "streamflow"))),
                             
                             ##Units  
                             fluidRow(

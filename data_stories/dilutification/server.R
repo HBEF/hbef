@@ -1,15 +1,13 @@
 library(ggplot2)
 library(lubridate)
-library(gridExtra)
 library(readr)
 library(tidyr)
 library(dplyr)
 library(shiny)
 library(plotly)
 library(utils)
-library(grid)
-library(ggthemes)
-library(directlabels)
+library(shinydashboard)
+
 
 
 
@@ -28,6 +26,17 @@ watershed_change <- function(df){
   return(df)
 }
 
+
+solutes_cations <- list("Potassium (K)" = "K",
+                        "Sodium (Na)" = "Na",
+                        "Calcium (Ca)" = "Ca",
+                        "Magnesium (Mg)" = "Mg",
+                        "Aluminum (Al)" = "Al")
+
+solutes_anions <- list("Sulfate (SO4)" = "SO4",
+                       "Nitrate (NO3)" = "NO3",
+                       "Chloride (Cl)" = "Cl")
+solutes_H <- c("Hydrogen (H)" = "H")
 #Write a function that converts the solute labels to their full written name
 solute_change <- function(df){
   df[df$solute == "K", "solute"] = "Potassium"
@@ -38,14 +47,14 @@ solute_change <- function(df){
   df[df$solute == "SO4", "solute"] = "Sulfate"
   df[df$solute == "NO3", "solute"] = "Nitrate"
   df[df$solute == "Cl", "solute"] = "Chloride"
-  df[df$solute == "H", "solute"] = "Hydrogen"
+  df[df$solute == "H", "solute"] = "Hydrogen Ion"
   return(df)
   
 }
 
 source_change <- function(df){
-  df[df$source == "flow", "source"] = "Streamflow (Q)"
-  df[df$source == "precip", "source"] = "Precipitation (P)"
+  df[df$source == "streamflow", "source"] = "Streamflow (Q)"
+  df[df$source == "precipitation", "source"] = "Precipitation (P)"
   return(df)
 }
 
@@ -113,8 +122,8 @@ shinyServer(function(session, input, output) {
   observeEvent(input$select_all_ions, {
     if(input$select_all_ions == 0) {}
     else if (input$select_all_ions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")
-      updateCheckboxGroupInput(session, "solutes_cations", selected = "K")
-      updateCheckboxGroupInput(session, "solutes_H", selected = "H")}
+      updateCheckboxGroupInput(session, "solutes_cations", selected = "Potassium")
+      updateCheckboxGroupInput(session, "solutes_H", selected = "Hydrogen Ion")}
     else{
       updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
       updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)
@@ -150,17 +159,17 @@ shinyServer(function(session, input, output) {
   #The can add precipitation but not remove streamflow
   observe({
     if((length(input$water_sources) < 2) & "precip" %in% input$water_sources){
-      updateCheckboxGroupInput(session, "water_sources", selected = c("flow", "precip"))}
+      updateCheckboxGroupInput(session, "water_sources", selected = c("streamflow", "precipitation"))}
     else if(length(input$water_sources) < 2){
-      updateCheckboxGroupInput(session, "water_sources", selected = c("flow")) 
+      updateCheckboxGroupInput(session, "water_sources", selected = c("streamflow")) 
     }
   })
   
   observe({
     if((length(input$water_sources2) < 2) & "precip" %in% input$input$water_sources2){
-      updateCheckboxGroupInput(session, "water_sources2", selected = c("flow", "precip"))}
+      updateCheckboxGroupInput(session, "water_sources2", selected = c("streamflow", "precipitation"))}
     else if(length(input$water_sources2) < 2){
-      updateCheckboxGroupInput(session, "water_sources2", selected = c("flow")) 
+      updateCheckboxGroupInput(session, "water_sources2", selected = c("streamflow")) 
     }
   })
   
@@ -172,8 +181,8 @@ shinyServer(function(session, input, output) {
   
   
   ########### DATA IMPORT ####################################################
-  
-  imported_data <- readRDS("precip_stream_data_long.rds")
+  load("precip_streamflow_dfs.Rdata")
+  imported_data <- precip_streamflow_long
   imported_data <- watershed_change(imported_data)
   
   
@@ -195,6 +204,7 @@ shinyServer(function(session, input, output) {
     data <- data[data$source %in% input$water_sources,]
     data <- data[data$solute %in% input$sol,] 
     data <- data[data$ws %in% input$watersheds,]
+    data <- data[data$granularity %in% input$granularity,]
     data <- solute_change(data)
     data <- source_change(data)
   })
@@ -205,6 +215,7 @@ shinyServer(function(session, input, output) {
     data <- data[data$solute %in% solutes2(),] 
     #note that solutes2 is a function, that's because the inputs for solutes come from input$cations and input$anions
     data <- data[data$ws %in% input$watersheds2,]
+    data <- data[data$granularity %in% input$granularity2, ]
     data <- solute_change(data)
     data <- source_change(data)
   })
@@ -220,21 +231,15 @@ shinyServer(function(session, input, output) {
   })
   
   y <- reactive({
-    if(input$granularity == "month" & input$units =="mg/L"){"concentration_mg"}
-    else if(input$granularity == "year" & input$units =="mg/L"){"mg_weighted_average"}
-    else if(input$granularity == "month" & input$units =="ueq/L"){"concentration_ueq"}
-    else if(input$granularity == "year" & input$units =="ueq/L"){"ueq_weighted_average"}
-    else if(input$granularity == "month"& input$units =="umol/L"){"concentration_umol"}
-    else if(input$granularity == "year"& input$units =="umol/L"){"umol_weighted_average"}
+    if(input$units =="mg/L"){"concentration_mg"}
+    else if(input$units =="ueq/L"){"concentration_ueq"}
+    else if(input$units =="umol/L"){"concentration_umol"}
   })
   
   y2 <- reactive({
-    if(input$granularity2 == "month" & input$units2 =="mg/L"){"concentration_mg"}
-    else if(input$granularity2 == "year" & input$units2 =="mg/L"){"mg_weighted_average"}
-    else if(input$granularity2 == "month" & input$units2 =="ueq/L"){"concentration_ueq"}
-    else if(input$granularity2 == "year" & input$units2 =="ueq/L"){"ueq_weighted_average"}
-    else if(input$granularity2 == "month"& input$units2 =="umol/L"){"concentration_umol"}
-    else if(input$granularity2 == "year"& input$units2 =="umol/L"){"umol_weighted_average"}
+    if(input$units2 =="mg/L"){"concentration_mg"}
+    else if(input$units2 =="ueq/L"){"concentration_ueq"}
+    else if(input$units2 =="umol/L"){"concentration_umol"}
   })
   
 
