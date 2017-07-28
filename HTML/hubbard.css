@@ -317,16 +317,22 @@ nav{
 
 .box_text {
 	padding:10%;
-	padding-top: 20%;
 	min-height: 60vh;
 }
 
+
+.box_text h3{
+	padding:10%;
+}
+
 .box_text button{
-	margin-top: 15%;
+	margin: 0;
+	margin: 25%;
 }
 
 .box_text h3{
 	text-align: right;
+	margin-top:10%;
 }
 
 .stories_menu_link {
@@ -452,6 +458,17 @@ color: #fafafa;
 	background-size: cover;
 }
 
+.calcium {
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.15), 
+		rgba(25, 25, 25, 0.15)), 
+		url("images/calcium.jpg");
+	background-size: cover;
+}
+
+.blank {
+	color: #363229;
+}
 
 /* exploratory colors */
 .exploretime {
