@@ -27,6 +27,7 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
+#watershed choices for LAI plot
 watersheds1 <- list("Watershed 1" = "1",
                     "Watershed 6" = "6")
 
@@ -39,12 +40,6 @@ granularity <- list("Year (VWC)" = "year",
 
 units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 
-units3 <- list("uEquivalent/L","uMole/L", "mg/L", "flux", "normalized_flux")
-
-units_lai <- list("meterSquaredPerMeterSquared")
-
-units_flux <- list("flux")
-
 #######################################################################################
 ########### APPLICATION UI ############################################################
 ########################################################################################
@@ -55,6 +50,7 @@ shinyUI(
                 dashboardSidebar(
                   width = 200,
                   sidebarMenu(
+                    #icons from fontawesome.io/icons
                     menuItem("Intro", tabName = "intro", icon = icon("snowflake-o")),
                     menuItem("NO3 trends", tabName = "trends", icon = icon("line-chart")),
                     menuItem("NO3 flux (Q)", tabName = "flux", icon = icon("arrows-v")),
@@ -80,37 +76,31 @@ shinyUI(
                   ########### BODY ##############################################################
                   
                   tabItems(
-
-                    
-                    
                     
                     ###############################################################################
                     #### ------------  Intro  Tab ----------------------------------------- #######
                     ###############################################################################
                     
                     tabItem(tabName = "intro",
-
-                            #############################################
                             
-                  
                             ########### TEXT FOR QUESTION #1 ##########
                             
+                            #text that overlays image specified in the css file
                             fluidRow(tags$div(class = "intro-text",
-                                     h1("understanding ice storms"),
-                                      h3("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+                                              h1("understanding ice storms"),
+                                              h3("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
                                          that damaged the experimental watersheds.  Major effects of the 
                                          storm can be tracked by the NO3 streamflow data and changes in 
                                          vegetation.")))
                             
                             ########### END OF QUESTION #1 ##########
-                                                     ),# Closes Intro Tab
+                    ),# Closes Intro Tab
                     
                     ###############################################################################
-                    #### ------------ End of Intro Tab ------------------------------- #######
+                    #### ------------ End of Intro Tab ------------------------------------ #######
                     ###############################################################################  
                     
                     
-                                        
                     ###############################################################################
                     #### ------------  NO3  trends  Tab ----------------------------------- #######
                     ###############################################################################
@@ -121,11 +111,9 @@ shinyUI(
                             fluidRow(tags$div(class = "container_question", 
                                               tags$h1("How do NO3 concentrations change following an ice storm?")) 
                             ),
-                            
                             #############################################
                             
                             ########### GRAPH FOR QUESTION #1 ##########
-                            
                             fluidRow(
                               column(9,
                                      tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
@@ -133,20 +121,20 @@ shinyUI(
                                             ###Units - Axis Log
                                             tabPanel(shiny::icon("gear"),
                                                      fluidRow(
-                                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                                                           
-                                                           ##Units - Y Axis Log
-                                                           column(6, selectInput("log", label = "Y Axis",
-                                                                                 choices = c("linear", "log"), 
-                                                                                 selected = "linear"))))),
+                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
+                                                                                 
+                                                                                 ##Units - Y Axis Log
+                                                                                 column(6, selectInput("log", label = "Y Axis",
+                                                                                                       choices = c("linear", "log"), 
+                                                                                                       selected = "linear")))))),
                                             ######## PLOT 
                                             tabPanel(shiny::icon("circle"),
-                                                     div(class = "titleRow", fluidRow(column(5, tags$h2("")),
+                                                     div(class = "titleRow", fluidRow(column(5, tags$h2("")), #put graph title if desired
                                                                                       ##Granularity
                                                                                       column(3,  offset = 4, selectInput("granularity", label = "",
                                                                                                                          choices = granularity,
                                                                                                                          selected = "month")))),
-                                                     ## Time Plot
+                                                     ## NO3 over time plot
                                                      plotlyOutput("NO3_plot")
                                             ) #Closes tabpanel
                                             
@@ -176,15 +164,13 @@ shinyUI(
                                                      min = as.Date("1962-01-01"),
                                                      max = as.Date("2014-01-01"),
                                                      value = c(as.Date("1997-01-01"), as.Date("2001-01-01")),
-                                                     timeFormat = "%b %Y"))
+                                                     timeFormat = "%b %Y")) #formats time into "Jan 1962" format
                                      
                               )#Closes the column
                               
                             ),#Closes graph row
                             
-                            
                             ########### END OF GRAPH FOR QUESTION #1 ##########
-                            
                             
                             ########### TEXT FOR QUESTION #1 ##########
                             
@@ -210,7 +196,7 @@ shinyUI(
                             
                             ########### TITLE ####################
                             fluidRow(tags$div(class = "container_question", 
-                                              tags$h1("Post-ice storm NO3 flux Plots Replication (Bernhardt et. al, 2003)")) 
+                                              tags$h1("Post-ice storm NO3 flux: plot replication (Bernhardt et. al, 2003)")) #full paper details in text below
                             ),
                             
                             #############################################
@@ -224,13 +210,12 @@ shinyUI(
                                             ###Units - Axis Log
                                             tabPanel(shiny::icon("gear"),
                                                      fluidRow(
-                                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE,
-                                                           
-                                                           ##Units - Y Axis Log
-                                                           column(6, selectInput("log_flux", label = "Y Axis",
-                                                                                 choices = c("linear", "log"), 
-                                                                                 selected = "linear"))
-                                                       ))),
+                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE,
+                                                                                 
+                                                                                 ##Units - Y Axis Log
+                                                                                 column(6, selectInput("log_flux", label = "Y Axis",
+                                                                                                       choices = c("linear", "log"), 
+                                                                                                       selected = "linear")))))),
                                             ######## PLOT 
                                             tabPanel(shiny::icon("circle"),
                                                      div(class = "titleRow", fluidRow(column(9, tags$h2("Streamflow flux")))),
@@ -248,11 +233,13 @@ shinyUI(
                                             ######## PLOT 
                                             tabPanel(shiny::icon("circle"),
                                                      div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux")))),
-                                                     ## Time Plot
-                                                     p("*Note the 1966 devegetation spike (ws2), the 1971 stripcutting spike (ws4), 
-                                                               and the 1983 whole tree harvest spike (ws5)."),
-                                                     p("To better see the effects of the
-                                                                               ice storm, click and drag to zoom in."),
+                                                     
+                                                     #text above plot
+                                                     p("*Note the 1966 devegetation spike (ws2), the 1971 stripcutting spike (ws4),
+                                                       and the 1983 whole tree harvest spike (ws5)."),
+                                                     p("To better see the effects of the ice storm, click and drag to zoom in."),
+                                                     
+                                                     ## plot of NO3 streamflow that exceeded ws6
                                                      plotlyOutput("NO3_excess")
                                             ) #Closes tabpanel
                                             
@@ -289,12 +276,12 @@ shinyUI(
                             tags$div(class = "",
                                      fluidRow(column(width = 9,
                                                      p("On January 7-8, 1998 the HBEF was hit by a powerful ice 
-                                                               storm that damaged the experimental watersheds.  Some 
-                                                               effects of the storm can be tracked by the NO3 flux data. 
-                                                               The above plots were recreated from the 2003 paper 'In-stream 
-                                                               uptake dampens effects of major forest disturbance on 
-                                                               watershed nitrogen export' by Emily Bernhardt, Gene Likens, 
-                                                               and Donald Buso."))))
+                                                       storm that damaged the experimental watersheds.  Some 
+                                                       effects of the storm can be tracked by the NO3 flux data. 
+                                                       The above plots were recreated from the 2003 paper 
+                                                       'In-stream uptake dampens effects of major forest 
+                                                       disturbance on watershed nitrogen export' by Emily Bernhardt, 
+                                                       Gene Likens, and Donald Buso."))))
                             
                             ########### END OF QUESTION #1 ##########
                     ),# Closes Flux Tab
@@ -328,18 +315,19 @@ shinyUI(
                                             ###Units - Axis Log
                                             tabPanel(shiny::icon("gear"),
                                                      fluidRow(
-                                                       box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = TRUE, 
-                                                           
-                                                           ##Units - Y Axis Log
-                                                           column(6, selectInput("log_counts", label = "Y Axis",
-                                                                                 choices = c("linear", "log"), 
-                                                                                 selected = "linear"))))),
+                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
+                                                                                 
+                                                                                 ##Units - Y Axis Log
+                                                                                 column(6, selectInput("log_counts", label = "Y Axis",
+                                                                                                       choices = c("linear", "log"), 
+                                                                                                       selected = "linear")))))),
                                             ######## PLOT 
                                             tabPanel(shiny::icon("circle"),
-                                                     div(class = "titleRow", fluidRow(column(7, tags$h2("Decline in leaf counts across species due to ice storm"),
-                                                                                             p("(click on key to focus on specific species)")
-                                                     ))),
-                                                     ## Time Plot
+                                                     div(class = "titleRow", 
+                                                         fluidRow(column(7, tags$h2("Decline in leaf counts across species due to ice storm"),
+                                                                         p("(click on key to focus on specific species)")
+                                                         ))),
+                                                     ## plot of leaf counts from different tree species over time
                                                      plotlyOutput("leaf_count")
                                                      
                                             ) #Closes tabpanel
@@ -358,10 +346,8 @@ shinyUI(
                                                                                       column(3, offset = 2, h4("Watersheds"),
                                                                                              selectInput("watersheds1", label = "",
                                                                                                          choices = watersheds1,
-                                                                                                         selected = "1"))
-                                                     )
-                                                     ),
-                                                     ## Plot
+                                                                                                         selected = "1")))),
+                                                     ## plot of LAI by plot number
                                                      plotlyOutput("lai_plot")
                                             ) #Closes tabpanel
                                             
@@ -375,17 +361,16 @@ shinyUI(
                               column(3, 
                                      box(width = 13, height = "700px", id = "sidebar",
                                          
-                                         ##Date Range
+                                         ##Date Range for leaf counts
                                          sliderInput("date_range_count", label = h4("Date Range"),
                                                      min = 1993,
                                                      max = 2013,
                                                      value = c(1997, 2001),
                                                      sep = "")
                                          
-                                         )#Closes the box
+                                     )#Closes the box
                                      
                               )#Closes the column
-                              
                               
                             ),#Closes graph row
                             
@@ -395,9 +380,10 @@ shinyUI(
                             
                             tags$div(class = "",
                                      fluidRow(column(width = 9,
-                                                     p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
-                                                               that damaged the experimental watersheds.  The leaf area index
-                                                               (LAI) is one way to track the regrowth of the canopy."))))
+                                                     p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm 
+                                                       that damaged the experimental watersheds.  The leaf area index 
+                                                       (LAI) is one way to track the regrowth of the canopy."))))
+                            
                             ########### END OF QUESTION #1 ##########
                     ) # Closes Vegetation Tab
                     

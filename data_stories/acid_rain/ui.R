@@ -167,7 +167,7 @@ shinyUI(
                                                                                                                          selected = "year")))
                                                      ),
                                                      ## pH plot over time
-                                                     plotlyOutput("pH_intro")
+                                                     plotlyOutput("pH")
                                             ) #Closes tabpanel
                                             
                                      )# Closes tab Box
@@ -238,7 +238,7 @@ shinyUI(
                     tabItem(tabName = "chemistry",
                             
                             ########### TITLE ####################
-                            fluidRow(column(9,tags$h1("What does acid rain do to the different solutes in the water?"))
+                            fluidRow(column(9,tags$h1("How does acid rain affect solute concentrations?"))
                             ),
                             
                             #############################################
@@ -445,9 +445,9 @@ shinyUI(
                                                                                                             selected = "year")))),
                                                      #Solutes
                                                      fluidRow(column(9, offset = 6, checkboxGroupInput("solutes_anions_Al", label = "",
-                                                                                 choices = solutes_anions_Al,
-                                                                                 selected = c("Al"), 
-                                                                                 inline = TRUE))),
+                                                                                                       choices = solutes_anions_Al,
+                                                                                                       selected = c("Al"), 
+                                                                                                       inline = TRUE))),
                                                      ## Time Plot
                                                      fluidRow(plotlyOutput("policy_Al"))
                                             ) #Closes tabpanel
