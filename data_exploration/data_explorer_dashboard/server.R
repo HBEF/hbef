@@ -843,22 +843,25 @@ shinyServer(function(input, output, session) {
         scale_colour_brewer()
     }
     
-    
-    # x and y axis transformations
-    if(log_x == "log"){
-      plot <- plot + scale_x_continuous(trans='log2')
-    }
-    
-    if(log_y == "log"){
-      plot <- plot + scale_y_continuous(trans='log2')
-    }
-    
     plot <- plot + my_theme + 
       scale_size(range = size_range)+
       scale_alpha_discrete(range = c(0.9, 0.5))+
-      scale_shape_manual(values = c(21, 22, 23, 24, 25)) + 
+      scale_shape_manual(values = c(21, 22, 23, 24, 25))+ 
       labs(x= x_label, y = y_label)
-      
+  
+  
+    # x and y axis transformations
+    if(log_x == "log"){
+      plot <- plot + scale_x_continuous(trans='log2')+ 
+        labs(x = paste("log", "(",x_label, ")"))
+    }
+    
+    if(log_y == "log"){
+      plot <- plot + scale_y_continuous(trans='log2')+ 
+        labs(y =paste("log", "(",y_label, ")"))
+    }
+    
+  
     #ggplotly
     
     if(animate == "Animate"){
