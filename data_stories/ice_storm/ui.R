@@ -69,7 +69,9 @@ shinyUI(
                   tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
                   tags$head(includeScript(system.file('www', 'ajax.js'))),
                   tags$head(includeScript(system.file('www', 'hubbard.js'))),
-                  tags$head(includeScript(system.file('www','google_analytics.js'))),
+                  tags$head(includeScript(system.file('www','google_analytics_1.js'))),
+                  tags$head(includeScript(system.file('www','google_analytics_2.js'))),
+                  tags$head(includeScript(system.file('www','google_analytics_3.js'))),
                   tags$head(tags$style(HTML(
                     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
                   ###############################################################################

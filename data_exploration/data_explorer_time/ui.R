@@ -62,7 +62,9 @@ shinyUI(fluidPage(
   tags$head(includeScript(system.file('www', 'ajax.js'))),
   tags$head(includeScript(system.file('www', 'iframeResizer.contentWindow.min.js'))),
   tags$head(includeScript(system.file('www', 'app.js'))),
-  tags$head(includeScript(system.file('www','google_analytics.js'))),
+  tags$head(includeScript(system.file('www','google_analytics_1.js'))),
+  tags$head(includeScript(system.file('www','google_analytics_2.js'))),
+  tags$head(includeScript(system.file('www','google_analytics_3.js'))),
   tags$head(tags$style(HTML(
     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
   ###############################################################################
