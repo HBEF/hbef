@@ -69,6 +69,7 @@ shinyUI(
                   tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
                   tags$head(includeScript(system.file('www', 'ajax.js'))),
                   tags$head(includeScript(system.file('www', 'hubbard.js'))),
+                  tags$head(includeScript(system.file('www','google_analytics.js'))),
                   tags$head(tags$style(HTML(
                     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
                   ###############################################################################
@@ -87,11 +88,7 @@ shinyUI(
                             
                             #text that overlays image specified in the css file
                             fluidRow(tags$div(class = "intro-text",
-                                              h1("understanding ice storms"),
-                                              h3("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
-                                         that damaged the experimental watersheds.  Major effects of the 
-                                         storm can be tracked by the NO3 streamflow data and changes in 
-                                         vegetation.")))
+                                              h1("understanding ice storms")))
                             
                             ########### END OF QUESTION #1 ##########
                     ),# Closes Intro Tab

@@ -43,6 +43,7 @@ shinyUI(dashboardPage(skin = "black",
   tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
   tags$head(includeScript(system.file('www', 'ajax.js'))),
   tags$head(includeScript(system.file('www', 'hubbard.js'))),
+  tags$head(includeScript(system.file('www','google_analytics.js'))),
   tags$head(tags$style(HTML(
     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
   ###############################################################################
@@ -58,11 +59,8 @@ shinyUI(dashboardPage(skin = "black",
             
             #title and text to overlay intro image
             fluidRow(tags$div(class = "intro-text",
-                              h1("understanding deforestation"),
-                              h3("Deforestation is the cutting and removal of trees, 
-                                 which has harmful effects on the environment. At Hubbard Brook,
-                                 data has shown that solute concentrations in streamwater increase
-                                 after deforestation, and streamwater quantities increase as well.")))
+                              h1("understanding deforestation")
+                              ))
             
             
             ########### END ###########

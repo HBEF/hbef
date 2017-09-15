@@ -16,6 +16,7 @@ shinyUI(
                   #the dashboard sidebar, increasing the width decreases the 
                   #graph widths
                   sidebarMenu(
+                    menuItem("Intro", tabName = "intro", icon = icon("tint")),
                     menuItem("Biomass Graphs", tabName = "bargraphs", icon = icon("home")),
                     menuItem("ET Graphs", tabName = "et", icon = icon("search-plus")),
                     menuItem("Streamflow Graphs", tabName = "streamflow", icon = icon("search-plus")),
@@ -32,11 +33,24 @@ shinyUI(
    tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
    tags$head(includeScript(system.file('www', 'ajax.js'))),
    tags$head(includeScript(system.file('www', 'hubbard.js'))),
+   tags$head(includeScript(system.file('www','google_analytics.js'))),
    tags$head(tags$style(HTML(
      "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
    ###############################################################################
    
   tabItems(
+    tabItem(tabName = "intro",
+            
+            #############################################
+            
+            ########### TEXT ###########
+            
+            #title and text to overlay intro image
+            fluidRow(tags$div(class = "intro-text",
+                              h1("understanding the calcium experiment"))
+            )
+            ########### END ###########
+                              ),
     #Tab for the biomass bar plots
     tabItem(tabName = "bargraphs",
             #Title indicates that this is the calcium experiment data story

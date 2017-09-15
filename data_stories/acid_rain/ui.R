@@ -96,6 +96,7 @@ shinyUI(
                   tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
                   tags$head(includeScript(system.file('www', 'ajax.js'))),
                   tags$head(includeScript(system.file('www', 'hubbard.js'))),
+                  tags$head(includeScript(system.file('www','google_analytics.js'))),
                   tags$head(tags$style(HTML(
                     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
                   ###############################################################################
@@ -115,12 +116,8 @@ shinyUI(
                             
                             #title and text to overlay intro image
                             fluidRow(tags$div(class = "intro-text",
-                                              h1("understanding acid rain"),
-                                              h3("Chemical reactions caused by acid rain wash nutrients 
-                                                 out of the soil and release toxins into the streamflow 
-                                                 that inhibit ecosystem growth. Policies like the 
-                                                 Clean Air Act have largely mitigated these effects over
-                                                 the past sixty years.")))
+                                              h1("understanding acid rain")
+                                              ))
                             
                             ########### END ###########
                     ),# Closes Intro Tab
