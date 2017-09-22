@@ -158,7 +158,7 @@ shinyUI(
                                calcium is added to the environment?"))
                        )),
             fluidRow(column(9,
-            box(width = 13, height = "600px",
+            box(width = 13, height = "1000px",
             #Granularity widget inside graph box
             div(class = "titleRow", fluidRow(column(5, tags$h2("")),
               column(3, offset = 4, selectInput("granularity",
@@ -173,12 +173,13 @@ shinyUI(
               
             )),
             fluidRow(
-              #Space for graph of streamflow over time related to the carbon
+              #Space for graph of streamflow over time related to the calcium 
               #application
               column(12, 
                      box(width = "100%",
+                         height = "100%",
                          fluidRow(column(12, plotlyOutput("s.plot", width = "100%",
-                                                          height = "100%"))),
+                                                          height= "100%"))),
                          fluidRow(p("*The solid black line represents the calcium
                                     application at Watershed 1."))))))),
             column(3,
@@ -211,7 +212,7 @@ shinyUI(
                        ),
             fluidRow(column(9,
                             #Space for setting granularity within the graph box
-                            box(width = 13, height = "600px",
+                            box(width = 13, height = "1000px",
                                 div(class = "titleRow", fluidRow(column(5, tags$h2("")),
                                   column(3, offset = 4, selectInput("granularity.et",
                                                                     label = h4("Granularity"),
@@ -228,6 +229,7 @@ shinyUI(
                                   column(12, 
                                          #Evapotranspiration graph
                                          box(width = "100%",
+                                             height = "100%",
                                              fluidRow(column(12, plotlyOutput("et.plot", width = "100%",
                                                                               height = "100%"))),
                                              fluidRow(p("*The solid black line represents the calcium
