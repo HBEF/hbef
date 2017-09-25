@@ -28,6 +28,7 @@ shinyUI(dashboardPage(skin = "black",
                       dashboardSidebar(
                         width = 200,
                         sidebarMenu(
+                          menuItem("Intro", tabName = "intro", icon = icon("home")),
                           menuItem("Concentration", tabName = "solutes", icon = icon("home")),
                           menuItem("Quantities", tabName = "streamflow", icon = icon("search-plus")),
                           tags$div(class = "footer",tags$ul(
@@ -42,6 +43,9 @@ shinyUI(dashboardPage(skin = "black",
   tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
   tags$head(includeScript(system.file('www', 'ajax.js'))),
   tags$head(includeScript(system.file('www', 'hubbard.js'))),
+  tags$head(includeScript(system.file('www','google_analytics_1.js'))),
+  tags$head(includeScript(system.file('www','google_analytics_2.js'))),
+  tags$head(includeScript(system.file('www','google_analytics_3.js'))),
   tags$head(tags$style(HTML(
     "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
   ###############################################################################
@@ -49,6 +53,21 @@ shinyUI(dashboardPage(skin = "black",
   ########### BODY ##############################################################
   
   tabItems(
+    tabItem(tabName = "intro",
+            
+            #############################################
+            
+            ########### TEXT ###########
+            
+            #title and text to overlay intro image
+            fluidRow(tags$div(class = "intro-text",
+                              h1("understanding deforestation")
+                              ))
+            
+            
+            ########### END ###########
+                              ),# Closes Intro Tab
+    
               tabItem(tabName = "solutes",
                        fluidRow(column(9,tags$h1("Effects of Deforestation"))),
                        fluidRow(column(9, 

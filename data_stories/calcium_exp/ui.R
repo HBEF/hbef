@@ -16,6 +16,7 @@ shinyUI(
                   #the dashboard sidebar, increasing the width decreases the 
                   #graph widths
                   sidebarMenu(
+                    menuItem("Intro", tabName = "intro", icon = icon("tint")),
                     menuItem("Biomass Graphs", tabName = "bargraphs", icon = icon("home")),
                     menuItem("ET Graphs", tabName = "et", icon = icon("search-plus")),
                     menuItem("Streamflow Graphs", tabName = "streamflow", icon = icon("search-plus")),
@@ -32,11 +33,26 @@ shinyUI(
    tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
    tags$head(includeScript(system.file('www', 'ajax.js'))),
    tags$head(includeScript(system.file('www', 'hubbard.js'))),
+   tags$head(includeScript(system.file('www','google_analytics_1.js'))),
+   tags$head(includeScript(system.file('www','google_analytics_2.js'))),
+   tags$head(includeScript(system.file('www','google_analytics_3.js'))),
    tags$head(tags$style(HTML(
      "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
    ###############################################################################
    
   tabItems(
+    tabItem(tabName = "intro",
+            
+            #############################################
+            
+            ########### TEXT ###########
+            
+            #title and text to overlay intro image
+            fluidRow(tags$div(class = "intro-text",
+                              h1("understanding the calcium experiment"))
+            )
+            ########### END ###########
+                              ),
     #Tab for the biomass bar plots
     tabItem(tabName = "bargraphs",
             #Title indicates that this is the calcium experiment data story
@@ -142,7 +158,7 @@ shinyUI(
                                calcium is added to the environment?"))
                        )),
             fluidRow(column(9,
-            box(width = 13, height = "600px",
+            box(width = 13, height = "1000px",
             #Granularity widget inside graph box
             div(class = "titleRow", fluidRow(column(5, tags$h2("")),
               column(3, offset = 4, selectInput("granularity",
@@ -157,12 +173,13 @@ shinyUI(
               
             )),
             fluidRow(
-              #Space for graph of streamflow over time related to the carbon
+              #Space for graph of streamflow over time related to the calcium 
               #application
               column(12, 
                      box(width = "100%",
+                         height = "100%",
                          fluidRow(column(12, plotlyOutput("s.plot", width = "100%",
-                                                          height = "100%"))),
+                                                          height= "100%"))),
                          fluidRow(p("*The solid black line represents the calcium
                                     application at Watershed 1."))))))),
             column(3,
@@ -195,7 +212,7 @@ shinyUI(
                        ),
             fluidRow(column(9,
                             #Space for setting granularity within the graph box
-                            box(width = 13, height = "600px",
+                            box(width = 13, height = "1000px",
                                 div(class = "titleRow", fluidRow(column(5, tags$h2("")),
                                   column(3, offset = 4, selectInput("granularity.et",
                                                                     label = h4("Granularity"),
@@ -212,6 +229,7 @@ shinyUI(
                                   column(12, 
                                          #Evapotranspiration graph
                                          box(width = "100%",
+                                             height = "100%",
                                              fluidRow(column(12, plotlyOutput("et.plot", width = "100%",
                                                                               height = "100%"))),
                                              fluidRow(p("*The solid black line represents the calcium
