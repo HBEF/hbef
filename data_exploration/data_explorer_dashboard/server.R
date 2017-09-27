@@ -17,101 +17,151 @@ library(magrittr)
 ########### SHINY SERVER ##############################################################
 #######################################################################################
 
+###########################################################################################
+############## DATA IMPORT ################################################################
 
-shinyServer(function(input, output, session) {
+load("precip_streamflow_dfs.RData")
 
- 
-  #######################################################################################
-  ############## THEME  ##################################################################
-  my_theme <- 
-    theme(rect = element_rect(fill = NA),
-          panel.background = element_rect("transparent", colour = NA),
-          panel.grid.major = element_line(colour = "#dddddd"), 
-          panel.grid.major.x = element_line(colour = NA),
-          text = element_text(family = "Helvetica", size = 12), 
-          legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
-          axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
-          plot.margin = margin(1, 1, 1, 1, "cm"),
-          strip.background = element_rect(colour = NA, fill = NA),
-          strip.text = element_text(hjust = 1, size = 10, face = "bold", lineheight = 20))
-  
-  
-  color_cation <- c("Al" = "#240085", "Mg" = "#1D267A", "Ca" = "#164C6F", "NH4" = "#0F7364" , "Na" = "#089959", "K" = "#02C04E")
-  color_anion <- c("PO4" = "#BB1D4C", "SO4" = "#BB1D4C", "NO3" = "#C83239", "SiO2"= "#D54726", "Cl" = "#E25C13", "HCO3" = "#F07100")
-  
-  
-  color_cation <- c("Al" = "#162338", "Mg" = "#273D64", "Ca" = "#3B5C95", "NH4" = "#4E7AC7" , "Na" = "#7195D2", "K" = "#95AFDD")
-  color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
-  color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
-  
-  solute_palette <- c(color_cation, color_anion, color_hydro)
-  ws_palette <- c("1" = "#fae550", "2" = "#a8db40", "3" = "#62c74a", "4" = "#408b77", 
-                  "5" = "#27517b", "6" = "#303475", "7" = "#351042", "8" = "#79276e", "9" = "#b63462")
-  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-  source_color_solutemd <- c("streamflow_Al" = "#162338", "streamflow_Mg" = "#273D64", "streamflow_Ca" = "#3B5C95", "streamflow_NH4" = "#4E7AC7" , 
-                    "streamflow_Na" = "#7195D2", "streamflow_K" = "#95AFDD","streamflow_PO4" = "#600B0B", "streamflow_SO4" = "#8F1010", 
-                    "streamflow_NO3" = "#BF1616", "streamflow_SiO2"= "#CC4545", "streamflow_Cl" = "#D97373", "streamflow_HCO3" = "#E5A2A2",
-                     "streamflow_H" = "#FFE79C", 
+# LONG DATA
+imported_data <- precip_streamflow_long
+# Add fill_color_solutemd and fill_color_wsmd columns so that fill color 
+# can depend on both source and solute and source and ws. 
+imported_data %<>% 
+  mutate(fill_color_solutemd = paste(source, solute, sep = '_')) %>% 
+  mutate(fill_color_wsmd = paste(source, ws, sep = '_'))
+
+# WIDE DATA
+imported_data_wide<- precip_streamflow_wide
+
+# SUPER WIDE DATA
+imported_data_super_wide<- precip_streamflow_super_wide
+
+#######################################################################################
+############## THEME  ##################################################################
+my_theme <- 
+  theme(rect = element_rect(fill = NA),
+        panel.background = element_rect("transparent", colour = NA),
+        panel.grid.major = element_line(colour = "#dddddd"), 
+        panel.grid.major.x = element_line(colour = NA),
+        text = element_text(family = "Helvetica", size = 12), 
+        legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
+        axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
+        plot.margin = margin(1, 1, 1, 1, "cm"),
+        strip.background = element_rect(colour = NA, fill = NA),
+        strip.text = element_text(hjust = 1, size = 10, face = "bold", lineheight = 20))
+
+
+color_cation <- c("Al" = "#240085", "Mg" = "#1D267A", "Ca" = "#164C6F", "NH4" = "#0F7364" , "Na" = "#089959", "K" = "#02C04E")
+color_anion <- c("PO4" = "#BB1D4C", "SO4" = "#BB1D4C", "NO3" = "#C83239", "SiO2"= "#D54726", "Cl" = "#E25C13", "HCO3" = "#F07100")
+
+
+color_cation <- c("Al" = "#162338", "Mg" = "#273D64", "Ca" = "#3B5C95", "NH4" = "#4E7AC7" , "Na" = "#7195D2", "K" = "#95AFDD")
+color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
+color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
+
+solute_palette <- c(color_cation, color_anion, color_hydro)
+ws_palette <- c("1" = "#fae550", "2" = "#a8db40", "3" = "#62c74a", "4" = "#408b77", 
+                "5" = "#27517b", "6" = "#303475", "7" = "#351042", "8" = "#79276e", "9" = "#b63462")
+source_shapes <- c("streamflow" = 16, "precipitation"= 21)
+source_color_solutemd <- c("streamflow_Al" = "#162338", "streamflow_Mg" = "#273D64", "streamflow_Ca" = "#3B5C95", "streamflow_NH4" = "#4E7AC7" , 
+                           "streamflow_Na" = "#7195D2", "streamflow_K" = "#95AFDD","streamflow_PO4" = "#600B0B", "streamflow_SO4" = "#8F1010", 
+                           "streamflow_NO3" = "#BF1616", "streamflow_SiO2"= "#CC4545", "streamflow_Cl" = "#D97373", "streamflow_HCO3" = "#E5A2A2",
+                           "streamflow_H" = "#FFE79C", 
+                           "precipitation_Al" = "#FFFFFF", "precipitation_Mg" = "#FFFFFF", "precipitation_Ca" = "#FFFFFF", "precipitation_NH4" = "#FFFFFF" , 
+                           "precipitation_Na" = "#FFFFFF", "precipitation_K" = "#FFFFFF","precipitation_PO4" = "#FFFFFF", "precipitation_SO4" = "#FFFFFF", 
+                           "precipitation_NO3" = "#FFFFFF", "precipitation_SiO2"= "#FFFFFF", "precipitation_Cl" = "#FFFFFF", "precipitation_HCO3" = "#FFFFFF",
+                           "precipitation_H" = "#FFFFFF",
+                           "precipitation"= "#FFFFFF")
+
+source_color_wsmd <- c("streamflow_1" = "#fae550", "streamflow_2" = "#a8db40", "streamflow_3" = "#62c74a", "streamflow_4" = "#408b77", 
+                       "streamflow_5" = "#27517b", "streamflow_6" = "#303475", "streamflow_7" = "#351042", "streamflow_8" = "#79276e", "streamflow_9" = "#b63462",
+                       "precipitation_1" = "#FFFFFF", "precipitation_2" = "#FFFFFF", "precipitation_3" = "#FFFFFF", "precipitation_4" = "#FFFFFF", 
+                       "precipitation_5" = "#FFFFFF", "precipitation_6" = "#FFFFFF", "precipitation_7" = "#FFFFFF", "precipitation_8" = "#FFFFFF", "precipitation_9" = "#FFFFFF")
+
+
+grey_palette <- c("#222222", "#999999", "#555555","#777777","#333333", "#888888",  "#444444", "#666666")
+
+grey_palette_2 <- c("streamflow_Al" = "#222222", "streamflow_Mg" = "#222222", "streamflow_Ca" = "#222222", "streamflow_NH4" = "#222222" , 
+                    "streamflow_Na" = "#222222", "streamflow_K" = "#222222","streamflow_PO4" = "#222222", "streamflow_SO4" = "#222222", 
+                    "streamflow_NO3" = "#222222", "streamflow_SiO2"= "#222222", "streamflow_Cl" = "#222222", "streamflow_HCO3" = "#222222",
+                    "streamflow_H" = "#222222", 
                     "precipitation_Al" = "#FFFFFF", "precipitation_Mg" = "#FFFFFF", "precipitation_Ca" = "#FFFFFF", "precipitation_NH4" = "#FFFFFF" , 
                     "precipitation_Na" = "#FFFFFF", "precipitation_K" = "#FFFFFF","precipitation_PO4" = "#FFFFFF", "precipitation_SO4" = "#FFFFFF", 
                     "precipitation_NO3" = "#FFFFFF", "precipitation_SiO2"= "#FFFFFF", "precipitation_Cl" = "#FFFFFF", "precipitation_HCO3" = "#FFFFFF",
                     "precipitation_H" = "#FFFFFF",
                     "precipitation"= "#FFFFFF")
-  
-  source_color_wsmd <- c("streamflow_1" = "#fae550", "streamflow_2" = "#a8db40", "streamflow_3" = "#62c74a", "streamflow_4" = "#408b77", 
-  "streamflow_5" = "#27517b", "streamflow_6" = "#303475", "streamflow_7" = "#351042", "streamflow_8" = "#79276e", "streamflow_9" = "#b63462",
-  "precipitation_1" = "#FFFFFF", "precipitation_2" = "#FFFFFF", "precipitation_3" = "#FFFFFF", "precipitation_4" = "#FFFFFF", 
-  "precipitation_5" = "#FFFFFF", "precipitation_6" = "#FFFFFF", "precipitation_7" = "#FFFFFF", "precipitation_8" = "#FFFFFF", "precipitation_9" = "#FFFFFF")
 
-  
-  grey_palette <- c("#222222", "#999999", "#555555","#777777","#333333", "#888888",  "#444444", "#666666")
-  
-  grey_palette_2 <- c("streamflow_Al" = "#222222", "streamflow_Mg" = "#222222", "streamflow_Ca" = "#222222", "streamflow_NH4" = "#222222" , 
-                      "streamflow_Na" = "#222222", "streamflow_K" = "#222222","streamflow_PO4" = "#222222", "streamflow_SO4" = "#222222", 
-                      "streamflow_NO3" = "#222222", "streamflow_SiO2"= "#222222", "streamflow_Cl" = "#222222", "streamflow_HCO3" = "#222222",
-                      "streamflow_H" = "#222222", 
-                      "precipitation_Al" = "#FFFFFF", "precipitation_Mg" = "#FFFFFF", "precipitation_Ca" = "#FFFFFF", "precipitation_NH4" = "#FFFFFF" , 
-                      "precipitation_Na" = "#FFFFFF", "precipitation_K" = "#FFFFFF","precipitation_PO4" = "#FFFFFF", "precipitation_SO4" = "#FFFFFF", 
-                      "precipitation_NO3" = "#FFFFFF", "precipitation_SiO2"= "#FFFFFF", "precipitation_Cl" = "#FFFFFF", "precipitation_HCO3" = "#FFFFFF",
-                      "precipitation_H" = "#FFFFFF",
-                      "precipitation"= "#FFFFFF")
-  
-  water_sources <- list("Streamflow (Q)" = "streamflow", 
-                        "Precipitation (P)" = "precipitation")
-  
- 
-  ############################################################################################## 
-  ###  SIDEBAR LISTS  ##########################################################################
-  #Edit if there are values that do not appear or are not relevant to your data. 
-  #Should be the same as the lists in the UI file.
-  
-  watersheds <- list("Watershed 1" = "1",
-                     "Watershed 2" = "2", 
-                     "Watershed 3" = "3",
-                     "Watershed 4" = "4",
-                     "Watershed 5" = "5",
-                     "Watershed 6" = "6",
-                     "Watershed 7" = "7",
-                     "Watershed 8" = "8",
-                     "Watershed 9" = "9")
-  
-  solutes_cations <- list("Aluminum (Al)" = "Al",
-                          "Magnesium (Mg)" = "Mg",
-                          "Calcium (Ca)" = "Ca",
-                          "Sodium (Na)" = "Na",
-                          "Potassium (K)" = "K")
-  
-  solutes_anions <- list("Phosphate (PO4)" = "PO4",
-                         "Sulfate (SO4)" = "SO4",
-                         "Nitrate (NO3)" = "NO3",
-                         "Silicon Dioxide (SiO2)" = "SiO2",
-                         "Chloride (Cl)" = "Cl",
-                         "Bicarbonate (HCO3)" = "HCO3")
-  
-  solutes_H <- list("Hydrogen (H)" = "H", "Dissolved Inorganic Carbon" = "DIC")
-  
-  
-  all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
+water_sources <- list("Streamflow (Q)" = "streamflow", 
+                      "Precipitation (P)" = "precipitation")
+
+
+############################################################################################## 
+###  SIDEBAR LISTS  ##########################################################################
+#Edit if there are values that do not appear or are not relevant to your data. 
+#Should be the same as the lists in the UI file.
+
+watersheds <- list("Watershed 1" = "1",
+                   "Watershed 2" = "2", 
+                   "Watershed 3" = "3",
+                   "Watershed 4" = "4",
+                   "Watershed 5" = "5",
+                   "Watershed 6" = "6",
+                   "Watershed 7" = "7",
+                   "Watershed 8" = "8",
+                   "Watershed 9" = "9")
+
+solutes_cations <- list("Aluminum (Al)" = "Al",
+                        "Magnesium (Mg)" = "Mg",
+                        "Calcium (Ca)" = "Ca",
+                        "Sodium (Na)" = "Na",
+                        "Potassium (K)" = "K")
+
+solutes_anions <- list("Phosphate (PO4)" = "PO4",
+                       "Sulfate (SO4)" = "SO4",
+                       "Nitrate (NO3)" = "NO3",
+                       "Silicon Dioxide (SiO2)" = "SiO2",
+                       "Chloride (Cl)" = "Cl",
+                       "Bicarbonate (HCO3)" = "HCO3")
+
+solutes_H <- list("Hydrogen (H)" = "H", "Dissolved Inorganic Carbon" = "DIC")
+
+
+all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
+
+###########################################################################################
+############ FUNCTIONS ####################################################################
+
+## This function is used to duplicate rows and allow for cummulative animations
+## See https://plot.ly/r/cumulative-animations/
+accumulate_by <- function(dat, var) {
+  var <- lazyeval::f_eval(var, dat)
+  lvls <- plotly:::getLevels(var)
+  dats <- lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+
+
+## These functions are used to allow for formulas as input in the exploratory bubble graph
+## See https://stackoverflow.com/questions/22908050/formula-evaluation-with-mutate
+
+# creates column with name temporary_x
+formula_function_x <- function(df, s){
+  q = quote(mutate(df, temporary_x = s))
+  eval(parse(text=sub("s", s, deparse(q))))}
+
+# creates column with name temporary_y
+formula_function_y <- function(df, s){
+  q = quote(mutate(df, temporary_y = s))
+  eval(parse(text=sub("s", s, deparse(q))))}
+
+############ END OF FUNCTIONS ##############################################################
+
+
+
+shinyServer(function(input, output, session) {
+
 
   # Changing legend depending on the color mode.
   # If colormode is solutes, the checkboxes for solutes will have solute colors if selected 
@@ -128,37 +178,7 @@ shinyServer(function(input, output, session) {
   })
   
 
-  ###########################################################################################
-  ############ FUNCTIONS ####################################################################
-  
-  ## This function is used to duplicate rows and allow for cummulative animations
-  ## See https://plot.ly/r/cumulative-animations/
-  accumulate_by <- function(dat, var) {
-    var <- lazyeval::f_eval(var, dat)
-    lvls <- plotly:::getLevels(var)
-    dats <- lapply(seq_along(lvls), function(x) {
-      cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
-    })
-    dplyr::bind_rows(dats)
-  }
-  
-  
-  ## These functions are used to allow for formulas as input in the exploratory bubble graph
-  ## See https://stackoverflow.com/questions/22908050/formula-evaluation-with-mutate
-  
-  # creates column with name temporary_x
-  formula_function_x <- function(df, s){
-    q = quote(mutate(df, temporary_x = s))
-    eval(parse(text=sub("s", s, deparse(q))))}
-  
-  # creates column with name temporary_y
-  formula_function_y <- function(df, s){
-    q = quote(mutate(df, temporary_y = s))
-    eval(parse(text=sub("s", s, deparse(q))))}
-
-  ############ END OF FUNCTIONS ##############################################################
-  
-
+ 
   
   
   ############################################################################################
@@ -261,29 +281,6 @@ shinyServer(function(input, output, session) {
   
   ########### END OF SIDEBAR FUNCTIONS ####################################################
 
-  
-  
-  
-  ###########################################################################################
-  ############## DATA IMPORT ################################################################
-  
-  load("precip_streamflow_dfs.RData")
-  
-  # LONG DATA
-  imported_data <- precip_streamflow_long
-  # Add fill_color_solutemd and fill_color_wsmd columns so that fill color 
-  # can depend on both source and solute and source and ws. 
-  imported_data %<>% 
-    mutate(fill_color_solutemd = paste(source, solute, sep = '_')) %>% 
-    mutate(fill_color_wsmd = paste(source, ws, sep = '_'))
-  
-  # WIDE DATA
-  imported_data_wide<- precip_streamflow_wide
-  
-  # SUPER WIDE DATA
-  imported_data_super_wide<- precip_streamflow_super_wide
-  
-  
   
   ###########################################################################################
   ############ REACTIVE FUNCTIONS AND REACTIVE DATA FOR EACH PLOT ###########################
@@ -618,9 +615,6 @@ shinyServer(function(input, output, session) {
   
   ########### END OF REACTIVE DATA FOR EACH PLOT #########################################
   
-  
-  
-  
   ######################################################################################################
   ########### PLOTTING  FUNCTIONS ###########################################################################
   
@@ -649,7 +643,7 @@ shinyServer(function(input, output, session) {
       scale_color_manual(values = color_scale)+
       scale_fill_manual(values = color_scale)+
       scale_x_datetime(date_breaks = date_breaks, date_labels = date_labels)
-      
+    
     
     if(log == "log"){
       streamflow <- streamflow + scale_y_continuous(trans='log2')+
@@ -679,7 +673,7 @@ shinyServer(function(input, output, session) {
       config(showLink = FALSE)%>% 
       layout(hovermode = "x") %>%
       layout(dragmode = "select")
-
+    
   }
   
   
@@ -699,7 +693,7 @@ shinyServer(function(input, output, session) {
     if(animate == "Animate"){
       plot <- ggplot(data=data, aes_string(x = x, y = y, 
                                            frame = ifelse(trace == "Leave Trace","frame", "framey"), color = colormode))}
-
+    
     else{
       plot <- ggplot(data=data, aes_string(x = x, y = y, color = colormode))
     } 
@@ -730,9 +724,9 @@ shinyServer(function(input, output, session) {
                                                    if(granularity == "year"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y"), ", ", round(get(y),2), ")", sep="")}
                                                    else if(granularity == "month"){paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y-%b"), ", ", round(get(y),2), ")", sep="")}
                                                    else{paste(ws, ", ", solute, " • ", "(", strftime(get(x), "%Y-%b-%d"), ", ", round(get(y),2), ")", sep="")}}))
-       
+      
     }
-
+    
     
     plot <- plot +
       my_theme + 
@@ -753,7 +747,7 @@ shinyServer(function(input, output, session) {
     
     
     # ggplotly
-      
+    
     if(animate == "Animate"){
       ggplotly(plot, tooltip = "text") %>%
         config(displayModeBar = FALSE) %>%
@@ -772,7 +766,7 @@ shinyServer(function(input, output, session) {
         layout(dragmode = "select")
     }
   }
-
+  
   
   ###### >>>>>>>>>>>>>>>>>>>>>>>>>>>> CHARGE BALANCE PLOT FUNCTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<< #####
   
@@ -811,7 +805,7 @@ shinyServer(function(input, output, session) {
                                      color = NA, color_scale = NA, 
                                      size = NA, size_range, 
                                      text = NA, cq = "no", granularity){
-  
+    
     # Animation 
     # options where frame is the column with the year and framey is a column with the data point's year. 
     # And frame is a column with the year after accumulating -- so each data point is duplicated various times, once
@@ -836,11 +830,11 @@ shinyServer(function(input, output, session) {
         scale_color_manual(values = color_scale) +
         scale_fill_manual(values = color_scale)
     }
-   
+    
     else{
       plot <- plot+ 
         geom_point(aes_string(x = x, y = y, size = size, color = color, fill = color, shape = NA), stroke= 0.2, alpha = 0.8)
-        scale_colour_brewer()
+      scale_colour_brewer()
     }
     
     plot <- plot + my_theme + 
@@ -848,8 +842,8 @@ shinyServer(function(input, output, session) {
       scale_alpha_discrete(range = c(0.9, 0.5))+
       scale_shape_manual(values = c(21, 22, 23, 24, 25))+ 
       labs(x= x_label, y = y_label)
-  
-  
+    
+    
     # x and y axis transformations
     if(log_x == "log"){
       plot <- plot + scale_x_continuous(trans='log2')+ 
@@ -861,17 +855,17 @@ shinyServer(function(input, output, session) {
         labs(y =paste("log", "(",y_label, ")"))
     }
     
-  
+    
     #ggplotly
     
     if(animate == "Animate"){
-    ggplotly(plot, tooltip = "text") %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE) %>%
-      layout(hovermode = "closest") %>% 
-      animation_opts(frame = speed, transition = 0, redraw = FALSE) %>%
-      animation_slider(currentvalue = list(prefix = "Water Year ", font = list(size = 15))) %>%
-      animation_button(font = list(size = 12))}
+      ggplotly(plot, tooltip = "text") %>%
+        config(displayModeBar = FALSE) %>%
+        config(showLink = FALSE) %>%
+        layout(hovermode = "closest") %>% 
+        animation_opts(frame = speed, transition = 0, redraw = FALSE) %>%
+        animation_slider(currentvalue = list(prefix = "Water Year ", font = list(size = 15))) %>%
+        animation_button(font = list(size = 12))}
     else{
       ggplotly(plot, tooltip = "text") %>%
         config(displayModeBar = FALSE) %>%
