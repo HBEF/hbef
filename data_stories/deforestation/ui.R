@@ -29,8 +29,8 @@ shinyUI(dashboardPage(skin = "black",
                         width = 200,
                         sidebarMenu(
                           menuItem("Intro", tabName = "intro", icon = icon("home")),
-                          menuItem("Concentration", tabName = "solutes", icon = icon("home")),
-                          menuItem("Quantities", tabName = "streamflow", icon = icon("search-plus")),
+                          menuItem("Chemistry", tabName = "solutes", icon = icon("home")),
+                          menuItem("Hydrology", tabName = "streamflow", icon = icon("search-plus")),
                           tags$div(class = "footer",tags$ul(
                             tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#menu", "HOME")),
                             tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#datastories","DATA STORIES")),

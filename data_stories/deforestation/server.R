@@ -91,10 +91,10 @@ plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab
   
     if (logarithm == "log") {
       gg <- ggplot(df,aes(x= get(x.r),y= log(get(y.r)), shape =source, 
-                          color = solute, label=date))
+                          color = solute))
     }else {
       gg <- ggplot(df,aes(x= get(x.r),y= get(y.r), shape =source, 
-                          color = solute, label=date))
+                          color = solute))
     }
     p <- gg +
       geom_line() +
@@ -111,7 +111,7 @@ plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab
            y = y.lab,
            title = title.lab)+
       scale_shape_manual(values = source_shapes) +
-      facet_wrap(~ws2, ncol = 1) +
+      facet_wrap(~ws2, ncol = 1, scales = "free_y") +
       geom_vline(data = v.line,
                  aes(xintercept = vals),
                  linetype = 1,
@@ -161,7 +161,7 @@ plot.dis.df <- function(df, x.r, date.input, y.lab, title.lab, logarithm){
          y = y.lab,
          title = title.lab)+
     scale_shape_manual(values = source_shapes) +
-    facet_wrap(~ws2, ncol = 1) +
+    facet_wrap(~ws2, ncol = 1, scales = "free_y") +
     geom_vline(data = v.line,
                aes(xintercept = vals),
                linetype = 1,
