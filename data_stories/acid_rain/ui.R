@@ -74,7 +74,7 @@ units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
 
 shinyUI(
   dashboardPage(skin = "black",
-                dashboardHeader(title = tags$a(href="http://vcm-192.vm.duke.edu/","HB-WER Viz"), titleWidth = 200),
+                dashboardHeader(title = tags$a(href="http://hbef.streampulse.org/","HB-WER Viz"), titleWidth = 200),
                 dashboardSidebar(
                   width = 200,
                   sidebarMenu(
@@ -84,10 +84,10 @@ shinyUI(
                     menuItem("Policy", tabName = "policy", icon = icon("book")),
                     # footer here
                     tags$div(class = "footer",tags$ul(
-                      tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#menu", "HOME")),
-                      tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#datastories","DATA STORIES")),
-                      tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#exploratory","EXPLORATORY TOOLS")),
-                      tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#aboutus","ABOUT US")))
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#menu", "HOME")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#datastories","DATA STORIES")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#exploratory","EXPLORATORY TOOLS")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#aboutus","ABOUT US")))
                     ))
                   
                 ),
