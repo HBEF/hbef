@@ -107,13 +107,15 @@ shinyServer(function(session, input, output) {
   
   ## GGPLOT pH FUNCTION -- This builds the pH graph
   ggplot_function_pH <- function(data, x, y, log){
-    
+    source_shapes <- c("streamflow" = 16, "precipitation"= 21)
     if(log == "log") {
       plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source))+
-        labs(x = " ", y = paste("log pH"))}
+        labs(x = " ", y = paste("log pH")) +
+        scale_shape_manual(values = source_shapes)}
     
     else{plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source))+
-        labs(x = " ", y = "pH")}
+        labs(x = " ", y = "pH") +
+        scale_shape_manual(values = source_shapes)}
     
     final <- plot+ my_theme + 
       #geom_hline annotations for acid/clean rain cutoffs on graph
