@@ -66,7 +66,7 @@ granularity <- list("Year (VWC)" = "year",
                     "Month (VWC)" = "month",
                     "Week" = "week")
 
-units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
+units <- list("ueq/L","umol/L", "mg/L", "flux")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
