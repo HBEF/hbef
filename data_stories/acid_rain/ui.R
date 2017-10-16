@@ -60,7 +60,7 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 9" = "9")
 
 water_sources <- list("Precipitation (P)" = "precipitation",
-                      "Discharge (Q)" = "streamflow")
+                      "Streamflow (Q)" = "streamflow")
 
 granularity <- list("Year (VWC)" = "year",
                     "Month (VWC)" = "month",
@@ -191,38 +191,14 @@ shinyUI(
                                      
                               )#Closes the column
                               
-                            ),#Closes graph row
+                            )#Closes graph row
                             
                             ########### END OF GRAPH FOR QUESTION #1 ##########
                             
                             
                             ########### TEXT FOR QUESTION #1 ##########
                             
-                            tags$div(class = "text-container",
-                                     fluidRow(column(width = 9,
-                                                     p("Air pollution amplifies acid rain, which washes nutrients out of the 
-                               soil and releases toxins into the streamflow that inhibit ecosystem 
-                               growth.  United States policy has largely mitigated the effects 
-                               of acid rain, and the long term data from Hubbard Brook is able 
-                               to show the story of an ecosystem on the long path to recovery."),
-                                                     p("In order to best understand the canonical story of acid rain, this 
-                               module will focus on watershed six - the biogeochemical reference - 
-                               to observe the effects of acid rain without experimental 
-                               disruptions.  The dataset for watershed six dates back to 1963, 
-                               which coincidentally is the year of the first rendition of the 
-                               Clean Air Act.  This was also eight years after the first 
-                               legislation on air pollution (The Air Pollution Control Act of 1955.)
-                               Thus, the data concretely describes more of the ecosystem recovery 
-                               following the effects of acid rain."),
-                                                     p("Ecosystem recovery can in part be tracked by the increasing 
-                               (de-acidifying) pH, as seen over the past 60+ years as new 
-                               policies are implemented to address air quality (see plot above.)"))),
-                                     fluidRow(column(width = 9,
-                                                     #link to a short quiz on acid rain
-                                                     p("Let's see how much you know offhand about acid rain... Click",
-                                                       tags$a(href = "https://www.surveymonkey.com/r/RGNNTMH", "here"),
-                                                       "to take the acid rain quiz."))))
-                            ########### END OF QUESTION #1 ##########
+                            
                     ), # Closes Intro Tab
                     
                     ###############################################################################
@@ -318,20 +294,14 @@ shinyUI(
                                      
                               )#Closes the column
                               
-                            ),#Closes graph row
+                            )#Closes graph row
                             
                             ########### END OF GRAPH FOR QUESTION #1 ##########
                             
                             
                             ########### TEXT FOR QUESTION #1 ##########
                             
-                            tags$div(class = "text-container",
-                                     fluidRow(column(width = 9,
-                                                     p("Air pollution amplifies acid rain, which washes nutrients out of the 
-                                       soil and releases toxins into the streamflow that inhibit ecosystem 
-                                       growth.  United States policy has largely mitigated the effects 
-                                       of acid rain, and the long term data from Hubbard Brook is able 
-                                       to show the story of an ecosystem on the long path to recovery."))))
+        
                             
                             ########### END OF QUESTION #1 ##########
                     ),# Closes Intro Tab
@@ -352,6 +322,12 @@ shinyUI(
                             ),
                             
                             #############################################
+                            
+                            ####Policy Timeline#####
+                            tags$div(class = "container_question",
+                                fluidRow(column(9, h4("Acid Rain Key Events Timeline"))),
+                                fluidRow(column(9, timevisOutput("timeline")))),
+                            
                             
                             ########### GRAPH FOR QUESTION #1 ##########
                             
@@ -481,22 +457,9 @@ shinyUI(
                                      
                               )#Closes the column
                               
-                            ),#Closes graph row
+                            )#Closes graph row
                             
                             ########### END OF GRAPH FOR QUESTION #1 ##########
-                            
-                            
-                            ########### TEXT & TIMELINE FOR QUESTION #1 ##########
-                            
-                            tags$div(class = "text-container",
-                                     fluidRow(column(9, h4("Acid Rain Key Events Timeline"))),
-                                     fluidRow(column(9, timevisOutput("timeline"))),
-                                     fluidRow(column(width = 9,
-                                                     p("Air pollution amplifies acid rain, which washes nutrients out of the 
-                                       soil and releases toxins into the streamflow that inhibit ecosystem 
-                                       growth.  United States policy has largely mitigated the effects 
-                                       of acid rain, and the long term data from Hubbard Brook is able 
-                                       to show the story of an ecosystem on the long path to recovery."))))
                             
                             ########### END OF QUESTION #1 ##########
                     )# Closes Intro Tab
