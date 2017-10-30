@@ -137,7 +137,7 @@ shinyUI(
                                                  dot represents a precipitation monitoring station. 
                                                  Maps for all years available at http://nadp.isws.illinois.edu/maplib"), 
                                                        style = "text-align: left;"),
-                                                 p(div(h4(em("Have we fixed the problem of acid rain?")), style = "text-align: left;")),
+                                                 p(div(span(em("Have we fixed the problem of acid rain?"), style = "text-decoration:underline;"), style = "text-align: left;")),
                                                  p(div("The answer is not everywhere and not quite.", style = "text-align: left;")),
                                                  tags$div(p(class = "thick", "Not Everywhere:"), style = "text-align: left;"), 
                                                  tags$div(HTML(paste("While environmental regulations to reduce the production 
