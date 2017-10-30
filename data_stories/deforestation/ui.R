@@ -76,7 +76,7 @@ shinyUI(dashboardPage(skin = "black",
                                  solute concentrations in streamwater?")))
                          ),
                       fluidRow(column(9,
-                                      tabBox(width = 12, height = "600px", side="right", 
+                                      tabBox(width = 12, height = "1100px", side="right", 
                                              selected = shiny::icon("circle"),
                                              ###Units - Axis Log
                                              tabPanel(shiny::icon("gear"),
@@ -158,7 +158,7 @@ shinyUI(dashboardPage(skin = "black",
                                  streamflow?")))
                       ),
                       fluidRow(column(9,
-                                      tabBox(width = 12, height = "800px", side="right", 
+                                      tabBox(width = 12, height = "1100px", side="right", 
                                              selected = shiny::icon("circle"),
                                              ###Units - Axis Log
                                              tabPanel(shiny::icon("gear"),
