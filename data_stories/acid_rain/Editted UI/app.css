@@ -38,7 +38,6 @@ h1 {
 }
 
 
-
 h2 {
 	color: #363229;
 	text-transform: uppercase;
@@ -410,8 +409,8 @@ input[value = "Al"]:checked:after {
 		rgba(25, 25, 25, 0.65), 
 		rgba(25, 25, 25, 0.65)), 
 		url("acidrain.jpg");
-	height: 100vh;
-	margin: -10px;
+	height: 100%;
+	margin: -10pt;
 }
 
 
@@ -422,6 +421,7 @@ input[value = "Al"]:checked:after {
 	text-transform: none;
 	line-height: 1em;
 	width: 80%;
+	margin-bottom: 0;
 
 }
 
