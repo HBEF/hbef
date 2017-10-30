@@ -5,7 +5,7 @@
 /*/// Typography ///*/
 
 body {
-	font-family: 'Montserrat', sans-serif;
+	font-family: 'Montserrat';
 }
 
 a{
@@ -21,11 +21,14 @@ a:visited {
 	color: #363229;
 }
 
+span {
+  font-weight: 400;
+}
 
 h1 {
 	color: #6C7A89;
 	font-size: 2em;
-	font-family: 'Montserrat', sans-serif;
+	font-family: 'Montserrat';
 	text-align: left;
 	font-style: normal;
 	letter-spacing: 2px;
@@ -38,25 +41,39 @@ h1 {
 h2 {
 	color: #363229;
 	text-transform: uppercase;
-	font-family: 'Montserrat', sans-serif;
+	font-family: 'Gotham';
 	margin-left: 10pt;
 }
 
 
 h3 {
 	font-size: 1em;
-	font-family: 'Montserrat', sans-serif;
+	font-family: 'Gotham';
 	text-align: left;
 	font-style: normal;
 	font-weight: 400;
 	
 }
 
-
+h4 {
+  text-decoration: underline;
+  font-size: 1em;
+	font-family: 'Gotham';
+	text-align: left;
+	font-style: normal;
+	font-weight: 400;
+}
+  
 p{
-	font-size: 12pt;
-	font-family: Gotham, 'Helvetica Neue', Helvetica, Arial, 'sans-serif';
+	font-size: 1em;
+	font-family: 'Gotham', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
 	text-align: justify;
+}
+
+p.thick{
+  font-family: 'Gotham';
+  font-weight: 900;
+  text-align: left;
 }
 
 
@@ -392,7 +409,7 @@ input[value = "Al"]:checked:after {
 		rgba(25, 25, 25, 0.65), 
 		rgba(25, 25, 25, 0.65)), 
 		url("acidrain.jpg");
-	height: 100vh;
+	height: 100%;
 	margin: -10pt;
 }
 
@@ -418,6 +435,7 @@ input[value = "Al"]:checked:after {
 }
 
 .intro-text h2 {
+<<<<<<< HEAD
   background: rgba(255, 255, 255, 0.75);
   color: black;
   font-size: 7em;
@@ -429,4 +447,22 @@ input[value = "Al"]:checked:after {
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
+=======
+  background-color: rgba(255,255,255, 1);
+  box-shadow: 4px 4px 4px rgba(50, 50, 50, 0.75);
+  color: black;
+  font-size: 1.5em;
+	text-align: left;
+	text-transform: none;
+	width: 80%;
+	margin: 1em 15vh;
+}
 
+
+>>>>>>> 9623fd343ef5fb8e8bc37354eff17078191a6abb
+
+a:link{
+  color: blue;
+  margin: 0;
+  padding: 0;
+}
