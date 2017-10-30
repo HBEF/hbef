@@ -653,4 +653,42 @@ button:hover{
 	color: #363229 !important;
 }
 
+.intro-text h1{
+	font-size: 7em;
+	color: #FEFEFE;
+	text-align: left;
+	text-transform: none;
+	line-height: 1em;
+	width: 80%;
+	margin-bottom: 0;
+
+}
+
+.intro-text h3{
+	color: #FEFEFE;
+	font-size: 1.5em;
+	text-align: left;
+	text-transform: none;
+	width: 80%;
+	margin: 1em 15vh;
+}
+
+.intro-text h2 {
+  background-color: rgba(255,255,255, 1);
+  box-shadow: 4px 4px 4px rgba(50, 50, 50, 0.75);
+  color: black;
+  font-size: 1.5em;
+	text-align: left;
+	text-transform: none;
+	width: 80%;
+	margin: 1em 15vh;
+}
+
+
+
+a:link{
+  color: blue;
+  margin: 0;
+  padding: 0;
+}
 
