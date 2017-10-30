@@ -65,7 +65,10 @@ h4 {
 	font-weight: 400;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
 
 h5 {
   background-color: rgba(255,255,255, 1);
@@ -77,6 +80,9 @@ h5 {
 	width: 80%;
 	margin: 1em 15vh;
 }
+<<<<<<< HEAD
+>>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
+=======
 >>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
   
 p{
@@ -426,7 +432,11 @@ input[value = "Al"]:checked:after {
 		url("acidrain.jpg");
 	height: 100%;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	margin: -10pt;
+=======
+	margin: -10px;
+>>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
 =======
 	margin: -10px;
 >>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
@@ -453,6 +463,7 @@ input[value = "Al"]:checked:after {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 .intro-text h2 {
 <<<<<<< HEAD
   background: rgba(255, 255, 255, 0.75);
@@ -472,6 +483,10 @@ input[value = "Al"]:checked:after {
 .intro-text h5 {
   background-color: "white";
 >>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
+=======
+.intro-text h5 {
+  background-color: "white";
+>>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
   box-shadow: 4px 4px 4px rgba(50, 50, 50, 0.75);
   color: black;
   font-size: 1.5em;
@@ -481,14 +496,21 @@ input[value = "Al"]:checked:after {
 	margin: 1em 15vh;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 >>>>>>> 9623fd343ef5fb8e8bc37354eff17078191a6abb
+=======
+
+>>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
 
 =======
 
+<<<<<<< HEAD
 
 
+>>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
+=======
 >>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
 a:link{
   color: blue;
