@@ -121,7 +121,11 @@ shinyUI(
                                               h1("understanding acid rain"),
                                               hr(),
 <<<<<<< HEAD
+<<<<<<< HEAD
                                               h2(tags$div(HTML(paste("When Gene Likens discovered that rainwater collected in the Hubbard Brook Experimental Forest 
+=======
+                                              h5(tags$div(HTML(paste("When Gene Likens discovered that rainwater collected in the Hubbard Brook Experimental Forest 
+>>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
 =======
                                               h5(tags$div(HTML(paste("When Gene Likens discovered that rainwater collected in the Hubbard Brook Experimental Forest 
 >>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
