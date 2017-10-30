@@ -64,6 +64,17 @@ h4 {
 	font-style: normal;
 	font-weight: 400;
 }
+
+h5 {
+  background-color: rgba(255,255,255, 1);
+  box-shadow: 4px 4px 4px rgba(50, 50, 50, 0.75);
+  color: black;
+  font-size: 1.5em;
+	text-align: left;
+	text-transform: none;
+	width: 80%;
+	margin: 1em 15vh;
+}
   
 p{
 	font-size: 1em;
@@ -410,7 +421,7 @@ input[value = "Al"]:checked:after {
 		rgba(25, 25, 25, 0.65), 
 		rgba(25, 25, 25, 0.65)), 
 		url("acidrain.jpg");
-	height: 100vh;
+	height: 100%;
 	margin: -10px;
 }
 
@@ -434,8 +445,8 @@ input[value = "Al"]:checked:after {
 	margin: 1em 15vh;
 }
 
-.intro-text h2 {
-  background-color: rgba(255,255,255, 1);
+.intro-text h5 {
+  background-color: "white";
   box-shadow: 4px 4px 4px rgba(50, 50, 50, 0.75);
   color: black;
   font-size: 1.5em;
