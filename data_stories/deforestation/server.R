@@ -22,12 +22,12 @@ my_theme <-
         panel.background = element_rect("transparent", colour = NA),
         panel.grid.major = element_line(colour = "#dddddd"), 
         panel.grid.major.x = element_line(colour = NA),
-        text = element_text(family = "Helvetica", size = 12), 
+        text = element_text(family = "Helvetica", size = 16), 
         legend.position="none", legend.direction = "horizontal", legend.title = element_blank(),
-        axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
+        axis.title = element_text(size = 16, margin = unit(c(3, 3, 3, 3), "cm")),
         plot.margin = margin(1, 1, 1, 1, "cm"),
         strip.background = element_rect(colour = NA, fill = NA),
-        strip.text = element_text(hjust = 1, vjust = 0, size = 10, face = "bold", lineheight = 20))
+        strip.text = element_text(hjust = 1, vjust = 0, size = 16, face = "bold", lineheight = 20))
 
 #read in the data
 load("precip_streamflow_dfs.RData")
@@ -117,7 +117,7 @@ plot.solute.df <- function(df, timescale, x.r, y.r, date.input, y.lab, title.lab
                  linetype = 1,
                  show.legend = T) + my_theme
     plot <- ggplotly(p,tooltip = "text",
-                     width = 400, height = 600) %>%
+                     width = 400, height = 900) %>%
       layout(margin = list(b = 90)) %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
@@ -167,7 +167,7 @@ plot.dis.df <- function(df, x.r, date.input, y.lab, title.lab, logarithm){
                linetype = 1,
                show.legend = T) + my_theme
   plot <- ggplotly(p, tooltip = "text",
-                   height = 600, width = 400)%>%
+                   height = 900, width = 400)%>%
     layout(margin = list(b = 90)) %>%
     config(displayModeBar = FALSE) %>%
     config(showLink = FALSE) 
