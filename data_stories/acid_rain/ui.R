@@ -120,7 +120,11 @@ shinyUI(
                             fluidRow(tags$div(class = "intro-text",
                                               h1("understanding acid rain"),
                                               hr(),
+<<<<<<< HEAD
                                               h2(tags$div(HTML(paste("When Gene Likens discovered that rainwater collected in the Hubbard Brook Experimental Forest 
+=======
+                                              h5(tags$div(HTML(paste("When Gene Likens discovered that rainwater collected in the Hubbard Brook Experimental Forest 
+>>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
                                                  in 1963 had a pH of 3.7, this began a long series of efforts to understand
                                                  why this rain was so acidic, how this acidity compared to other places on earth,
                                                  and what the source of this acidity was. It took more than a decade for researchers
