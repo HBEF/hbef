@@ -74,6 +74,7 @@ h5 {
 	text-transform: none;
 	width: 80%;
 	margin: 1em 15vh;
+	padding: 10px 10px 10px 10px;
 }
   
 p{
@@ -422,7 +423,7 @@ input[value = "Al"]:checked:after {
 		rgba(25, 25, 25, 0.65)), 
 		url("acidrain.jpg");
 	height: 100%;
-	margin: -10px;
+	margin: -20px;
 }
 
 
@@ -454,6 +455,7 @@ input[value = "Al"]:checked:after {
 	text-transform: none;
 	width: 80%;
 	margin: 1em 15vh;
+	padding: 10px 10px 10px 10px;
 }
 
 
