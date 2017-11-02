@@ -74,9 +74,9 @@ units <- list("ueq/L","umol/L", "mg/L", "flux")
 
 shinyUI(
   dashboardPage(skin = "black",
-                dashboardHeader(title = tags$a(href="http://vcm-192.vm.duke.edu/","HB-WER Viz"), titleWidth = 200),
+                dashboardHeader(title = tags$a(href="http://hbef.streampulse.org/","HB-WER Viz"), titleWidth = 200),
                 dashboardSidebar(
-                  width = 200,
+                  width = 215,
                   sidebarMenu(
                     menuItem("Intro", tabName = "intro", icon = icon("tint")),
                     menuItem("pH", tabName = "pH", icon = icon("list-alt")),
@@ -84,10 +84,10 @@ shinyUI(
                     menuItem("Policy", tabName = "policy", icon = icon("book")),
                     # footer here
                     tags$div(class = "footer",tags$ul(
-                      tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#menu", "HOME")),
-                      tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#datastories","DATA STORIES")),
-                      tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#exploratory","EXPLORATORY TOOLS")),
-                      tags$li(tags$a(href="http://vcm-192.vm.duke.edu/#aboutus","ABOUT US")))
+                      tags$li(tags$a(href="http://hbef.streampulse.org/", "HOME")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#datastories","DATA STORIES")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#exploratory","EXPLORATORY TOOLS")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#aboutus","ABOUT US")))
                     ))
                   
                 ),
@@ -130,7 +130,7 @@ shinyUI(
                                                  was from the smokestacks of coal fired power plants in the Ohio River valley.
                                                  (read more about this discovery ", a(href = "https://www.caryinstitute.org/science-program/our-scientists/dr-gene-e-likens/acid-rain",
                                                                                     "here"), ")", sep = ""))), 
-                                                 p(div(img(src = "acid_rain_us.png", width = "600px", height = "200px"),
+                                                 p(div(img(src = "acid_rain_us.png", width = "100%", height = "100%"),
                                                                                                style="text-align: center;")),
                                                  div(p(class = "thick","FIGURE 1 – Hydrogen ion concentrations as pH from measurements made by 
                                                  the National Atmospheric Deposition Program in a) 1985 and b) 2015. Note that each 
@@ -147,7 +147,7 @@ shinyUI(
                                                      a(href = "http://iopscience.iop.org/article/10.1088/1748-9326/8/1/014003/pdf","Klimont et al. 2013"), ") 
                                                      where fossil fuel combustion is increasing without
                                                      corresponding regulatory protections for air quality (Figure 2).", sep = ""))),
-                                                 p(div(img(src = "so2_emissions.png", width = "500px", height = "400px"), style = "text-align: center;")),
+                                                 p(div(img(src = "so2_emissions.png", width = "100%", height = "100%"), style = "text-align: center;")),
                                                  div(p(class = "thick", "FIGURE 2. A map of the change in global sulfur dioxide", tags$span(HTML(paste("(SO", tags$sub(2),")", sep = "")), style = "font-weight:bold;" ),
                                                        tags$span(HTML(paste("emissions between 2005 and 2010. Note the decline throughout North American
                                                        and Europe and the widespread increase in southeast Asia (this figure is from
@@ -179,7 +179,7 @@ shinyUI(
                                                        style = "text-align: left;")),
                                                  p(div("How much calcium and magnesium enters these forests in rain? How much is
                                                        leaving in streams? How has this changed over time?", style = "text-align: left;")),
-                                                 p(div(h4(p(class = "thick","RESOURCES TO LEARN MORE")), 
+                                                 p(div(span(p(class = "thick","RESOURCES TO LEARN MORE"), style = "text-decoration: underline;"), 
                                                        style = "text-align: left;")),
                                                  p(em("Free internet resources")),
                                                  p(div("From the Hubbard Brook Research Foundation,",
@@ -233,6 +233,9 @@ shinyUI(
                     ###############################################################################
                     
                     tabItem(tabName = "pH",
+                            tags$head(
+                              tags$style(type='text/css', 
+                                         ".nav-tabs {font-size: 16px} ")),
                             
                             ########### TITLE ####################
                             fluidRow(column(9,tags$h1("How does pH change when acid rain is mitigated?"))
@@ -249,10 +252,12 @@ shinyUI(
                                             ###Units - Axis Log
                                             tabPanel(shiny::icon("gear"),
                                                      fluidRow(
-                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
-                                                                                 
+                                                       column(6, offset = 6, box(width = 12, title = span("X and Y", style = "font-size: 1.2em;"), 
+                                                                                 collapsible = TRUE, collapsed = FALSE,
                                                                                  ##Units - Y Axis Log
-                                                                                 column(5, selectInput("log1", label = "Y Axis",
+                                                                                 column(5,
+                                                                                   selectInput("log1",
+                                                                                    label = span("Y Axis", style = "font-size: 1.2em;"),
                                                                                                        choices = c("linear", "log"), 
                                                                                                        selected = "linear")))))),
                                             ######## PLOT 
@@ -320,15 +325,15 @@ shinyUI(
                             
                             fluidRow(
                               column(9,
-                                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                                     tabBox(width = 12, height = "900px", side="right", selected = shiny::icon("circle"),
                                             ######## OPTIONS
                                             ###Units - Axis Log
                                             tabPanel(shiny::icon("gear"),
                                                      fluidRow(
-                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
+                                                       column(6, offset = 6, box(width = 12, title = span("X and Y", style = "font-size: 1.2em;"), collapsible = TRUE, collapsed = FALSE, 
                                                                                  
                                                                                  ##Units - Y Axis Log
-                                                                                 column(5, selectInput("log2", label = "Y Axis",
+                                                                                 column(5, selectInput("log2", label = span("Y Axis", style = "font-size: 1.1em;"),
                                                                                                        choices = c("linear", "log"), 
                                                                                                        selected = "linear")))))),
                                             ######## PLOT 
@@ -348,13 +353,13 @@ shinyUI(
                               
                               ######## SIDEBAR
                               column(3, 
-                                     box(width = 13, height = "700px", id = "sidebar",
+                                     box(width = 13, height = "900px", id = "sidebar",
                                          #Solutes
                                          fluidRow(
                                            actionLink("select_all_ions", h4("Select Solutes")),
                                            div(class = "scrollbox",
                                                #Cations
-                                               actionLink("select_all_cations", h5("Cations")),
+                                               actionLink("select_all_cations", h4("Cations")),
                                                checkboxGroupInput("solutes_cations", label = p(""),
                                                                   choices = solutes_cations,
                                                                   selected = "Ca"),
@@ -365,7 +370,7 @@ shinyUI(
                                                                   selected = ""),
                                                
                                                #Anions
-                                               actionLink("select_all_anions", h5("Anions")),
+                                               actionLink("select_all_anions", h4("Anions")),
                                                checkboxGroupInput("solutes_anions", label = p(""),
                                                                   choices = solutes_anions,
                                                                   selected = ""))),
@@ -437,10 +442,10 @@ shinyUI(
                                             ###Units - Axis Log
                                             tabPanel(shiny::icon("gear"),
                                                      fluidRow(
-                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
+                                                       column(6, offset = 6, box(width = 12, title = span("X and Y", style = "font-size: 1.2em;"), collapsible = TRUE, collapsed = FALSE, 
                                                                                  
                                                                                  ##Units - Y Axis Log
-                                                                                 column(5, selectInput("log3", label = "Y Axis",
+                                                                                 column(5, selectInput("log3", label = span("Y Axis", style = "font-size: 1.1em;"),
                                                                                                        choices = c("linear", "log"), 
                                                                                                        selected = "linear")))))),
                                             ######## PLOT 
@@ -471,10 +476,10 @@ shinyUI(
                                             ###Units - Axis Log
                                             tabPanel(shiny::icon("gear"),
                                                      fluidRow(
-                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
+                                                       column(6, offset = 6, box(width = 12, title = span("X and Y", style = "font-size: 1.2em;"), collapsible = TRUE, collapsed = FALSE, 
                                                                                  
                                                                                  ##Units - Y Axis Log
-                                                                                 column(5, selectInput("log4", label = "Y Axis",
+                                                                                 column(5, selectInput("log4", label = span("Y Axis", style = "font-size: 1.1em;"),
                                                                                                        choices = c("linear", "log"), 
                                                                                                        selected = "linear")))))),
                                             ######## PLOT 
@@ -503,10 +508,10 @@ shinyUI(
                                             ###Units - Axis Log
                                             tabPanel(shiny::icon("gear"),
                                                      fluidRow(
-                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
+                                                       column(6, offset = 6, box(width = 12, title = span("X and Y", style = "font-size: 1.2em;"), collapsible = TRUE, collapsed = FALSE, 
                                                                                  
                                                                                  ##Units - Y Axis Log
-                                                                                 column(5, selectInput("log5", label = "Y Axis",
+                                                                                 column(5, selectInput("log5", label = span("Y Axis", style = "font-size: 1.1em;"),
                                                                                                        choices = c("linear", "log"), 
                                                                                                        selected = "linear")))))),
                                             ######## PLOT 

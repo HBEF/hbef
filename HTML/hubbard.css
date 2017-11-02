@@ -95,20 +95,20 @@ section{
 /*/// Typography ///*/
 
 a{
-	color: #363229;
+	color: blue;
 	text-decoration: none;
 }
 
 p a{
-	text-decoration: underline;
+	text-decoration: none;
 }
 
 a:hover {
-	color: #363229;
+	color: blue;
 }
 
 a:visited {
-	color: #363229;
+	color: blue;
 }
 
 
@@ -152,7 +152,7 @@ h5 {
   background-color: rgba(255,255,255, 1);
   box-shadow: 4px 4px 4px rgba(50, 50, 50, 0.75);
   color: black;
-  font-size: 1.5em;
+  font-size: 2.1em;
 	text-align: left;
 	text-transform: none;
 	width: 80%;

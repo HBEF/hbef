@@ -31,10 +31,11 @@ my_theme <-
         panel.background = element_rect("transparent", colour = NA),
         panel.grid.major = element_line(colour = "#dddddd"), 
         panel.grid.major.x = element_line(colour = NA),
-        text = element_text(family = "Helvetica", size = 12), 
+        text = element_text(family = "Helvetica", size = 15), 
         legend.position="none", #hides legend
         legend.direction = "horizontal", legend.title = element_blank(),
-        axis.title = element_text(size = 10, margin = unit(c(3, 3, 3, 3), "cm")),
+        axis.title = element_text(size = 17, margin = unit(c(3, 3, 3, 3), "cm")),
+        axis.text = element_text(size = 15),
         plot.margin = margin(1, 1, 1, 1, "cm"))
 
 color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
@@ -128,11 +129,11 @@ shinyServer(function(session, input, output) {
                                    "Value:", get(y), "<br>", "Date: ", get(x)))) + 
       xlim(min(input$date_range_pH[1]), max(input$date_range_pH[2]))+ 
       geom_vline(size = 0.5, xintercept = -5, alpha = 0.2)+
-      annotate("text", label = "Clean Air Act", x = as.Date("1970-01-01"), y = 4, alpha = 0.7, color = "black", angle = 20)+
+      annotate("text", label = "Clean Air Act", x = as.Date("1970-01-01"), y = 4, alpha = 0.7, color = "black", angle = 20, size = 4)+
       geom_vline(size = 0.5, xintercept = 7300, alpha = 0.2)+
-      annotate("text", label = "Clean Air Act Amendment  ", x = as.Date("1990-01-01"), y = 4, alpha = 0.7, color = "black", angle = 20)+
-      annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.22, alpha = 0.7, color = "black", hjust=2)+
-      annotate("text", label = "Normal (clean) rain pH", x = as.Date("2005-01-01"), y = 5.12, alpha = 0.7, color = "black", angle = 20, hjust=2)+
+      annotate("text", label = "Clean Air Act Amendment  ", x = as.Date("1990-01-01"), y = 4, alpha = 0.7, color = "black", angle = 20, size = 4)+
+      annotate("text", label = "Average pH of acid rain", x = as.Date("2005-01-01"), y = 4.22, alpha = 0.7, color = "black", hjust=2, size = 4)+
+      annotate("text", label = "Normal (clean) rain pH", x = as.Date("2005-01-01"), y = 5.12, alpha = 0.7, color = "black", angle = 20, hjust=2, size = 4)+
       scale_color_manual(values = grey_palette)
       #Efforts to make it a gradient color scale
       #scale_colour_gradient2(low = "red", mid = "orange" , high = "green", midpoint = 4)
