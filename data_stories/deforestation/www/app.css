@@ -9,16 +9,16 @@ body {
 }
 
 a{
-	color: #363229;
+	color: blue;
 	text-decoration:none;
 }
 
 a:hover {
-	color: #363229;
+	color: blue;
 }
 
 a:visited {
-	color: #363229;
+	color: blue;
 }
 
 
