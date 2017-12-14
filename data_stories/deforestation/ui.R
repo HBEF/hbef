@@ -168,7 +168,17 @@ shinyUI(dashboardPage(skin = "black",
                                        a(href = "http://www.ecoplexity.org/files/Lickens%20et%20al,%201970.pdf",
                                          span("Effects of Forest Cutting and Herbicide Treatment on Nutrient
                                          Budgets in the Hubbard Brook Watershed-Ecosystem.", style = "text-decoration:underline;")),
-                                       em("Ecological Monographs, 40"), "(1).", sep = "")))))
+                                       em("Ecological Monographs, 40"), "(1).", sep = "")))),
+                                 p(div(HTML(paste("Likens, Gene E, F. H Bormann, and N. M Johnson. 1969.",
+                                                  a(href = "http://science.sciencemag.org/content/163/3872/1205",
+                                                    HTML(paste("\"", span("Nitrification: Importance To Nutrient Losses From A Cutover Forested Ecosystem",
+                                                         style = "text-decoration:underline;"), "\"", sep = ""))),
+                                                  em(". Science"),  " 163: 1205-1206.", sep = "")))),
+                                 p(div(HTML(paste("Pardo, Linda H, Charles T Driscoll, and Gene E Likens. 1995. ",
+                                                  a(href = "https://www.researchgate.net/publication/226282221_Patterns_of_Nitrate_Loss_From_a_Chronosequence_of_Clear-Cut_Watersheds",
+                                                    HTML(paste("\"", span("Patterns Of Nitrate Loss From A Chronosequence Of Clear-Cut Watersheds",
+                                                         style = "text-decoration:underline;"), "\"", sep = ""))),
+                                                  em(". Water, Air, and Soil Pollution "), "85: 1659-1664.", sep = "")))))
                               ))
             
             
