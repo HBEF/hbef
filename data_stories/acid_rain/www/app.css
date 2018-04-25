@@ -9,16 +9,16 @@ body {
 }
 
 a{
-	color: #363229;
+	color: blue;
 	text-decoration:none;
 }
 
 a:hover {
-	color: #363229;
+	color: blue;
 }
 
 a:visited {
-	color: #363229;
+	color: blue;
 }
 
 span {
@@ -53,7 +53,7 @@ h3 {
 	text-align: left;
 	font-style: normal;
 	font-weight: 400;
-	
+
 }
 
 h4 {
@@ -64,14 +64,7 @@ h4 {
 	font-style: normal;
 	font-weight: 400;
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
+
 
 h5 {
   background-color: rgba(255,255,255, 1);
@@ -83,14 +76,8 @@ h5 {
 	width: 80%;
 	margin: 1em 15vh;
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-  
+
+
 p{
 	font-size: 1em;
 	font-family: 'Gotham', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
@@ -144,17 +131,23 @@ p.thick{
     background: -o-linear-gradient(#171A1E, #30363F); /* For Opera 11.1 to 12.0 */
     background: -moz-linear-gradient(#171A1E, #30363F); /* For Firefox 3.6 to 15 */
     background: linear-gradient(#171A1E, #30363F); /* Standard syntax */
-	position: fixed; 
+	position: fixed;
 	overflow: visible;
+	font-size: 1.1em;
 }
 
+.main-sidebar .sidebar .sidebar-menu a{
+  font-size: 1.1em;
+}
 
 .main-sidebar .sidebar .sidebar-menu a:hover{
 	background-color: #1E2226 !important;
+	font-size: 1.1em;
 }
 
 .main-sidebar .sidebar .sidebar-menu .active a{
 	background-color: #1E2226 !important;
+	font-size: 1.1em;
 }
 
 
@@ -169,21 +162,21 @@ p.thick{
 
 .footer{
 	position:fixed;
-	bottom:0;  
+	bottom:0;
 	right:0;
 	left:0;
 	background:#1E2226;
 	padding: 20px 0 ;
 	font-size: 10pt;
 	color: #fefefe;
-	width: 200px;
+	width: 215px;
 	margin-left: 0px;
 }
 
 .footer ul li {
 	list-style: none;
 	font-family: 'Montserrat', sans-serif;
-	font-size: 0.9em;
+	font-size: 1.1em;
 	font-weight:400;
 	letter-spacing: 1px;
 	text-align: left;
@@ -208,7 +201,7 @@ p.thick{
 }
 
 .titleRow h2{
-	font-size: 1.5em;
+	font-size: 2em;
 	font-weight: 300;
 }
 
@@ -238,7 +231,7 @@ p.thick{
 }
 
 .box h5{
-	font-size: 1em;
+	font-size: 3em;
 	color: #6C7A89;
 	font-weight: 400;
 	font-family: 'Montserrat', sans-serif;
@@ -260,6 +253,7 @@ p.thick{
 
 #sidebar.box-body{
 	padding: 20pt;
+	font-size: 1.3em;
 }
 
 /* SLIDER */
@@ -267,7 +261,7 @@ p.thick{
 	border-top-color: #6C7A89;
 	border-bottom-color: #6C7A89;
 	border-radius: 0;
-} 
+}
 
 .irs-bar-edge {
 	border-color: #6C7A89;
@@ -293,7 +287,7 @@ p.thick{
 	background:#6C7A89;}
 .irs-grid-pol.small {
     height: 0px;}
-      
+
 
 /* Selectize */
 
@@ -433,23 +427,12 @@ input[value = "Al"]:checked:after {
 
 #shiny-tab-intro{
 	background-image:  linear-gradient(
-		rgba(25, 25, 25, 0.65), 
-		rgba(25, 25, 25, 0.65)), 
+		rgba(25, 25, 25, 0.65),
+		rgba(25, 25, 25, 0.65)),
 		url("acidrain.jpg");
 	height: 100%;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-	margin: -10pt;
-=======
 	margin: -10px;
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
-	margin: -10px;
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
-	margin: -10px;
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
+
 }
 
 
@@ -472,11 +455,8 @@ input[value = "Al"]:checked:after {
 	margin: 1em 15vh;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 .intro-text h2 {
-<<<<<<< HEAD
   background: rgba(255, 255, 255, 0.75);
   color: black;
   font-size: 7em;
@@ -488,52 +468,15 @@ input[value = "Al"]:checked:after {
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
-=======
-  background-color: rgba(255,255,255, 1);
-=======
+
 .intro-text h5 {
   background-color: "white";
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
-.intro-text h5 {
-  background-color: "white";
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
-.intro-text h5 {
-  background-color: "white";
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-  box-shadow: 4px 4px 4px rgba(50, 50, 50, 0.75);
-  color: black;
-  font-size: 1.5em;
 	text-align: left;
 	text-transform: none;
 	width: 80%;
 	margin: 1em 15vh;
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-
->>>>>>> 9623fd343ef5fb8e8bc37354eff17078191a6abb
-=======
-=======
-
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-
-<<<<<<< HEAD
-=======
-
-<<<<<<< HEAD
-
-
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
-=======
->>>>>>> bd6cb36562dcc3a765368c6100e3967e95e6b34d
 a:link{
   color: blue;
   margin: 0;
