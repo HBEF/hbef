@@ -94,6 +94,9 @@ grey_palette_2 <- c("streamflow_Al" = "#222222", "streamflow_Mg" = "#222222", "s
 water_sources <- list("Streamflow (Q)" = "streamflow", 
                       "Precipitation (P)" = "precipitation")
 
+date_options <- c("water year", "water years", "water_year", "year", "years", "water month", "water months",
+                  "water_month", "month", "months", "water week", "water weeks", 
+                  "water_week", "week", "weeks", "date", "time")
 
 ############################################################################################## 
 ###  SIDEBAR LISTS  ##########################################################################
@@ -559,7 +562,8 @@ shinyServer(function(input, output, session) {
   
   solutesx_formula <- reactive({
     capitalized <-"(^[[:upper:]][[:alpha:]])|^H|^K"
-    strip_spaces <- gsub(" ", "", input$solutesx_formula, fixed = TRUE)
+    x_formula <- ifelse(tolower(input$solutesx_formula) %in% date_options, "date", input$solutesx_formula)
+    strip_spaces <- gsub(" ", "", x_formula, fixed = TRUE)
     include_space <- gsub("([^[:alnum:]])", " \\1 ", strip_spaces)
     trim <- str_trim(include_space)
     split_each <- str_split(trim, " ")
