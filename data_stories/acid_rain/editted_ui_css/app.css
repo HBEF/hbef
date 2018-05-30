@@ -1,0 +1,454 @@
+@charset "UTF-8";
+
+/*///////// GENERAL SETTINGS //////////*/
+
+/*/// Typography ///*/
+
+body {
+	font-family: 'Montserrat';
+}
+
+a{
+	color: #363229;
+	text-decoration:none;
+}
+
+a:hover {
+	color: #363229;
+}
+
+a:visited {
+	color: #363229;
+}
+
+span {
+  font-weight: 400;
+}
+
+h1 {
+	color: #6C7A89;
+	font-size: 2em;
+	font-family: 'Montserrat';
+	text-align: left;
+	font-style: normal;
+	letter-spacing: 2px;
+	line-height: 1em;
+	margin: 2em 1em;
+	text-transform: uppercase;
+}
+
+
+h2 {
+	color: #363229;
+	text-transform: uppercase;
+	font-family: 'Gotham';
+	margin-left: 10pt;
+}
+
+
+h3 {
+	font-size: 1em;
+	font-family: 'Gotham';
+	text-align: left;
+	font-style: normal;
+	font-weight: 400;
+	
+}
+
+h4 {
+  text-decoration: underline;
+  font-size: 1em;
+	font-family: 'Gotham';
+	text-align: left;
+	font-style: normal;
+	font-weight: 400;
+}
+  
+p{
+	font-size: 1em;
+	font-family: 'Gotham', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+	text-align: justify;
+}
+
+p.thick{
+  font-family: 'Gotham';
+  font-weight: 900;
+  text-align: left;
+}
+
+
+
+.text-container {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	padding-top: 10vh;
+	padding-bottom: 10vh;
+}
+
+
+
+/*///////// Boxes /////////*/
+
+/* This code makes the padding around the boxes smaller*/
+
+[class*="col-lg-"],[class*="col-md-"],
+[class*="col-sm-"],[class*="col-xs-"]{
+    padding-right:2pt !important;
+    padding-left:2pt !important;
+}
+
+/* this code changes the background color of the entire app */
+
+.content-wrapper{
+	background-color: #f2f6f7;
+}
+
+/*//////// MAIN HEADER AND MAIN SIDEBAR ///////*/
+
+.main-header{
+	position: fixed;
+	width:100%;
+}
+
+.main-sidebar{
+	background: red; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(#171A1E, #30363F); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#171A1E, #30363F); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#171A1E, #30363F); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(#171A1E, #30363F); /* Standard syntax */
+	position: fixed; 
+	overflow: visible;
+}
+
+
+.main-sidebar .sidebar .sidebar-menu a:hover{
+	background-color: #1E2226 !important;
+}
+
+.main-sidebar .sidebar .sidebar-menu .active a{
+	background-color: #1E2226 !important;
+}
+
+
+/* This code makes sure the content is seen even when the header is fixed */
+.content {
+	padding-top: 60px;
+}
+
+
+
+/*//////// FOOTER ////////*/
+
+.footer{
+	position:fixed;
+	bottom:0;  
+	right:0;
+	left:0;
+	background:#1E2226;
+	padding: 20px 0 ;
+	font-size: 10pt;
+	color: #fefefe;
+	width: 200px;
+	margin-left: 0px;
+}
+
+.footer ul li {
+	list-style: none;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 0.9em;
+	font-weight:400;
+	letter-spacing: 1px;
+	text-align: left;
+	width: auto;
+	transition: all 0.3s linear;
+	color: #fefefe;
+	margin-left: -20px;}
+
+.footer ul li a:hover{
+	background:rgba(125,57,58,0.00);
+	color: #4a545e;}
+
+
+/*//////// WITHIN EACH TAB ////////*/
+
+
+/* Title Row */
+
+.titleRow{
+	border-bottom: 1px solid #8C8C8C;
+	padding: 0% 5%;
+}
+
+.titleRow h2{
+	font-size: 1.5em;
+	font-weight: 300;
+}
+
+
+
+
+/*//////// Boxes ////////*/
+
+.box{
+	background-color: #E9EDF0 !important;
+	border-top: none;
+	border-radius: 0;
+}
+
+.box .row{
+	border-bottom: 1px solid #CED1D4;
+	padding: 10% 7%;
+}
+
+.box h4 {
+	font-size: 1.2em;
+	color: #6C7A89;
+	font-weight: 400;
+	font-family: 'Montserrat', sans-serif;
+	text-align: left;
+	line-height: 1em;
+}
+
+.box h5{
+	font-size: 1em;
+	color: #6C7A89;
+	font-weight: 400;
+	font-family: 'Montserrat', sans-serif;
+	text-align: left;
+	line-height: 1em;
+	margin-bottom: -5px;
+}
+
+.scrollbox {
+	height:150px;
+	overflow-y:scroll;
+	overflow-x:hidden;
+	padding-left: 5px;
+}
+
+
+
+/*//// Tab Sidebar -- Reactivity Sidebar //////*/
+
+#sidebar.box-body{
+	padding: 20pt;
+}
+
+/* SLIDER */
+.irs-bar {
+	border-top-color: #6C7A89;
+	border-bottom-color: #6C7A89;
+	border-radius: 0;
+} 
+
+.irs-bar-edge {
+	border-color: #6C7A89;
+	border-radius: 0;
+}
+
+.irs-single, .irs-bar-edge, .irs-bar, .irs-from,  .irs-to {
+	background: #6C7A89;
+	border-radius: 0;
+}
+
+
+.irs-slider.from, .irs-slider.to {
+	border: 2px solid #6C7A89;
+	width: 2px;
+	height: 20px;
+	border-radius: 0;
+
+}
+
+.irs-grid-pol{
+    height: 3px;
+	background:#6C7A89;}
+.irs-grid-pol.small {
+    height: 0px;}
+      
+
+/* Selectize */
+
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=pH] { color: #FFC408 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=H] { color: #FFE79C }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=NO3] { color: #BF1616 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=SiO2] { color: #CC4545 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=PO4] { color: #600B0B }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=SO4] { color: #8F1010 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Cl] { color: #D97373 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=HCO3] { color: #E5A2A2 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=K] { color: #95AFDD }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Na] { color: #7195D2 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=NH4] { color: #4E7AC7 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Ca] { color: #3B5C95 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Mg] { color: #273D64 }
+#solutes ~ .selectize-control.single .selectize-dropdown [data-value=Al] { color: #162338 }
+
+
+#solutes_anions3, #solutes_cations3, #solutes_Al_anions3{
+	float: right;
+	margin-right: 5%;
+}
+
+/* Checkboxes */
+
+input[type="checkbox"]:after {
+		width: 20px;
+        height: 20px;
+	 	top: -2px;
+        right: 5px;
+        border-radius: 15px;
+        position: relative;
+        background-color: #d1d3d1;
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
+}
+
+
+input[type='checkbox']:checked:after {
+        width: 20px;
+        height: 20px;
+        border-radius: 15px;
+        position: relative;
+        background-color: #828282;
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
+    }
+
+
+
+/* WATER SOURCES */
+
+input[value = "precipitation"]:checked:after {
+    background-color: #EBEBEB;
+	border: 5px solid #3E3D3D;
+    }
+
+input[value = "streamflow"]:checked:after {
+    background-color: #3E3D3D;
+    }
+
+
+
+/* HYDROGEN */
+
+input[value = "pH"]:checked:after {
+      background-color: #FFC408;
+    }
+
+input[value = "H"]:checked:after {
+      background-color: #FFE79C;
+    }
+
+
+
+/* ANIONS */
+
+input[value = "NO3"]:checked:after {
+      background-color: #BF1616;
+    }
+
+input[value = "SiO2"]:checked:after {
+      background-color: #CC4545;
+    }
+
+input[value = "PO4"]:checked:after {
+      background-color: #600B0B;
+    }
+
+input[value = "SO4"]:checked:after {
+      background-color: #8F1010;
+    }
+
+
+input[value = "Cl"]:checked:after {
+      background-color: #D97373;
+    }
+
+input[value = "HCO3"]:checked:after {
+      background-color: #E5A2A2;
+    }
+
+
+/* CATIONS */
+
+input[value = "K"]:checked:after {
+      background-color: #95AFDD;
+    }
+
+input[value = "Na"]:checked:after {
+      background-color: #7195D2;
+    }
+
+input[value = "NH4"]:checked:after {
+      background-color: #4E7AC7;
+    }
+
+input[value = "Ca"]:checked:after {
+      background-color: #3B5C95;
+    }
+
+input[value = "Mg"]:checked:after {
+      background-color: #273D64;
+    }
+
+input[value = "Al"]:checked:after {
+      background-color: #162338;
+    }
+
+
+/* ////// SPECIFICS ////*/
+
+#shiny-tab-intro{
+	background-image:  linear-gradient(
+		rgba(25, 25, 25, 0.65), 
+		rgba(25, 25, 25, 0.65)), 
+		url("acidrain.jpg");
+	height: 100%;
+	margin: -10pt;
+}
+
+
+.intro-text h1{
+	font-size: 7em;
+	color: #FEFEFE;
+	text-align: left;
+	text-transform: none;
+	line-height: 1em;
+	width: 80%;
+	margin-bottom: 0;
+
+}
+
+.intro-text h3{
+	color: #FEFEFE;
+	font-size: 1.5em;
+	text-align: left;
+	text-transform: none;
+	width: 80%;
+	margin: 1em 15vh;
+}
+
+.intro-text h2 {
+  background-color: rgba(255,255,255,1);
+  box-shadow: 4px 4px 4px rgba(50, 50, 50, 0.75);
+  color: black;
+  font-size: 1.5em;
+	text-align: left;
+	text-transform: none;
+	width: 80%;
+	margin: 1em 15vh;
+}
+
+
+
+a:link{
+  color: blue;
+  margin: 0;
+  padding: 0;
+}

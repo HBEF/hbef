@@ -9,229 +9,65 @@ library(plotly)
 library(utils)
 library(grid)
 library(ggthemes)
-library(reshape2)
+
+
+########### DATA IMPORT ####################################################
+
+#load vegetation data - LAI and leaf counts
+lai_data<- readRDS("lai_data.rds")
+yearly_count_means <- readRDS("yearly_count_means.rds")
+
+#load water chemistry data
+water_chem_data <- readRDS("normalized_flux.rds")
+
+#create vector to rename facets in leaf count plot
+site_names <- c(
+  'BB'="Bear Brook Watershed site",
+  'TF'="Throughfall site",
+  'W1'="Watershed 1",
+  'W5'="Watershed 5"
+  )
+########### END OF DATA IMPORT #############################################
+
+
+########### IMPORTANT PRELIMINARY INFO #############################################
+
+###  Theme  ################
+my_theme <- theme_fivethirtyeight() + 
+  theme(rect = element_rect(fill = NA),
+        panel.grid.major = element_line(colour = "#dddddd"), 
+        text = element_text(family = "Helvetica", size = 12), 
+        legend.position = "right", legend.direction = "vertical", legend.title = element_blank(),
+        strip.text = element_text(size = 10),
+        axis.title= element_text(NULL), axis.title.x= element_blank(), 
+        axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
+
+color_anion <- c("NO3" = "#BF1616")
+source_shapes <- c("streamflow" = 16, "precipitation"= 21)
+watershed_linetypes <- c("1"= 2,"2"= 1,"3"= 3,"4"= 5,"5"= 4,"6"= 6,"7"= 1,"8"= 1,"9"= 1)
+
+### End of Theme ################
+
+########### END OF IMPORTANT PRELIMINARY INFO #########################################
+
 
 #######################################################################################
 ########### SHINY SERVER ##############################################################
 #######################################################################################
 
-
 shinyServer(function(session, input, output) {
-  
-  ########### IMPORTANT PRELIMINARY INFO #############################################
-  
-  ###  Theme  ################
-  my_theme <- theme_fivethirtyeight() + 
-    theme(rect = element_rect(fill = NA),
-          panel.grid.major = element_line(colour = "#dddddd"), 
-          text = element_text(family = "Helvetica", size = 12), 
-          legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
-          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
-          axis.title= element_text(NULL), axis.title.x= element_blank(), 
-          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
-  
-  color_cation <- c("K" = "#95AFDD", "Na" = "#7195D2", "NH4" = "#4E7AC7" , "Ca" = "#3B5C95", "Mg" = "#273D64", "Al" = "#162338")
-  color_anion <- c("PO4" = "#600B0B", "SO4" = "#8F1010", "NO3" = "#BF1616", "SiO2"= "#CC4545", "Cl" = "#D97373", "HCO3" = "#E5A2A2")
-  color_hydro <- c("pH" = "#FFC408", "H" = "#FFE79C")
-  
-  solute_palette <- c(color_cation, color_anion, color_hydro)
-  source_shapes <- c("streamflow" = 16, "precipitation"= 21)
-  watershed_shapes <- c("1"= 5, "2"= 2, "3"= 16, "4"= 1, "5"= 0, "6"= 17)
-  
-  ### End of Theme ################
-  
-  ###  Lists for the sidebar  ######
-  #Edit if there are values that do not appear or are not relevant to your data. 
-  #Should be the same as the lists in the UI file.
-  
-  watersheds <- list("Watershed 1" = "1",
-                     "Watershed 2" = "2", 
-                     "Watershed 3" = "3",
-                     "Watershed 4" = "4",
-                     "Watershed 5" = "5",
-                     "Watershed 6" = "6",
-                     "Watershed 7" = "7",
-                     "Watershed 8" = "8",
-                     "Watershed 9" = "9")
-  
-  solutes_cations <- list("Aluminum (Al)" = "Al",
-                          "Magnesium (Mg)" = "Mg",
-                          "Calcium (Ca)" = "Ca",
-                          "Sodium (Na)" = "Na",
-                          "Potassium (K)" = "K")
-  
-  solutes_anions <- list("Phosphate (PO4)" = "PO4",
-                         "Sulfate (SO4)" = "SO4",
-                         "Nitrate (NO3)" = "NO3",
-                         "Silicon Dioxide (SiO2)" = "SiO2",
-                         "Chloride (Cl)" = "Cl",
-                         "Bicarbonate (HCO3)" = "HCO3")
-  
-  solutes_H <- list("Hydrogen (H)" = "H",
-                    "pH" = "pH")
-  
-  all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
-  
-  ########### END OF IMPORTANT PRELIMINARY INFO #############################################
-  
-  
-  
-  
-  ########### SIDEBAR FUNCTIONS ##############################################################
-  ###  allow 'select all' interactivity, do not edit
-  
-  observeEvent(input$select_all_ions, {
-    if(input$select_all_ions == 0) {}
-    else if (input$select_all_ions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")
-      updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
-    else{
-      updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)
-      updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
-  })
-  
-  observeEvent(input$select_all_anions, {
-    if(input$select_all_anions == 0) {}
-    else if (input$select_all_anions%%2 == 0){updateCheckboxGroupInput(session, "solutes_anions", selected = "PO4")}
-    else{updateCheckboxGroupInput(session, "solutes_anions", selected = solutes_anions)}
-  })
-  
-  observeEvent(input$select_all_cations, {
-    if(input$select_all_cations == 0) {}
-    else if (input$select_all_cations%%2 == 0){updateCheckboxGroupInput(session, "solutes_cations", selected = "K")}
-    else{updateCheckboxGroupInput(session, "solutes_cations", selected = solutes_cations)}
-  })
-  
-  observeEvent(input$select_all_ws, {
-    if(input$select_all_ws == 0) {updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
-    else if (input$select_all_ws%%2 == 0){updateCheckboxGroupInput(session, "watersheds", selected = "ws1")}
-    else{updateCheckboxGroupInput(session, "watersheds", selected = watersheds)}
-  })
-  
-  observeEvent(input$select_all_ws2, {
-    if(input$select_all_ws2 == 0) {updateCheckboxGroupInput(session, "watersheds2", selected = "ws1")}
-    else if (input$select_all_ws2%%2 == 0){updateCheckboxGroupInput(session, "watersheds2", selected = "ws1")}
-    else{updateCheckboxGroupInput(session, "watersheds2", selected = watersheds)}
-  })
-  
-  solutes_NO3 <- reactive({c(input$solutes_NO3)})
-  solutes_NO33 <- reactive({c(input$solutes_NO33)})
-  
-  ########### END OF SIDEBAR FUNCTIONS ####################################################
-  
-  
-  
-  
-  ########### DATA IMPORT ####################################################
-  
-  lai_data <- read_csv("lai.txt")
-  # lai_data <- read_csv("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/lai.txt")
-  load("D:/Duke/Work(Environ)/Programming/hbef/data_stories/ice_storm/precip_streamflow_dfs.RData")
-  load("precip_streamflow_dfs.RData")
-  imported_data <- precip_streamflow_long
-  
-  #Matt normalization####################
-  #####YEARLY#####
-  ws_cast_year <- imported_data %>%
-    filter(granularity=='year') %>% 
-    filter(source=='streamflow') %>%
-    filter(solute=='NO3') %>%
-    dcast(.,date+water_year+solute~ws,value.var='flux')
-  
-  #normalize data by subtracting ws6 from each
-  ws_cast_year$"n2" <- ws_cast_year$"2"-ws_cast_year$"6"
-  ws_cast_year$"n4" <- ws_cast_year$"4"-ws_cast_year$"6"
-  ws_cast_year$"n5" <- ws_cast_year$"5"-ws_cast_year$"6"
-  
-  #rename ws columns so I can name normalized columns just numbers to make merging easier
-  names(ws_cast_year)[names(ws_cast_year) == "2"] <- "ws2"
-  names(ws_cast_year)[names(ws_cast_year) == "4"] <- "ws4"
-  names(ws_cast_year)[names(ws_cast_year) == "5"] <- "ws5"
-  names(ws_cast_year)[names(ws_cast_year) == "n2"] <- "2"
-  names(ws_cast_year)[names(ws_cast_year) == "n4"] <- "4"
-  names(ws_cast_year)[names(ws_cast_year) == "n5"] <- "5"
-  
-  #melt function to get them all back together (new tidyr version is spread)
-  ws_cast_year <- melt(ws_cast_year, id.vars = c("date","water_year","solute"), measure.vars = c("2","4","5"),
-       variable.name = "ws", value.name = "normalized_flux")
-  
-  #add granularity column with "year"
-  ws_cast_year$granularity <- rep("year", nrow(ws_cast_year))
-  
-  #repeat for month and week
-  #####MONTHLY#####
-  ws_cast_month <- imported_data %>%
-    filter(granularity=='month') %>% 
-    filter(source=='streamflow') %>%
-    filter(solute=='NO3') %>%
-    dcast(.,date+water_year+solute~ws,value.var='flux')
-  
-  #normalize data by subtracting ws6 from each
-  ws_cast_month$"n2" <- ws_cast_month$"2"-ws_cast_month$"6"
-  ws_cast_month$"n4" <- ws_cast_month$"4"-ws_cast_month$"6"
-  ws_cast_month$"n5" <- ws_cast_month$"5"-ws_cast_month$"6"
-  
-  #rename ws columns so I can name normalized columns just numbers to make merging easier
-  names(ws_cast_month)[names(ws_cast_month) == "2"] <- "ws2"
-  names(ws_cast_month)[names(ws_cast_month) == "4"] <- "ws4"
-  names(ws_cast_month)[names(ws_cast_month) == "5"] <- "ws5"
-  names(ws_cast_month)[names(ws_cast_month) == "n2"] <- "2"
-  names(ws_cast_month)[names(ws_cast_month) == "n4"] <- "4"
-  names(ws_cast_month)[names(ws_cast_month) == "n5"] <- "5"
-  
-  #melt function to get them all back together (new tidyr version is spread)
-  ws_cast_month <- melt(ws_cast_month, id.vars = c("date","water_year","solute"), measure.vars = c("2","4","5"),
-                       variable.name = "ws", value.name = "normalized_flux")
-  
-  #add granularity column with "month"
-  ws_cast_month$granularity <- rep("month", nrow(ws_cast_month))
-  
-  #####WEEKLY#####
-  ws_cast_week <- imported_data %>%
-    filter(granularity=='week') %>% 
-    filter(source=='streamflow') %>%
-    filter(solute=='NO3') %>%
-    dcast(.,date+water_year+solute~ws,value.var='flux')
-  
-  #normalize data by subtracting ws6 from each
-  ws_cast_week$"n2" <- ws_cast_week$"2"-ws_cast_week$"6"
-  ws_cast_week$"n4" <- ws_cast_week$"4"-ws_cast_week$"6"
-  ws_cast_week$"n5" <- ws_cast_week$"5"-ws_cast_week$"6"
-  
-  #rename ws columns so I can name normalized columns just numbers to make merging easier
-  names(ws_cast_week)[names(ws_cast_week) == "2"] <- "ws2"
-  names(ws_cast_week)[names(ws_cast_week) == "4"] <- "ws4"
-  names(ws_cast_week)[names(ws_cast_week) == "5"] <- "ws5"
-  names(ws_cast_week)[names(ws_cast_week) == "n2"] <- "2"
-  names(ws_cast_week)[names(ws_cast_week) == "n4"] <- "4"
-  names(ws_cast_week)[names(ws_cast_week) == "n5"] <- "5"
-  
-  #melt function to get them all back together (new tidyr version is spread)
-  ws_cast_week <- melt(ws_cast_week, id.vars = c("date","water_year","solute"), measure.vars = c("2","4","5"),
-                        variable.name = "ws", value.name = "normalized_flux")
-  
-  #add granularity column with "week"
-  ws_cast_week$granularity <- rep("week", nrow(ws_cast_week))
-  #####
-  #merge all ws_cast s together
-  ws_cast <- merge(ws_cast_month, ws_cast_year, all = T)
-  ws_cast <- merge(ws_cast, ws_cast_week, all = T)
 
-  ########### END OF DATA IMPORT #############################################
+  ########### REACTIVE DATA AND X Y #########################################
   
-  
-  ########### REACTIVE DATA AND X Y 2 #########################################
-  #Reactive Data Normal
-  
-  reactive_data2 <- reactive({
-    data <- imported_data
+  #Reactive Data for NO3 trends
+  reactive_data <- reactive({
+    data <- water_chem_data
     data <- data[data$granularity %in% input$granularity,]
-    data <- data[data$source %in% input$water_sources2,]
-    data <- data[data$solute %in% solutes_NO3(),] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
+    data <- data[data$source %in% c("streamflow"),]
+    data <- data[data$solute %in% c("NO3"),] 
     data <- data[data$ws %in% input$watersheds2,]
   })
-  
-  
+
   x <- reactive({
     if(input$granularity == "week"){"water_date"}
     else if(input$granularity == "month"){"water_date"}
@@ -245,234 +81,204 @@ shinyServer(function(session, input, output) {
     else if(input$units =="flux"){"flux"}
   })
   
-  log_transform <- reactive({
-    if(input$log == "ln"){"transform"}
-    else{"no_transform"}
-  })
-
-  ########### REACTIVE DATA AND X Y 3 #########################################
-  #Reactive Data Normal
-  
-  reactive_data3 <- reactive({
-    data <- imported_data
-    data <- data[data$granularity %in% input$granularity,]
-    data <- data[data$source %in% input$water_sources3,]
-    data <- data[data$solute %in% solutes_NO33(),] 
-    #note that solutes is a function, that's because the inputs for solutes come from input$cations and input$anions
-    data <- data[data$ws %in% input$watersheds3,]
+  #Reactive flux data  
+  reactive_data_flux <- reactive({
+    data <- water_chem_data
+    data <- data[data$granularity %in% input$granularity3,]
+    data <- data[data$source %in% c("streamflow"),]
+    data <- data[data$ws %in% c("1", "6"),]
+    data <- data[data$solute %in% c("NO3"),] 
   })
   
+  yflux <- reactive({
+    {"flux"}
+  })
+  
+  #Reactive normalized flux data
   reactive_data_norm <- reactive({
-    data_norm <- merge(imported_data, ws_cast, all = T)
-    data_norm <- data_norm[data_norm$granularity %in% input$granularity3,]
-    data_norm <- data_norm[data_norm$source %in% c("streamflow"),]
-    data_norm <- data_norm[data_norm$ws %in% c("2", "4", "5"),]
-    data_norm <- data_norm[data_norm$solute %in% c("NO3"),]
+    data <- water_chem_data
+    data <- data[data$granularity %in% input$granularity3,]
+    data <- data[data$source %in% c("streamflow"),]
+    data <- data[data$ws %in% c("2", "4", "5"),]
+    data <- data[data$solute %in% c("NO3"),]
   })
   
-  x3 <- reactive({
+  xflux <- reactive({
     if(input$granularity3 == "week"){"water_date"}
     else if(input$granularity3 == "month"){"water_date"}
     else if(input$granularity3 == "year"){"water_year"}
   })
   
-  y3 <- reactive({
-    if(input$units3 =="mg/L"){"concentration_mg"}
-    else if(input$units3 =="uEquivalent/L"){"concentration_ueq"}
-    else if(input$units3 =="uMole/L"){"concentration_umol"}
-    else if(input$units3 =="flux"){"flux"}
-    else if (input$units3=="normalized_flux"){"normalized_flux"}
+  ynorm <- reactive({
+    {"normalized_flux"}
   })
   
-  log_transform <- reactive({
-    if(input$log3 == "ln"){"transform"}
-    else{"no_transform"}
-  })
-  
-  ########### PLOT FUNCTIONS 2 #########################################
+  ########### PLOT FUNCTION #########################################
   
   ## GGPLOT TIME FUNCTION
-  ggplot_function <- function(data, x, y, ncol = NULL, nrow = NULL, log){
+  ggplot_function <- function(data, x, y, log, units, date_range){
     
-    if(log) {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",input$units, ")"))}
+    #if statement to make log Y axis and define plot basics
+    if(log == "log") {
+      plot <- ggplot(data=data, aes(x= get(x), y= logb(get(y), base=exp(1)), linetype= ws, color = solute, shape = source))+
+        labs(x = "Water Year", y = paste("log", "(",units, ")"))}
     
     else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = input$units)}
+      plot <- ggplot(data=data, aes(x= get(x), y= get(y), color = solute, shape = source, linetype= ws))+
+        labs(x = "Water Year", y = units)}
     
-    final <- plot+ my_theme + geom_line(size = 1) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range2[1]), max(input$date_range2[2]))+ 
+    #create rest of basic plot format
+    final <- plot+ my_theme + geom_line(size = 0.5) + 
+      geom_point(size = 1.3, fill = "white", stroke = 0.5, 
+                 aes(text = paste("Watershed: ", ws, "<br>", "Value:", get(y), "<br>", "Date: ", get(x)))) + 
+      xlim(min(date_range[1]), max(date_range[2]))+ 
       geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
-      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 22, color = "black")+
+      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = 5, color = "black")+
       scale_shape_manual(values = source_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))
-    
-    ggplotly(  
-      final, tooltip = "text",
-      width = 900) %>%
+      scale_color_manual(values = color_anion) +
+      scale_linetype_manual(values = watershed_linetypes)
+    #wrap in plotly
+    ggplotly(final, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-  }
-
-  ########### PLOT FUNCTIONS 3 #########################################
-  
-  ## GGPLOT TIME FUNCTION 3.1
-  ggplot_function3.1 <- function(data, x, y, ncol = NULL, nrow = NULL, log){
-    
-    if(log) {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = ws, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",input$units3, ")"))}
-    
-    else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = ws, alpha = ws))+
-        labs(x = "Water Year", y = input$units3)}
-    
-    final <- plot+ my_theme + geom_line(size = 1) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Water Source: ", source, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
-      geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
-      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = -8, color = "black")+
-      scale_shape_manual(values = watershed_shapes) +
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))
-    
-    ggplotly(  
-      final, tooltip = "text",
-      width = 900) %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-  }
-
-
-  ## GGPLOT TIME FUNCTION _excess
-  ggplot_function_excess <- function(data, x, y, ncol = NULL, nrow = NULL, log){
-    
-    if(log) {
-      plot <- ggplot(data=data, aes(x = get(x), y = logb(get(y), base=exp(1)), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = paste("log", "(",input$units3, ")"))}
-    
-    else{
-      plot <- ggplot(data=data, aes(x = get(x), y = get(y), color = solute, shape = source, alpha = ws))+
-        labs(x = "Water Year", y = input$units3)}
-    
-    final <- plot+ my_theme + geom_line(size = 1) + 
-      geom_point(size = 1.5, fill = "white", stroke = 0.5, 
-                 aes( text = paste("Solute: ", solute, "<br>", "Watershed: ", ws, "<br>",
-                                   "Value:", get(y), "<br>", "Date: ", get(x)))) + 
-      xlim(min(input$date_range3[1]), max(input$date_range3[2]))+ 
-      geom_vline(size = 0.5, xintercept = 10235, alpha = 0.5)+
-      annotate("text", label = "   Ice storm", x = as.Date("1998-01-07"), y = -8, color = "black")+
-      scale_shape_manual(values = source_shapes)+
-      scale_color_manual(values = solute_palette) +
-      scale_alpha_discrete(range = c(0.9, 0.5))
-    
-    ggplotly(  
-      final, tooltip = "text",
-      width = 900) %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-    
-  }
-  
-    
+      config(showLink = FALSE) 
+    }
   
   #############################################################
   ########### OUTPUTS #########################################
   #############################################################
   
-  #ggplotly that shows most plots increase in lai following the ice storm
+  #ggplotly that shows most plots increase in tree lai following the ice storm
   output$lai_plot <- renderPlotly({
-    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], aes(x = YEAR, y = LAIT, color = ELEVATION_M))+
+    lai_plot <- ggplot(lai_data[lai_data$WS == input$watersheds1,], #filtered by WS1 becuase it showed trends more clearly
+                       aes(x = YEAR, y = LAIT, color = ELEVATION_M))+ my_theme+
       geom_point(aes(text = paste("Year: ", YEAR, "<br>", "LAI: ", LAIT)))+
       geom_smooth(method = "lm", se = F, size = 0.5)+
-      theme(axis.title.x = element_text(face="bold", colour="#990000", size=20))+
-      ylab("Leaf Area Index T")+
-      facet_wrap(~PLOT)+
-      theme(axis.text.x = element_text(angle = 90, hjust = 1))
-    
-    lai_plot <- ggplotly(lai_plot, tooltip = "text",
-                         width = 900) %>%
+      labs(color="Plot Elevation", x=" ", y="LAIT (meter-squared per meter-squared)")+ #LAIT = LAI of only trees
+      facet_wrap(~PLOT)+ coord_cartesian(ylim = c(2,11))+
+      theme(axis.text.x = element_text(angle = 90, hjust = 1), 
+            legend.title = element_text("Plot Elevation", family = "Helvetica"))
+    #wrap in plotly
+    lai_plot <- ggplotly(lai_plot, tooltip = "text") %>%
       config(displayModeBar = FALSE) %>%
       config(showLink = FALSE)
-    
+    #make plot readjust consistently to fill window
     lai_plot$x$layout$width <- NULL
     lai_plot$y$layout$height <- NULL
     lai_plot$width <- NULL
     lai_plot$height <- NULL
     lai_plot %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
+  })
+  
+  #plot of beech, sugar maple, etc. leaf count decline due to ice storm
+  output$leaf_count <- renderPlotly({
+    yearly_count_means<-yearly_count_means[yearly_count_means$SITE != "W5",] #filter for all but w5 since w5 has so much missing data
+    #filter for all but Aspen and Pin Cherry since they are always zero
+    yearly_count_means<-yearly_count_means[yearly_count_means$species != "Aspen",]
+    yearly_count_means<-yearly_count_means[yearly_count_means$species != "Pin Cherry",]
+    
+    #if statement for log Y axis
+    if(input$log_counts == "log") {
+      plot <- ggplot(yearly_count_means, aes(x=YEAR, y=logb(count, base=exp(1)), color = species))+
+        labs(x = " ", y = paste("log", "(Leaf counts)"))+
+        coord_cartesian(ylim = c(-1,5))}
+    
+    else{
+      plot <- ggplot(yearly_count_means, aes(x=YEAR, y=count, color = species))+
+        labs(x = " ", y = "Leaf Counts")}
+    
+    #rest of plot
+    leaf_count <- plot + geom_line(size=0.5)+ my_theme+
+      geom_point(size=1.3, 
+                 #text/variables to display in the plotly tooltip hover
+                 aes(text = paste("Species: ", species, "<br>", "Leaf count: ", count, "<br>", "Year: ", YEAR)))+
+      #facet by site and rename facets to be full site names
+      facet_wrap(~SITE, ncol = 1, labeller= as_labeller(site_names))+
+      xlim(min(input$date_range_count[1]), max(input$date_range_count[2]))+
+      #Ice storm annotation
+      geom_vline(size = 0.5, xintercept = 1998, alpha = 0.5)+
+      annotate("text", label = "   Ice storm", x = 1998, y = 120, color = "black")
+    
+    #Wrap in plotly and hide unnecessary plotly toolbar
+    leaf_count <- ggplotly(leaf_count, tooltip = "text") %>%
+      config(displayModeBar = FALSE) %>%
+      config(showLink = FALSE) %>%
+      #annotate legend title so that it's connected to the legend itself
+      add_annotations(text="Species", xref="paper", yref="paper",
+                      x=1, xanchor="left",
+                      y=0.8, yanchor="bottom",    # Same y as legend below
+                      legendtitle=TRUE, showarrow=FALSE) %>%
+      layout(legend=list(y=0.8, yanchor="top"))
+    
+    #manually adjust margins so axis labs aren't cut off
+    leaf_count$x$layout$margin$l <- leaf_count$x$layout$margin$l + 30
+    leaf_count$x$layout$margin$b <- leaf_count$x$layout$margin$b + 30
+    
+    #makes plot readjust correctly to window
+    leaf_count$x$layout$width <- NULL
+    leaf_count$y$layout$height <- NULL
+    leaf_count$width <- NULL
+    leaf_count$height <- NULL
+    leaf_count %>%
+      layout(autosize = TRUE)
   })
   
   #plot to generally show how the ice storm affected NO3 (conc or flux?)
   output$NO3_plot <- renderPlotly({
-    NO3_plot <- ggplot_function(reactive_data2(), x(), y(), ncol = 1, log = input$log) #probs should use Camila's theme
-    
+    NO3_plot <- ggplot_function(reactive_data(), x(), y(), log=input$log, units=input$units, date_range=input$date_range2)
+    #readjusts plot size to consistently fill window
     NO3_plot$x$layout$width <- NULL
     NO3_plot$y$layout$height <- NULL
     NO3_plot$width <- NULL
     NO3_plot$height <- NULL
     NO3_plot %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE, showlegend = FALSE)
   })
   
-  #make a plot of nitrates like in the 2003 paper
-  #(moles/ha-yr (flux) vs water year, faceted into output for ws1,6 and excess (norm) for ws2,4,5)
-  #have line for ws1 and ws6 show up on same graph... write an if statement when weekly data is figured out
+  #recreate plots of nitrate fluxes (Bernhardt et. al, 2003)
+  #(moles/ha-yr (flux) vs water year, faceted into NO3 streamflow for ws1,6 and excess (normalized) for ws2,4,5)
   output$NO3_output <- renderPlotly({
-    NO3_output <- ggplot_function3.1(reactive_data3(), x3(), y = imported_data$flux, ncol = 1, log = input$log3)
+    NO3_output <- ggplot_function(reactive_data_flux(), xflux(), yflux(), log=input$log_flux, units="moles/ha-yr", date_range=input$date_range3)%>%
+      #annotate legend title so that it is connected to the legend itself
+      add_annotations(text="Watershed", xref="paper", yref="paper",
+                       x=1, xanchor="left",
+                       y=0.8, yanchor="bottom",    # Same y as legend below
+                       legendtitle=TRUE, showarrow=FALSE) %>%
+      layout(legend=list(y=0.8, yanchor="top"))
+    #readjusts plot size to consistently fill window
     NO3_output$x$layout$width <- NULL
     NO3_output$y$layout$height <- NULL
     NO3_output$width <- NULL
     NO3_output$height <- NULL
     NO3_output %>%
-      layout(autosize = TRUE, height = 600)
-  })
-  #simple version of NO3 output to help see what should be interactive, etc
-  output$static_NO3_output <- renderPlotly({
-    streamflow_NO3_data <- imported_data
-    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$source %in% c("streamflow"),]
-    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$solute %in% c("NO3"),]
-    streamflow_NO3_data <- streamflow_NO3_data[streamflow_NO3_data$granularity %in% input$granularity3,]
-    
-    static_NO3_output <- ggplot(NULL, aes(get(x3()), y = flux, color = "#BF1616", shape = ws))+ my_theme+
-      geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "1",])+
-      geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws =="1",])+
-      geom_line(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
-      geom_point(data = streamflow_NO3_data[streamflow_NO3_data$ws == "6",])+
-      scale_shape_manual(values = watershed_shapes)
-
-    static_NO3_output <- ggplotly(
-      static_NO3_output, #tooltip = "text",
-      width = 900) %>%
-      config(displayModeBar = FALSE) %>%
-      config(showLink = FALSE)
-
-    static_NO3_output$x$layout$width <- NULL
-    static_NO3_output$y$layout$height <- NULL
-    static_NO3_output$width <- NULL
-    static_NO3_output$height <- NULL
-    static_NO3_output %>%
-      layout(autosize = TRUE, height = 600)
+      layout(autosize = TRUE)
+    #manually code what shows in the legend
+    NO3_output[['x']][['data']][[1]][['name']] <- '1'
+    NO3_output[['x']][['data']][[2]][['name']] <- '6'
+    NO3_output
   })
   
-  #NO3 excess
+  #NO3 excess plot
   output$NO3_excess <- renderPlotly({
-    NO3_excess <- ggplot_function_excess(reactive_data_norm(), x3(), y3(), ncol = 1, log = input$log3)
+    NO3_excess <- ggplot_function(reactive_data_norm(), xflux(), ynorm(), log="linear", units="moles/ha-yr", date_range=input$date_range3)%>%
+      #annotate legend title so that it is connected to the legend itself
+      add_annotations(text="Watershed", xref="paper", yref="paper",
+                      x=1, xanchor="left",
+                      y=0.8, yanchor="bottom",    # Same y as legend below
+                      legendtitle=TRUE, showarrow=FALSE) %>%
+      layout(legend=list(y=0.8, yanchor="top"))
+    
+    #readjusts plot size to consistently fill window
     NO3_excess$x$layout$width <- NULL
     NO3_excess$y$layout$height <- NULL
     NO3_excess$width <- NULL
     NO3_excess$height <- NULL
     NO3_excess %>%
-      layout(autosize = TRUE, height = 600)
-    })
+      layout(autosize = TRUE)
+    #manually code what shows in the legend
+    NO3_excess[['x']][['data']][[1]][['name']] <- '2'
+    NO3_excess[['x']][['data']][[2]][['name']] <- '4'
+    NO3_excess[['x']][['data']][[3]][['name']] <- '5'
+    NO3_excess
+  })
 })

@@ -181,11 +181,6 @@ shinyServer(function(session, input, output) {
     else if(input$units =="Eq/ha-yr"){"flux"}
   })
   
-  log_transform <- reactive({
-    if(input$log == "ln"){"transform"}
-    else{"no_transform"}
-  })
-  
   ########### PLOT FUNCTIONS #########################################
   
   ## GGPLOT TIME FUNCTION

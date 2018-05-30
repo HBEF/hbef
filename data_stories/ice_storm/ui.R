@@ -1,39 +1,22 @@
 library(ggplot2)
-library(lubridate)
-library(readr)
-library(tidyr)
-library(dplyr)
+#library(lubridate) #detach("package:<packageName>", unload=TRUE)
+#library(readr) #If this is only run once to create the ui, then I don't think these are needed...
+#library(tidyr)
+#library(dplyr)
 library(shiny)
 library(plotly)
 library(ggthemes)
 library(directlabels)
+library(shinydashboard)
 
 
 ########### IMPORTANT LISTS ############
 
-
 ###  Lists for the sidebar  ###
 #Edit if there are values that do not appear or are not relevant to your data. 
 
-solutes_cations <- list("Aluminum (Al)" = "Al",
-                        "Magnesium (Mg)" = "Mg",
-                        "Calcium (Ca)" = "Ca",
-                        "Sodium (Na)" = "Na",
-                        "Potassium (K)" = "K")
-
-solutes_anions <- list("Phosphate (PO4)" = "PO4",
-                       "Sulfate (SO4)" = "SO4",
-                       "Nitrate (NO3)" = "NO3",
-                       "Silicon Dioxide (SiO2)" = "SiO2",
-                       "Chloride (Cl)" = "Cl",
-                       "Bicarbonate (HCO3)" = "HCO3")
-solutes_H <- list("Hydrogen (H)" = "H",
-                  "pH" = "pH")
-
-all_solutes <- c(solutes_cations, solutes_anions, solutes_H)
-
 solutes_NO3 <- list("Nitrate (NO3)" = "NO3")
-                       
+
 watersheds <- list("Watershed 1" = "1",
                    "Watershed 2" = "2", 
                    "Watershed 3" = "3",
@@ -44,8 +27,9 @@ watersheds <- list("Watershed 1" = "1",
                    "Watershed 8" = "8",
                    "Watershed 9" = "9")
 
+#watershed choices for LAI plot
 watersheds1 <- list("Watershed 1" = "1",
-                   "Watershed 6" = "6")
+                    "Watershed 6" = "6")
 
 water_sources <- list("Precipitation (P)" = "precipitation",
                       "Discharge (Q)" = "streamflow")
@@ -53,313 +37,361 @@ water_sources <- list("Precipitation (P)" = "precipitation",
 granularity <- list("Year (VWC)" = "year",
                     "Month (VWC)" = "month",
                     "Week" = "week")
-granularity3 <- list("Year (VWC)" = "year",
-                    "Month (VWC)" = "month",
-                    "Week" = "week")
 
 units <- list("uEquivalent/L","uMole/L", "mg/L", "flux")
-
-units3 <- list("uEquivalent/L","uMole/L", "mg/L", "flux", "normalized_flux")
-
-units_lai <- list("meterSquaredPerMeterSquared", ("NO^2"))
-
-units_flux <- list("flux")
 
 #######################################################################################
 ########### APPLICATION UI ############################################################
 ########################################################################################
 
-shinyUI(fluidPage(
-  
-  ########### HEAD - DO NOT EDIT ################################################
-  theme = "app.css",
-  tags$head(includeScript(system.file('www', 'ajax.js'))),
-  tags$head(includeScript(system.file('www', 'hubbard.js'))),
-  tags$head(tags$style(HTML(
-    "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
-  ###############################################################################
-  
-  ########### BODY ##############################################################
-  
-  tabsetPanel(id = "top", type = "pills",
-              
-              
-              ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
-              
-              tabPanel("LAI",
-                       
-                       
-                       
-                       ########################### QUESTION #1 ###################################
-                       
-                       fluidRow(
-                         tags$div(class = "container_question", tags$h3("Framework for Ice Storm... still in progress!"))
-                       ),
-                       
-                       
-                       #---------VISUALIZATION FOR QUESTION #1 ---------#
-                       
-                       fluidRow(
-                         
-                         sidebarLayout(
-                           ############## SIDE BAR 1 ################ 
-                           #You can edit what the default selected options are. 
-                           #You can also delete inputs if you are not allowing 
-                           #the user to change that particular input. 
-                           
-                           sidebarPanel(
-                             
-                             ##Watersheds
-                             fluidRow(
-                               column(12, h4("Watersheds"), 
-                                      selectInput("watersheds1", label = "",
-                                                  choices = watersheds1,
-                                                  selected = "1"))), width = 4),
-                           
-                           ############## END OF SIDEBAR 1 #######
-                           
-                           ############## GRAPH 1 #################### 
-                           #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph", 
-                                              tabsetPanel(id = "plot_tab",
-                                                          
-                                                          ### PLOT VIEW 1
-                                                          tabPanel("LAI by plot", plotlyOutput("lai_plot", height = "auto"))
-                                              )), width = 8), 
-                           position = "right"
-                         )
-                         ############## END OF GRAPH 1 ################ 
-                       ),
-                       
-                       #---------END OF VISUALIZATION FOR QUESTION #1 ---------#
-                       
-                       
-                       #--------- TEXT QUESTION #1 ----------------------------#
-                       
-                       tags$div(class = "container_paragraph", fluidRow(
-                         tags$p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
-                                that damaged the experimental watersheds.  The leaf area index
-                                (LAI) is one way to track the regrowth of the canopy.")
-                         ))
-                       #--------- END OF TEXT QUESTION #1 ----------------------------#
-                       
-                       ########################### END OF QUESTION #1 ###################################
-                       
-                       
-                         ),  ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 1 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
-              
-              
-              
-
-              ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
-              
-              tabPanel("NO3 general",
-                       
-                       
-                       
-                       ########################### QUESTION #2 ###################################
-                       
-                       fluidRow(
-                         tags$div(class = "container_question", tags$h3("Post-ice storm NO3 behaviour"))
-                       ),
-                       
-                       
-                       #---------VISUALIZATION FOR QUESTION #2 ---------#
-                       
-                       fluidRow(
-                         
-                         sidebarLayout(
-                           ############## SIDE BAR 2 ################ 
-                           #You can edit what the default selected options are. 
-                           #You can also delete inputs if you are not allowing 
-                           #the user to change that particular input. 
-                           
-                           sidebarPanel(
-                             
-                             #Solutes
-                             fluidRow(
-                               column(12, h4("Solutes"))),
-                               column(12,
-                                      selectInput("solutes_NO3", label = "",
-                                                  choices = solutes_NO3)),
-                             
-                             ##Watersheds
-                             fluidRow(
-                               column(12, actionLink("select_all_ws2", h4("Watersheds")), 
-                                      selectInput("watersheds2", label = "",
-                                                  choices = watersheds, multiple = TRUE,
-                                                  selected = "6"))),
-                             
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources2", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = "streamflow",
-                                                             inline = TRUE))),
-                             
-                             ##Units  
-                             fluidRow(
-                               column(12, selectInput("units", label = h4("Units"),
-                                                      choices = units,
-                                                      selected = "mg/L")),
-                               column(12, checkboxInput("log", label = ("ln"),
-                                                        value = FALSE))),
-                             ##Granularity
-                             fluidRow(
-                               column(12, selectInput("granularity", label = h4("Granularity"),
-                                                      choices = granularity,
-                                                      selected = "month"))),
-                             
-                             ##Date Range
-                             sliderInput("date_range2", label = h4("Date Range"),
-                                         min = as.Date("1962-01-01"),
-                                         max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1997-01-01"), as.Date("2001-01-01"))), width = 4),
-                           
-                           
-                           ############## END OF SIDEBAR 2 #######
-                           
-                           ############## GRAPH 2 #################### 
-                           #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
-                                                                                   
-                                                                                   ### PLOT VIEW 1
-                                                                                   tabPanel("Plot1",plotlyOutput("NO3_plot")),
-                                                                                   
-                                                                                   ### PLOT VIEW 2
-                                                                                   tabPanel("Plot2",plotlyOutput(""))
-                           )), width = 8), 
-                           position = "right"
-                         )
-                         ############## END OF GRAPH 2 ################ 
-                       ),
-                       
-                       #---------END OF VISUALIZATION FOR QUESTION #2 ---------#
-                       
-                       
-                       #--------- TEXT QUESTION #2 ----------------------------#
-                       
-                       tags$div(class = "container_paragraph", fluidRow(
-                         tags$p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
+shinyUI(
+  dashboardPage(skin = "black",
+                dashboardHeader(title = tags$a(href="http://hbef.streampulse.org/","HB-WER Viz"), titleWidth = 200),
+                dashboardSidebar(
+                  width = 200,
+                  sidebarMenu(
+                    #icons from fontawesome.io/icons
+                    menuItem("Intro", tabName = "intro", icon = icon("snowflake-o")),
+                    menuItem("NO3 trends", tabName = "trends", icon = icon("line-chart")),
+                    menuItem("NO3 flux (Q)", tabName = "flux", icon = icon("arrows-v")),
+                    menuItem("Vegetation", tabName = "vegetation", icon = icon("leaf")),
+                    # footer here
+                    tags$div(class = "footer",tags$ul(
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#menu", "HOME")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#datastories","DATA STORIES")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#exploratory","EXPLORATORY TOOLS")),
+                      tags$li(tags$a(href="http://hbef.streampulse.org/#aboutus","ABOUT US")))
+                    )
+                  )
+                ),
+                dashboardBody(
+                  ########### HEAD - DO NOT EDIT ################################################
+                  tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
+                  tags$head(includeScript(system.file('www', 'ajax.js'))),
+                  tags$head(includeScript(system.file('www', 'hubbard.js'))),
+                  tags$head(includeScript(system.file('www','google_analytics_1.js'))),
+                  tags$head(includeScript(system.file('www','google_analytics_2.js'))),
+                  tags$head(includeScript(system.file('www','google_analytics_3.js'))),
+                  tags$head(tags$style(HTML(
+                    "@import url('https://fonts.googleapis.com/css?family=Montserrat');"))),
+                  ###############################################################################
+                  
+                  ########### BODY ##############################################################
+                  
+                  tabItems(
+                    
+                    ###############################################################################
+                    #### ------------  Intro  Tab ----------------------------------------- #######
+                    ###############################################################################
+                    
+                    tabItem(tabName = "intro",
+                            
+                            ########### TEXT FOR QUESTION #1 ##########
+                            
+                            #text that overlays image specified in the css file
+                            fluidRow(tags$div(class = "intro-text",
+                                              h1("understanding ice storms")))
+                            
+                            ########### END OF QUESTION #1 ##########
+                    ),# Closes Intro Tab
+                    
+                    ###############################################################################
+                    #### ------------ End of Intro Tab ------------------------------------ #######
+                    ###############################################################################  
+                    
+                    
+                    ###############################################################################
+                    #### ------------  NO3  trends  Tab ----------------------------------- #######
+                    ###############################################################################
+                    
+                    tabItem(tabName = "trends",
+                            
+                            ########### TITLE ####################
+                            fluidRow(tags$div(class = "container_question", 
+                                              tags$h1("How do NO3 concentrations change following an ice storm?")) 
+                            ),
+                            #############################################
+                            
+                            ########### GRAPH FOR QUESTION #1 ##########
+                            fluidRow(
+                              column(9,
+                                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                                            ######## OPTIONS
+                                            ###Units - Axis Log
+                                            tabPanel(shiny::icon("gear"),
+                                                     fluidRow(
+                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
+                                                                                 
+                                                                                 ##Units - Y Axis Log
+                                                                                 column(6, selectInput("log", label = "Y Axis",
+                                                                                                       choices = c("linear", "log"), 
+                                                                                                       selected = "linear")))))),
+                                            ######## PLOT 
+                                            tabPanel(shiny::icon("circle"),
+                                                     div(class = "titleRow", fluidRow(column(5, tags$h2("")), #put graph title if desired
+                                                                                      ##Granularity
+                                                                                      column(3,  offset = 4, selectInput("granularity", label = "",
+                                                                                                                         choices = granularity,
+                                                                                                                         selected = "month")))),
+                                                     ## NO3 over time plot
+                                                     plotlyOutput("NO3_plot")
+                                            ) #Closes tabpanel
+                                            
+                                     )# Closes tab Box
+                                     
+                              ), #Closes the column
+                              
+                              ######## SIDEBAR
+                              column(3, 
+                                     box(width = 13, height = "700px", id = "sidebar",
+                                         
+                                         ##Watersheds
+                                         fluidRow(
+                                           column(12, h4("Watersheds"), 
+                                                  selectInput("watersheds2", label = "",
+                                                              choices = watersheds, multiple = T,
+                                                              selected = "6"))),
+                                         
+                                         ##Units  
+                                         fluidRow(
+                                           column(12, selectInput("units", label = h4("Units"),
+                                                                  choices = units,
+                                                                  selected = "mg/L"))),
+                                         
+                                         ##Date Range
+                                         sliderInput("date_range2", label = h4("Date Range"),
+                                                     min = as.Date("1962-01-01"),
+                                                     max = as.Date("2014-01-01"),
+                                                     value = c(as.Date("1997-01-01"), as.Date("2001-01-01")),
+                                                     timeFormat = "%b %Y")) #formats time into "Jan 1962" format
+                                     
+                              )#Closes the column
+                              
+                            ),#Closes graph row
+                            
+                            ########### END OF GRAPH FOR QUESTION #1 ##########
+                            
+                            ########### TEXT FOR QUESTION #1 ##########
+                            
+                            tags$div(class = "",
+                                     fluidRow(column(width = 9,
+                                                     p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
                                 that damaged the experimental watersheds.  Some effects of the 
-                                storm can be tracked by the NO3 streamflow data.")
-                         ))
-                       #--------- END OF TEXT QUESTION #2 ----------------------------#
-                       
-                       ########################### END OF QUESTION #2 ###################################
-                       
-                       
-                         ), ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 2 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
-              
-              
-              
-              ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN TAB # 3 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
-              
-              tabPanel("NO3 flux",
-                       
-                       
-                       
-                       ########################### QUESTION #3 ###################################
-                       
-                       fluidRow(
-                         tags$div(class = "container_question", tags$h3("Post-ice storm NO3 flux"))
-                       ),
-                       
-                       
-                       #---------VISUALIZATION FOR QUESTION #3 ---------#
-                       
-                       fluidRow(
-                         
-                         sidebarLayout(
-                           ############## SIDE BAR 3 ################ 
-                           #You can edit what the default selected options are. 
-                           #You can also delete inputs if you are not allowing 
-                           #the user to change that particular input. 
-                           
-                           sidebarPanel(
-                             
-                             #Solutes
-                             fluidRow(
-                               column(12, h4("Solutes"))),
-                             column(12,
-                                    selectInput("solutes_NO33", label = "",
-                                                choices = solutes_NO3)),
-                             
-                             ##Watersheds
-                             fluidRow(
-                               column(12, actionLink("select_all_ws3", h4("Watersheds")), 
-                                      selectInput("watersheds3", label = "",
-                                                  choices = watersheds, multiple = TRUE,
-                                                  selected = "6"))),
-                             
-                             ##Water Sources
-                             fluidRow(
-                               column(12, checkboxGroupInput("water_sources3", label = h4("Water Sources"),
-                                                             choices = water_sources,
-                                                             selected = "streamflow",
-                                                             inline = TRUE))),
-                             
-                             ##Units  
-                             fluidRow(
-                               column(12, selectInput("units3", label = h4("Units"),
-                                                      choices = units3,
-                                                      selected = "normalized_flux")),
-                               column(12, checkboxInput("log3", label = ("ln"),
-                                                        value = FALSE))),
-                             ##Granularity
-                             fluidRow(
-                               column(12, selectInput("granularity3", label = h4("Granularity"),
-                                                      choices = granularity,
-                                                      selected = "year"))),
-                             
-                             ##Date Range
-                             sliderInput("date_range3", label = h4("Date Range"),
-                                         min = as.Date("1962-01-01"),
-                                         max = as.Date("2014-01-01"),
-                                         value = c(as.Date("1991-01-01"), as.Date("2014-01-01"))), width = 4),
-                           
-                           
-                           ############## END OF SIDEBAR 3 #######
-                           
-                           ############## GRAPH 3 #################### 
-                           #Edit the name of the plot based on the name given in the server.R file 
-                           mainPanel(tags$div(class="container_graph", tabsetPanel(id = "plot_tab",
-                                                                                   
-                                                                                   ### PLOT VIEW 1
-                                                                                   tabPanel("NO3 Plots Replication",
-                                                                                            h4("Static Output (ws1, ws6)"),
-                                                                                            plotlyOutput("static_NO3_output", height = "auto"),
-                                                                                            h4("Output (ws1, ws6)"),
-                                                                                            plotlyOutput("NO3_output", height = "auto"),
-                                                                                            h4("Excess (ws2, ws4, ws5)"),
-                                                                                            plotlyOutput("NO3_excess", height = "auto"))
-                           )), width = 8), 
-                           position = "right"
-                         )
-                         ############## END OF GRAPH 3 ################ 
-                       ),
-                       
-                       #---------END OF VISUALIZATION FOR QUESTION #3 ---------#
-                       
-                       
-                       #--------- TEXT QUESTION #3 ----------------------------#
-                       
-                       tags$div(class = "container_paragraph", fluidRow(
-                         tags$p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm
-                                that damaged the experimental watersheds.  Some effects of the 
-                                storm can be tracked by the NO3 flux data.")
-                         ))
-                       #--------- END OF TEXT QUESTION #3 ----------------------------#
-                       
-                       ########################### END OF QUESTION #3 ###################################
-                       
-                       
-                         ) ### >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> END OF MAIN TAB # 3 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-####
-              
-              
-              
-                       )# Closes Tabset Panel for Main Tabs
-  
-                       )#closes FluidPage
-              ) #closes ShinyUI
+                                       storm can be tracked by the NO3 streamflow data."))))
+                            
+                            ########### END OF QUESTION #1 ##########
+                    ),# Closes trends Tab
+                    
+                    ###############################################################################
+                    #### ------------ End of NO3 trends Tab ------------------------------- #######
+                    ###############################################################################  
+                    
+                    
+                    ###############################################################################
+                    #### ------------  Flux Tab  ------------------------------------------ #######
+                    ###############################################################################
+                    
+                    tabItem(tabName = "flux",
+                            
+                            ########### TITLE ####################
+                            fluidRow(tags$div(class = "container_question", 
+                                              tags$h1("Post-ice storm NO3 flux: plot replication (Bernhardt et. al, 2003)")) #full paper details in text below
+                            ),
+                            
+                            #############################################
+                            
+                            ########### GRAPH FOR QUESTION #1 ##########
+                            fluidRow(
+                              column(9,
+                                     #------ Box 1 --------#
+                                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                                            ######## OPTIONS
+                                            ###Units - Axis Log
+                                            tabPanel(shiny::icon("gear"),
+                                                     fluidRow(
+                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE,
+                                                                                 
+                                                                                 ##Units - Y Axis Log
+                                                                                 column(6, selectInput("log_flux", label = "Y Axis",
+                                                                                                       choices = c("linear", "log"), 
+                                                                                                       selected = "linear")))))),
+                                            ######## PLOT 
+                                            tabPanel(shiny::icon("circle"),
+                                                     div(class = "titleRow", fluidRow(column(9, tags$h2("Streamflow flux")))),
+                                                     ## Time Plot
+                                                     plotlyOutput("NO3_output")
+                                            ) #Closes tabpanel
+                                            
+                                     ),# Closes tab Box
+                                     
+                                     #------ End of Box 1 --------#
+                                     
+                                     #------ Box 2 --------#
+                                     
+                                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                                            ######## PLOT 
+                                            tabPanel(shiny::icon("circle"),
+                                                     div(class = "titleRow", fluidRow(column(9, tags$h2("Normalized streamflow flux")))),
+                                                     
+                                                     #text above plot
+                                                     p("*Note the 1966 devegetation spike (ws2), the 1971 stripcutting spike (ws4),
+                                                       and the 1983 whole tree harvest spike (ws5)."),
+                                                     p("To better see the effects of the ice storm, click and drag to zoom in."),
+                                                     
+                                                     ## plot of NO3 streamflow that exceeded ws6
+                                                     plotlyOutput("NO3_excess")
+                                            ) #Closes tabpanel
+                                            
+                                     )# Closes tab Box
+                                     
+                                     #------ End of Box 2 --------#
+                                     
+                              ), #Closes the column
+                              
+                              ######## SIDEBAR
+                              column(3, 
+                                     box(width = 13, height = "700px", id = "sidebar",
+                                         
+                                         ##Granularity
+                                         fluidRow(
+                                           column(12, selectInput("granularity3", label = h4("Granularity"),
+                                                                  choices = granularity,
+                                                                  selected = "year"))),
+                                         ##Date Range
+                                         sliderInput("date_range3", label = h4("Date Range"),
+                                                     min = as.Date("1962-01-01"),
+                                                     max = as.Date("2014-01-01"),
+                                                     value = c(as.Date("1963-01-01"), as.Date("2004-01-01")),
+                                                     timeFormat = "%b %Y"))
+                                     
+                              )#Closes the column
+                              
+                            ),#Closes graph row
+                            
+                            ########### END OF GRAPH FOR QUESTION #1 ##########
+                            
+                            ########### TEXT FOR QUESTION #1 ##########
+                            
+                            tags$div(class = "",
+                                     fluidRow(column(width = 9,
+                                                     p("On January 7-8, 1998 the HBEF was hit by a powerful ice 
+                                                       storm that damaged the experimental watersheds.  Some 
+                                                       effects of the storm can be tracked by the NO3 flux data. 
+                                                       The above plots were recreated from the 2003 paper 
+                                                       'In-stream uptake dampens effects of major forest 
+                                                       disturbance on watershed nitrogen export' by Emily Bernhardt, 
+                                                       Gene Likens, and Donald Buso."))))
+                            
+                            ########### END OF QUESTION #1 ##########
+                    ),# Closes Flux Tab
+                    
+                    ###############################################################################
+                    #### ------------  End of Flux Tab ------------------------------------ #######
+                    ############################################################################### 
+                    
+                    
+                    ###############################################################################
+                    #### ------------  Vegetation  Tab ------------------------------------ #######
+                    ###############################################################################
+                    
+                    tabItem(tabName = "vegetation",
+                            
+                            ########### TITLE ####################
+                            fluidRow(tags$div(class = "container_question",
+                                              tags$h1("How do ice storms affect vegetation?"))
+                            ),
+                            
+                            #############################################
+                            
+                            ########### GRAPH FOR QUESTION #1 ##########
+                            
+                            fluidRow(
+                              column(9,
+                                     #------ Box 1 --------#
+                                     
+                                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                                            ######## OPTIONS
+                                            ###Units - Axis Log
+                                            tabPanel(shiny::icon("gear"),
+                                                     fluidRow(
+                                                       column(6, offset = 6, box(width = 12, title = "X and Y", collapsible = TRUE, collapsed = FALSE, 
+                                                                                 
+                                                                                 ##Units - Y Axis Log
+                                                                                 column(6, selectInput("log_counts", label = "Y Axis",
+                                                                                                       choices = c("linear", "log"), 
+                                                                                                       selected = "linear")))))),
+                                            ######## PLOT 
+                                            tabPanel(shiny::icon("circle"),
+                                                     div(class = "titleRow", 
+                                                         fluidRow(column(7, tags$h2("Decline in leaf counts across species due to ice storm"),
+                                                                         p("(click on key to focus on specific species)")
+                                                         ))),
+                                                     ## plot of leaf counts from different tree species over time
+                                                     plotlyOutput("leaf_count")
+                                                     
+                                            ) #Closes tabpanel
+                                            
+                                     ), # Closes tab Box
+                                     
+                                     #------ End of Box 1 --------#
+                                     
+                                     #------ Box 2 --------#
+                                     tabBox(width = 12, height = "700px", side="right", selected = shiny::icon("circle"),
+                                            ######## OPTIONS
+                                            ######## PLOT 
+                                            tabPanel(shiny::icon("circle"),
+                                                     div(class = "titleRow", fluidRow(column(6, tags$h2("Vegetation increase after ice storm by plot")),
+                                                                                      ##Granularity
+                                                                                      column(3, offset = 2, h4("Watersheds"),
+                                                                                             selectInput("watersheds1", label = "",
+                                                                                                         choices = watersheds1,
+                                                                                                         selected = "1")))),
+                                                     ## plot of LAI by plot number
+                                                     plotlyOutput("lai_plot")
+                                            ) #Closes tabpanel
+                                            
+                                     )# Closes tab Box
+                                     
+                                     #------ End of Box 2 --------#
+                                     
+                              ), #Closes the column
+                              
+                              ######## SIDEBAR
+                              column(3, 
+                                     box(width = 13, height = "700px", id = "sidebar",
+                                         
+                                         ##Date Range for leaf counts
+                                         sliderInput("date_range_count", label = h4("Date Range"),
+                                                     min = 1993,
+                                                     max = 2013,
+                                                     value = c(1997, 2001),
+                                                     sep = "")
+                                         
+                                     )#Closes the box
+                                     
+                              )#Closes the column
+                              
+                            ),#Closes graph row
+                            
+                            ########### END OF GRAPH FOR QUESTION #1 ##########
+                            
+                            ########### TEXT FOR QUESTION #1 ##########
+                            
+                            tags$div(class = "",
+                                     fluidRow(column(width = 9,
+                                                     p("On January 7-8, 1998 the HBEF was hit by a powerful ice storm 
+                                                       that damaged the experimental watersheds.  The leaf area index 
+                                                       (LAI) is one way to track the regrowth of the canopy."))))
+                            
+                            ########### END OF QUESTION #1 ##########
+                    ) # Closes Vegetation Tab
+                    
+                    ###############################################################################
+                    #### ------------  End of Vegetation Tab ------------------------------ #######
+                    ###############################################################################
+                    
+                  )# Closes Tabset Panel for Main Tabs
+                )#Closes Dashboard Body
+  )#closes FluidPage
+) #closes ShinyUI
 

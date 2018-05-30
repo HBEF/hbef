@@ -22,14 +22,35 @@ save(precip_streamflow_long, file = "precip_streamflow_long.RData")
 precip_streamflow_wide <- plyr::rbind.fill(precip_streamflow_data_wide, precip_streamflow_weekly_data_wide)
 
 save(precip_streamflow_wide, file = "precip_streamflow_wide.RData")
+
 ```
+
+
+```{r}
+super_wide <- precip_streamflow_wide
+drop <- c("framey")
+df <- super_wide[, !(names(super_wide) %in% drop)]
+fixed <- c("ws","date","water_date","water_year", "granularity", "source")
+values <- colnames(df[, !(names(df) %in% fixed)])
+
+precip_streamflow_super_wide <- data.table::dcast(data.table::setDT(df), ws + date + water_date + water_year + granularity ~ source, value.var = values)
+
+precip_streamflow_super_wide$frame <- precip_streamflow_super_wide$water_date
+precip_streamflow_super_wide %<>% 
+  separate("frame", c("framey") )
+
+save(precip_streamflow_super_wide, file = "precip_streamflow_super_wide.RData")
+
+```
+
+
 
 ```{r}
 rm(list=ls())
 
 load("precip_streamflow_wide.RData")
+load("precip_streamflow_super_wide.RData")
 load("precip_streamflow_long.RData")
-load("precip_streamflow_diff_data_long.RData")
 
 save(list = ls(all.names = TRUE), file = "precip_streamflow_dfs.RData", envir = .GlobalEnv)
 ```

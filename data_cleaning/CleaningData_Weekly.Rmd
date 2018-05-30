@@ -5,7 +5,7 @@ output:  html_document
 
 ```{r message=FALSE}
 #Libraries
-#detach(package:plyr) ### Run once.. Important to get the weighted average to work. 
+
 library(tidyr)
 library(lubridate)
 library(dplyr)
@@ -35,40 +35,12 @@ importf <- function(alist, extension, apath, dfname){
 }
 
 
-#Applying lapply and then saving the output dfs back to the global environment Applies a function to each data frame in a list of data frames, and saves them to the global environment. 
-
-lapply_and_save <- function(a_df_list, a_function, optional_argument1, optional_argument2, optional_argument3, a_name) {
-  if(missing(optional_argument1) & missing(optional_argument2) & missing(optional_argument3)) {
-    temp_df <- lapply(a_df_list, a_function)
-    for (i in seq(temp_df))
-    assign(paste("w",i, a_name, sep = ""), temp_df[[i]], envir=.GlobalEnv)
-  }
-  else if(missing(optional_argument2) & missing(optional_argument3)){
-    temp_df <- lapply(a_df_list, a_function, optional_argument1)
-    for (i in seq(temp_df))
-    assign(paste("w",i, a_name, sep = ""), temp_df[[i]], envir=.GlobalEnv)
-  }
-  
-  else if(missing(optional_argument3)){
-    temp_df <- lapply(a_df_list, a_function, optional_argument1, optional_argument2)
-    for (i in seq(temp_df))
-    assign(paste("w",i, a_name, sep = ""), temp_df[[i]], envir=.GlobalEnv)
-  }
-  else {
-        temp_df <- lapply(a_df_list, a_function, optional_argument1,
-                          optional_argument2, optional_argument3) 
-        for (i in seq(temp_df))
-          assign(paste("w",i, a_name, sep = ""), temp_df[[i]], envir=.GlobalEnv)
-    }}
-
-
 #Replaces a value (by default -3) throughout a dataframe with another value (by default NA). 
 
 recodef <- function(df, replace_value = -3, replace_with = NA) {
         x <- df
         x[x == replace_value] <- replace_with
-        #return(x)
-        assign(deparse(substitute(df)), x, envir=.GlobalEnv)}
+        return(x)}
 
 
 #Replaces a value (by default -3) throughout a dataframe with another value (by default NA). 
@@ -76,8 +48,7 @@ recodef <- function(df, replace_value = -3, replace_with = NA) {
 renamecolf <- function(df, from, to) {
         x <- df
         names(x)[names(x) == from] <- to
-        #return(x)
-        assign(deparse(substitute(df)), x, envir=.GlobalEnv)}
+        return(x)}
 
 #Given year and month in two separate columns, creates a field called date that is in the format year, month, day with the day being the first day of the month (01)
 
@@ -86,7 +57,7 @@ create_date_field <- function(df){
   x <- unite(x, "date", c(`year`, `mo`), sep = "-")
   x["date"] <- apply(x[,c("date")],2, function(each){paste0(each, '-01')})
   x$date <- as.Date(x$date)
-  assign(deparse(substitute(df)), x, envir=.GlobalEnv)
+  return(x)
 }
 
 #Find Water year from date field, given water year starting month. 
@@ -95,7 +66,7 @@ get_water_date <- function(df, water_year_start = 153){
   x <- df
   x %<>%
     mutate(water_date = date - days(water_year_start - 1))
-  assign(deparse(substitute(df)), x, envir=.GlobalEnv)}
+  return(x)}
 
 #Create Year Date
 create_water_year_date <- function(df, water_year_start = 06){
@@ -105,7 +76,7 @@ create_water_year_date <- function(df, water_year_start = 06){
     separate(water_year_date, c("water_year"), sep = "-")
   x["water_year"] <- apply(x[,c("water_year")],2, function(x){paste0(x,'-', as.character(water_year_start), '-01')})
   x$water_year <- as.Date(x$water_year)
-  assign(deparse(substitute(df)), x, envir=.GlobalEnv)
+  return(x)
   }
 
 #Get H concentration from pH
@@ -113,17 +84,16 @@ create_water_year_date <- function(df, water_year_start = 06){
 get_Hydrogen <- function(df){
   x <- df
   x %<>% 
-    mutate(H = 10^(-pH)*1000)
-  #return(x)
-  assign(deparse(substitute(df)), x, envir=.GlobalEnv)}
+    mutate(H = 10^(-pH_week)*1000)
+  return(x)}
 
 
 #Gather function that creates solute and concentration_mg columns. It understands all columns that have a capital letter as elements and puts them under the solute column. It takes their corresponding values and puts them under the concentration_mg column. 
 gather_concentration <- function(df){
   x <- df
-  x <- gather(x, solute, concentration_mg_week, matches("[A-Z]", ignore.case = FALSE))
+  x <- gather(x, solute, concentration_mg_week, matches("^[A-Z]", ignore.case = FALSE))
   x$concentration_mg_week <- as.numeric(x$concentration_mg_week)
-  assign(deparse(substitute(df)), x, envir=.GlobalEnv)
+  return(x)
 }
 
 
@@ -133,7 +103,7 @@ gather_source <- function(df){
   x <- df
   x <- gather(x, source, water_mm_week, matches("precipitation|streamflow", ignore.case = FALSE))
   x$water_mm_week <- as.numeric(x$water_mm_week)
-  assign(deparse(substitute(df)), x, envir=.GlobalEnv)
+  return(x)
 }
 
 
@@ -147,15 +117,6 @@ df %>%
   arrange(desc(source)) %>%
   summarise_each(funs(diff), concentration_mg, concentration_ueq,concentration_umol,flux)}
 
-
-# precip_streamflow_weekly_data_long %>%
-#   filter(ws == "1")%>%
-#   filter(granularity == "week")%>%
-#   group_by(ws, water_year, water_date, granularity, solute) %>%
-#   arrange(desc(source)) %>%
-#   summarise(n=n())
-
-
 ```
 
 
@@ -168,20 +129,7 @@ df %>%
 streamflow_weekly <- read_csv("data_original/HBEF_stream_chemistry_1963-2013.csv")
 precipitation_weekly <- read_csv("data_original/HBEF_precipitation_chemistry_1963-2013.csv")
 
-load("public_data.Rdata", envir = parent.frame(), verbose = FALSE)
-
-#change charge for Al from NA to 3
-MW.data[4, "z"] <- 3
-
-#change charge for NH4 from NA to 1
-MW.data[5, "z"] <- 1
-
-#change charge for PO4 from NA to -3
-MW.data[11, "z"] <- -3
-
-#change charge for HCO3 from NA to -3
-newrow <- data.frame("solute" = "HCO3", "MW" = 61.0168, "z"= -1, stringsAsFactors=FALSE)
-MW.data <- rbind(MW.data, newrow)
+load("MW.data.Rdata", envir = parent.frame(), verbose = FALSE)
 
 
 ```
@@ -195,20 +143,27 @@ MW.data <- rbind(MW.data, newrow)
 
 #remove columns that will not be used yet. 
 precipitation_weekly %<>% 
-  select(-X1, -sp.cond, -note)
+  select(-X1, -note)
 
 
 streamflow_weekly %<>% 
-  select(-X1, -sp.cond, -temp, -hydro.limb, -note, -ANC, -DIC)
+  #select(-X1, -sp.cond, -temp, -hydro.limb, -note, -ANC, -DIC)
+  select(-X1, -hydro.limb, -note)
 
 
 #Change colnames to streamflow and precipitation --> this is important because we are trying to unify names. 
 #rename columns
-renamecolf(streamflow_weekly, "Q", "streamflow")
-renamecolf(precipitation_weekly, "precip", "precipitation")
+streamflow_weekly <- renamecolf(streamflow_weekly, "Q", "streamflow")
+precipitation_weekly <- renamecolf(precipitation_weekly, "precip", "precipitation")
 
-#renamecolf(streamflow_weekly, "ANC", "anc")
-renamecolf(precipitation_weekly, "site", "ws")
+streamflow_weekly <- renamecolf(streamflow_weekly, "pH", "pH_week")
+precipitation_weekly <- renamecolf(precipitation_weekly, "pH", "pH_week")
+
+streamflow_weekly <- renamecolf(streamflow_weekly, "sp.cond", "spcond")
+precipitation_weekly <- renamecolf(precipitation_weekly, "sp.cond", "spcond")
+
+streamflow_weekly <- renamecolf(streamflow_weekly, "ANC", "anc")
+precipitation_weekly <- renamecolf(precipitation_weekly, "site", "ws")
 
 precipitation_weekly$ws <- recodef(precipitation_weekly$ws, "S", 1)
 precipitation_weekly$ws <- recodef(precipitation_weekly$ws, "N", 7)
@@ -226,11 +181,12 @@ precipitation_weekly <- precipitation_weekly[!duplicated(precipitation_weekly[,c
 ```{r message = FALSE}
 #Create water date field
 
-get_water_date(streamflow_weekly, 152)
-get_water_date(precipitation_weekly, 152)
+streamflow_weekly <- get_water_date(streamflow_weekly, 152)
+precipitation_weekly <- get_water_date(precipitation_weekly, 152)
 
-create_water_year_date(streamflow_weekly, water_year_start = 06)
-create_water_year_date(precipitation_weekly, water_year_start = 06)
+#create water year
+streamflow_weekly <- create_water_year_date(streamflow_weekly, water_year_start = 01)
+precipitation_weekly <- create_water_year_date(precipitation_weekly, water_year_start = 01)
 
 ```
 
@@ -240,8 +196,8 @@ create_water_year_date(precipitation_weekly, water_year_start = 06)
 ```{r}
 #Get H from pH
 
-get_Hydrogen(streamflow_weekly)
-get_Hydrogen(precipitation_weekly)
+streamflow_weekly <-get_Hydrogen(streamflow_weekly)
+precipitation_weekly <- get_Hydrogen(precipitation_weekly)
 
 
 ```
@@ -252,13 +208,13 @@ get_Hydrogen(precipitation_weekly)
 ```{r}
 #Gather Solutes and Concentration_mg
 
-gather_concentration(streamflow_weekly)
-gather_concentration(precipitation_weekly)
+streamflow_weekly <-gather_concentration(streamflow_weekly)
+precipitation_weekly <- gather_concentration(precipitation_weekly)
 
 #Gather Water source so that there's a column for water source (either precip or streamflow) and one for 
 
-gather_source(streamflow_weekly)
-gather_source(precipitation_weekly)
+streamflow_weekly <-gather_source(streamflow_weekly)
+precipitation_weekly <- gather_source(precipitation_weekly)
 
 
 ```
@@ -274,6 +230,9 @@ precip_streamflow_weekly_data_long <- plyr::rbind.fill(precipitation_weekly, str
 #Join new complete df with molecular weight data (MW.data) to calculate mol and eq values. 
 
 precip_streamflow_weekly_data_long<- left_join(precip_streamflow_weekly_data_long, MW.data, by = "solute")
+
+precip_streamflow_weekly_data_long$spcond <- as.numeric(precip_streamflow_weekly_data_long$spcond)
+precip_streamflow_weekly_data_long$anc <- as.numeric(precip_streamflow_weekly_data_long$anc)
 
 
 # Calculate ueq, umol, and flux. 
@@ -301,10 +260,11 @@ After creating the new variables that find yearly data from month data, we are g
 #Gather for it to be long and then extract the granularity (month or year) from the column value
 
 precip_streamflow_weekly_data_long <- precip_streamflow_weekly_data_long %>%
-  gather(key, value, concentration_mg_week, water_mm_week, concentration_ueq_week,
+  gather(key, value, pH_week, concentration_mg_week, water_mm_week, concentration_ueq_week,
          concentration_umol_week, flux_week) %>%
   tidyr::extract(key, c('unit', 'granularity'), "(.*)_(.*)") %>% 
   spread(unit, value)
+
 
 ```
 
@@ -358,10 +318,10 @@ save(precip_streamflow_weekly_data_long, file = "precip_streamflow_weekly_data_l
 long <- precip_streamflow_weekly_data_long
 drop <- c("z", "MW", "framey")
 df <- long[, !(names(long) %in% drop)]
-fixed <- c("ws","date","water_date", "datetime", "water_year","canonical", "source", "water_mm", "granularity", "solute", "datetime", "canonical")
+fixed <- c("ws","date","water_date", "datetime", "water_year","canonical", "source", "water_mm", "granularity", "pH", "solute", "datetime", "canonical", "spcond", "temp", "anc")
 values <- colnames(df[, !(names(df) %in% fixed)])
 
-precip_streamflow_weekly_data_wide <- data.table::dcast(data.table::setDT(df), ws + date + water_date + datetime + water_year + source + water_mm + granularity + canonical ~ solute, value.var = values)
+precip_streamflow_weekly_data_wide <- data.table::dcast(data.table::setDT(df), ws + date + water_date + datetime + water_year + source + water_mm + granularity + pH + canonical + spcond + temp + anc ~ solute, value.var = values)
 
 precip_streamflow_weekly_data_wide$ws <- as.factor(precip_streamflow_weekly_data_wide$ws)
 precip_streamflow_weekly_data_wide$source <- as.factor(precip_streamflow_weekly_data_wide$source)
@@ -389,7 +349,6 @@ load("precip_streamflow_weekly_data_long.RData")
 load("precip_streamflow_weekly_data_wide.RData")
 
 save(list = ls(all.names = TRUE), file = "precip_streamflow_weekly_dfs.RData", envir = .GlobalEnv)
-
 
 ```
 
