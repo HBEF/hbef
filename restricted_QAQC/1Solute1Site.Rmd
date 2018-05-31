@@ -1,0 +1,165 @@
+---
+title: "HBEF 1Solute/1Site Report"
+output: pdf_document
+params:
+  HYDROLOGY1: NA
+  SOLUTES_HIST1: NA
+  WATERYEAR1: NA
+  SOLUTES1: NA
+  LOQ1: NA
+  MDL1: NA
+  dataOrigQHist1: NA
+  dataOrigQ1: NA
+  dataOrigHist1: NA
+  dataOrig1: NA
+  dataHist1: NA
+---
+
+
+
+```{r}
+
+library(dygraphs)
+
+if ( params$HYDROLOGY1 == TRUE)   {
+   if ( params$SOLUTES_HIST1 == TRUE) {
+      
+      # Plots Default + Discharge + Historical data
+      data1 <- dataOrigQHist1()
+      data1.xts <- xts(data1[,-1], order.by = data1$date)
+      #paste(c("XTS:", class(dataOrig1$FieldCode)))
+      
+      dygraph1 <- dygraph(data1.xts) %>%
+         dyAxis("x", label = paste("Water Year",  params$WATERYEAR1),
+                axisLabelColor = "black") %>%
+         dyAxis("y", label = ylabel,
+                independentTicks=TRUE,
+                axisLabelColor = "black") %>%
+         dyAxis('y2',label='Hydrology (mm or L/s)',
+                independentTicks=TRUE,
+                axisLabelColor = "#3182bd",
+                axisLabelWidth = 70,
+                axisLineColor = "#3182bd") %>%
+         dySeries(name =  params$SOLUTES1,
+                  color = "black",
+                  drawPoints = TRUE,
+                  pointSize = 3,
+                  axis='y') %>%
+         dySeries(name = 'GageHt_or_Q',
+                  drawPoints = FALSE,
+                  fillGraph=T,
+                  color = "#3182bd",
+                  axis='y2') %>%
+         dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
+                  strokePattern = c("dashed"),
+                  color = c("#A9A9A9"),
+                  label = 'median + IQR',
+                  axis='y') %>%
+         dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+         dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+         dyOptions(drawGrid = FALSE,
+                   strokeWidth = 1,
+                   fillAlpha = 0.5,
+                   connectSeparatedPoints=TRUE,
+                   includeZero = TRUE) %>%
+         dyLegend(width = 300, showZeroValues = FALSE)
+      
+      dygraph1
+      
+   } else {
+      
+      # Plots Default + Discharge data
+      data1 <- dataOrigQ1()
+      data1.xts <- xts(data1[,-1], order.by = data1$date)
+      
+      dygraph1 <- dygraph(data1.xts) %>%
+         dyAxis("x", label = paste("Water Year",  params$WATERYEAR1)) %>%
+         dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
+         dyAxis('y2',label='Hydrology (mm or L/s)', independentTicks=TRUE,
+                axisLabelWidth = 70,
+                axisLabelColor = "#3182bd",
+                axisLineColor = "#3182bd") %>% # color is light blue
+         dySeries(name =  params$SOLUTES1,
+                  color = "#black") %>%
+         dySeries(name = 'GageHt_or_Q',
+                  drawPoints = FALSE,
+                  fillGraph=T,
+                  color = "#3182bd",
+                  axis='y2') %>%
+         dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+         dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+         dyOptions(drawGrid = FALSE,
+                   drawPoints = TRUE,
+                   strokeWidth = 1,
+                   pointSize = 3,
+                   fillAlpha = 0.5,
+                   connectSeparatedPoints=TRUE,
+                   includeZero = TRUE)
+      dygraph1 
+   }
+} else {
+   
+   if ( params$SOLUTES_HIST1 == TRUE) {
+      
+      # Plots Default + Historical data
+      data1 <- dataOrigHist1()
+      data1.xts <- xts(data1[,-1], order.by = data1$date)
+      
+      dygraph1 <- dygraph(data1.xts) %>%
+         dyAxis("x", label = paste("Water Year",  params$WATERYEAR1)) %>%
+         dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
+         dySeries(name =  params$SOLUTES1,
+                  color = "black",
+                  drawPoints = TRUE,
+                  pointSize = 3,
+                  axis='y') %>%
+         dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
+                  strokePattern = c("dashed"),
+                  color = "#A9A9A9",
+                  label = 'median + IQR',
+                  axis='y') %>%
+         dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+         dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+         dyOptions(drawGrid = FALSE,
+                   strokeWidth = 1,
+                   fillAlpha = 0.3,
+                   connectSeparatedPoints=TRUE,
+                   includeZero = TRUE)
+      
+      dygraph1
+      
+   } else {
+      
+      # Plots Default data
+      
+      data1 <- dataOrig1()
+      data1.xts <- xts(data1, order.by = data1$date)
+      
+      #padrange <- c(min(data1.xts$ params$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$ params$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
+      
+      dygraph1 <- dygraph(data1.xts) %>%
+         dyAxis("x", label = paste("Water Year",  params$WATERYEAR1)) %>%
+         dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
+         dySeries(name =  params$SOLUTES1,
+                  color = "black",
+                  drawPoints = TRUE,
+                  strokeWidth = 1,
+                  pointSize = 3) %>%
+         # dySeries(name = "FieldCode",
+         #          color = "black",
+         #          drawPoints = TRUE,
+         #          strokeWidth = 0,
+         #          pointSize = 1) %>%
+         # for (i in 1:nrow(data1.xts)) {
+         #    dyAnnotation(index(i), data1.xts$FieldCode[i])
+         # } %>%
+         dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+         dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+         dyOptions(drawGrid = FALSE,
+                   connectSeparatedPoints=TRUE,
+                   includeZero = TRUE)
+      
+      dygraph1
+   }
+}
+```
