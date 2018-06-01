@@ -15,6 +15,7 @@ library(ggplot2)
 library(ggthemes)
 #library(lubridate)        # Does not work with shinyapps.io: https://stackoverflow.com/questions/28656683/r-script-working-locally-not-working-on-shinyapp-io
 library(RColorBrewer)
+library(RMySQL)
 library(rhandsontable)
 library(reshape2)
 library(shiny)
@@ -22,10 +23,22 @@ library(stringr)           # needed for str_extract function
 library(tidyr)
 library(xts)
 
+message("hello, I'm at the top of server.R")
 
 # **********************************************************************
 #                      ---- DATA IMPORT & PREP ----
 # **********************************************************************
+
+# RMySQL Tests ----
+x = MySQL()
+pass  = readLines('/home/hbef/RMySQL.config')
+engine = dbConnect(x, 
+                   user = 'root',
+                   password = pass,
+                   host = 'localhost', 
+                   dbname = 'hbef')
+tables = dbListTables(engine)
+message(tables)
 
 # Older Data ----
 # import historical precipitation data
@@ -74,7 +87,7 @@ dataHistorical <- read.csv("data/formatted/historical.csv", stringsAsFactors = F
 dataLimits <- read.csv("data/Limits_MDL_LOQ.csv", na.strings=c(""," ","NA"))
 defClasses <- read.csv("data/formatted/Rclasses.csv", header = TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 defClassesSample <- read.csv("data/formatted/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-   defClassesSample$date <- as.Date(helpClassesSample$date, "%Y-%m-%d")
+   defClassesSample$date <- as.Date(defClassesSample$date, "%Y-%m-%d")
 
 # ****  END OF DATA IMPORT & PREP ****
 
@@ -949,6 +962,8 @@ shinyServer(function(input, output, session) {
       dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
    # 2. Join data together
    dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical)
+message("I'm near dataAll")
+message(head(dataAll))
    dataAll_dateMin <-min(dataAll$date, na.rm=TRUE)
    dataAll_dateMax <-max(dataAll$date, na.rm=TRUE)
    # 3. Filter data according to inputs

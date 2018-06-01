@@ -14,6 +14,8 @@ library(dygraphs)         # makes dynamic graphs used in QA/QC tab
 library(rhandsontable)    # essential for "Excel-like Entry" tab
 library(shiny)            # basis of entire app, allows us to create reactive dashboard
 
+message("hello, I'm in ui.R")
+
 # Lists ----
 #*****************
 
@@ -401,9 +403,9 @@ shinyUI(
                            sliderInput(
                               "DATE4",
                               label = h4("Date Range"),
-                              min = dataAll_dateMin,
-                              max = dataAll_dateMax,
-                              value = c(dataAll_dateMin, dataAll_dateMax),
+                              min =as.Date( "1969-02-03"),
+                              max = as.Date("2014-04-14"),
+                              value = as.Date(c("1975-03-02", "2000-12-30")),
                               timeFormat = "%b %Y",
                               dragRange = TRUE
                            ),
