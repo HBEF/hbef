@@ -29,30 +29,6 @@ message("hello, I'm at the top of server.R")
 #                      ---- DATA IMPORT & PREP ----
 # **********************************************************************
 
-# RMySQL Tests ----
-library(RMariaDB)
-x = MySQL()
-y = RMariaDB::MariaDB()
-pass  = readLines('/home/hbef/RMySQL.config')
-engine = dbConnect(y, 
-                   user = 'root',
-                   password = pass,
-                   host = 'localhost', 
-                   dbname = 'hbef')
-tables = dbListTables(engine)
-message(tables)
-
-# Insert data into RMySQL tables
-dataInitial <- read.csv("data/formatted/initial_noRefNo.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-message("From R")
-message(head(dataInitial))
-
-dbWriteTable(engine, "initial", dataInitial, append=TRUE, row.names=FALSE)
-message("From MySQL:")
-dbGetQuery(engine, "SELECT * FROM initial LIMIT 5;")
-dbDisconnect(engine)
-
 # Older Data ----
 # import historical precipitation data
 dataHist.precip <- read.csv("data/HBEF_precipitation_chemistry_1963-2013_PLUSwaterYr.csv") 
@@ -102,6 +78,31 @@ defClasses <- read.csv("data/formatted/Rclasses.csv", header = TRUE, stringsAsFa
 defClassesSample <- read.csv("data/formatted/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
    defClassesSample$date <- as.Date(defClassesSample$date, "%Y-%m-%d")
 
+# Placing data in MySQL ----
+library(RMariaDB)
+x = MySQL()
+y = RMariaDB::MariaDB()
+pass  = readLines('/home/hbef/RMySQL.config')
+con = dbConnect(y, 
+                user = 'root',
+                password = pass,
+                host = 'localhost', 
+                dbname = 'hbef')
+tables = dbListTables(con)
+message(con)
+   
+# Insert data into RMySQL tables
+#dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+dbWriteTable(con, "current", dataCurrent, append=TRUE, row.names=FALSE)
+dbWriteTable(con, "historical", dataHistorical, append=TRUE, row.names=FALSE)
+dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
+message("From MySQL:")
+message(dbGetQuery(con, "SELECT * FROM initial LIMIT 5;"))
+message(dbGetQuery(con, "SELECT * FROM current LIMIT 5;"))
+message(dbGetQuery(con, "SELECT * FROM historical LIMIT 5;"))
+message(dbGetQuery(con, "SELECT * FROM sensor LIMIT 5;"))
+dbDisconnect(con)
+   
 # ****  END OF DATA IMPORT & PREP ****
 
 # ***********************************************************************
