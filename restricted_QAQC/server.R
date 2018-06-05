@@ -262,6 +262,7 @@ shinyServer(function(input, output, session) {
       # ColClasses :    vector of desired class types for the data.frame
       r <- nrow(d)
       c <- ncol(d)
+      message("I'm at as.character in standardizeClasses (before for loop)")
       for (i in 1:c) {
          ## 1. Insert an additional row with a sample value for each column
          ### Find index in defClassesSample that corresponds to column in d, save that index
@@ -281,6 +282,7 @@ shinyServer(function(input, output, session) {
                 #POSIXct=as.POSIXct(d[[i]], "%Y-%m-%d %H:%M", tz="EST", usetz=FALSE, na.rm=TRUE),
                 factor=as.factor(d[[i]])
          )
+         message("I'm at as.character in standardizeClasses (after for loop)")
       }
       ## 3. Delete last row of sample values
       d <- d[-(r+1),]
