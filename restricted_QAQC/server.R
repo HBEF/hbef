@@ -78,30 +78,30 @@ defClasses <- read.csv("data/formatted/Rclasses.csv", header = TRUE, stringsAsFa
 defClassesSample <- read.csv("data/formatted/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
    defClassesSample$date <- as.Date(defClassesSample$date, "%Y-%m-%d")
 
-# Placing data in MySQL ----
-library(RMariaDB)
-x = MySQL()
-y = RMariaDB::MariaDB()
-pass  = readLines('/home/hbef/RMySQL.config')
-con = dbConnect(y, 
-                user = 'root',
-                password = pass,
-                host = 'localhost', 
-                dbname = 'hbef')
-tables = dbListTables(con)
-message(con)
-   
-# Insert data into RMySQL tables
-#dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
-dbWriteTable(con, "current", dataCurrent, append=TRUE, row.names=FALSE)
-dbWriteTable(con, "historical", dataHistorical, append=TRUE, row.names=FALSE)
-dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
-message("From MySQL:")
-message(dbGetQuery(con, "SELECT * FROM initial LIMIT 5;"))
-message(dbGetQuery(con, "SELECT * FROM current LIMIT 5;"))
-message(dbGetQuery(con, "SELECT * FROM historical LIMIT 5;"))
-message(dbGetQuery(con, "SELECT * FROM sensor LIMIT 5;"))
-dbDisconnect(con)
+# # Placing data in MySQL ----
+# library(RMariaDB)
+# x = MySQL()
+# y = RMariaDB::MariaDB()
+# pass  = readLines('/home/hbef/RMySQL.config')
+# con = dbConnect(y, 
+#                 user = 'root',
+#                 password = pass,
+#                 host = 'localhost', 
+#                 dbname = 'hbef')
+# tables = dbListTables(con)
+# message(con)
+#    
+# # Insert data into RMySQL tables
+# #dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "current", dataCurrent, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "historical", dataHistorical, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
+# message("From MySQL:")
+# message(dbGetQuery(con, "SELECT * FROM initial LIMIT 5;"))
+# message(dbGetQuery(con, "SELECT * FROM current LIMIT 5;"))
+# message(dbGetQuery(con, "SELECT * FROM historical LIMIT 5;"))
+# message(dbGetQuery(con, "SELECT * FROM sensor LIMIT 5;"))
+# dbDisconnect(con)
    
 # ****  END OF DATA IMPORT & PREP ****
 
@@ -262,7 +262,6 @@ shinyServer(function(input, output, session) {
       # ColClasses :    vector of desired class types for the data.frame
       r <- nrow(d)
       c <- ncol(d)
-      message("I'm at as.character in standardizeClasses (before for loop)")
       for (i in 1:c) {
          ## 1. Insert an additional row with a sample value for each column
          ### Find index in defClassesSample that corresponds to column in d, save that index
@@ -282,7 +281,6 @@ shinyServer(function(input, output, session) {
                 #POSIXct=as.POSIXct(d[[i]], "%Y-%m-%d %H:%M", tz="EST", usetz=FALSE, na.rm=TRUE),
                 factor=as.factor(d[[i]])
          )
-         message("I'm at as.character in standardizeClasses (after for loop)")
       }
       ## 3. Delete last row of sample values
       d <- d[-(r+1),]
