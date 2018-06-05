@@ -30,15 +30,28 @@ message("hello, I'm at the top of server.R")
 # **********************************************************************
 
 # RMySQL Tests ----
+library(RMariaDB)
 x = MySQL()
+y = RMariaDB::MariaDB()
 pass  = readLines('/home/hbef/RMySQL.config')
-engine = dbConnect(x, 
+engine = dbConnect(y, 
                    user = 'root',
                    password = pass,
                    host = 'localhost', 
                    dbname = 'hbef')
 tables = dbListTables(engine)
 message(tables)
+
+# Insert data into RMySQL tables
+dataInitial <- read.csv("data/formatted/initial_noRefNo.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+message("From R")
+message(head(dataInitial))
+
+dbWriteTable(engine, "initial", dataInitial, append=TRUE, row.names=FALSE)
+message("From MySQL:")
+dbGetQuery(engine, "SELECT * FROM initial LIMIT 5;")
+dbDisconnect(engine)
 
 # Older Data ----
 # import historical precipitation data
