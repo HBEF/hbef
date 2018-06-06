@@ -89,18 +89,18 @@ con = dbConnect(y,
                 host = 'localhost',
                 dbname = 'hbef')
 tables = dbListTables(con)
-message(con)
+message(tables)
 
 # #Insert data into RMySQL tables
-# #dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
 # dbWriteTable(con, "current", dataCurrent, append=TRUE, row.names=FALSE)
 # dbWriteTable(con, "historical", dataHistorical, append=TRUE, row.names=FALSE)
-dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
 # message("From MySQL:")
-# message(dbGetQuery(con, "SELECT * FROM initial LIMIT 5;"))
+message(dbGetQuery(con, "SELECT * FROM initial LIMIT 5;"))
 # message(dbGetQuery(con, "SELECT * FROM current LIMIT 5;"))
 # message(dbGetQuery(con, "SELECT * FROM historical LIMIT 5;"))
-message(dbGetQuery(con, "SELECT * FROM sensor LIMIT 5;"))
+# message(dbGetQuery(con, "SELECT * FROM sensor LIMIT 5;"))
 dbDisconnect(con)
    
 # ****  END OF DATA IMPORT & PREP ****
