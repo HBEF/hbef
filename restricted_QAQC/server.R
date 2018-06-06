@@ -78,30 +78,30 @@ defClasses <- read.csv("data/formatted/Rclasses.csv", header = TRUE, stringsAsFa
 defClassesSample <- read.csv("data/formatted/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
    defClassesSample$date <- as.Date(defClassesSample$date, "%Y-%m-%d")
 
-# # Placing data in MySQL ----
-# library(RMariaDB)
-# x = MySQL()
-# y = RMariaDB::MariaDB()
-# pass  = readLines('/home/hbef/RMySQL.config')
-# con = dbConnect(y, 
-#                 user = 'root',
-#                 password = pass,
-#                 host = 'localhost', 
-#                 dbname = 'hbef')
-# tables = dbListTables(con)
-# message(con)
-#    
-# # Insert data into RMySQL tables
+# Placing data in MySQL ----
+library(RMariaDB)
+x = MySQL()
+y = RMariaDB::MariaDB()
+pass  = readLines('/home/hbef/RMySQL.config')
+con = dbConnect(y,
+                user = 'root',
+                password = pass,
+                host = 'localhost',
+                dbname = 'hbef')
+tables = dbListTables(con)
+message(con)
+
+# #Insert data into RMySQL tables
 # #dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
 # dbWriteTable(con, "current", dataCurrent, append=TRUE, row.names=FALSE)
 # dbWriteTable(con, "historical", dataHistorical, append=TRUE, row.names=FALSE)
-# dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
+dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
 # message("From MySQL:")
 # message(dbGetQuery(con, "SELECT * FROM initial LIMIT 5;"))
 # message(dbGetQuery(con, "SELECT * FROM current LIMIT 5;"))
 # message(dbGetQuery(con, "SELECT * FROM historical LIMIT 5;"))
-# message(dbGetQuery(con, "SELECT * FROM sensor LIMIT 5;"))
-# dbDisconnect(con)
+message(dbGetQuery(con, "SELECT * FROM sensor LIMIT 5;"))
+dbDisconnect(con)
    
 # ****  END OF DATA IMPORT & PREP ****
 
