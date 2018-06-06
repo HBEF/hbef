@@ -92,7 +92,8 @@ tables = dbListTables(con)
 message(tables)
 
 # #Insert data into RMySQL tables
-dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+message(head(dataInitial$precipCatch))
 message(head(dataCurrent$flowGageHt))
 dbWriteTable(con, "current", dataCurrent, append=TRUE, row.names=FALSE)
 # dbWriteTable(con, "historical", dataHistorical, append=TRUE, row.names=FALSE)
