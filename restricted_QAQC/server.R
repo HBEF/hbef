@@ -57,7 +57,7 @@ dataLimits <- read.csv("data/Limits_MDL_LOQ.csv")
 # import weekly data entry example
 dataWeeklyExample <- read.csv("data/WeeklyDataExample.csv")
 
-# Grabbing Data in MySQL
+# Grabbing Data in MySQL ----
 y = RMariaDB::MariaDB()
 pass  = readLines('/home/hbef/RMySQL.config')
 con = dbConnect(y,
@@ -71,6 +71,11 @@ dataInitial <- dbReadTable(con, "initial")
 dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor")
+
+message(head(dataInitial))
+message(head(dataCurrent))
+message(head(dataHistorical))
+message(head(dataSensor))
 
 dbDisconnect(con)
 
