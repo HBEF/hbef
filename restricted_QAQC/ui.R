@@ -491,8 +491,9 @@ shinyUI(
                   mainPanel(
                      tags$h4(textOutput("TITLE4")),
                      hr(),
+                     plotOutput("GRAPH_PRECIP4"),
                      plotOutput("GRAPH_MAIN4"),
-                     #plotOutput("GRAPH")
+                     plotOutput("GRAPH_FLOW4"),
                      hr(),
                      h4("Table of Selected Data"),
                      HTML("<p>Search bar finds specific values within selected 
