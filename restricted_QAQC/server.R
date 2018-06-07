@@ -92,12 +92,12 @@ tables = dbListTables(con)
 message(tables)
 
 # #Insert data into RMySQL tables
-# dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
 message(head(dataInitial$precipCatch))
 message(head(dataCurrent$flowGageHt))
-dbWriteTable(con, "current", dataCurrent, append=TRUE, row.names=FALSE)
-# dbWriteTable(con, "historical", dataHistorical, append=TRUE, row.names=FALSE)
-dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "current", dataCurrent, append=TRUE, row.names=FALSE)
+dbWriteTable(con, "historical", dataHistorical, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "sensor", dataSensor, append=TRUE, row.names=FALSE)
 # message("From MySQL:")
 message(dbGetQuery(con, "SELECT * FROM initial LIMIT 5;"))
 # message(dbGetQuery(con, "SELECT * FROM current LIMIT 5;"))
@@ -978,8 +978,8 @@ shinyServer(function(input, output, session) {
       dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
    # 2. Join data together
    dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical)
-message("I'm near dataAll")
-message(head(dataAll))
+   #message("I'm near dataAll")
+   #message(head(dataAll))
    dataAll_dateMin <-min(dataAll$date, na.rm=TRUE)
    dataAll_dateMax <-max(dataAll$date, na.rm=TRUE)
    # 3. Filter data according to inputs
