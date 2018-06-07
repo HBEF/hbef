@@ -72,9 +72,13 @@ dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor")
 
+message("head(dataInitial):")
 message(head(dataInitial))
+message("head(dataCurrent):")
 message(head(dataCurrent))
+message("head(dataHistorical):")
 message(head(dataHistorical))
+message("head(dataSensor):")
 message(head(dataSensor))
 
 dbDisconnect(con)
@@ -1383,6 +1387,8 @@ shinyServer(function(input, output, session) {
       #    geom_area(color="blue", fill = "lightblue", na.rm=TRUE)
       # h
    }) # end of output$GRAPH_MAIN4
+   
+   paste(head(dataCurrent))
    
    output$TABLE4 <- renderDataTable({
       #data4()
