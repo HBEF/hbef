@@ -73,6 +73,31 @@ dataHistorical <- read.csv("data/formatted/historical.csv", stringsAsFactors = F
       dateString <- str_extract(dataHistorical$uniqueID[i], "196.....")
       dataHistorical$date[i] <- as.Date(dateString, "%Y%m%d")
    }
+   # !!! write a function that alerts user to duplicates uniqueID?
+   
+   # # CODE TO DEAL WITH DUPLICATE ROWS IN DATA
+   # # remove rows that are exact duplicates 
+   # dataHistorical <- distinct(dataHistorical)
+   # # find remaining duplicate uniqueID's and count number of them
+   # duplicatesHist <- dataHistorical %>% 
+   #    group_by(uniqueID) %>% 
+   #    filter(n()>1) %>% 
+   #    count(uniqueID)
+   # # add "Dup" (or "Dup2") to remaining duplicate's 'uniqueID' and 'duplicate' columns
+   # for (i in 1:nrow(duplicatesHist)) {
+   #    indices <- which(duplicatesHist$uniqueID[i] == dataHistorical$uniqueID)   
+   #    for (j in 1:length(indices)) {
+   #       if (j > 1) {
+   #          index <- indices[j]
+   #          if (j == 2 ) num <- c() else num <- j-1
+   #          dataHistorical$uniqueID[index] <- paste0(dataHistorical$uniqueID[index] ,"_Dup", num)
+   #          dataHistorical$duplicate[index]  <- paste0("Dup",num)
+   #       }
+   #    }
+   # }
+   # # export
+   # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
+   
 dataLimits <- read.csv("data/Limits_MDL_LOQ.csv", na.strings=c(""," ","NA"))
 defClasses <- read.csv("data/formatted/Rclasses.csv", header = TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 defClassesSample <- read.csv("data/formatted/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
