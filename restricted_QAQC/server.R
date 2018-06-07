@@ -86,33 +86,33 @@ dbDisconnect(con)
 # # Newer Data ----
 # # Import all datasets & make needed changes
 # dataInitial <- read.csv("data/formatted/initial.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y") 
+#    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
 # dataCurrent <- read.csv("data/formatted/current_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) #, na.strings=c(""," ","NA")
 #    dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
 # dataSensor <- read.csv("data/formatted/sensor.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y") 
+#    dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y")
 # dataHistorical <- read.csv("data/formatted/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")  
+#    dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")
 #    # Dates before 1969 are incorrect after above transformation
 #    # Replace dates before 1970 with date information extracted from 'uniqueID' column
 #    pre1968_indices <- grep("_196", dataHistorical$uniqueID, value=FALSE)
-#    for (i in pre1968_indices){                                             
+#    for (i in pre1968_indices){
 #       dateString <- str_extract(dataHistorical$uniqueID[i], "196.....")
 #       dataHistorical$date[i] <- as.Date(dateString, "%Y%m%d")
 #    }
 #    # !!! write a function that alerts user to duplicates uniqueID?
-#    
+# 
 #    # # CODE TO DEAL WITH DUPLICATE ROWS IN DATA
-#    # # remove rows that are exact duplicates 
+#    # # remove rows that are exact duplicates
 #    # dataHistorical <- distinct(dataHistorical)
 #    # # find remaining duplicate uniqueID's and count number of them
-#    # duplicatesHist <- dataHistorical %>% 
-#    #    group_by(uniqueID) %>% 
-#    #    filter(n()>1) %>% 
+#    # duplicatesHist <- dataHistorical %>%
+#    #    group_by(uniqueID) %>%
+#    #    filter(n()>1) %>%
 #    #    count(uniqueID)
 #    # # add "Dup" (or "Dup2") to remaining duplicate's 'uniqueID' and 'duplicate' columns
 #    # for (i in 1:nrow(duplicatesHist)) {
-#    #    indices <- which(duplicatesHist$uniqueID[i] == dataHistorical$uniqueID)   
+#    #    indices <- which(duplicatesHist$uniqueID[i] == dataHistorical$uniqueID)
 #    #    for (j in 1:length(indices)) {
 #    #       if (j > 1) {
 #    #          index <- indices[j]
@@ -229,7 +229,7 @@ sites_streams <- list("Watershed 1" = "W1",
                       "ML70",
                       "PLY")
 
-sites_precip <- list("RG11", "RG23", "STA/22")
+sites_precip <- list("RG11", "RG23", "STA/22", "N", "S")
 
 # list of solutes that have units other than mg/L for data items 
 other_units <- c("pH",
@@ -1025,12 +1025,49 @@ shinyServer(function(input, output, session) {
    dataAll_dateMin <-min(dataAll$date, na.rm=TRUE)
    dataAll_dateMax <-max(dataAll$date, na.rm=TRUE)
    # 3. Filter data according to inputs
-   data4 <-reactive ({
+   
+   # Base data 
+   data4 <- reactive ({
       data4 <- dataAll %>% 
          filter(date >= input$DATE4[1]) %>% 
-         filter(date <= input$DATE4[2]) %>%
+         filter(date <= input$DATE4[2]) 
+   })
+   
+   # Data for Precip plot
+   dataPrecip4 <- reactive ({
+      dataPrecip4 <- data4() %>% 
+         select(one_of("date", "site", "precipCatch")) %>% 
+         filter(site %in% sites_precip) %>% 
+         group_by(date) %>% 
+         summarise(PrecipMedian = median(precipCatch, na.rm=TRUE))
+   })
+   
+   # Data for Main plot
+   dataMain4 <- reactive ({
+      dataMain4 <- data4() %>% 
          filter(site %in% input$SITES4) %>% 
-         select(one_of("date", "site", input$SOLUTES4)) # Keep date, site, and solute data
+         select(one_of("date", "site", input$SOLUTES4, "fieldCode")) %>%  # Keep date, site, solute & fieldcode data
+         group_by(date, site) %>% 
+         gather(key = solute, value = solute_value, -site, -date, -fieldCode)  # Reshape data for ggplot2 plotting
+   })
+   
+   # Data for Flow plot
+   dataFlow4 <- reactive ({
+      dataFlow4 <- data4() %>% 
+         select(one_of("date", "site", "gageHt", "flowGageHt")) %>% 
+         filter(site %in% sites_streams) %>% 
+         group_by(date) %>% 
+         summarise(gageHtMedian = median(gageHt, na.rm=TRUE),
+                   flowGageHtMedian = median(flowGageHt, na.rm=TRUE))
+         #           hydroGraph = first(hydroGraph, na.rm=TRUE)) #!!! ability to choose source of stream/flow data
+   })
+   
+   # Data for HydroGraph Labels 
+   dataFlowHydroGraph4 <- reactive ({
+      dataFlowHydroGraph4 <- data4() %>% 
+         filter(site %in% input$HYDROLIMB_SITE4) %>%
+         select(one_of("date", "hydroGraph")) 
+      #           hydroGraph = first(hydroGraph, na.rm=TRUE)) #!!! ability to choose source of stream/flow data
    })
 
    
@@ -1362,7 +1399,7 @@ shinyServer(function(input, output, session) {
    # Panel 4 Output ####
    #********************
    
-   output$TITLE4 <- renderText ({print(input$DATE4)})
+   output$TITLE4 <- renderText ({print(input$SITES4)})
    
    output$GRAPH_MAIN4 <- renderPlot({
       # GRAPH EVERYTHING!
@@ -1391,8 +1428,8 @@ shinyServer(function(input, output, session) {
    paste(head(dataCurrent))
    
    output$TABLE4 <- renderDataTable({
-      #data4()
-      head(dataCurrent)
+      dataMain4()
+      #head(dataCurrent)
    }) # end of output$TABLE4 
    
    #**** END of Output ****

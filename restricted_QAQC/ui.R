@@ -73,7 +73,7 @@ sites_streams <- list("Watershed 1" = "W1",
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
-sites_precip <- list("RG11", "RG23", "STA/22") 
+sites_precip <- list("RG11", "RG23", "STA/22", "N", "S") 
 
 wateryears <- list("2014", "2015", "2016", "2017")
 
@@ -404,32 +404,10 @@ shinyUI(
                               "DATE4",
                               label = h4("Date Range"),
                               min =as.Date( "1969-02-03"),
-                              max = as.Date("2014-04-14"),
+                              max = as.Date("2018-02-14"),
                               value = as.Date(c("1975-03-02", "2000-12-30")),
                               timeFormat = "%b %Y",
                               dragRange = TRUE
-                           ),
-                           checkboxInput(
-                              "DISCHARGE4",
-                              label = "Discharge (monthly median)",
-                              value = FALSE
-                           ),
-                           # this panel only appears when discharge button is clicked
-                           conditionalPanel(
-                              condition = "input.DISCHARGE4 == true",
-                              checkboxGroupInput(
-                                 "DISCHARGE_SOURCE4",
-                                 label = "Discharge data source:",
-                                 choices = c("Gage Height",
-                                             "Q (estimated from Gage Height)",
-                                             "Q (ETI)"
-                                 ),
-                                 selected = "Gage Height"
-                              ),
-                              style = "color:#3182bd;"
-                           ),
-                           p("Discharge shows daily median of all watershed sites." ,
-                             style = "color:#666666; font-size:85%;"
                            ),
                            checkboxInput(
                               "PRECIP4",
@@ -455,11 +433,8 @@ shinyUI(
                            checkboxInput("FIELDCODE4",
                                          label = "Show field codes",
                                          value = FALSE
-                           ),
-                           checkboxInput("HYDROLIMB4",
-                                         label = "Hydrograph limb",
-                                         value = FALSE)
-                           ), 
+                           )
+                        ), 
                         #********************
                         # Solutes tab
                         #********************
@@ -482,7 +457,44 @@ shinyUI(
                                              choices = c(sites_streams, sites_precip),
                                              selected = "W1"
                            )
-                        )
+                        ),
+                        #********************
+                        # Discharge tab
+                        #********************
+                        tabPanel( "Discharge",
+                           checkboxInput(
+                                  "DISCHARGE4",
+                                  label = "Discharge (monthly median)",
+                                  value = FALSE
+                           ),
+                           # this panel only appears when discharge button is clicked
+                           conditionalPanel(
+                              condition = "input.DISCHARGE4 == true",
+                              checkboxGroupInput(
+                                 "DISCHARGE_SOURCE4",
+                                 label = "Discharge data source:",
+                                 choices = c("Gage Height",
+                                          "Q (estimated from Gage Height)",
+                                          "Q (ETI)"
+                                 ),
+                              selected = "Gage Height"
+                              ),
+                              style = "color:#3182bd;"
+                           ),
+                           p("Discharge shows daily median of all watershed sites." ,
+                              style = "color:#666666; font-size:85%;"
+                           ),
+                           checkboxInput("HYDROLIMB4",
+                                          label = "Hydrograph limb",
+                                          value = FALSE
+                           ),
+                           selectInput(
+                              "HYDROLIMB_SITE4",
+                              label = "Site",
+                              choices = c(sites_streams),
+                              selected = "W1"
+                           )
+                        ) # end of tabPanel
                      ), #end of tabsetPanel
                      width = 3
                   ), # closes sidebarPanel
