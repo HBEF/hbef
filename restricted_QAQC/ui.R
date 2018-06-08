@@ -109,19 +109,19 @@ shinyUI(
                # Sidebar layout with input and output definitions
                sidebarLayout(
                   # Sidebar panel for inputs
-                  sidebarPanel(
-                     # Input: Select a file
-                     fileInput("FILE_UPLOAD", "Choose CSV File",
-                             multiple = TRUE,
+                sidebarPanel(
+                  # Input: Select a file
+                  fileInput("FILE_UPLOAD", "Choose CSV File",
+                             multiple = FALSE,
                              accept = c("text/csv",
                                         "text/comma-separated-values,text/plain",
-                                        ".csv"
-                             )
-                  ), # end of sidebarPanel                
+                                        ".csv")
+                  ), 
+                  actionButton("SUBMIT", label = "Submit"),
                   # Horizontal line
                   # tags$hr(),
                   # Input: Checkbox to indicate whether file has header
-                  checkboxInput("header", "Data includes header (column names)", TRUE),
+                  checkboxInput("HEADER", "Data includes header (column names)", TRUE),
                   # Input: Select separator to indicate how data is separated
                   radioButtons("sep", "Separator",
                                 choices = c(Comma = ",",
@@ -144,10 +144,10 @@ shinyUI(
                                 choices = c(Head = "head", 
                                             All = "all"),
                                             selected = "head")
-                  ), # end of sidebarLayout
+                  ), # end of sidebarPanel
                   mainPanel(
                      # Shows data file as a table 
-                     tableOutput("contents")
+                     tableOutput("FILE_PREVIEW")
                   ) # end of mainPanel            
                ) # end of Sidebar Layout
             ), # end of tabPanel for "Upload" 
