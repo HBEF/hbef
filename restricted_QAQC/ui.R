@@ -111,7 +111,7 @@ shinyUI(
                   # Sidebar panel for inputs
                   sidebarPanel(
                      # Input: Select a file
-                     fileInput("file1", "Choose CSV File",
+                     fileInput("FILE_UPLOAD", "Choose CSV File",
                              multiple = TRUE,
                              accept = c("text/csv",
                                         "text/comma-separated-values,text/plain",
@@ -403,9 +403,9 @@ shinyUI(
                            sliderInput(
                               "DATE4",
                               label = h4("Date Range"),
-                              min =as.Date( "1969-02-03"),
-                              max = as.Date("2018-02-14"),
-                              value = as.Date(c("1975-03-02", "2000-12-30")),
+                              min =as.Date("1963-06-01"),
+                              max = as.Date(maxDate),
+                              value = as.Date(c(maxDate-365, maxDate)),
                               timeFormat = "%b %Y",
                               dragRange = TRUE
                            ),
