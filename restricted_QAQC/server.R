@@ -227,7 +227,8 @@ my_theme <- theme_fivethirtyeight() +
    theme(rect = element_rect(fill = NA),
          panel.grid.major = element_line(colour = "#dddddd"), 
          text = element_text(family = "Helvetica", size = 12), 
-         legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
+         legend.position = "top", legend.direction = "horizontal", legend.box = "horizontal",
+            legend.box.just = "left", legend.title = element_blank(),
          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
          axis.title= element_text(NULL), axis.title.x= element_blank(), 
          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
@@ -949,8 +950,8 @@ shinyServer(function(input, output, session) {
    
    # Lists of selected inputs to be placed in title
    title.Sites3 <- reactive({
-     if (length(input$SITES3) == 1) {paste(input$SITES3) } 
-     else {paste(input$SITES3, sep=", ")}
+     if (length(input$SITES3) == 1) {paste(input$SITES3) } else {
+        paste(input$SITES3, sep=", ") }
    })
    
    # filters Original (recent water year) data to only include data selected by inputs
@@ -1044,20 +1045,14 @@ shinyServer(function(input, output, session) {
       dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
    # 2. Join data together
    dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical)
-   #message("I'm near dataAll")
-   #message(head(dataAll))
-   dataAll_dateMin <-min(dataAll$date, na.rm=TRUE)
-   dataAll_dateMax <-max(dataAll$date, na.rm=TRUE)
    # 3. Filter data according to inputs
-
-   # Base data
+   ## Base data
    data4 <- reactive ({
       data4 <- dataAll %>%
          filter(date >= input$DATE4[1]) %>%
          filter(date <= input$DATE4[2])
    })
-
-   # Data for Precip plot
+   ## Data for Precip plot
    dataPrecip4 <- reactive ({
       dataPrecip4 <- data4() %>%
          select(one_of("date", "site", "precipCatch")) %>%
@@ -1065,8 +1060,7 @@ shinyServer(function(input, output, session) {
          group_by(date) %>%
          summarise(PrecipMedian = median(precipCatch, na.rm=TRUE))
    })
-
-   # Data for Main plot
+   ## Data for Main plot
    dataMain4 <- reactive ({
       dataMain4 <- data4() %>%
          filter(site %in% input$SITES4) %>%
@@ -1074,8 +1068,7 @@ shinyServer(function(input, output, session) {
          group_by(date, site) %>%
          gather(key = solute, value = solute_value, -site, -date, -fieldCode)  # Reshape data for ggplot2 plotting
    })
-
-   # Data for Flow plot
+   ## Data for Flow plot
    dataFlow4 <- reactive ({
       dataFlow4 <- data4() %>%
          select(one_of("date", "site", "gageHt", "flowGageHt")) %>%
@@ -1085,8 +1078,7 @@ shinyServer(function(input, output, session) {
                    flowGageHtMedian = median(flowGageHt, na.rm=TRUE))
          #           hydroGraph = first(hydroGraph, na.rm=TRUE)) #!!! ability to choose source of stream/flow data
    })
-
-   # Additional data for Flow plot: hydroGraph labels
+   ## Additional data for Flow plot: hydroGraph labels
    dataFlowHydroGraph4 <- reactive ({
       dataFlowHydroGraph4 <- data4() %>%
          filter(site %in% input$HYDROLIMB_SITE4) %>%
@@ -1131,7 +1123,7 @@ shinyServer(function(input, output, session) {
       }
       
       df <- standardizeClasses(df)
-      
+      dataInitial <- standardizeClasses(dataInitial)
       # classes <- NA
       # for (i in 1:ncol(d)) classes[i] <- class(d[[i]])
       dfNew <- bind_rows(dataInitial, df)
@@ -1433,31 +1425,44 @@ shinyServer(function(input, output, session) {
    #********************
 
    output$TITLE4 <- renderText ({print(input$SITES4)})
-
-   output$GRAPH_MAIN4 <- renderPlot({
-      # GRAPH EVERYTHING!
-      data <- data4()
+   output$GRAPH_PRECIP4 <- renderPlot({
+      data <- dataPrecip4()
       x <- data$date
-      # # Precipitation plot
-      # y <- data$precipCatch
-      # p <- ggplot(data, aes(x, y)) + my_theme +
-      #    geom_col(color="blue", fill = "lightblue", na.rm=TRUE) +
-      #    labs(x = "", y = "Precipitation (Catch)") +
-      #    scale_y_reverse()
-      # p
-      # Main plot
-      y <- input$SOLUTES4
-      m <- ggplot(data, aes(x, y)) + my_theme +
-         geom_point(na.rm=TRUE) +
+      y <- data$PrecipMedian
+      p <- ggplot(data, aes(x, y)) + my_theme +
+         geom_col(color="blue", fill = "lightblue", width = 0.9, na.rm=TRUE) +
+         labs(x = "", y = "Precipitation (Catch)") +
+         scale_y_reverse()
+      p
+   }) # end of output$GRAPH_PRECIP4
+   output$GRAPH_MAIN4 <- renderPlot({
+      # data prep
+      data <- dataMain4()
+      x <- data$date
+      y <- data$solute_value
+      # build ggplot function
+      m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) +
+         my_theme +
+         geom_point(size = 2.5) +
+         geom_line(alpha = 0.5) +
          scale_x_date(date_labels = "%Y-%b")
+      # If show field code is selected, add to ggplot
+      if (input$FIELDCODE4 == TRUE) {
+         m <- m + geom_text(aes(label=data$fieldCode), 
+                            nudge_y = (max(data$solute_value, na.rm = TRUE) - min(data$solute_value, na.rm = TRUE))/15,
+                            check_overlap = TRUE)
+      }
+      # plot
       m
+
+   }) # end of output$GRAPH_MAIN4
+   output$GRAPH_FLOW4 <- renderPlot({
       # # Hydrology plot
       # y <- data$gageHt
-      # h <- ggplot(data, aes(x, y)) + my_theme +
+      # f <- ggplot(data, aes(x, y)) + my_theme +
       #    geom_area(color="blue", fill = "lightblue", na.rm=TRUE)
-      # h
-   }) # end of output$GRAPH_MAIN4
-
+      # f
+   }) # end of output$GRAPH_FLOW4
    paste(head(dataCurrent))
 
    output$TABLE4 <- renderDataTable({
