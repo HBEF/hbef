@@ -410,26 +410,44 @@ shinyUI(
                               dragRange = TRUE
                            ),
                            checkboxInput(
-                              "PRECIP4",
-                              label = "Precipitation (median)",
-                              value = FALSE
+                              "HYDROLOGY4",
+                              label = "View hydrology",
+                              value = TRUE
                            ),
-                           # this panel only appears when precip button is clicked
+                           # this panel only appears when hydology option is selected
                            conditionalPanel(
-                              condition = "input.PRECIP4 == true",
+                              condition = "input.HYDROLOGY4 == true",
+                              selectInput("PRECIP_SITE4",
+                                          label = "Source of precipitation data:",
+                                          choices = c(sites_precip),
+                                          selected = "RG11"), # !!! need to field this from what's in data...
                               checkboxGroupInput(
                                  "PRECIP_SOURCE4",
                                  label = "Precipitation data source:",
-                                 choices = c("Collector Catch",
-                                             "ETI"
+                                 choices = c("Collector Catch" = "precipCatch",
+                                             "ETI" = "precipETI"
                                  ),
                                  selected = "Collector Catch"
                               ),
+                              selectInput("FLOW_SITE4",
+                                          label = "Source of flow data:",
+                                          choices = c(sites_streams),
+                                          selected = "W1"), # !!! need to field this from what's in data...
+                              checkboxGroupInput(
+                                 "FLOW_SOURCE4",
+                                 label = "Flow data source:",
+                                 choices = c("Gage Height" = "gageHt",
+                                             "Q (estimated from Gage Height)" = "flowGageHt",
+                                             "Q (ETI)" = "flowSensor"
+                                 ),
+                                 selected = "Gage Height"
+                              ),
+                              checkboxInput("HYDROLIMB4",
+                                          label = "Hydrograph limb",
+                                          value = FALSE
+                              ),
                               style = "color:#3182bd;"
-                           ),
-                           p("Precipitation shows daily median of all rain gage sites." ,
-                             style = "color:#666666; font-size:85%;"
-                           ),
+                           ), #end of conditional panel
                            checkboxInput("FIELDCODE4",
                                          label = "Show field codes",
                                          value = FALSE
@@ -457,44 +475,7 @@ shinyUI(
                                              choices = c(sites_streams, sites_precip),
                                              selected = "W1"
                            )
-                        ),
-                        #********************
-                        # Discharge tab
-                        #********************
-                        tabPanel( "Discharge",
-                           checkboxInput(
-                                  "DISCHARGE4",
-                                  label = "Discharge (monthly median)",
-                                  value = FALSE
-                           ),
-                           # this panel only appears when discharge button is clicked
-                           conditionalPanel(
-                              condition = "input.DISCHARGE4 == true",
-                              checkboxGroupInput(
-                                 "DISCHARGE_SOURCE4",
-                                 label = "Discharge data source:",
-                                 choices = c("Gage Height",
-                                          "Q (estimated from Gage Height)",
-                                          "Q (ETI)"
-                                 ),
-                              selected = "Gage Height"
-                              ),
-                              style = "color:#3182bd;"
-                           ),
-                           p("Discharge shows daily median of all watershed sites." ,
-                              style = "color:#666666; font-size:85%;"
-                           ),
-                           checkboxInput("HYDROLIMB4",
-                                          label = "Hydrograph limb",
-                                          value = FALSE
-                           ),
-                           selectInput(
-                              "HYDROLIMB_SITE4",
-                              label = "Site",
-                              choices = c(sites_streams),
-                              selected = "W1"
-                           )
-                        ) # end of tabPanel
+                        ) #end of tabPanel "Sites"
                      ), #end of tabsetPanel
                      width = 3
                   ), # closes sidebarPanel

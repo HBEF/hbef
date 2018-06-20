@@ -1466,7 +1466,7 @@ shinyServer(function(input, output, session) {
    paste(head(dataCurrent))
 
    output$TABLE4 <- renderDataTable({
-      dataMain4()
+      dataFlow4()
       #head(dataCurrent)
    }) # end of output$TABLE4
 
