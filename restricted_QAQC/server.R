@@ -7,6 +7,8 @@
 # Some code borrowed and updated from https://github.com/akl21/hbef/blob/dev/data_stories/acid_rain/server.R
 
 Sys.setenv(TZ='America/New_York')
+options(shiny.maxRequestSize = 30*1024^2) # allows max file upload size to be 30 MB
+options(show.error.locations=TRUE) # show error locations
 
 library(colorspace)
 library(dplyr)
@@ -57,77 +59,77 @@ dataLimits <- read.csv("data/Limits_MDL_LOQ.csv")
 # import weekly data entry example
 dataWeeklyExample <- read.csv("data/WeeklyDataExample.csv")
 
-# Grabbing Data in MySQL ----
-y = RMariaDB::MariaDB()
-pass  = readLines('/home/hbef/RMySQL.config')
-con = dbConnect(y,
-                user = 'root',
-                password = pass,
-                host = 'localhost',
-                dbname = 'hbef')
-tables = dbListTables(con)
-
-dataInitial <- dbReadTable(con, "initial")
-dataCurrent <- dbReadTable(con, "current")
-dataHistorical <- dbReadTable(con, "historical")
-dataSensor <- dbReadTable(con, "sensor")
-
-message("head(dataInitial):")
-message(head(dataInitial))
-message("head(dataCurrent):")
-message(head(dataCurrent))
-message("head(dataHistorical):")
-message(head(dataHistorical))
-message("head(dataSensor):")
-message(head(dataSensor))
-
-dbDisconnect(con)
-
-# # Newer Data ----
-# # Import all datasets & make needed changes
-# dataInitial <- read.csv("data/formatted/initial.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-# dataCurrent <- read.csv("data/formatted/current_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) #, na.strings=c(""," ","NA")
-#    dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
-# dataSensor <- read.csv("data/formatted/sensor.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y")
-# dataHistorical <- read.csv("data/formatted/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")
-#    # Dates before 1969 are incorrect after above transformation
-#    # Replace dates before 1970 with date information extracted from 'uniqueID' column
-#    pre1968_indices <- grep("_196", dataHistorical$uniqueID, value=FALSE)
-#    for (i in pre1968_indices){
-#       dateString <- str_extract(dataHistorical$uniqueID[i], "196.....")
-#       dataHistorical$date[i] <- as.Date(dateString, "%Y%m%d")
-#    }
-#    # !!! write a function that alerts user to duplicates uniqueID?
+# # When grabbing Data from MySQL ----
+# y = RMariaDB::MariaDB()
+# pass  = readLines('/home/hbef/RMySQL.config')
+# con = dbConnect(y,
+#                 user = 'root',
+#                 password = pass,
+#                 host = 'localhost',
+#                 dbname = 'hbef')
+# tables = dbListTables(con)
 # 
-#    # # CODE TO DEAL WITH DUPLICATE ROWS IN DATA
-#    # # remove rows that are exact duplicates
-#    # dataHistorical <- distinct(dataHistorical)
-#    # # find remaining duplicate uniqueID's and count number of them
-#    # duplicatesHist <- dataHistorical %>%
-#    #    group_by(uniqueID) %>%
-#    #    filter(n()>1) %>%
-#    #    count(uniqueID)
-#    # # add "Dup" (or "Dup2") to remaining duplicate's 'uniqueID' and 'duplicate' columns
-#    # for (i in 1:nrow(duplicatesHist)) {
-#    #    indices <- which(duplicatesHist$uniqueID[i] == dataHistorical$uniqueID)
-#    #    for (j in 1:length(indices)) {
-#    #       if (j > 1) {
-#    #          index <- indices[j]
-#    #          if (j == 2 ) num <- c() else num <- j-1
-#    #          dataHistorical$uniqueID[index] <- paste0(dataHistorical$uniqueID[index] ,"_Dup", num)
-#    #          dataHistorical$duplicate[index]  <- paste0("Dup",num)
-#    #       }
-#    #    }
-#    # }
-#    # # export
-#    # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
+# dataInitial <- dbReadTable(con, "initial")
+# dataCurrent <- dbReadTable(con, "current")
+# dataHistorical <- dbReadTable(con, "historical")
+# dataSensor <- dbReadTable(con, "sensor")
+# 
+# message("head(dataInitial):")
+# message(head(dataInitial))
+# message("head(dataCurrent):")
+# message(head(dataCurrent))
+# message("head(dataHistorical):")
+# message(head(dataHistorical))
+# message("head(dataSensor):")
+# message(head(dataSensor))
+# 
+# dbDisconnect(con)
+
+# Newer Data ----
+# Import all datasets & make needed changes
+dataInitial <- read.csv("data/formatted/initial.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+dataCurrent <- read.csv("data/formatted/current_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) #, na.strings=c(""," ","NA")
+   dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
+dataSensor <- read.csv("data/formatted/sensor.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y")
+dataHistorical <- read.csv("data/formatted/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")
+   # Dates before 1969 are incorrect after above transformation
+   # Replace dates before 1970 with date information extracted from 'uniqueID' column
+   pre1968_indices <- grep("_196", dataHistorical$uniqueID, value=FALSE)
+   for (i in pre1968_indices){
+      dateString <- str_extract(dataHistorical$uniqueID[i], "196.....")
+      dataHistorical$date[i] <- as.Date(dateString, "%Y%m%d") 
+   }
+   # !!! write a function that alerts user to duplicates uniqueID?
+
+   # # CODE TO DEAL WITH DUPLICATE ROWS IN DATA
+   # # remove rows that are exact duplicates
+   # dataHistorical <- distinct(dataHistorical)
+   # # find remaining duplicate uniqueID's and count number of them
+   # duplicatesHist <- dataHistorical %>%
+   #    group_by(uniqueID) %>%
+   #    filter(n()>1) %>%
+   #    count(uniqueID)
+   # # add "Dup" (or "Dup2") to remaining duplicate's 'uniqueID' and 'duplicate' columns
+   # for (i in 1:nrow(duplicatesHist)) {
+   #    indices <- which(duplicatesHist$uniqueID[i] == dataHistorical$uniqueID)
+   #    for (j in 1:length(indices)) {
+   #       if (j > 1) {
+   #          index <- indices[j]
+   #          if (j == 2 ) num <- c() else num <- j-1
+   #          dataHistorical$uniqueID[index] <- paste0(dataHistorical$uniqueID[index] ,"_Dup", num)
+   #          dataHistorical$duplicate[index]  <- paste0("Dup",num)
+   #       }
+   #    }
+   # }
+   # # export
+   # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
 dataLimits <- read.csv("data/Limits_MDL_LOQ.csv", na.strings=c(""," ","NA"))
 defClasses <- read.csv("data/formatted/Rclasses.csv", header = TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 defClassesSample <- read.csv("data/formatted/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-   defClassesSample$date <- as.Date(defClassesSample$date, "%Y-%m-%d")
+defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 
 # # CODE FOR FIRST PLACEMENT OF DATA in MySQL ----
 # y = RMariaDB::MariaDB()
@@ -225,7 +227,8 @@ my_theme <- theme_fivethirtyeight() +
    theme(rect = element_rect(fill = NA),
          panel.grid.major = element_line(colour = "#dddddd"), 
          text = element_text(family = "Helvetica", size = 12), 
-         legend.position = "none", legend.direction = "vertical", legend.title = element_blank(),
+         legend.position = "top", legend.direction = "horizontal", legend.box = "horizontal",
+            legend.box.just = "left", legend.title = element_blank(),
          strip.text = element_text(hjust = 1, size = 20, face = "bold"), 
          axis.title= element_text(NULL), axis.title.x= element_blank(), 
          axis.title.y= element_text(hjust = 1, angle = 90, margin = margin(r=20)))
@@ -369,6 +372,47 @@ shinyServer(function(input, output, session) {
    #   if (input$SOLUTES_HIST1 == "all")  {histYears <- seq(min(dataHist$waterYr), (input$WATERYEAR - 1))}
    #   paste(histYears, sep=" ")
    # })
+   
+   # *DATA INPUT Tab* #### 
+   #************************
+
+   # Upon choosing csv file, grabs and displays file contents
+   dataNew <- eventReactive(input$FILE_UPLOAD,{
+         #for testing
+         #dataNew <-read.csv("data/formatted/current_testADD.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+         dataNew <- read.csv(input$FILE_UPLOAD$datapath,
+                             header = input$HEADER, 
+                             stringsAsFactors = FALSE, 
+                             na.strings=c(""," ","NA"))
+         dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
+   })
+   
+   # Upon pressing submit, transfer uploaded file content to 'current' table in database
+   observeEvent(input$SUBMIT, {
+      # openning connection to database 
+      pass  = readLines('/home/hbef/RMySQL.config')
+      con = dbConnect(RMariaDB::MariaDB(),
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = 'hbef')
+      # make some needed changes to data for successful uploading
+      dataNew()$date <- as.Date(dataNew()$date, "%m/%d/%y")
+      dataNew() <- standardizeClasses(dataNew())
+      # upload data
+      dbWriteTable(con, "current", dataNew(), append=TRUE, row.names=FALSE)
+      dbDisconnect(con)
+      
+      # clear out input file
+      input$FILE_UPLOAD = NULL
+      
+      # send success message
+      # !!! will likely want to make this more advance later (only show success if there are no errors)
+      showNotification("Done!")
+   })
+   
+   # *QA/QC Tab* #### 
+   #************************
    
    # Panel 1 Reactivity #### 
    #************************
@@ -927,8 +971,8 @@ shinyServer(function(input, output, session) {
    
    # Lists of selected inputs to be placed in title
    title.Sites3 <- reactive({
-     if (length(input$SITES3) == 1) {paste(input$SITES3) } 
-     else {paste(input$SITES3, sep=", ")}
+     if (length(input$SITES3) == 1) {paste(input$SITES3) } else {
+        paste(input$SITES3, sep=", ") }
    })
    
    # filters Original (recent water year) data to only include data selected by inputs
@@ -997,88 +1041,82 @@ shinyServer(function(input, output, session) {
    
    # Panel 4 Reactivity####
    #************************
-   
+
    # Solute limit (MDL & LOQ)
    # Finding MDL and LOQ value for solute, if they exist
    MDL4 <- reactive({
       if (input$SOLUTES4 %in% dataLimits$Analyte) {dataLimits$MDL[dataLimits$Analyte == input$SOLUTES4]}
-      else {NA} 
+      else {NA}
    })
    LOQ4 <- reactive({
       if (input$SOLUTES4 %in% dataLimits$Analyte) {dataLimits$LOQ[dataLimits$Analyte == input$SOLUTES4]}
-      else {NA} 
+      else {NA}
    })
-   
+
    # Join data together
    # 1. Re-Classify data class of each column to ensure consistency aross tables
    ## (necessary for merging data tables)
+   defClassesSample$date <- as.Date(defClassesSample$date, format="%m/%d/%y")
+   defClassesSample$date <- as.Date(defClassesSample$date, format="%Y-%m-%d")
    dataHistorical <- standardizeClasses(dataHistorical)
    dataCurrent <- standardizeClasses(dataCurrent)
       # !!! for some reason 'precipCatch' needs to be corrected
-      dataCurrent$precipCatch <- as.numeric(dataCurrent$precipCatch) 
+      dataCurrent$precipCatch <- as.numeric(dataCurrent$precipCatch)
       ## remove columns that don't match up between datasets
       dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
    # 2. Join data together
-   dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical)
-   #message("I'm near dataAll")
-   #message(head(dataAll))
-   dataAll_dateMin <-min(dataAll$date, na.rm=TRUE)
-   dataAll_dateMax <-max(dataAll$date, na.rm=TRUE)
+   dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical) # !!! eventually need to add sensor data here
    # 3. Filter data according to inputs
-   
-   # Base data 
+   ## Base data
    data4 <- reactive ({
-      data4 <- dataAll %>% 
-         filter(date >= input$DATE4[1]) %>% 
-         filter(date <= input$DATE4[2]) 
+      data4 <- dataAll %>%
+         filter(date >= input$DATE4[1]) %>%
+         filter(date <= input$DATE4[2])
    })
-   
-   # Data for Precip plot
+   ## Data for Precip plot
    dataPrecip4 <- reactive ({
-      dataPrecip4 <- data4() %>% 
-         select(one_of("date", "site", "precipCatch")) %>% 
-         filter(site %in% sites_precip) %>% 
-         group_by(date) %>% 
-         summarise(PrecipMedian = median(precipCatch, na.rm=TRUE))
+      dataPrecip4 <- data4() %>%
+         filter(site %in% input$PRECIP_SITE4) %>%
+         select(one_of("date", "site", input$PRECIP_SOURCE4)) 
    })
-   
-   # Data for Main plot
+   ## Data for Main plot
    dataMain4 <- reactive ({
-      dataMain4 <- data4() %>% 
-         filter(site %in% input$SITES4) %>% 
+      dataMain4 <- data4() %>%
+         filter(site %in% input$SITES4) %>%
          select(one_of("date", "site", input$SOLUTES4, "fieldCode")) %>%  # Keep date, site, solute & fieldcode data
-         group_by(date, site) %>% 
+         group_by(date, site) %>%
          gather(key = solute, value = solute_value, -site, -date, -fieldCode)  # Reshape data for ggplot2 plotting
    })
-   
-   # Data for Flow plot
+   ## Data for Flow plot
    dataFlow4 <- reactive ({
-      dataFlow4 <- data4() %>% 
-         select(one_of("date", "site", "gageHt", "flowGageHt")) %>% 
-         filter(site %in% sites_streams) %>% 
-         group_by(date) %>% 
-         summarise(gageHtMedian = median(gageHt, na.rm=TRUE),
-                   flowGageHtMedian = median(flowGageHt, na.rm=TRUE))
-         #           hydroGraph = first(hydroGraph, na.rm=TRUE)) #!!! ability to choose source of stream/flow data
+      dataFlow4 <- data4() %>%
+         filter(site %in% input$FLOW_SITE4) %>%
+         select(one_of("date", input$FLOW_SOURCE4))
+   if (input$FLOW_SOURCE4 == "gageHt") {
+      dataFlow4 <- dataFlow4 %>%
+         group_by(date) %>%
+         summarise(flowMaxPerDate = max(gageHt, na.rm=TRUE))
+   }
+   if (input$FLOW_SOURCE4 == "flowGageHt") {
+      dataFlow4 <- dataFlow4 %>%
+         group_by(date) %>%
+         summarise(flowMaxPerDate = max(flowGageHt, na.rm=TRUE))
+   }
+   if (input$FLOW_SOURCE4 == "flowSensor") {
+      dataFlow4 <- dataFlow4 %>%
+         group_by(date) %>%
+         summarise(flowMaxPerDate = max(flowSensor, na.rm=TRUE))
+   }
+         
    })
-   
-   # Data for HydroGraph Labels 
+   ## Additional data for Flow plot: hydroGraph labels
    dataFlowHydroGraph4 <- reactive ({
-      dataFlowHydroGraph4 <- data4() %>% 
+      dataFlowHydroGraph4 <- data4() %>%
          filter(site %in% input$HYDROLIMB_SITE4) %>%
-         select(one_of("date", "hydroGraph")) 
+         select(one_of("date", "hydroGraph"))
       #           hydroGraph = first(hydroGraph, na.rm=TRUE)) #!!! ability to choose source of stream/flow data
    })
 
-   
-   DATE4_MAX <- reactive({
-      print(input$DATE4)
-      print(class(input$DATE4))
-      print(is.vector(input$DATE4))
-      print(input$DATE4[1])
-      print(input$DATE4[2])
-   })
-   
    # **** END of Panel 4 Reactivity ****
    
    
@@ -1086,29 +1124,52 @@ shinyServer(function(input, output, session) {
    # ***********************************
    
    
-   # DATA INPUT tab #########################################
+   # *DATA INPUT Tab* #########################################
    
-   # Upload .csv ####
-   # Code initially copied from: https://github.com/rstudio/shiny-examples/blob/master/009-upload/app.R
-   
-   output$contents <- renderTable({
+   output$FILE_PREVIEW <- renderTable({
       
       # input$file1 will be NULL initially. After the user selects
       # and uploads a file, head of that data file by default,
       # or all rows if selected, will be shown.
+            
+      req(input$FILE_UPLOAD)
       
-      req(input$file1)
-      
-      df <- read.csv(input$file1$datapath,
-                     header = input$header,
-                     #quote = input$quote,
-                     sep = input$sep)
+      # # for testing
+      # # df <- read.csv("data/Formatted/test.csv",
+      # #                header = TRUE,
+      # #                stringsAsFactors = FALSE,
+      # #                na.strings=c(""," ","NA"))
+      # 
+      # df <- read.csv(input$FILE_UPLOAD$datapath,
+      #                header = input$HEADER,
+      #                stringsAsFactors = FALSE, 
+      #                na.strings=c(""," ","NA"))
+      # df$date <- as.Date(df$date, "%m/%d/%y") 
+      # df$date <- as.Date(df$date, "%Y/%m/%d")
+      # # Remove "archived" column (if it exists)
+      # if ("archived" %in% colnames(df)) {
+      #    ind <- which("archived" == colnames(df), arr.ind = TRUE)
+      #    df <- df[,-ind]
+      # }
+      # 
+      # df <- standardizeClasses(df)
+      # dataInitial <- standardizeClasses(dataInitial)
+      # # classes <- NA
+      # # for (i in 1:ncol(d)) classes[i] <- class(d[[i]])
+      # dfNew <- bind_rows(dataInitial, df)
+      # return(dfNew)
+
+      # dataNEW <- read.csv(input$FILE_UPLOAD$datapath,
+      #                     header = input$HEADER)
+      # dataNew$date <- as.Date(dataNew$date)
+      # #dataNEW <- bind_rows(dataInitial, dataNEW)
+      # dataNEW <- standardizeClasses(dataNEW)
       
       if(input$disp == "head") {
-         return(head(df))
+         return(head(dataNew()))
       }
       else {
-         return(df)
+         return(dataNew())
       }
       
    })
@@ -1121,7 +1182,7 @@ shinyServer(function(input, output, session) {
    )
    
    
-   # QA/QC tab #########################################
+   # *QA/QC Tab* #########################################
    
      # Panel 1 Output ####
    #********************
@@ -1398,40 +1459,56 @@ shinyServer(function(input, output, session) {
    
    # Panel 4 Output ####
    #********************
-   
+
    output$TITLE4 <- renderText ({print(input$SITES4)})
-   
-   output$GRAPH_MAIN4 <- renderPlot({
-      # GRAPH EVERYTHING!
-      data <- data4()
+   output$GRAPH_PRECIP4 <- renderPlot({
+      data <- dataPrecip4()
       x <- data$date
-      # # Precipitation plot
-      # y <- data$precipCatch
-      # p <- ggplot(data, aes(x, y)) + my_theme +
-      #    geom_col(color="blue", fill = "lightblue", na.rm=TRUE) +
-      #    labs(x = "", y = "Precipitation (Catch)") +
-      #    scale_y_reverse()
-      # p
-      # Main plot
-      y <- input$SOLUTES4
-      m <- ggplot(data, aes(x, y)) + my_theme +
-         geom_point(na.rm=TRUE) +
+      ind_col <- which(input$PRECIP_SOURCE4 == colnames(data), arr.ind = TRUE)
+      y <- data[,ind_col]
+      p <- ggplot(data, aes(x, y)) + my_theme +
+         geom_col(color="blue", fill = "lightblue", width = 0.9, na.rm=TRUE) +
+         labs(x = "", y = "Precipitation (Catch)") +
+         scale_y_reverse()
+      p
+   }) # end of output$GRAPH_PRECIP4
+   output$GRAPH_MAIN4 <- renderPlot({
+      # data prep
+      data <- dataMain4()
+      x <- data$date
+      y <- data$solute_value
+      # build ggplot function
+      m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) +
+         my_theme +
+         geom_point(size = 2.5) +
+         geom_line(alpha = 0.5) +
          scale_x_date(date_labels = "%Y-%b")
+      # If show field code is selected, add to ggplot
+      if (input$FIELDCODE4 == TRUE) {
+         m <- m + geom_text(aes(label=data$fieldCode), 
+                            nudge_y = (max(data$solute_value, na.rm = TRUE) - min(data$solute_value, na.rm = TRUE))/15,
+                            check_overlap = TRUE)
+      }
+      # plot
       m
-      # # Hydrology plot
-      # y <- data$gageHt
-      # h <- ggplot(data, aes(x, y)) + my_theme +
-      #    geom_area(color="blue", fill = "lightblue", na.rm=TRUE)
-      # h
+
    }) # end of output$GRAPH_MAIN4
-   
+   output$GRAPH_FLOW4 <- renderPlot({
+      data <- dataFlow4()
+      x <- data$date
+      y <- data$flowMaxPerDate
+      f <- ggplot(data, aes(x, y)) + my_theme +
+         geom_area(color="blue", fill = "lightblue", na.rm=TRUE) +
+         labs(x = "", y = "Flow") 
+      f
+   }) # end of output$GRAPH_FLOW4
    paste(head(dataCurrent))
-   
+
    output$TABLE4 <- renderDataTable({
-      dataMain4()
+      dataFlow4()
       #head(dataCurrent)
-   }) # end of output$TABLE4 
-   
+   }) # end of output$TABLE4
+
    #**** END of Output ****
    
 }) # closes shinyServer

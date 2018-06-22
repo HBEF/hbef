@@ -108,20 +108,20 @@ shinyUI(
             tabPanel("Upload", # Upload Panel ----
                # Sidebar layout with input and output definitions
                sidebarLayout(
-                  # Sidebar panel for inputs
-                  sidebarPanel(
-                     # Input: Select a file
-                     fileInput("FILE_UPLOAD", "Choose CSV File",
-                             multiple = TRUE,
+                # Sidebar panel for inputs
+                sidebarPanel(
+                  # Input: Select a file
+                  fileInput("FILE_UPLOAD", "Choose CSV File",
+                             multiple = FALSE,
                              accept = c("text/csv",
                                         "text/comma-separated-values,text/plain",
-                                        ".csv"
-                             )
-                  ), # end of sidebarPanel                
+                                        ".csv")
+                  ), 
+                  actionButton("SUBMIT", label = "Submit to Database"),
                   # Horizontal line
                   # tags$hr(),
                   # Input: Checkbox to indicate whether file has header
-                  checkboxInput("header", "Data includes header (column names)", TRUE),
+                  checkboxInput("HEADER", "Data includes header (column names)", TRUE),
                   # Input: Select separator to indicate how data is separated
                   radioButtons("sep", "Separator",
                                 choices = c(Comma = ",",
@@ -144,10 +144,10 @@ shinyUI(
                                 choices = c(Head = "head", 
                                             All = "all"),
                                             selected = "head")
-                  ), # end of sidebarLayout
+                  ), # end of sidebarPanel
                   mainPanel(
                      # Shows data file as a table 
-                     tableOutput("contents")
+                     tableOutput("FILE_PREVIEW")
                   ) # end of mainPanel            
                ) # end of Sidebar Layout
             ), # end of tabPanel for "Upload" 
@@ -400,36 +400,46 @@ shinyUI(
                         # General tab
                         #********************
                         tabPanel("General",
-                           sliderInput(
-                              "DATE4",
-                              label = h4("Date Range"),
-                              min =as.Date("1963-06-01"),
-                              max = as.Date(maxDate),
-                              value = as.Date(c(maxDate-365, maxDate)),
-                              timeFormat = "%b %Y",
-                              dragRange = TRUE
-                           ),
+                           
                            checkboxInput(
-                              "PRECIP4",
-                              label = "Precipitation (median)",
-                              value = FALSE
+                              "HYDROLOGY4",
+                              label = "View hydrology",
+                              value = TRUE
                            ),
-                           # this panel only appears when precip button is clicked
+                           # this panel only appears when hydology option is selected
                            conditionalPanel(
-                              condition = "input.PRECIP4 == true",
+                              condition = "input.HYDROLOGY4 == true",
+                              selectInput("PRECIP_SITE4",
+                                          label = "Precipitation data sources:",
+                                          choices = c(sites_precip),
+                                          selected = "RG11"), # !!! need to field this from what's in data...
                               checkboxGroupInput(
                                  "PRECIP_SOURCE4",
-                                 label = "Precipitation data source:",
-                                 choices = c("Collector Catch",
-                                             "ETI"
+                                 label = "",
+                                 choices = c("Collector Catch" = "precipCatch",
+                                             "ETI" = "precipETI"
                                  ),
-                                 selected = "Collector Catch"
+                                 selected = "precipCatch"
+                              ),
+                              selectInput("FLOW_SITE4",
+                                          label = "Flow data sources:",
+                                          choices = c(sites_streams),
+                                          selected = "W1"), # !!! need to field this from what's in data...
+                              checkboxGroupInput(
+                                 "FLOW_SOURCE4",
+                                 label = "",
+                                 choices = c("Gage Height" = "gageHt",
+                                             "Q (estimated from Gage Height)" = "flowGageHt",
+                                             "Q (ETI)" = "flowSensor"
+                                 ),
+                                 selected = "gageHt"
+                              ),
+                              checkboxInput("HYDROLIMB4",
+                                          label = "Hydrograph limb",
+                                          value = FALSE
                               ),
                               style = "color:#3182bd;"
-                           ),
-                           p("Precipitation shows daily median of all rain gage sites." ,
-                             style = "color:#666666; font-size:85%;"
-                           ),
+                           ), #end of conditional panel
                            checkboxInput("FIELDCODE4",
                                          label = "Show field codes",
                                          value = FALSE
@@ -457,50 +467,23 @@ shinyUI(
                                              choices = c(sites_streams, sites_precip),
                                              selected = "W1"
                            )
-                        ),
-                        #********************
-                        # Discharge tab
-                        #********************
-                        tabPanel( "Discharge",
-                           checkboxInput(
-                                  "DISCHARGE4",
-                                  label = "Discharge (monthly median)",
-                                  value = FALSE
-                           ),
-                           # this panel only appears when discharge button is clicked
-                           conditionalPanel(
-                              condition = "input.DISCHARGE4 == true",
-                              checkboxGroupInput(
-                                 "DISCHARGE_SOURCE4",
-                                 label = "Discharge data source:",
-                                 choices = c("Gage Height",
-                                          "Q (estimated from Gage Height)",
-                                          "Q (ETI)"
-                                 ),
-                              selected = "Gage Height"
-                              ),
-                              style = "color:#3182bd;"
-                           ),
-                           p("Discharge shows daily median of all watershed sites." ,
-                              style = "color:#666666; font-size:85%;"
-                           ),
-                           checkboxInput("HYDROLIMB4",
-                                          label = "Hydrograph limb",
-                                          value = FALSE
-                           ),
-                           selectInput(
-                              "HYDROLIMB_SITE4",
-                              label = "Site",
-                              choices = c(sites_streams),
-                              selected = "W1"
-                           )
-                        ) # end of tabPanel
+                        ) #end of tabPanel "Sites"
                      ), #end of tabsetPanel
                      width = 3
                   ), # closes sidebarPanel
                        
                   # Plot
                   mainPanel(
+                     sliderInput(
+                        "DATE4",
+                        label = h4("Date Range"),
+                        min =as.Date("1963-06-01"),
+                        max = as.Date(maxDate),
+                        value = as.Date(c(maxDate-365, maxDate)),
+                        width = "100%",
+                        timeFormat = "%b %Y",
+                        dragRange = TRUE
+                     ),
                      tags$h4(textOutput("TITLE4")),
                      hr(),
                      plotOutput("GRAPH_PRECIP4"),
