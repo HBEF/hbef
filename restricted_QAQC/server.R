@@ -373,25 +373,46 @@ shinyServer(function(input, output, session) {
    #   paste(histYears, sep=" ")
    # })
    
-   # DATA INPUT Reactivity #### 
+   # *DATA INPUT Tab* #### 
    #************************
+
+   # Upon choosing csv file, grabs and displays file contents
+   dataNew <- eventReactive(input$FILE_UPLOAD,{
+         #for testing
+         #dataNew <-read.csv("data/formatted/current_testADD.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+         dataNew <- read.csv(input$FILE_UPLOAD$datapath,
+                             header = input$HEADER, 
+                             stringsAsFactors = FALSE, 
+                             na.strings=c(""," ","NA"))
+         dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
+   })
    
+   # Upon pressing submit, transfer uploaded file content to 'current' table in database
+   observeEvent(input$SUBMIT, {
+      # openning connection to database 
+      pass  = readLines('/home/hbef/RMySQL.config')
+      con = dbConnect(RMariaDB::MariaDB(),
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = 'hbef')
+      # make some needed changes to data for successful uploading
+      dataNew()$date <- as.Date(dataNew()$date, "%m/%d/%y")
+      dataNew() <- standardizeClasses(dataNew())
+      # upload data
+      dbWriteTable(con, "current", dataNew(), append=TRUE, row.names=FALSE)
+      dbDisconnect(con)
+      
+      # clear out input file
+      input$FILE_UPLOAD = NULL
+      
+      # send success message
+      # !!! will likely want to make this more advance later (only show success if there are no errors)
+      showNotification("Done!")
+   })
    
-   # observeEvent(input$SUBMIT,{
-   #       dataNEW <- read.csv(input$FILE_UPLOAD$datapath,
-   #                           header = input$HEADER)
-   #       dataNew$date <- as.Date(dataNew$date)
-   #       dataNEW <- bind_rows(dataInitial, dataNEW)
-   #       dataNEW <- standardizeClasses(dataNEW)
-   #       print(dataNew)
-   # })
-   # dataNEW <- eventReactive(input$SUBMIT,{
-   #       dataNEW <- read.csv(input$FILE_UPLOAD$datapath, 
-   #                           header = input$HEADER)
-   #       dataNew$date <- as.Date(dataNew$date)
-   #       dataNEW <- bind_rows(dataInitial, dataNEW)
-   #       dataNEW <- standardizeClasses(dataNEW)
-   # })
+   # *QA/QC Tab* #### 
+   #************************
    
    # Panel 1 Reactivity #### 
    #************************
@@ -1044,7 +1065,7 @@ shinyServer(function(input, output, session) {
       ## remove columns that don't match up between datasets
       dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
    # 2. Join data together
-   dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical)
+   dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical) # !!! eventually need to add sensor data here
    # 3. Filter data according to inputs
    ## Base data
    data4 <- reactive ({
@@ -1055,10 +1076,8 @@ shinyServer(function(input, output, session) {
    ## Data for Precip plot
    dataPrecip4 <- reactive ({
       dataPrecip4 <- data4() %>%
-         select(one_of("date", "site", "precipCatch")) %>%
-         filter(site %in% sites_precip) %>%
-         group_by(date) %>%
-         summarise(PrecipMedian = median(precipCatch, na.rm=TRUE))
+         filter(site %in% input$PRECIP_SITE4) %>%
+         select(one_of("date", "site", input$PRECIP_SOURCE4)) 
    })
    ## Data for Main plot
    dataMain4 <- reactive ({
@@ -1071,12 +1090,24 @@ shinyServer(function(input, output, session) {
    ## Data for Flow plot
    dataFlow4 <- reactive ({
       dataFlow4 <- data4() %>%
-         select(one_of("date", "site", "gageHt", "flowGageHt")) %>%
-         filter(site %in% sites_streams) %>%
+         filter(site %in% input$FLOW_SITE4) %>%
+         select(one_of("date", input$FLOW_SOURCE4))
+   if (input$FLOW_SOURCE4 == "gageHt") {
+      dataFlow4 <- dataFlow4 %>%
          group_by(date) %>%
-         summarise(gageHtMedian = median(gageHt, na.rm=TRUE),
-                   flowGageHtMedian = median(flowGageHt, na.rm=TRUE))
-         #           hydroGraph = first(hydroGraph, na.rm=TRUE)) #!!! ability to choose source of stream/flow data
+         summarise(flowMaxPerDate = max(gageHt, na.rm=TRUE))
+   }
+   if (input$FLOW_SOURCE4 == "flowGageHt") {
+      dataFlow4 <- dataFlow4 %>%
+         group_by(date) %>%
+         summarise(flowMaxPerDate = max(flowGageHt, na.rm=TRUE))
+   }
+   if (input$FLOW_SOURCE4 == "flowSensor") {
+      dataFlow4 <- dataFlow4 %>%
+         group_by(date) %>%
+         summarise(flowMaxPerDate = max(flowSensor, na.rm=TRUE))
+   }
+         
    })
    ## Additional data for Flow plot: hydroGraph labels
    dataFlowHydroGraph4 <- reactive ({
@@ -1093,48 +1124,53 @@ shinyServer(function(input, output, session) {
    # ***********************************
    
    
-   # DATA INPUT Output #########################################
+   # *DATA INPUT Tab* #########################################
    
-   # Upload .csv ####
    output$FILE_PREVIEW <- renderTable({
       
       # input$file1 will be NULL initially. After the user selects
       # and uploads a file, head of that data file by default,
       # or all rows if selected, will be shown.
-
+            
       req(input$FILE_UPLOAD)
-
-      # for testing
-      # df <- read.csv("data/Formatted/test.csv",
-      #                header = TRUE,
-      #                stringsAsFactors = FALSE,
+      
+      # # for testing
+      # # df <- read.csv("data/Formatted/test.csv",
+      # #                header = TRUE,
+      # #                stringsAsFactors = FALSE,
+      # #                na.strings=c(""," ","NA"))
+      # 
+      # df <- read.csv(input$FILE_UPLOAD$datapath,
+      #                header = input$HEADER,
+      #                stringsAsFactors = FALSE, 
       #                na.strings=c(""," ","NA"))
+      # df$date <- as.Date(df$date, "%m/%d/%y") 
+      # df$date <- as.Date(df$date, "%Y/%m/%d")
+      # # Remove "archived" column (if it exists)
+      # if ("archived" %in% colnames(df)) {
+      #    ind <- which("archived" == colnames(df), arr.ind = TRUE)
+      #    df <- df[,-ind]
+      # }
+      # 
+      # df <- standardizeClasses(df)
+      # dataInitial <- standardizeClasses(dataInitial)
+      # # classes <- NA
+      # # for (i in 1:ncol(d)) classes[i] <- class(d[[i]])
+      # dfNew <- bind_rows(dataInitial, df)
+      # return(dfNew)
+
+      # dataNEW <- read.csv(input$FILE_UPLOAD$datapath,
+      #                     header = input$HEADER)
+      # dataNew$date <- as.Date(dataNew$date)
+      # #dataNEW <- bind_rows(dataInitial, dataNEW)
+      # dataNEW <- standardizeClasses(dataNEW)
       
-      df <- read.csv(input$FILE_UPLOAD$datapath,
-                     header = input$HEADER,
-                     stringsAsFactors = FALSE, 
-                     na.strings=c(""," ","NA"))
-      df$date <- as.Date(df$date, "%m/%d/%y") 
-      df$date <- as.Date(df$date, "%Y/%m/%d")
-      # Remove "archived" column (if it exists)
-      if ("archived" %in% colnames(df)) {
-         ind <- which("archived" == colnames(df), arr.ind = TRUE)
-         df <- df[,-ind]
+      if(input$disp == "head") {
+         return(head(dataNew()))
       }
-      
-      df <- standardizeClasses(df)
-      dataInitial <- standardizeClasses(dataInitial)
-      # classes <- NA
-      # for (i in 1:ncol(d)) classes[i] <- class(d[[i]])
-      dfNew <- bind_rows(dataInitial, df)
-      return(dfNew)
-#
-#       if(input$disp == "head") {
-#          return(head(df))
-#       }
-#       else {
-#          return(df)
-#       }
+      else {
+         return(dataNew())
+      }
       
    })
    
@@ -1146,7 +1182,7 @@ shinyServer(function(input, output, session) {
    )
    
    
-   # QA/QC tab #########################################
+   # *QA/QC Tab* #########################################
    
      # Panel 1 Output ####
    #********************
@@ -1428,7 +1464,8 @@ shinyServer(function(input, output, session) {
    output$GRAPH_PRECIP4 <- renderPlot({
       data <- dataPrecip4()
       x <- data$date
-      y <- data$PrecipMedian
+      ind_col <- which(input$PRECIP_SOURCE4 == colnames(data), arr.ind = TRUE)
+      y <- data[,ind_col]
       p <- ggplot(data, aes(x, y)) + my_theme +
          geom_col(color="blue", fill = "lightblue", width = 0.9, na.rm=TRUE) +
          labs(x = "", y = "Precipitation (Catch)") +
@@ -1457,11 +1494,13 @@ shinyServer(function(input, output, session) {
 
    }) # end of output$GRAPH_MAIN4
    output$GRAPH_FLOW4 <- renderPlot({
-      # # Hydrology plot
-      # y <- data$gageHt
-      # f <- ggplot(data, aes(x, y)) + my_theme +
-      #    geom_area(color="blue", fill = "lightblue", na.rm=TRUE)
-      # f
+      data <- dataFlow4()
+      x <- data$date
+      y <- data$flowMaxPerDate
+      f <- ggplot(data, aes(x, y)) + my_theme +
+         geom_area(color="blue", fill = "lightblue", na.rm=TRUE) +
+         labs(x = "", y = "Flow") 
+      f
    }) # end of output$GRAPH_FLOW4
    paste(head(dataCurrent))
 

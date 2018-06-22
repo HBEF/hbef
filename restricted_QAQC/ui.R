@@ -108,7 +108,7 @@ shinyUI(
             tabPanel("Upload", # Upload Panel ----
                # Sidebar layout with input and output definitions
                sidebarLayout(
-                  # Sidebar panel for inputs
+                # Sidebar panel for inputs
                 sidebarPanel(
                   # Input: Select a file
                   fileInput("FILE_UPLOAD", "Choose CSV File",
@@ -117,7 +117,7 @@ shinyUI(
                                         "text/comma-separated-values,text/plain",
                                         ".csv")
                   ), 
-                  actionButton("SUBMIT", label = "Submit"),
+                  actionButton("SUBMIT", label = "Submit to Database"),
                   # Horizontal line
                   # tags$hr(),
                   # Input: Checkbox to indicate whether file has header
@@ -400,15 +400,7 @@ shinyUI(
                         # General tab
                         #********************
                         tabPanel("General",
-                           sliderInput(
-                              "DATE4",
-                              label = h4("Date Range"),
-                              min =as.Date("1963-06-01"),
-                              max = as.Date(maxDate),
-                              value = as.Date(c(maxDate-365, maxDate)),
-                              timeFormat = "%b %Y",
-                              dragRange = TRUE
-                           ),
+                           
                            checkboxInput(
                               "HYDROLOGY4",
                               label = "View hydrology",
@@ -418,29 +410,29 @@ shinyUI(
                            conditionalPanel(
                               condition = "input.HYDROLOGY4 == true",
                               selectInput("PRECIP_SITE4",
-                                          label = "Source of precipitation data:",
+                                          label = "Precipitation data sources:",
                                           choices = c(sites_precip),
                                           selected = "RG11"), # !!! need to field this from what's in data...
                               checkboxGroupInput(
                                  "PRECIP_SOURCE4",
-                                 label = "Precipitation data source:",
+                                 label = "",
                                  choices = c("Collector Catch" = "precipCatch",
                                              "ETI" = "precipETI"
                                  ),
-                                 selected = "Collector Catch"
+                                 selected = "precipCatch"
                               ),
                               selectInput("FLOW_SITE4",
-                                          label = "Source of flow data:",
+                                          label = "Flow data sources:",
                                           choices = c(sites_streams),
                                           selected = "W1"), # !!! need to field this from what's in data...
                               checkboxGroupInput(
                                  "FLOW_SOURCE4",
-                                 label = "Flow data source:",
+                                 label = "",
                                  choices = c("Gage Height" = "gageHt",
                                              "Q (estimated from Gage Height)" = "flowGageHt",
                                              "Q (ETI)" = "flowSensor"
                                  ),
-                                 selected = "Gage Height"
+                                 selected = "gageHt"
                               ),
                               checkboxInput("HYDROLIMB4",
                                           label = "Hydrograph limb",
@@ -482,6 +474,16 @@ shinyUI(
                        
                   # Plot
                   mainPanel(
+                     sliderInput(
+                        "DATE4",
+                        label = h4("Date Range"),
+                        min =as.Date("1963-06-01"),
+                        max = as.Date(maxDate),
+                        value = as.Date(c(maxDate-365, maxDate)),
+                        width = "100%",
+                        timeFormat = "%b %Y",
+                        dragRange = TRUE
+                     ),
                      tags$h4(textOutput("TITLE4")),
                      hr(),
                      plotOutput("GRAPH_PRECIP4"),
