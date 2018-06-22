@@ -11,3 +11,4 @@ restricted_QAQC/test.R
 ._.DS_Store
 **/.DS_Store
 **/._.DS_Store:
+streampulse_diagnostic_plots
