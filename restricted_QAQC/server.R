@@ -378,37 +378,48 @@ shinyServer(function(input, output, session) {
 
    # Upon choosing csv file, grabs and displays file contents
    dataNew <- eventReactive(input$FILE_UPLOAD,{
+   
          #for testing
          #dataNew <-read.csv("data/formatted/current_testADD.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+         message("I'm inside event reactive")
          dataNew <- read.csv(input$FILE_UPLOAD$datapath,
                              header = input$HEADER, 
                              stringsAsFactors = FALSE, 
                              na.strings=c(""," ","NA"))
+         message("just ran read.csv")
          dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
-   })
+         message("ran remove NA rows")
+         dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
+         message("after date")
+         message(print(head(dataNew))) 
+  })
    
    # Upon pressing submit, transfer uploaded file content to 'current' table in database
    observeEvent(input$SUBMIT, {
+      message("inside submit")
       # openning connection to database 
       pass  = readLines('/home/hbef/RMySQL.config')
-      con = dbConnect(RMariaDB::MariaDB(),
+      con = dbConnect(MariaDB(),
                       user = 'root',
                       password = pass,
                       host = 'localhost',
                       dbname = 'hbef')
       # make some needed changes to data for successful uploading
-      dataNew()$date <- as.Date(dataNew()$date, "%m/%d/%y")
+      #dataNew()$date <- as.Date(dataNew()$date, "%m/%d/%y")
+      message(print(head(dataNew())))
       dataNew() <- standardizeClasses(dataNew())
+      message(princt(head(dataNew())))
       # upload data
       dbWriteTable(con, "current", dataNew(), append=TRUE, row.names=FALSE)
       dbDisconnect(con)
-      
+      message("after database connection closed")
       # clear out input file
       input$FILE_UPLOAD = NULL
-      
+      message("after nulling file upload")
       # send success message
       # !!! will likely want to make this more advance later (only show success if there are no errors)
       showNotification("Done!")
+      message("after show Notification")
    })
    
    # *QA/QC Tab* #### 
