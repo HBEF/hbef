@@ -413,7 +413,7 @@ shinyUI(
                                           label = "Precipitation data sources:",
                                           choices = c(sites_precip),
                                           selected = "RG11"), # !!! need to field this from what's in data...
-                              checkboxGroupInput(
+                              radioButtons(
                                  "PRECIP_SOURCE4",
                                  label = "",
                                  choices = c("Collector Catch" = "precipCatch",
@@ -425,7 +425,7 @@ shinyUI(
                                           label = "Flow data sources:",
                                           choices = c(sites_streams),
                                           selected = "W1"), # !!! need to field this from what's in data...
-                              checkboxGroupInput(
+                              radioButtons(
                                  "FLOW_SOURCE4",
                                  label = "",
                                  choices = c("Gage Height" = "gageHt",
@@ -437,8 +437,8 @@ shinyUI(
                               checkboxInput("HYDROLIMB4",
                                           label = "Hydrograph limb",
                                           value = FALSE
-                              ),
-                              style = "color:#3182bd;"
+                              )
+                              #style = "color:#3182bd;"
                            ), #end of conditional panel
                            checkboxInput("FIELDCODE4",
                                          label = "Show field codes",
@@ -486,9 +486,21 @@ shinyUI(
                      ),
                      tags$h4(textOutput("TITLE4")),
                      hr(),
-                     plotOutput("GRAPH_PRECIP4"),
-                     plotOutput("GRAPH_MAIN4"),
-                     plotOutput("GRAPH_FLOW4"),
+                     #plotOutput("GRAPH_PRECIP4"),
+                     #plotOutput("GRAPH_MAIN4"),
+                     #plotOutput("GRAPH_FLOW4"),
+                     fluidRow(
+                        column(12, style = "height:150px;",
+                               plotOutput("GRAPH_PRECIP4"))
+                     ),  
+                     fluidRow(
+                        column(12, style = "height:400px;",
+                               plotOutput("GRAPH_MAIN4"))
+                     ),
+                     fluidRow(
+                        column(12, style = "height:150px;",
+                               plotOutput("GRAPH_FLOW4"))
+                     ),
                      hr(),
                      h4("Table of Selected Data"),
                      HTML("<p>Search bar finds specific values within selected 

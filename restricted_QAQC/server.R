@@ -15,6 +15,7 @@ library(dplyr)
 library(dygraphs)          # allows for interactivity
 library(ggplot2)
 library(ggthemes)
+library(plotly)
 #library(lubridate)        # Does not work with shinyapps.io: https://stackoverflow.com/questions/28656683/r-script-working-locally-not-working-on-shinyapp-io
 library(RColorBrewer)
 library(RMariaDB)
@@ -408,7 +409,7 @@ shinyServer(function(input, output, session) {
       #dataNew()$date <- as.Date(dataNew()$date, "%m/%d/%y")
       message(print(head(dataNew())))
       dataNew() <- standardizeClasses(dataNew())
-      message(princt(head(dataNew())))
+      message(print(head(dataNew())))
       # upload data
       dbWriteTable(con, "current", dataNew(), append=TRUE, row.names=FALSE)
       dbDisconnect(con)
@@ -1087,8 +1088,20 @@ shinyServer(function(input, output, session) {
    ## Data for Precip plot
    dataPrecip4 <- reactive ({
       dataPrecip4 <- data4() %>%
-         filter(site %in% input$PRECIP_SITE4) %>%
+         #filter(site %in% input$PRECIP_SITE4) %>%
+         filter(site %in% sites_precip) %>% 
          select(one_of("date", "site", input$PRECIP_SOURCE4)) 
+      if (input$PRECIP_SOURCE4 == "precipCatch") {
+         dataPrecip4 <- dataPrecip4 %>%
+            group_by(date) %>%
+            summarise(medianPrecip = median(precipCatch, na.rm=TRUE))
+      }
+      if (input$PRECIP_SOURCE4 == "precipETI") {
+         dataPrecip4 <- dataPrecip4 %>%
+            group_by(date) %>%
+            summarise(medianPrecip = median(precipETI, na.rm=TRUE))
+      }
+      dataPrecip4
    })
    ## Data for Main plot
    dataMain4 <- reactive ({
@@ -1103,22 +1116,22 @@ shinyServer(function(input, output, session) {
       dataFlow4 <- data4() %>%
          filter(site %in% input$FLOW_SITE4) %>%
          select(one_of("date", input$FLOW_SOURCE4))
-   if (input$FLOW_SOURCE4 == "gageHt") {
-      dataFlow4 <- dataFlow4 %>%
-         group_by(date) %>%
-         summarise(flowMaxPerDate = max(gageHt, na.rm=TRUE))
-   }
-   if (input$FLOW_SOURCE4 == "flowGageHt") {
-      dataFlow4 <- dataFlow4 %>%
-         group_by(date) %>%
-         summarise(flowMaxPerDate = max(flowGageHt, na.rm=TRUE))
-   }
-   if (input$FLOW_SOURCE4 == "flowSensor") {
-      dataFlow4 <- dataFlow4 %>%
-         group_by(date) %>%
-         summarise(flowMaxPerDate = max(flowSensor, na.rm=TRUE))
-   }
-         
+      if (input$FLOW_SOURCE4 == "gageHt") {
+         dataFlow4 <- dataFlow4 %>%
+            group_by(date) %>%
+            summarise(flowMaxPerDate = max(gageHt, na.rm=TRUE))
+      }
+      if (input$FLOW_SOURCE4 == "flowGageHt") {
+         dataFlow4 <- dataFlow4 %>%
+            group_by(date) %>%
+            summarise(flowMaxPerDate = max(flowGageHt, na.rm=TRUE))
+      }
+      if (input$FLOW_SOURCE4 == "flowSensor") {
+         dataFlow4 <- dataFlow4 %>%
+            group_by(date) %>%
+            summarise(flowMaxPerDate = max(flowSensor, na.rm=TRUE))
+      }
+      dataFlow4
    })
    ## Additional data for Flow plot: hydroGraph labels
    dataFlowHydroGraph4 <- reactive ({
@@ -1472,19 +1485,22 @@ shinyServer(function(input, output, session) {
    #********************
 
    output$TITLE4 <- renderText ({print(input$SITES4)})
+   orig_dev.size <- dev.size(units = "px")
    output$GRAPH_PRECIP4 <- renderPlot({
-      data <- dataPrecip4()
-      x <- data$date
-      ind_col <- which(input$PRECIP_SOURCE4 == colnames(data), arr.ind = TRUE)
-      y <- data[,ind_col]
-      p <- ggplot(data, aes(x, y)) + my_theme +
-         geom_col(color="blue", fill = "lightblue", width = 0.9, na.rm=TRUE) +
-         labs(x = "", y = "Precipitation (Catch)") +
-         scale_y_reverse()
-      p
-   }) # end of output$GRAPH_PRECIP4
+      if (input$HYDROLOGY4 == TRUE) {
+         data <- dataPrecip4()
+         x <- data$date
+         # get column number of selected precipitation source
+         # ind_col <- which(input$PRECIP_SOURCE4 == colnames(data), arr.ind = TRUE)
+         y <- data$medianPrecip
+         p <- ggplot(data, aes(x, y)) + my_theme +
+            geom_col(color="blue", fill = "lightblue", width = 1, na.rm=TRUE) +
+            labs(x = "", y = "Precipitation (Catch)") +
+            scale_y_reverse()
+         p
+      }
+   }, height = 150) # end of output$GRAPH_PRECIP4
    output$GRAPH_MAIN4 <- renderPlot({
-      # data prep
       data <- dataMain4()
       x <- data$date
       y <- data$solute_value
@@ -1502,21 +1518,22 @@ shinyServer(function(input, output, session) {
       }
       # plot
       m
-
-   }) # end of output$GRAPH_MAIN4
+   }, height = 400) # end of output$GRAPH_MAIN4
    output$GRAPH_FLOW4 <- renderPlot({
-      data <- dataFlow4()
-      x <- data$date
-      y <- data$flowMaxPerDate
-      f <- ggplot(data, aes(x, y)) + my_theme +
-         geom_area(color="blue", fill = "lightblue", na.rm=TRUE) +
-         labs(x = "", y = "Flow") 
-      f
-   }) # end of output$GRAPH_FLOW4
+      if (input$HYDROLOGY4 == TRUE) {
+         data <- dataFlow4()
+         x <- data$date
+         y <- data$flowMaxPerDate
+         f <- ggplot(data, aes(x, y)) + my_theme +
+            geom_area(color="blue", fill = "lightblue", na.rm=TRUE) +
+            labs(x = "", y = "Flow") 
+         f
+      }
+   }, height = 150) # end of output$GRAPH_FLOW4
    paste(head(dataCurrent))
 
    output$TABLE4 <- renderDataTable({
-      dataFlow4()
+      dataPrecip4()
       #head(dataCurrent)
    }) # end of output$TABLE4
 
