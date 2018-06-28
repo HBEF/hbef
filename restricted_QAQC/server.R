@@ -166,8 +166,12 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 standardizeClasses <- function(d) {
       # d:              data.frame to be checked for columns with only NA's
       # ColClasses :    vector of desired class types for the data.frame
+      message("In standardizeClasses")
+      message(head(d))
       r <- nrow(d)
+      message(r)
       c <- ncol(d)
+      message(c)
       for (i in 1:c) {
          ## 1. Insert an additional row with a sample value for each column
          ### Find index in defClassesSample that corresponds to column in d, save that index
@@ -393,8 +397,9 @@ shinyServer(function(input, output, session) {
          message("ran remove NA rows")
          dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
          message("after date")
-         message(print(head(dataNew))) 
-  })
+         # message(print(head(dataNew))) 
+         return(dataNew)  
+    })
    
    # Upon pressing submit, transfer uploaded file content to 'current' table in database
    observeEvent(input$SUBMIT, {
@@ -406,20 +411,16 @@ shinyServer(function(input, output, session) {
                       password = pass,
                       host = 'localhost',
                       dbname = 'hbef')
-      # make some needed changes to data for successful uploading
-      #dataNew()$date <- as.Date(dataNew()$date, "%m/%d/%y")
-      message(print(head(dataNew())))
-      dataNew() <- standardizeClasses(dataNew())
-      message(print(head(dataNew())))
+
+      # make needed data type changes to data before uploading
+      dataNew <- standardizeClasses(dataNew())
+      message("after standardize classes")
+      message(head(dataNew))
       # upload data
-      dbWriteTable(con, "current", dataNew(), append=TRUE, row.names=FALSE)
+      dbWriteTable(con, "current", dataNew, overwrite=TRUE, row.names=FALSE)
       dbDisconnect(con)
       message("after database connection closed")
-      # clear out input file
-      input$FILE_UPLOAD = NULL
-      message("after nulling file upload")
-      # send success message
-      # !!! will likely want to make this more advance later (only show success if there are no errors)
+      # !!! will likely want to make this more advanced later (only show success if there are no errors)
       showNotification("Done!")
       message("after show Notification")
    })
