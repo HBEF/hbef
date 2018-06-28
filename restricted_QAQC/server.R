@@ -1491,7 +1491,6 @@ shinyServer(function(input, output, session) {
    #********************
 
    output$TITLE4 <- renderText ({print(input$SITES4)})
-   orig_dev.size <- dev.size(units = "px")
    output$GRAPH_PRECIP4 <- renderPlot({
       if (input$HYDROLOGY4 == TRUE) {
          data <- dataPrecip4()
