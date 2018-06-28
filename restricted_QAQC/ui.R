@@ -116,34 +116,34 @@ shinyUI(
                              accept = c("text/csv",
                                         "text/comma-separated-values,text/plain",
                                         ".csv")
-                  ), 
-                  actionButton("SUBMIT", label = "Submit to Database"),
-                  # Horizontal line
-                  # tags$hr(),
+                  ),
                   # Input: Checkbox to indicate whether file has header
                   checkboxInput("HEADER", "Data includes header (column names)", TRUE),
-                  # Input: Select separator to indicate how data is separated
-                  radioButtons("sep", "Separator",
-                                choices = c(Comma = ",",
-                                            Semicolon = ";",
-                                            Tab = "\t"
-                                ),
-                                selected = ","
+                  # Input: Select number of rows to display in output chart
+                  p("Note: Must be checked for upload to work." , 
+                    style = "color:#666666; font-size:85%;"
                   ),
+                  tags$hr(), # horizontal line
+                  radioButtons("disp", "Display",
+                               choices = c(Head = "head", 
+                                           All = "all"),
+                               selected = "head"),
+                  tags$hr(), # horizontal line
+                  actionButton("SUBMIT", label = "Submit to Database")
+                  # Input: Select separator to indicate how data is separated
+                  # radioButtons("sep", "Separator",
+                  #               choices = c(Comma = ",",
+                  #                           Semicolon = ";",
+                  #                           Tab = "\t"
+                  #               ),
+                  #               selected = ","
+                  # ),
                   # # Input: Select quotes
                   # radioButtons("quote", "Quote",
                   #              choices = c(None = "",
                   #                          "Double Quote" = '"',
                   #                          "Single Quote" = "'"),
                   #              selected = '"'),
-                                  
-                  # Horizontal line
-                  # tags$hr(),
-                  # Input: Select number of rows to display in output chart
-                  radioButtons("disp", "Display",
-                                choices = c(Head = "head", 
-                                            All = "all"),
-                                            selected = "head")
                   ), # end of sidebarPanel
                   mainPanel(
                      # Shows data file as a table 
@@ -409,10 +409,6 @@ shinyUI(
                            # this panel only appears when hydology option is selected
                            conditionalPanel(
                               condition = "input.HYDROLOGY4 == true",
-                              selectInput("PRECIP_SITE4",
-                                          label = "Precipitation data sources:",
-                                          choices = c(sites_precip),
-                                          selected = "RG11"), # !!! need to field this from what's in data...
                               radioButtons(
                                  "PRECIP_SOURCE4",
                                  label = "",
