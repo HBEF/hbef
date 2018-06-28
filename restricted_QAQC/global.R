@@ -63,7 +63,8 @@ dataHistorical <- read.csv("data/formatted/historical.csv", stringsAsFactors = F
    # # export
    # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
 
-# Find maximum date
+# Find maximum date ----
+# used in ui.R for "Free-for-all" panel
 maxDate_initial <- max(dataInitial$date, na.rm=TRUE)
 maxDate_current <- max(dataCurrent$date, na.rm=TRUE)
 maxDate_historical <- max(dataHistorical$date, na.rm=TRUE)

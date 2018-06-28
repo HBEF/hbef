@@ -125,9 +125,10 @@ shinyUI(
                   ),
                   tags$hr(), # horizontal line
                   radioButtons("disp", "Display",
-                               choices = c(Head = "head", 
-                                           All = "all"),
-                               selected = "head"),
+                               choices = c("Head" = "head", 
+                                           "All" = "all"),
+                               selected = "head"
+                  ),
                   tags$hr(), # horizontal line
                   actionButton("SUBMIT", label = "Submit to Database")
                   # Input: Select separator to indicate how data is separated
@@ -147,7 +148,7 @@ shinyUI(
                   ), # end of sidebarPanel
                   mainPanel(
                      # Shows data file as a table 
-                     tableOutput("FILE_PREVIEW")
+                     dataTableOutput("FILE_PREVIEW")
                   ) # end of mainPanel            
                ) # end of Sidebar Layout
             ), # end of tabPanel for "Upload" 

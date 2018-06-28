@@ -1155,13 +1155,13 @@ shinyServer(function(input, output, session) {
    
    # *DATA INPUT Tab* #########################################
    
-   output$FILE_PREVIEW <- renderTable({
+   output$FILE_PREVIEW <- renderDataTable({
       
       # input$file1 will be NULL initially. After the user selects
       # and uploads a file, head of that data file by default,
       # or all rows if selected, will be shown.
             
-      req(input$FILE_UPLOAD)
+      #req(input$FILE_UPLOAD)
       
       # # for testing
       # # df <- read.csv("data/Formatted/test.csv",
@@ -1195,10 +1195,10 @@ shinyServer(function(input, output, session) {
       # dataNEW <- standardizeClasses(dataNEW)
       
       if(input$disp == "head") {
-         return(head(dataNew()))
+         head(dataNew())
       }
       else {
-         return(dataNew())
+         dataNew()
       }
       
    })
