@@ -1,7 +1,21 @@
-# Variables that can be accessed by ui.R and server.R
+# Used to:
+# -Import all data
+# -Create variables that can be accessed by ui.R and server.R
 
 library(RMariaDB)
 library(stringr) 
+
+# **********************************************************************
+#                      ---- DATA IMPORT & PREP ----
+# **********************************************************************
+
+# import MDL/LOQ data
+dataLimits <- read.csv("data/Limits_MDL_LOQ.csv")
+
+# data needed for standardizeClasses() funciton to work
+defClasses <- read.csv("data/formatted/Rclasses.csv", header = TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+defClassesSample <- read.csv("data/formatted/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 
 # Grabbing Data from MySQL database ----
 # USE WHEN LIVE ON SITE
@@ -62,6 +76,8 @@ dbDisconnect(con)
 #    # }
 #    # # export
 #    # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
+
+# ****  END OF DATA IMPORT & PREP ****
 
 # Find maximum date ----
 # used in ui.R for "Free-for-all" panel
