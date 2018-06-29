@@ -115,7 +115,7 @@ shinyUI(
                        "WATERYEAR1",
                        label = "Water Year",
                        choices = wateryears,
-                       selected = 2014
+                       selected = wateryears[1]
                      ),
                      hr(),
                      selectInput(
@@ -142,7 +142,7 @@ shinyUI(
                         value = FALSE
                      ),
                      conditionalPanel(
-                        # this panel only appears when discharge/precipitation button is clicked
+                        # this panel only appears when Hydrology button is clicked AND a stream site is selected
                         # !!! this condition could be optimized to be when sites %in% sites_stream (in javascript)
                         condition = "input.HYDROLOGY1 == true &&
                                       (input.SITES1 == 'W1' ||
@@ -218,7 +218,7 @@ shinyUI(
                         "WATERYEAR2",
                         label = "Water Year",
                         choices = wateryears,
-                        selected = 2014
+                        selected = wateryears[1]
                      ),
                      selectInput("SITES2",
                                 label = "Site",
@@ -230,19 +230,33 @@ shinyUI(
                                value = FALSE))
                      ),
                      conditionalPanel(
-                        # this panel only appears when discharge/precipitation button is clicked
-                        condition = "input.HYDROLOGY2 == true", 
-                        p(radioButtons("GAGEHT_or_Q2", 
-                                      "Select data source:",
-                                      choices = c("Gage Height (mm)" = "GageHt", 
-                                                  "Q (L/s)" = "Q"),
-                                      selected = "GageHt",
-                                      inline = FALSE)
+                        # this panel only appears when Hydrology button is clicked AND a stream site is selected
+                        # !!! this condition could be optimized to be when sites %in% sites_stream (in javascript)
+                        condition = "input.HYDROLOGY2 == true &&
+                        (input.SITES2 == 'W1' ||
+                        input.SITES2 =='W2' ||
+                        input.SITES2 == 'W3' ||
+                        input.SITES2 == 'W4' ||
+                        input.SITES2 == 'W5' ||
+                        input.SITES2 == 'W6' |
+                        input.SITES2 == 'W7' ||
+                        input.SITES2 == 'W8' ||
+                        input.SITES2 == 'W9' ||
+                        input.SITES2 == 'HBK' ||
+                        input.SITES2 == 'ML70' ||
+                        input.SITES2 == 'PLY')", 
+                        p(radioButtons("Flow_or_Precip2", 
+                                       "Select data source:",
+                                       choices = c("Gage Height (mm)" = "gageHt", 
+                                                   "Q from Gage Height (L/s)" = "flowGageHt"),
+                                       selected = "gageHt",
+                                       inline = FALSE)
                         ), 
                         style = "color:#3182bd;"
                      ),
-                     p("Hydrology shows discharge for watershed sites, and precipitation for rain gage sites." , 
-                         style = "color:#666666; font-size:85%;"
+                     p("Hydrology shows discharge for watershed sites, 
+                       and precipitation for rain gage sites." , 
+                       style = "color:#666666; font-size:85%;"
                      ),
                      checkboxGroupInput("SOLUTES2", 
                                        label = "Solutes",
@@ -279,14 +293,15 @@ shinyUI(
                        "WATERYEAR3",
                        label = "Water Year",
                        choices = wateryears,
-                       selected = 2014
+                       selected = wateryears[1]
                      ),
                      selectInput("SOLUTES3",
                                 label = "Solute",
                                 choices = c(solutes_cations, solutes_anions, solutes_other),
                                 selected = "Ca"
                      ),
-                     helpText(textOutput("LIMITS3"), style = "color:#fc9272; font-size:85%;"),
+                     helpText(textOutput("LIMITS3"), 
+                              style = "color:#fc9272; font-size:85%;"),
                      radioButtons("HYDROLOGY3",
                                   label = "Hydrology (median):",
                                   choices = c("Discharge", "Precipitation", "None"),
@@ -294,12 +309,12 @@ shinyUI(
                      ),
                      conditionalPanel(
                      # this panel only appears when discharge/precipitation button is clicked
-                        condition = "input.HYDROLOGY3 == 'Discharge' || input.HYDROLOGY3 == 'Precipitation'", 
-                        p(radioButtons("GAGEHT_or_Q3", 
-                                        "Select hydrology data source:",
-                                        choices = c("Gage Height (mm)" = "GageHt", 
-                                                    "Q (L/s)" = "Q"),
-                                        selected = "GageHt",
+                        condition = "input.HYDROLOGY3 == 'Discharge'", 
+                        p(radioButtons("Flow_or_Precip3", 
+                                        "Select discharge data source:",
+                                        choices = c("Gage Height (mm)" = "gageHt", 
+                                                    "Q from Gage Height (L/s)" = "flowGageHt"),
+                                        selected = "gageHt",
                                         inline = FALSE)), style = "color:#3182bd;"
                      ),
                      p("Discharge shows daily median of all watershed sites." , 
