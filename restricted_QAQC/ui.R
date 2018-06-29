@@ -16,77 +16,6 @@ library(shiny)            # basis of entire app, allows us to create reactive da
 
 message("hello, I'm in ui.R")
 
-# Lists ----
-#*****************
-
-# If you add to this list, must update colors_cations list as well
-solutes_cations <- list("TOTAL Cation Charge" = "cationCharge",
-                        "Calcium (Ca)" = "Ca", 
-                        "Magnesium (Mg)" = "Mg", 
-                        "Potassium (K)" = "K", 
-                        "Sodium (Na)" = "Na", 
-                        "TM Aluminum (Al)" = "TMAl", 
-                        "OM Aluminum (Al)" = "OMAl", 
-                        "Aluminum (Al) ICP" = "Al_ICP", 
-                        "Ammonium (NH4)" = "NH4", 
-                        "Manganese (Mn)" = "Mn", 
-                        "Iron (Fe)" = "Fe")
-
-# If you add to this list, must update colors_anions list as well
-solutes_anions <- list("TOTAL Anion Charge" = "anionCharge",
-                       "Sulfate (SO4)" = "SO4", 
-                       "Nitrate (NO3)" = "NO3", 
-                       "Chloride (Cl)" = "Cl", 
-                       "Phosphate (PO4)" = "PO4", 
-                       "Fluorine (F)" = "F")
-
-# If you add to this list, must update colors_other list as well
-solutes_other <- list("pH (3 Star)" = "pH", 
-              "pH (Metrohm)"="pHmetrohm",
-              "Dissolved Organic Carbon (DOC)" = "DOC", 
-              "Total Dissolved Nitrogen (TDN)" = "TDN", 
-              "Dissolved Organic Nitrogen (DON)" = "DON", 
-              "Dissolved Inorganic Carbon (DIC)" = "DIC", 
-              "Silica (SiO2)" = "SiO2", 
-              "Acid Neutralizing Capacity 960" = "ANC960", 
-              "Acid Neutralizing Capacity Met" = "ANCMet", 
-              "Specific Conductivity" = "spCond", 
-              "Theoretical Conductivity" = "theoryCond", 
-              "Water Temperature" = "temp", 
-              "Ion Balance" = "ionBalance")
-
-
-# Lists of Sites 
-#***************
-sites_streams <- list("Watershed 1" = "W1",
-                      "Watershed 2" = "W2", 
-                      "Watershed 3" = "W3",
-                      "Watershed 4" = "W4",
-                      "Watershed 5" = "W5",
-                      "Watershed 6" = "W6",
-                      "Watershed 7" = "W7",
-                      "Watershed 8" = "W8",
-                      "Watershed 9" = "W9",
-                      "HBK", 
-                      "ML70",
-                      "PLY")
-
-#Precipitation sites
-# If you update this list, also update conditional panel below
-sites_precip <- list("RG11", "RG23", "STA/22", "N", "S") 
-
-wateryears <- list("2014", "2015", "2016", "2017")
-
-# water_sources <- list("Precipitation (P)" = "precipitation",
-#                       "Streamflow (Q)" = "streamflow")
-# 
-# granularity <- list("Year (VWC)" = "year",
-#                     "Month (VWC)" = "month",
-#                     "Week" = "week")
-# 
-# units <- list("ueq/L","umol/L", "mg/L", "flux")
-
-
 # **********************************************************************
 #                    ---- USER INTERFACE CODE ----
 # **********************************************************************
@@ -207,18 +136,32 @@ shinyUI(
                      ),
                      hr(),
                      p(strong("Additional Options:")),
-                     checkboxInput("HYDROLOGY1",
-                                   label = "Hydrology",
-                                   value = FALSE
+                     checkboxInput(
+                        "HYDROLOGY1",
+                        label = "Hydrology",
+                        value = FALSE
                      ),
                      conditionalPanel(
                         # this panel only appears when discharge/precipitation button is clicked
-                        condition = "input.HYDROLOGY1 == true", 
-                        p(radioButtons("GAGEHT_or_Q1", 
+                        # !!! this condition could be optimized to be when sites %in% sites_stream (in javascript)
+                        condition = "input.HYDROLOGY1 == true &&
+                                      (input.SITES1 == 'W1' ||
+                                       input.SITES1 =='W2' ||
+                                       input.SITES1 == 'W3' ||
+                                       input.SITES1 == 'W4' ||
+                                       input.SITES1 == 'W5' ||
+                                       input.SITES1 == 'W6' |
+                                       input.SITES1 == 'W7' ||
+                                       input.SITES1 == 'W8' ||
+                                       input.SITES1 == 'W9' ||
+                                       input.SITES1 == 'HBK' ||
+                                       input.SITES1 == 'ML70' ||
+                                       input.SITES1 == 'PLY')", 
+                        p(radioButtons("Flow_or_Precip1", 
                                        "Select data source:",
                                        choices = c("Gage Height (mm)" = "gageHt", 
-                                                   "Q (L/s)" = "flowGageHt"),
-                                       selected = "GageHt",
+                                                   "Q from Gage Height (L/s)" = "flowGageHt"),
+                                       selected = "gageHt",
                                        inline = FALSE)
                         ), 
                         style = "color:#3182bd;"
@@ -231,28 +174,15 @@ shinyUI(
                                    label = "Historical Data",
                                    value = FALSE
                      ),
-                     conditionalPanel( 
-                        # this panel only appears if historical data is clicked and a rain gage site is selected
-                        condition = "input.SOLUTES_HIST1 == true &&
-                                     (input.SITES1 == 'RG11' ||
-                                      input.SITES1 =='RG23' ||
-                                      input.SITES1 == 'STA/22')", # !!! oppportunity to optimize code here: figure out how to make this a condition of whether site belong to 'sites_precip' list (instead of listing each site). operatior is 'in', but not working in way I'd assume
-                        # placing radio button in paragraph tag to be able to make text desired color
-                        p(radioButtons("N_or_S1", 
-                                       "Site direction for historical data:",
-                                       choices = c("North" = "N", 
-                                                   "South" = "S"),
-                                       selected = "N",
-                                       inline = TRUE)
-                        ), 
-                        style = "color:#A9A9A9;"
-                     ), 
                      conditionalPanel(
-                        # this panel only appears when historical data is clicked
+                        # this panel appears when historical data is clicked
                         condition = "input.SOLUTES_HIST1 == true",
                         p("Although historical data are shown as continuous, 
                           these lines are derived from median values per month."
                         ), 
+                        p("Historical data finds the median value of all stream sites
+                          when a watershed site is selected, the median value of all
+                          precipitation sites when a rain gage site is selected."),
                         style = "color:#666666; font-size:85%;"
                      ),
                      width = 3

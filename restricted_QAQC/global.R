@@ -5,6 +5,82 @@
 library(RMariaDB)
 library(stringr) 
 
+message("hello, I'm in global.R")
+
+# **********************************************************************
+#                      ---- LISTS ----
+# **********************************************************************
+
+# If you add to this list, must update colors_cations list as well
+solutes_cations <- list("TOTAL Cation Charge" = "cationCharge",
+                        "Calcium (Ca)" = "Ca", 
+                        "Magnesium (Mg)" = "Mg", 
+                        "Potassium (K)" = "K", 
+                        "Sodium (Na)" = "Na", 
+                        "TM Aluminum (Al)" = "TMAl", 
+                        "OM Aluminum (Al)" = "OMAl", 
+                        "Aluminum (Al) ICP" = "Al_ICP", 
+                        "Ammonium (NH4)" = "NH4", 
+                        "Manganese (Mn)" = "Mn", 
+                        "Iron (Fe)" = "Fe")
+
+# If you add to this list, must update colors_anions list as well
+solutes_anions <- list("TOTAL Anion Charge" = "anionCharge",
+                       "Sulfate (SO4)" = "SO4", 
+                       "Nitrate (NO3)" = "NO3", 
+                       "Chloride (Cl)" = "Cl", 
+                       "Phosphate (PO4)" = "PO4", 
+                       "Fluorine (F)" = "F")
+
+# If you add to this list, must update colors_other list as well
+solutes_other <- list("pH (3 Star)" = "pH", 
+                      "pH (Metrohm)"="pHmetrohm",
+                      "Dissolved Organic Carbon (DOC)" = "DOC", 
+                      "Total Dissolved Nitrogen (TDN)" = "TDN", 
+                      "Dissolved Organic Nitrogen (DON)" = "DON", 
+                      "Dissolved Inorganic Carbon (DIC)" = "DIC", 
+                      "Silica (SiO2)" = "SiO2", 
+                      "Acid Neutralizing Capacity 960" = "ANC960", 
+                      "Acid Neutralizing Capacity Met" = "ANCMet", 
+                      "Specific Conductivity" = "spCond", 
+                      "Theoretical Conductivity" = "theoryCond", 
+                      "Water Temperature" = "temp", 
+                      "Ion Balance" = "ionBalance")
+
+
+# Lists of Sites 
+#***************
+sites_streams <- list("Watershed 1" = "W1",
+                      "Watershed 2" = "W2", 
+                      "Watershed 3" = "W3",
+                      "Watershed 4" = "W4",
+                      "Watershed 5" = "W5",
+                      "Watershed 6" = "W6",
+                      "Watershed 7" = "W7",
+                      "Watershed 8" = "W8",
+                      "Watershed 9" = "W9",
+                      "HBK", 
+                      "ML70",
+                      "PLY")
+
+#Precipitation sites
+# If you update this list, also update conditional panel below
+sites_precip <- list("RG11", "RG23", "STA/22", "N", "S") 
+
+# wateryears ----> see list after data import
+
+# list of solutes that have units other than mg/L for data items 
+other_units <- c("pH",
+                 "DIC", 
+                 "ANC960", 
+                 "ANCMet", 
+                 "CationCharge",
+                 "AnionCharge",
+                 "sp.cond", 
+                 "TheoryCond",
+                 "temp",
+                 "IonBalance")
+
 # **********************************************************************
 #                      ---- DATA IMPORT & PREP ----
 # **********************************************************************
@@ -79,8 +155,18 @@ dataHistorical <- read.csv("data/formatted/historical.csv", stringsAsFactors = F
 
 # ****  END OF DATA IMPORT & PREP ****
 
+
+# Create water years list ----
+# used in ui.R and server.R for Panels 1-3 (QA/QC graphs)
+wy <- levels(as.factor(dataCurrent$waterYr))
+wy1 <- c()
+for (i in 1:length(wy)) {
+   wy1 <- c(wy1, wy[i])
+}
+wateryears <- as.list(wy1)
+      
 # Find maximum date ----
-# used in ui.R for "Free-for-all" panel
+# used in ui.R for Panel 4 (QA/QC "Free-for-all" graph)
 maxDate_initial <- max(dataInitial$date, na.rm=TRUE)
 maxDate_current <- max(dataCurrent$date, na.rm=TRUE)
 maxDate_historical <- max(dataHistorical$date, na.rm=TRUE)

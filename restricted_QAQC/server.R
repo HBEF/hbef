@@ -123,75 +123,6 @@ col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_co
    
 # **** END of Theme ****
 
-
-# Lists  ----
-#*******************************
-
-# Solutes
-# If you add to this list, must update colors_cations list as well
-solutes_cations <- list("TOTAL Cation Charge" = "cationCharge",
-                        "Calcium (Ca)" = "Ca", 
-                        "Magnesium (Mg)" = "Mg", 
-                        "Potassium (K)" = "K", 
-                        "Sodium (Na)" = "Na", 
-                        "TM Aluminum (Al)" = "TMAl", 
-                        "OM Aluminum (Al)" = "OMAl", 
-                        "Aluminum (Al) ICP" = "Al_ICP", 
-                        "Ammonium (NH4)" = "NH4", 
-                        "Manganese (Mn)" = "Mn", 
-                        "Iron (Fe)" = "Fe")
-
-# If you add to this list, must update colors_anions list as well
-solutes_anions <- list("TOTAL Anion Charge" = "anionCharge",
-                       "Sulfate (SO4)" = "SO4", 
-                       "Nitrate (NO3)" = "NO3", 
-                       "Chloride (Cl)" = "Cl", 
-                       "Phosphate (PO4)" = "PO4", 
-                       "Fluorine (F)" = "F")
-
-# If you add to this list, must update colors_other list as well
-solutes_other <- list("pH (3 Star)" = "pH", 
-                      "pH (Metrohm)"="pHmetrohm",
-                      "Dissolved Organic Carbon (DOC)" = "DOC", 
-                      "Total Dissolved Nitrogen (TDN)" = "TDN", 
-                      "Dissolved Organic Nitrogen (DON)" = "DON", 
-                      "Dissolved Inorganic Carbon (DIC)" = "DIC", 
-                      "Silica (SiO2)" = "SiO2", 
-                      "Acid Neutralizing Capacity 960" = "ANC960", 
-                      "Acid Neutralizing Capacity Met" = "ANCMet", 
-                      "Specific Conductivity" = "spCond", 
-                      "Theoretical Conductivity" = "theoryCond", 
-                      "Water Temperature" = "temp", 
-                      "Ion Balance" = "ionBalance")
-
-# Sites
-sites_streams <- list("Watershed 1" = "W1",
-                      "Watershed 2" = "W2", 
-                      "Watershed 3" = "W3",
-                      "Watershed 4" = "W4",
-                      "Watershed 5" = "W5",
-                      "Watershed 6" = "W6",
-                      "Watershed 7" = "W7",
-                      "Watershed 8" = "W8",
-                      "Watershed 9" = "W9",
-                      "HBK", 
-                      "ML70",
-                      "PLY")
-
-sites_precip <- list("RG11", "RG23", "STA/22", "N", "S")
-
-# list of solutes that have units other than mg/L for data items 
-other_units <- c("pH",
-                 "DIC", 
-                 "ANC960", 
-                 "ANCMet", 
-                 "CationCharge",
-                 "AnionCharge",
-                 "sp.cond", 
-                 "TheoryCond",
-                 "temp",
-                 "IonBalance")
-
 # Set consistent colors for solutes (used when more than one is displayed) - this is not working yet
 #***********************************
 pal_cations <- brewer.pal(length(solutes_cations), "Paired") # set color palette for group
@@ -351,96 +282,88 @@ shinyServer(function(input, output, session) {
    # and IQR for historical data are necessary because dygraphs cannot plot boxplots when the 
    # x-axis is continuous.
    
-   # filters recent ('original') data; i.e. wateryear, site, solute data from recent water year data
-   dataOrig1 <- reactive({
-     
-     dataOrig1 <- dataOrig %>% 
-       filter(waterYr %in% input$WATERYEAR1) %>%                # Filter data to selected water year
-       filter(site %in% input$SITES1) %>%                       # Filter data to selected site
-       select(one_of("date", input$SOLUTES1))   # Select desired columns of data
-
-   }) # END of dataOrig1
+   # Grab selected wateryear, site, solute data from recent data
+   dataCurrent1 <- reactive({
+     dataCurrent1 <- dataCurrent %>% 
+       filter(waterYr %in% input$WATERYEAR1) %>%      # Filter data to selected water year
+       filter(site %in% input$SITES1) %>%             # Filter data to selected site
+       select(one_of("date", input$SOLUTES1))         # Select desired columns of data
+   }) # END of dataCurrent1
    
-   # filters recent ('original') data and discharge; filters wateryear, site, solute, discharge data from recent water year data
-   dataOrigQ1 <- reactive({
-      
-      # data selection if GageHt is selected as source for Discharge/Precipitation
-      if (input$GAGEHT_or_Q1 == 'gageHt'){
-         dataOrigQ1 <- dataOrig %>% 
+   # Grab selected wateryear, site, solute, and discharge data from recent data
+   dataCurQ1 <- reactive({
+      if (input$SITES1 %in% sites_streams) {
+         if (input$Flow_or_Precip1 == 'gageHt'){
+            dataCurQ1 <- dataCurrent %>% 
+               filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
+               filter(site %in% input$SITES1) %>%                   # Filter data to selected site
+               select(one_of("date", input$SOLUTES1, "gageHt")) %>% # Selected desired columns of data
+               rename(Flow_or_Precip = gageHt)                         # Rename GageHt to standard name, so that don't have to create alternative graphs
+         }
+         if (input$Flow_or_Precip1 == 'flowGageHt'){
+            dataCurQ1 <- dataCurrent %>% 
+               filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
+               filter(site %in% input$SITES1) %>%                   # Filter data to selected site
+               select(one_of("date", input$SOLUTES1, "flowGageHt")) %>%      # Selected desired columns of data
+               rename(Flow_or_Precip = flowGageHt)                              # Rename Q to standard name, so that don't have to create alternative graphs
+         } 
+      }
+      if (input$SITES1 %in% sites_precip) {
+         dataCurQ1 <- dataCurrent %>% 
             filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
             filter(site %in% input$SITES1) %>%                   # Filter data to selected site
-            select(one_of("date", input$SOLUTES1, "gageHt")) %>% # Selected desired columns of data
-            rename(GageHt_or_Q = gageHt)                         # Rename GageHt to standard name, so that don't have to create alternative graphs
-      } 
-      
-      # data selection if Q is selected as source for Discharge/Precipitation
-      if (input$GAGEHT_or_Q1 == 'flowGageHt'){
-         dataOrigQ1 <- dataOrig %>% 
-            filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
-            filter(site %in% input$SITES1) %>%                   # Filter data to selected site
-            select(one_of("date", input$SOLUTES1, "flowGageHt")) %>%      # Selected desired columns of data
-            rename(GageHt_or_Q = flowGageHt)                              # Rename Q to standard name, so that don't have to create alternative graphs
-      } 
-      
-      dataOrigQ1
-         
-   }) # END of dataOrigQ1
+            select(one_of("date", input$SOLUTES1, "precipCatch")) %>%      # Selected desired columns of data
+            rename(Flow_or_Precip = precipCatch)                              # Rename Q to standard name, so that don't have to create alternative graphs
+      }
+      dataCurQ1
+   }) # END of dataCurrentQ1
    
    # filters historical data; i.e. site, solute, from historical data
-   dataHist1 <- reactive({
+   dataHistorical1 <- reactive({
+      # Selects appropriate historical data set (stream or precip) based on site selected
+      if (input$SITES1 %in% sites_streams) siteGroup <- sites_streams 
+      if (input$SITES1 %in% sites_precip) siteGroup <- sites_precip
+      # Filter historical data by stream/precip sites, date, and solute
+      dataHistorical1 <- dataHistorical %>% 
+         filter(site %in% siteGroup) %>% 
+         select(one_of("date", input$SOLUTES1)) %>%   # Select desired columns of solute data
+         separate(date, c("y","m","d"))               # Separate date into year, month, and day (to use month in next code block)
      
-     # Selects appropriate historical data set (stream or precip) based on site selected
-     if (input$SITES1 %in% sites_streams) {
-        dataHist <- dataHist.stream
-        dataHist <- dataHist %>%          # Keep if only you want to see historical data
-           filter(ws %in% input$SITES1)   # from selected watershed
-        }
-     else {
-        dataHist <- dataHist.precip %>% 
-            filter(site %in% input$N_or_S1) # Filters rain gage sites to either N or S sites
-        } 
-     
-     # !!! only works for watersheds, i.e. stream data; figure out how to show precip data
-     dataHist1 <- dataHist %>% 
-       select(one_of("date", input$SOLUTES1)) %>%  # Select desired columns of solute data
-       separate(date, c("y","m","d"))              # Separate date into year, month, and day (to use month in next code block)
-     
-     # Calculate median and IQR values per month
-     median <- tapply(dataHist1[,4], dataHist1$m, median, na.rm=TRUE)
-     IQR <- tapply(dataHist1[,4], dataHist1$m, IQR, na.rm=TRUE)
-     IQR.lower <- median - IQR
-     IQR.upper <- median + IQR
+      # Calculate median and IQR values per month
+      median <- tapply(dataHistorical1[,4], dataHistorical1$m, median, na.rm=TRUE)
+      IQR <- tapply(dataHistorical1[,4], dataHistorical1$m, IQR, na.rm=TRUE)
+      IQR.lower <- median - IQR
+      IQR.upper <- median + IQR
 
-     # Create dates for display
-     # Create list of dates in middle of the month, so that the median/IQR values are plotted in the middle of each month
-     date <- NA
-     wy <- as.numeric(input$WATERYEAR1)
-     wy.1 <- wy + 1
-     for (i in 1:12) {
-        if (i<6) {date[i] <- paste((as.numeric(input$WATERYEAR1) + 1),"/", i, "/15", sep="")}
-        else {date[i] <- paste(input$WATERYEAR1,"/", i, "/15", sep="")}
-     }
-     date <- as.Date(date)
-
-     # Create a data frame with the relevant data: date, median, upper and lower IQR
-     dataHist1 <- data.frame(date = date,
+      # Create dates for display
+      # Create list of dates in middle of the month, so that the median/IQR values are plotted in the middle of each month
+      date <- NA
+      wy <- as.numeric(input$WATERYEAR1)
+      wy.1 <- wy + 1
+      for (i in 1:12) {
+         if (i<6) {date[i] <- paste((as.numeric(input$WATERYEAR1) + 1),"/", i, "/15", sep="")}
+         else {date[i] <- paste(input$WATERYEAR1,"/", i, "/15", sep="")}
+      }
+      date <- as.Date(date)
+      # Create a data frame with the relevant data: date, median, upper and lower IQR
+      dataHistorical1 <- data.frame(date = date,
                              solute.IQRlower = IQR.lower,
                              solute.median = median,
                              solute.IQRupper = IQR.upper)
-     dataHist1
-   }) # END of dataHist1
+      dataHistorical1
+   }) # END of dataHistorical1
    
    # combines site, solute data from recent water year data with historical data
-   dataOrigHist1 <- reactive ({
-      dataOrigHist1 <- full_join(dataOrig1(), dataHist1(), by = "date")
-      return(dataOrigHist1)
-   }) #END of dataOrigHist1
+   dataCurHist1 <- reactive ({
+      dataCurHist1 <- full_join(dataCurrent1(), dataHistorical1(), by = "date")
+      return(dataCurHist1)
+   }) #END of dataCurHist1
    
    # combines site, solute, and discharge data from recent water year dataset with historical data
-   dataOrigQHist1 <- reactive ({
-      dataOrigQHist1 <- full_join(dataOrigQ1(), dataHist1(), by = "date")
-      return(dataOrigQHist1)
-   }) #END of dataOrigQHist1
+   dataCurQHist1 <- reactive ({
+      dataCurQHist1 <- full_join(dataCurQ1(), dataHistorical1(), by = "date")
+      return(dataCurQHist1)
+   }) #END of dataCurQHist1
    
    
    dygraph1 <- reactive ({
@@ -448,9 +371,9 @@ shinyServer(function(input, output, session) {
          if (input$SOLUTES_HIST1 == TRUE) {
             
             # Plots Default + Discharge + Historical data
-            data1 <- dataOrigQHist1()
+            data1 <- dataCurQHist1()
             data1.xts <- xts(data1[,-1], order.by = data1$date)
-            #paste(c("XTS:", class(dataOrig1$FieldCode)))
+            #paste(c("XTS:", class(dataCur1$FieldCode)))
             
             dygraph1 <- dygraph(data1.xts) %>%
                dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
@@ -468,7 +391,7 @@ shinyServer(function(input, output, session) {
                         drawPoints = TRUE,
                         pointSize = 3,
                         axis='y') %>%
-               dySeries(name = 'GageHt_or_Q',
+               dySeries(name = 'Flow_or_Precip',
                         drawPoints = FALSE,
                         fillGraph=T,
                         color = "#3182bd",
@@ -492,7 +415,7 @@ shinyServer(function(input, output, session) {
          } else {
             
             # Plots Default + Discharge data
-            data1 <- dataOrigQ1()
+            data1 <- dataCurQ1()
             data1.xts <- xts(data1[,-1], order.by = data1$date)
             
             dygraph1 <- dygraph(data1.xts) %>%
@@ -504,7 +427,7 @@ shinyServer(function(input, output, session) {
                       axisLineColor = "#3182bd") %>% # color is light blue
                dySeries(name = input$SOLUTES1,
                         color = "#black") %>%
-               dySeries(name = 'GageHt_or_Q',
+               dySeries(name = 'Flow_or_Precip',
                         drawPoints = FALSE,
                         fillGraph=T,
                         color = "#3182bd",
@@ -525,7 +448,7 @@ shinyServer(function(input, output, session) {
          if (input$SOLUTES_HIST1 == TRUE) {
             
             # Plots Default + Historical data
-            data1 <- dataOrigHist1()
+            data1 <- dataCurHist1()
             data1.xts <- xts(data1[,-1], order.by = data1$date)
             
             dygraph1 <- dygraph(data1.xts) %>%
@@ -555,7 +478,7 @@ shinyServer(function(input, output, session) {
             
             # Plots Default data
             
-            data1 <- dataOrig1()
+            data1 <- dataCurrent1()
             data1.xts <- xts(data1, order.by = data1$date)
             
             #padrange <- c(min(data1.xts$input$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$input$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
@@ -591,7 +514,7 @@ shinyServer(function(input, output, session) {
          if (input$SOLUTES_HIST1 == TRUE) {
             
             # Plots Default + Discharge + Historical data
-            data1 <- dataOrigQHist1()
+            data1 <- dataCurQHist1()
             data1.xts <- xts(data1[,-1], order.by = data1$date)
             #paste(c("XTS:", class(dataOrig1$FieldCode)))
             
@@ -611,7 +534,7 @@ shinyServer(function(input, output, session) {
                         drawPoints = TRUE,
                         pointSize = 3,
                         axis='y') %>%
-               dySeries(name = 'GageHt_or_Q',
+               dySeries(name = 'Flow_or_Precip',
                         drawPoints = FALSE,
                         fillGraph=T,
                         color = "#3182bd",
@@ -635,7 +558,7 @@ shinyServer(function(input, output, session) {
          } else {
             
             # Plots Default + Discharge data
-            data1 <- dataOrigQ1()
+            data1 <- dataCurQ1()
             data1.xts <- xts(data1[,-1], order.by = data1$date)
             
             dygraph1 <- dygraph(data1.xts) %>%
@@ -647,7 +570,7 @@ shinyServer(function(input, output, session) {
                       axisLineColor = "#3182bd") %>% # color is light blue
                dySeries(name = input$SOLUTES1,
                         color = "#black") %>%
-               dySeries(name = 'GageHt_or_Q',
+               dySeries(name = 'Flow_or_Precip',
                         drawPoints = FALSE,
                         fillGraph=T,
                         color = "#3182bd",
@@ -668,7 +591,7 @@ shinyServer(function(input, output, session) {
          if (input$SOLUTES_HIST1 == TRUE) {
             
             # Plots Default + Historical data
-            data1 <- dataOrigHist1()
+            data1 <- dataCurHist1()
             data1.xts <- xts(data1[,-1], order.by = data1$date)
             
             dygraph1 <- dygraph(data1.xts) %>%
@@ -698,7 +621,7 @@ shinyServer(function(input, output, session) {
             
             # Plots Default data
             
-            data1 <- dataOrig1()
+            data1 <- dataCurrent1()
             data1.xts <- xts(data1, order.by = data1$date)
             
             #padrange <- c(min(data1.xts$input$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$input$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
@@ -795,21 +718,21 @@ shinyServer(function(input, output, session) {
    dataOrigQ2 <- reactive({
       
       # data selection if GageHt is selected as source for Discharge/Precipitation
-      if (input$GAGEHT_or_Q2 == 'gageHt'){
+      if (input$Flow_or_Precip2 == 'gageHt'){
          dataOrigQ2 <- dataOrig %>% 
             filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
             filter(site %in% input$SITES2) %>%                   # Filter data to selected site
             select(one_of("date", input$SOLUTES2, "gageHt")) %>% # Selected desired columns of data
-            rename(GageHt_or_Q = gageHt)                         # Rename GageHt to standard name, so that don't have to create alternative graphs
+            rename(Flow_or_Precip = gageHt)                         # Rename GageHt to standard name, so that don't have to create alternative graphs
       } 
       
       # data selection if Q is selected as source for Discharge/Precipitation
-      if (input$GAGEHT_or_Q2 == 'flowGageHt'){
+      if (input$Flow_or_Precip2 == 'flowGageHt'){
          dataOrigQ2 <- dataOrig %>% 
             filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
             filter(site %in% input$SITES2) %>%                   # Filter data to selected site
             select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%      # Selected desired columns of data
-            rename(GageHt_or_Q = flowGageHt)                              # Rename Q to standard name, so that don't have to create alternative graphs
+            rename(Flow_or_Precip = flowGageHt)                              # Rename Q to standard name, so that don't have to create alternative graphs
       } 
       
       dataOrigQ2
@@ -884,36 +807,36 @@ shinyServer(function(input, output, session) {
      
      # if Discharge is selected, finds data for all watershed (stream) sites, and calculates median
      if (input$HYDROLOGY3 == 'Discharge') {
-       if (input$GAGEHT_or_Q3 == 'GageHt') {
+       if (input$Flow_or_Precip3 == 'GageHt') {
          Q3 <- dataOrig %>%
            filter(waterYr %in% input$WATERYEAR3) %>%          # Filter data to selected water year
            filter(site %in% sites_streams) %>% 
-           select(one_of("date", input$GAGEHT_or_Q3)) %>% 
+           select(one_of("date", input$Flow_or_Precip3)) %>% 
            group_by(date) %>% 
            summarise(Hydro.med = median(GageHt, na.rm=TRUE))}
-       else { #i.e. if input$GAGEHT_or_Q3 == 'Q'
+       else { #i.e. if input$Flow_or_Precip3 == 'Q'
          Q3 <- dataOrig %>%
            filter(waterYr %in% input$WATERYEAR3) %>%          # Filter data to selected water year
            filter(site %in% sites_streams) %>% 
-           select(one_of("date", input$GAGEHT_or_Q3)) %>% 
+           select(one_of("date", input$Flow_or_Precip3)) %>% 
            group_by(date) %>% 
            summarise(Hydro.med = median(Q, na.rm=TRUE))}
        } # end of Discharge if statement
      
      # if Precipitation is selected, finds data for all rain gage (precip) sites, and calculates median
      if (input$HYDROLOGY3 == 'Precipitation') {
-       if (input$GAGEHT_or_Q3 == 'GageHt') {
+       if (input$Flow_or_Precip3 == 'GageHt') {
         Q3 <- dataOrig %>%
            filter(waterYr %in% input$WATERYEAR3) %>%          # Filter data to selected water year
            filter(site %in% sites_precip) %>% 
-           select(one_of("date", input$GAGEHT_or_Q3)) %>% 
+           select(one_of("date", input$Flow_or_Precip3)) %>% 
            group_by(date) %>% 
            summarise(Hydro.med = median(GageHt, na.rm=TRUE))}
-       else { #i.e. if input$GAGEHT_or_Q3 == 'Q'
+       else { #i.e. if input$Flow_or_Precip3 == 'Q'
          Q3 <- dataOrig %>%
            filter(waterYr %in% input$WATERYEAR3) %>%          # Filter data to selected water year
            filter(site %in% sites_precip) %>% 
-           select(one_of("date", input$GAGEHT_or_Q3)) %>% 
+           select(one_of("date", input$Flow_or_Precip3)) %>% 
            group_by(date) %>% 
            summarise(Hydro.med = median(Q, na.rm=TRUE))}
       } # end of Preciptiation if statement
@@ -1151,7 +1074,7 @@ shinyServer(function(input, output, session) {
                      axisLabelColor = "#3182bd",
                      axisLineColor = "#3182bd") %>% # color is light blue
               #dySeries(name = input$SOLUTES2) %>% 
-              dySeries(name = 'GageHt_or_Q',
+              dySeries(name = 'Flow_or_Precip',
                        label = "Discharge/Precip",
                        drawPoints = FALSE,
                        fillGraph=T,
