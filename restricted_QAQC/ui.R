@@ -100,12 +100,30 @@ shinyUI(
       #includeCSS("style.css"),
 
       navbarPage(title = p(strong("HBEF Dashboard")),
+         tabPanel("Main",
+            h3("Welcome!"),
+            p("Please send any issues or comments to Carolina Simao at",
+              a(href="mailto:carolina.m.simao@gmail.com?subject=[HBEF%20Dashboard]", "carolina.m.simao@gmail.com"),
+              style="font-size:85%;"
+            ),
+            tags$br(),
+            h4("Helpful Resources:"),
+            tags$div(HTML("<ul>
+                          <li> Buso et al. 2000. <strong><a href=https://www.esf.edu/quest/documents/Busoetal.2000.HBstreamflowandchemistryGTR..pdf> 
+                          Chemistry of Precipitation, Streamwater, and Lakewater from the 
+                          Hubbard Brook Ecosystem Study: A Record of Sampling Protocols and 
+                          Analytical Procedures.</a></strong> USDA Forest Service, Northeastern Research
+                          Station, General Technical Report NE-275.</li>
+                          <li> Data Structures Template <em>(Forthcoming...)</em> </li>
+                          <li> Developer Documentation <em>(Forthcoming...)</em> </li>
+                          </ul>"))
+         ), #end of Main tabPanel
+                  
          #*********************************************************
          # ***DATA INPUT tab *** ----
          #*********************************************************
          # Code initially copied from: https://github.com/rstudio/shiny-examples/blob/master/009-upload/app.R
-         navbarMenu("Data Input",
-            tabPanel("Upload", # Upload Panel ----
+         tabPanel("Upload", # Upload Panel ----
                # Sidebar layout with input and output definitions
                sidebarLayout(
                 # Sidebar panel for inputs
@@ -120,11 +138,11 @@ shinyUI(
                   # Input: Checkbox to indicate whether file has header
                   checkboxInput("HEADER", "Data includes header (column names)", TRUE),
                   # Input: Select number of rows to display in output chart
-                  p("Note: Must be checked for upload to work." , 
+                  p("Note: The above must be checked for upload to work." , 
                     style = "color:#666666; font-size:85%;"
                   ),
                   tags$hr(), # horizontal line
-                  radioButtons("disp", "Display",
+                  radioButtons("UPLOAD_DISPLAY", "Display",
                                choices = c("Head" = "head", 
                                            "All" = "all"),
                                selected = "head"
@@ -149,13 +167,9 @@ shinyUI(
                   mainPanel(
                      # Shows data file as a table 
                      dataTableOutput("FILE_PREVIEW")
-                  ) # end of mainPanel            
+                  ) # end of mainPanel
                ) # end of Sidebar Layout
-            ), # end of tabPanel for "Upload" 
-     
-            tabPanel("Excel-like Entry", # Excel-like Entry tab ----
-               rHandsontableOutput("EXCEL")) 
-         ), # END of "Data Input" navbarMenu 
+         ), # END of "Upload" tabPanel 
         
          #*********************************************************
          # ***QA/QC tab ***----
@@ -471,7 +485,7 @@ shinyUI(
                        
                   # Plot
                   mainPanel(
-                     sliderInput(
+                     wellPanel(sliderInput(
                         "DATE4",
                         label = h4("Date Range"),
                         min =as.Date("1963-06-01"),
@@ -480,7 +494,7 @@ shinyUI(
                         width = "100%",
                         timeFormat = "%b %Y",
                         dragRange = TRUE
-                     ),
+                     )),
                      tags$h4(textOutput("TITLE4")),
                      hr(),
                      #plotOutput("GRAPH_PRECIP4"),

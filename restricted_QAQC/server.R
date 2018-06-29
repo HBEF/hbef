@@ -962,6 +962,7 @@ shinyServer(function(input, output, session) {
       data4 <- dataAll %>%
          filter(date >= input$DATE4[1]) %>%
          filter(date <= input$DATE4[2])
+      data4
    })
    ## Data for Precip plot
    dataPrecip4 <- reactive ({
@@ -1037,41 +1038,8 @@ shinyServer(function(input, output, session) {
       # input$file1 will be NULL initially. After the user selects
       # and uploads a file, head of that data file by default,
       # or all rows if selected, will be shown.
-            
-      #req(input$FILE_UPLOAD)
       
-      # # for testing
-      # # df <- read.csv("data/Formatted/test.csv",
-      # #                header = TRUE,
-      # #                stringsAsFactors = FALSE,
-      # #                na.strings=c(""," ","NA"))
-      # 
-      # df <- read.csv(input$FILE_UPLOAD$datapath,
-      #                header = input$HEADER,
-      #                stringsAsFactors = FALSE, 
-      #                na.strings=c(""," ","NA"))
-      # df$date <- as.Date(df$date, "%m/%d/%y") 
-      # df$date <- as.Date(df$date, "%Y/%m/%d")
-      # # Remove "archived" column (if it exists)
-      # if ("archived" %in% colnames(df)) {
-      #    ind <- which("archived" == colnames(df), arr.ind = TRUE)
-      #    df <- df[,-ind]
-      # }
-      # 
-      # df <- standardizeClasses(df)
-      # dataInitial <- standardizeClasses(dataInitial)
-      # # classes <- NA
-      # # for (i in 1:ncol(d)) classes[i] <- class(d[[i]])
-      # dfNew <- bind_rows(dataInitial, df)
-      # return(dfNew)
-
-      # dataNEW <- read.csv(input$FILE_UPLOAD$datapath,
-      #                     header = input$HEADER)
-      # dataNew$date <- as.Date(dataNew$date)
-      # #dataNEW <- bind_rows(dataInitial, dataNEW)
-      # dataNEW <- standardizeClasses(dataNEW)
-      
-      if(input$disp == "head") {
+      if(input$UPLOAD_DISPLAY == "head") {
          head(dataNew())
       }
       else {
@@ -1365,7 +1333,8 @@ shinyServer(function(input, output, session) {
    
    # Panel 4 Output ####
    #********************
-
+   # opar <- par() #save original parameters
+   # par(mar = c(5,10,4,2)+0.1)
    output$TITLE4 <- renderText ({print(input$SITES4)})
    output$GRAPH_PRECIP4 <- renderPlot({
       if (input$HYDROLOGY4 == TRUE) {
@@ -1377,6 +1346,7 @@ shinyServer(function(input, output, session) {
          p <- ggplot(data, aes(x, y)) + my_theme +
             geom_col(color="blue", fill = "lightblue", width = 1, na.rm=TRUE) +
             labs(x = "", y = "Precipitation") +
+            coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
             scale_y_reverse()
          p
       }
@@ -1391,6 +1361,7 @@ shinyServer(function(input, output, session) {
          geom_point(size = 2.5) +
          geom_line(alpha = 0.5) +
          scale_x_date(date_labels = "%Y-%b")+
+         coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
          labs(x = "", y = "Solutes") 
       # If show field code is selected, add to ggplot
       if (input$FIELDCODE4 == TRUE) {
@@ -1408,6 +1379,7 @@ shinyServer(function(input, output, session) {
          y <- data$flowMaxPerDate
          f <- ggplot(data, aes(x, y)) + my_theme +
             geom_area(color="blue", fill = "lightblue", na.rm=TRUE) +
+            coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
             labs(x = "", y = "Flow") 
          if (input$HYDROLIMB4 == TRUE) {
             data.hl <- dataFlowHydroGraph4()
@@ -1430,7 +1402,7 @@ shinyServer(function(input, output, session) {
       dataFlowHydroGraph4()
       #head(dataCurrent)
    }) # end of output$TABLE4
-
+   
    #**** END of Output ****
    
 }) # closes shinyServer
