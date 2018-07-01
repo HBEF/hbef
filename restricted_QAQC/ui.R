@@ -360,30 +360,32 @@ shinyUI(
                         # General tab
                         #********************
                         tabPanel("General",
-                           
-                           checkboxInput(
-                              "HYDROLOGY4",
-                              label = "View hydrology",
-                              value = TRUE
+                           p(checkboxInput(
+                                       "HYDROLOGY4",
+                                       label = strong("View hydrology"),
+                                       value = TRUE),
+                             style = "font-weight:bold;"
                            ),
                            # this panel only appears when hydology option is selected
                            conditionalPanel(
                               condition = "input.HYDROLOGY4 == true",
                               radioButtons(
                                  "PRECIP_SOURCE4",
-                                 label = "",
+                                 label = "PRECIPITATION data source",
                                  choices = c("Collector Catch" = "precipCatch",
                                              "ETI" = "precipETI"
                                  ),
                                  selected = "precipCatch"
                               ),
+                              p("DISCHARGE data sources",
+                                style = "font-weight:bold;"),
                               selectInput("FLOW_SITE4",
-                                          label = "Flow data sources:",
+                                          label = "Site:",
                                           choices = c(sites_streams),
                                           selected = "W1"), # !!! need to field this from what's in data...
                               radioButtons(
                                  "FLOW_SOURCE4",
-                                 label = "",
+                                 label = "Data type:",
                                  choices = c("Gage Height" = "gageHt",
                                              "Q (estimated from Gage Height)" = "flowGageHt",
                                              "Q (ETI)" = "flowSensor"
@@ -391,14 +393,14 @@ shinyUI(
                                  selected = "gageHt"
                               ),
                               checkboxInput("HYDROLIMB4",
-                                          label = "Hydrograph limb",
-                                          value = FALSE
-                              )
-                              #style = "color:#3182bd;"
+                                              label = strong("Add hydrograph limb"),
+                                              value = FALSE
+                              ),
+                              style = "color:#919191; font-size:85%;"
                            ), #end of conditional panel
                            checkboxInput("FIELDCODE4",
-                                         label = "Show field codes",
-                                         value = FALSE
+                                           label = strong("Show field codes"),
+                                           value = FALSE
                            )
                         ), 
                         #********************
@@ -430,43 +432,47 @@ shinyUI(
                        
                   # Plot
                   mainPanel(
-                     wellPanel(sliderInput(
-                        "DATE4",
-                        label = h4("Date Range"),
-                        min =as.Date("1963-06-01"),
-                        max = as.Date(maxDate),
-                        value = as.Date(c(maxDate-365, maxDate)),
-                        width = "100%",
-                        timeFormat = "%b %Y",
-                        dragRange = TRUE
-                     )),
-                     tags$h4(textOutput("TITLE4")),
-                     hr(),
-                     #plotOutput("GRAPH_PRECIP4"),
-                     #plotOutput("GRAPH_MAIN4"),
-                     #plotOutput("GRAPH_FLOW4"),
-                     fluidRow(
-                        column(12, style = "height:150px;",
-                               plotOutput("GRAPH_PRECIP4"))
+                     wellPanel(
+                            sliderInput(
+                               "DATE4",
+                               label = "Date Range",
+                               min =as.Date("1963-06-01"),
+                               max = as.Date(maxDate),
+                               value = as.Date(c(maxDate-365, maxDate)),
+                               width = "100%",
+                               timeFormat = "%b %Y",
+                               step = 30,
+                               dragRange = TRUE)
+                     ),
+                     #tags$h4(textOutput("TITLE4")),
+                     conditionalPanel(
+                        condition = "input.HYDROLOGY4 == true",
+                        fluidRow(
+                           column(12, style = "height:100px;",
+                                 plotOutput("GRAPH_PRECIP4"))
+                        )
                      ),  
                      fluidRow(
-                        column(12, style = "height:400px;",
+                        column(12, style = "height:350px;",
                                plotOutput("GRAPH_MAIN4"))
                      ),
-                     fluidRow(
-                        column(12, style = "height:150px;",
-                               plotOutput("GRAPH_FLOW4"))
-                     ),
-                     hr(),
-                     h4("Table of Selected Data"),
-                     HTML("<p>Search bar finds specific values within selected 
-                          data (e.g. '2014-06', '5.'). <br> Arrows (to the right 
-                          of column names) sort data in ascending or descending 
-                          order.</p>"
-                     ),
+                     conditionalPanel(
+                        condition = "input.HYDROLOGY4 == true",
+                        fluidRow(
+                           column(12, style = "height:100px;",
+                                  plotOutput("GRAPH_FLOW4"))
+                        )
+                     )
+                     # use for when testing data selection
+                     # hr(),
+                     # h4("Table of Selected Data"),
+                     # HTML("<p>Search bar finds specific values within selected 
+                     #      data (e.g. '2014-06', '5.'). <br> Arrows (to the right 
+                     #      of column names) sort data in ascending or descending 
+                     #      order.</p>"
+                     # ),
                      # used when testing data sorting
-                     dataTableOutput("TABLE4")
-                     #textOutput("TEST4.TEXT")
+                     # dataTableOutput("TABLE4")
                   ) # closes mainPanel
                ) # closes sidebarLayout
             ), # Closes Panel 4 tabPanel
@@ -480,11 +486,27 @@ shinyUI(
          #*********************************************************
          # ***DATA DOWNLOAD tab***----
          #*********************************************************
-         tabPanel("Data Download"),
+         tabPanel("Data Download",
+            sidebarLayout(
+               sidebarPanel(
+                  selectInput("DOWNLOAD_DATASET", "Choose a dataset:", 
+                              choices = c("Current", 
+                                          "Historical", 
+                                          "All")),
+                  radioButtons("DOWNLOAD_FILETYPE", "File type:",
+                               choices = c("csv", 
+                                           "tsv")),
+                  downloadButton('DOWNLOAD_DATA', 'Download')
+               ),
+               mainPanel(
+                  #tableOutput('table')
+               )
+            ) # end of sidebarLayout
+         ) # end of tabPanel for Data Download
          #********************************************************* 
          # ***DATA ARCHIVE? tab*** ----
          #*********************************************************
-         tabPanel("Approve & Archive Data")
+         # tabPanel("Approve & Archive Data")
         
          # *REMEMBER* that when data is archived, the data in 'initial' and 
          # 'current' tables should be cleared in MySQL hbef database

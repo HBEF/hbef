@@ -107,7 +107,7 @@ ylabel <- function(solute) {
 my_theme <- theme_fivethirtyeight() + 
    theme(rect = element_rect(fill = NA),
          panel.grid.major = element_line(colour = "#dddddd"), 
-         text = element_text(family = "Helvetica", size = 16), 
+         text = element_text(family = "Arial", size = 14), 
          legend.position = "top", legend.direction = "horizontal", legend.box = "horizontal",
             legend.box.just = "left", legend.title = element_blank(),
             #legend.key.size = unit(2.5, "native"),
@@ -258,21 +258,23 @@ shinyServer(function(input, output, session) {
       if(input$SOLUTES1 %in% other_units) { 
          if (input$SOLUTES1 == "DIC")     ylabel1 <- paste(mu,"M/L")
          if (input$SOLUTES1 == "ANC960")  ylabel1 <- paste(mu, "eq/L")
+         if (input$SOLUTES1 == "ANCMet")  ylabel1 <- paste(mu, "eq/L")
          if (input$SOLUTES1 == "spCond") ylabel1 <- paste(mu, "S/cm")
          if (input$SOLUTES1 == "temp")    ylabel1 <- "Degrees Celsius"
-         if (input$SOLUTES1 %in% c("pH3star",
+         if (input$SOLUTES1 %in% c("pH",
                                    "pHmetrohm",
                                    "cationCharge",
                                    "cnionCharge",
                                    "theoryCond",
                                    "ionBalance")) { ylabel1 <- "(No Units)" }
          
-         test <- gsub(" ", "", ylabel1, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string   
-   
+         ylabel1 <- gsub(" ", "", ylabel1, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string   
+         ylabel1
       } 
       # Otherwise, label as 'default' mg/L
       else {        
          ylabel1 <- "mg/L"
+         ylabel1
       }
    })
   
@@ -367,6 +369,7 @@ shinyServer(function(input, output, session) {
    
    
    dygraph1 <- reactive ({
+      ylabel <- ylabel1()
       if (input$HYDROLOGY1 == TRUE)   {
          if (input$SOLUTES_HIST1 == TRUE) {
             
@@ -673,7 +676,7 @@ shinyServer(function(input, output, session) {
          if (input$SOLUTES2[i] == "ANC960")  ylabel2[i] <- paste(mu, "eq/L")
          if (input$SOLUTES2[i] == "spCond") ylabel2[i] <- paste(mu, "S/cm")
          if (input$SOLUTES2[i] == "temp")    ylabel2[i] <- "Degrees Celsius"
-         if (input$SOLUTES2[i] %in% c("pH3star",
+         if (input$SOLUTES2[i] %in% c("pH",
                                    "pHmetrohm",
                                    "cationCharge",
                                    "anionCharge",
@@ -764,7 +767,7 @@ shinyServer(function(input, output, session) {
        if (input$SOLUTES3 == "ANC960")  ylabel3 <- paste(mu, "eq/L")
        if (input$SOLUTES3 == "spCond") ylabel3 <- paste(mu, "S/cm")
        if (input$SOLUTES3 == "temp")    ylabel3 <- "Degrees Celsius"
-       if (input$SOLUTES3 %in% c("pH3star",
+       if (input$SOLUTES3 %in% c("pH",
                                  "pHmetrohm",
                                  "cationCharge",
                                  "anionCharge",
@@ -990,7 +993,6 @@ shinyServer(function(input, output, session) {
    # from input panel. Done in this manner because dygraph() cannot overlay plots, each
    # plot must be started from scratch because it graphs ALL the data within xts data.
    output$GRAPH1 <- renderDygraph({
-     ylabel <- paste(ylabel1()) # get ylabel
      dygraph1()
    }) # END of output$GRAPH1
    
@@ -1265,7 +1267,7 @@ shinyServer(function(input, output, session) {
             scale_y_reverse()
          p
       }
-   }, height = 150) # end of output$GRAPH_PRECIP4
+   }, height = 100) # end of output$GRAPH_PRECIP4
    output$GRAPH_MAIN4 <- renderPlot({
       data <- dataMain4()
       x <- data$date
@@ -1286,7 +1288,7 @@ shinyServer(function(input, output, session) {
       }
       # plot
       m
-   }, height = 400) # end of output$GRAPH_MAIN4
+   }, height = 350) # end of output$GRAPH_MAIN4
    output$GRAPH_FLOW4 <- renderPlot({
       if (input$HYDROLOGY4 == TRUE) {
          data <- dataFlow4()
@@ -1295,7 +1297,7 @@ shinyServer(function(input, output, session) {
          f <- ggplot(data, aes(x, y)) + my_theme +
             geom_area(color="blue", fill = "lightblue", na.rm=TRUE) +
             coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
-            labs(x = "", y = "Flow") 
+            labs(x = "", y = "Discharge") 
          if (input$HYDROLIMB4 == TRUE) {
             data.hl <- dataFlowHydroGraph4()
             if (input$FLOW_SOURCE4 == "gageHt") y.hl <- data.hl$gageHt
@@ -1310,13 +1312,53 @@ shinyServer(function(input, output, session) {
          } 
          f
       }
-   }, height = 150) # end of output$GRAPH_FLOW4
+   }, height = 100) # end of output$GRAPH_FLOW4
    paste(head(dataCurrent))
 
    output$TABLE4 <- renderDataTable({
       dataFlowHydroGraph4()
       #head(dataCurrent)
    }) # end of output$TABLE4
+   
+   # *DATA DOWNLOAD Tab* ########################################
+   
+   datasetInput <- reactive({
+      # Fetch the appropriate data object, depending on the value
+      # of input$DATASET
+      switch(input$DOWNLOAD_DATASET,
+             "Current" = dataCurrent,
+             "Historical" = dataHistorical,
+             "All" = dataAll)
+   })
+   
+   output$table <- renderTable({
+      datasetInput()
+   })
+   
+   # NOTE: download does not work in RStudio, but works when shiny
+   #    app is used on browser
+   # downloadHandler() takes two arguments, both functions.
+   # The content function is passed a filename as an argument, and
+   #   it should write out data to that filename.
+   output$DOWNLOAD_DATA <- downloadHandler(
+      
+      # This function returns a string which tells the client
+      # browser what name to use when saving the file.
+      filename = function() {
+         maxDownloadDate = max(datasetInput()$date, na.rm = TRUE)
+         paste(paste('HBEFdata', input$DOWNLOAD_DATASET, paste('upto', maxDownloadDate, sep=""), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
+      },
+      
+      # This function should write data to a file given to it by
+      # the argument 'file'.
+      content = function(file) {
+         sep <- switch(input$DOWNLOAD_FILETYPE, "csv" = ",", "tsv" = "\t")
+         
+         # Write to a file specified by the 'file' argument
+         write.table(datasetInput(), file, sep = sep,
+                     row.names = FALSE)
+      }
+   )
    
    #**** END of Output ****
    
