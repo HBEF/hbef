@@ -107,7 +107,8 @@ shinyUI(
          # panel it's in, e.g. WATERYEAR1 (datatype+PanelNumber)
          # These names are what's used in the server.R file.
          navbarMenu("QA/QC", 
-            tabPanel("1 Solute/1 Site", # Panel 1 - 1 Solute/1 Site ####
+            # Panel 1 - 1 Solute/1 Site ###############
+            tabPanel("1 Solute/1 Site", 
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
@@ -210,7 +211,8 @@ shinyUI(
                  
             ), # END of Panel 1 tabPanel
          
-            tabPanel("Multiple Solutes", # Panel 2 - Multiple Solutes #### 
+            # Panel 2 - Multiple Solutes ###############
+            tabPanel("Multiple Solutes", 
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
@@ -285,7 +287,8 @@ shinyUI(
                ) # closes sidebarLayout
             ),# END of Panel 2 tabPanel
        
-            tabPanel("Multiple Sites", # Panel 3 - Multiple Sites ####
+            # Panel 3 - Multiple Sites ###############
+            tabPanel("Multiple Sites", 
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
@@ -350,8 +353,9 @@ shinyUI(
                   ) # closes mainPanel
                ) # closes sidebarLayout
             ), # END of Panel 3 tabPanel
-        
-            tabPanel("Free-for-all", # Panel 4 - Free-for-all ####
+         
+            # Panel 4 - Free-for-all ###############
+            tabPanel("Free-for-all", 
                sidebarLayout(
                  # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
@@ -477,8 +481,21 @@ shinyUI(
                ) # closes sidebarLayout
             ), # Closes Panel 4 tabPanel
         
-            tabPanel("Summary Table", # Panel 5 - Summary Table ####
-               rHandsontableOutput("HOT5") # HOT = HandsOnTable
+            # Panel 5 - Summary Table ###############
+            tabPanel("Summary Table",
+               selectInput(
+                  "WATERYEAR5",
+                  label = "Water Year",
+                  choices = wateryears,
+                  selected = wateryears[1]
+               ),               
+               selectInput(
+                  "SITE5",
+                  label = "Site",
+                  choices = c(sites_streams, sites_precip),
+                  selected = "W1"
+               ),
+               rHandsontableOutput("SUMMARYTABLE5") 
             ) # closes Panel 5 tabPanel
         
          ),# END of QA/QC navbarMenu

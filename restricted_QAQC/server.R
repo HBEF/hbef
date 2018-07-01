@@ -969,9 +969,20 @@ shinyServer(function(input, output, session) {
    # Excel-like Entry Output ####
    #*****************************
    
-   output$EXCEL <- renderRHandsontable(
-     rhandsontable(dataWeeklyExample)
-   )
+   dataSummary <- reactive({
+      # filter data to selected water year and site
+      dataSummary <- dataCurrent %>% 
+         filter(waterYr %in% input$WATERYEAR5) %>% 
+         filter(site %in% input$SITE5) 
+      dataSummary
+      # re-structure according to layout of Brenda's spreadsheet
+   })
+   
+   output$SUMMARYTABLE5 <- renderRHandsontable({
+      dataSummary <- dataSummary()
+      print(head(dataSummary))
+      rhandsontable(head(dataSummary))
+   })
    
    
    # *QA/QC Tab* #########################################
