@@ -371,6 +371,8 @@ shinyServer(function(input, output, session) {
    dygraph1 <- reactive ({
       ylabel <- ylabel1()
       if (input$HYDROLOGY1 == TRUE)   {
+         if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (mm or L/s)'
+         if (input$SITES1 %in% sites_precip) ylabel2 <- 'Precipitation (in)'
          if (input$SOLUTES_HIST1 == TRUE) {
             
             # Plots Default + Discharge + Historical data
@@ -384,7 +386,7 @@ shinyServer(function(input, output, session) {
                dyAxis("y", label = ylabel,
                       independentTicks=TRUE,
                       axisLabelColor = "black") %>%
-               dyAxis('y2',label='Hydrology (mm or L/s)',
+               dyAxis('y2',label=ylabel2,
                       independentTicks=TRUE,
                       axisLabelColor = "#3182bd",
                       axisLabelWidth = 70,
@@ -424,7 +426,7 @@ shinyServer(function(input, output, session) {
             dygraph1 <- dygraph(data1.xts) %>%
                dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
                dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-               dyAxis('y2',label='Hydrology (mm or L/s)', independentTicks=TRUE,
+               dyAxis('y2',label=ylabel2, independentTicks=TRUE,
                       axisLabelWidth = 70,
                       axisLabelColor = "#3182bd",
                       axisLineColor = "#3182bd") %>% # color is light blue
@@ -512,8 +514,12 @@ shinyServer(function(input, output, session) {
          }
       }
    })
+   
    dygraph1.fun <- function() {
       if (input$HYDROLOGY1 == TRUE)   {
+         if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (mm or L/s)'
+         if (input$SITES1 %in% sites_precip) ylabel2 <- 'Precipitation (in)'
+         
          if (input$SOLUTES_HIST1 == TRUE) {
             
             # Plots Default + Discharge + Historical data
@@ -527,7 +533,7 @@ shinyServer(function(input, output, session) {
                dyAxis("y", label = ylabel,
                       independentTicks=TRUE,
                       axisLabelColor = "black") %>%
-               dyAxis('y2',label='Hydrology (mm or L/s)',
+               dyAxis('y2',label=ylabel2,
                       independentTicks=TRUE,
                       axisLabelColor = "#3182bd",
                       axisLabelWidth = 70,
@@ -567,7 +573,7 @@ shinyServer(function(input, output, session) {
             dygraph1 <- dygraph(data1.xts) %>%
                dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
                dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-               dyAxis('y2',label='Hydrology (mm or L/s)', independentTicks=TRUE,
+               dyAxis('y2',label=ylabel2, independentTicks=TRUE,
                       axisLabelWidth = 70,
                       axisLabelColor = "#3182bd",
                       axisLineColor = "#3182bd") %>% # color is light blue
@@ -984,56 +990,49 @@ shinyServer(function(input, output, session) {
    
    observe({ 
       input$SAVECHANGES5 # update csv file each time the button is pressed
-      message("inside SAVECHANGES5")
-      # openning connection to database 
-      pass  = readLines('/home/hbef/RMySQL.config')
-      con = dbConnect(MariaDB(),
-                      user = 'root',
-                      password = pass,
-                      host = 'localhost',
-                      dbname = 'hbef')
+      # message("inside SAVECHANGES5")
+      # # openning connection to database 
+      # pass  = readLines('/home/hbef/RMySQL.config')
+      # con = dbConnect(MariaDB(),
+      #                 user = 'root',
+      #                 password = pass,
+      #                 host = 'localhost',
+      #                 dbname = 'hbef')
       
-      # Repeating this here to make sure that hot input & output match
-      if (!is.null(input$hot)) { # if there is an rhot user input...
-         dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
-         setHot(dataSummary) # set the rhandsontable values
-      }
-      # # make needed data type changes to data before uploading
-      # dataNew <- standardizeClasses(dataNew())
-      # message("after standardize classes")
-      message(head(dataNew))
-      # upload data
-      dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
-      dbDisconnect(con)
-      message("after database connection closed")
-      # if (!is.null(values[["hot"]])) { # if there's a table input
-      #    write.csv(values[["hot"]], fname) # overwrite the temporary database file
-      #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
+      # # Repeating this here to make sure that hot input & output match
+      # if (!is.null(input$hot)) { # if there is an rhot user input...
+      #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
+      #    setHot(dataSummary) # set the rhandsontable values
       # }
-      showNotification("Save Complete")
+      # # # make needed data type changes to data before uploading
+      # # dataNew <- standardizeClasses(dataNew())
+      # # message("after standardize classes")
+      # message(head(dataNew))
+      # # upload data
+      # dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
+      # dbDisconnect(con)
+      # message("after database connection closed")
+      # # if (!is.null(values[["hot"]])) { # if there's a table input
+      # #    write.csv(values[["hot"]], fname) # overwrite the temporary database file
+      # #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
+      # # }
+      # showNotification("Save Complete")
    })
    
    output$hot <- renderRHandsontable({
       
       dataSummary <- dataSummary()
       
-      if (!is.null(input$hot)) { # if there is an rhot user input...
-         dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
-         setHot(dataSummary) # set the rhandsontable values
-      }
+      # if (!is.null(input$hot)) { # if there is an rhot user input...
+      #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
+      #    setHot(dataSummary) # set the rhandsontable values
+      # }
       
       rhandsontable(dataSummary) %>% 
          hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
          hot_col("uniqueID", readOnly = TRUE) 
    })
    
-   observe({ 
-      input$SAVECHANGES5 
-      if (!is.null(values[["hot"]])) { 
-         write.csv(values[["hot"]], fname) 
-         write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) 
-      }
-   })
    
    # *QA/QC Tab* #########################################
    
@@ -1117,6 +1116,9 @@ shinyServer(function(input, output, session) {
      
      if (input$HYDROLOGY2 == TRUE)   {
            
+         if (input$SITES2 %in% sites_streams) ylabel2 <- 'Discharge (mm or L/s)'
+         if (input$SITES2 %in% sites_precip) ylabel2 <- 'Precipitation (in)'
+        
            # Plots Default + Discharge data
            data2 <- dataCurQ2()
            data2.xts <- xts(data2[,-1], order.by = data2$date)
@@ -1124,7 +1126,7 @@ shinyServer(function(input, output, session) {
            dygraph(data2.xts) %>%
               dyAxis("x", label = paste("Water Year", input$WATERYEAR2)) %>%
               dyAxis("y", label = "(various units, dependent on input)", independentTicks=TRUE) %>%
-              dyAxis('y2',label='Hydrology (mm or L/s)', independentTicks=TRUE,
+              dyAxis('y2',label=ylabel2, independentTicks=TRUE,
                      axisLabelWidth = 70,
                      axisLabelColor = "#3182bd",
                      axisLineColor = "#3182bd") %>% # color is light blue
@@ -1250,7 +1252,7 @@ shinyServer(function(input, output, session) {
            dygraph(data3.xts) %>%
              dyAxis("x", label = paste("Water Year", input$WATERYEAR3)) %>%
              dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
-             dyAxis('y2',label='Hydrology (mm or L/s)', independentTicks=TRUE,
+             dyAxis('y2',label='Precipitation (in)', independentTicks=TRUE,
                     axisLabelWidth = 70,
                     axisLabelColor = "#3182bd",
                     axisLineColor = "#3182bd") %>% # color is light blue
