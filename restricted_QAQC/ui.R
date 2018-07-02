@@ -483,19 +483,30 @@ shinyUI(
         
             # Panel 5 - Summary Table ###############
             tabPanel("Summary Table",
-               selectInput(
-                  "WATERYEAR5",
-                  label = "Water Year",
-                  choices = wateryears,
-                  selected = wateryears[1]
-               ),               
-               selectInput(
-                  "SITE5",
-                  label = "Site",
-                  choices = c(sites_streams, sites_precip),
-                  selected = "W1"
-               ),
-               rHandsontableOutput("SUMMARYTABLE5") 
+               fluidRow(
+                  column(3, 
+                     selectInput(
+                        "WATERYEAR5",
+                        label = "Water Year",
+                        choices = wateryears,
+                        selected = wateryears[1]
+                     )),
+                  column(3, 
+                     selectInput(
+                         "SITE5",
+                         label = "Site",
+                         choices = c(sites_streams, sites_precip),
+                         selected = "W1"
+                     )),
+                  column(4),
+                  column(2, 
+                         actionButton(
+                            "SAVECHANGES5",
+                            label = strong("Save Changes"),
+                            class='rightAlign'
+                         ))
+               ), #end of fluidRow  
+               rHandsontableOutput("hot") # hot = Hands On Table 
             ) # closes Panel 5 tabPanel
         
          ),# END of QA/QC navbarMenu

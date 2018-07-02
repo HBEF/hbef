@@ -228,7 +228,7 @@ shinyServer(function(input, output, session) {
       dbDisconnect(con)
       message("after database connection closed")
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
-      showNotification("Done!")
+      showNotification("Submit Complete")
       message("after show Notification")
    })
    
@@ -966,7 +966,7 @@ shinyServer(function(input, output, session) {
       
    })
    
-   # Excel-like Entry Output ####
+   # Summary Table Output ####
    #*****************************
    
    dataSummary <- reactive({
@@ -978,12 +978,62 @@ shinyServer(function(input, output, session) {
       # re-structure according to layout of Brenda's spreadsheet
    })
    
-   output$SUMMARYTABLE5 <- renderRHandsontable({
-      dataSummary <- dataSummary()
-      print(head(dataSummary))
-      rhandsontable(head(dataSummary))
+   dataHOT <- dataCurrent # R object data frame stored as ASCII text
+   values <- list() 
+   setHot <- function(x) values[["hot"]] <<- x 
+   
+   observe({ 
+      input$SAVECHANGES5 # update csv file each time the button is pressed
+      message("inside SAVECHANGES5")
+      # openning connection to database 
+      pass  = readLines('/home/hbef/RMySQL.config')
+      con = dbConnect(MariaDB(),
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = 'hbef')
+      
+      # Repeating this here to make sure that hot input & output match
+      if (!is.null(input$hot)) { # if there is an rhot user input...
+         dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
+         setHot(dataSummary) # set the rhandsontable values
+      }
+      # # make needed data type changes to data before uploading
+      # dataNew <- standardizeClasses(dataNew())
+      # message("after standardize classes")
+      message(head(dataNew))
+      # upload data
+      dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
+      dbDisconnect(con)
+      message("after database connection closed")
+      # if (!is.null(values[["hot"]])) { # if there's a table input
+      #    write.csv(values[["hot"]], fname) # overwrite the temporary database file
+      #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
+      # }
+      showNotification("Save Complete")
    })
    
+   output$hot <- renderRHandsontable({
+      
+      dataSummary <- dataSummary()
+      
+      if (!is.null(input$hot)) { # if there is an rhot user input...
+         dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
+         setHot(dataSummary) # set the rhandsontable values
+      }
+      
+      rhandsontable(dataSummary) %>% 
+         hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
+         hot_col("uniqueID", readOnly = TRUE) 
+   })
+   
+   observe({ 
+      input$SAVECHANGES5 
+      if (!is.null(values[["hot"]])) { 
+         write.csv(values[["hot"]], fname) 
+         write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) 
+      }
+   })
    
    # *QA/QC Tab* #########################################
    
