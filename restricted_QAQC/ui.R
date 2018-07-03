@@ -493,7 +493,7 @@ shinyUI(
                      )),
                   column(3, 
                      selectInput(
-                         "SITE5",
+                         "SITES5",
                          label = "Site",
                          choices = c(sites_streams, sites_precip),
                          selected = "W1"
