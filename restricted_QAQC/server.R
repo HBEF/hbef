@@ -225,6 +225,8 @@ shinyServer(function(input, output, session) {
       message(head(dataNew))
       # upload data
       dbWriteTable(con, "current", dataNew, overwrite=TRUE, row.names=FALSE)
+      # re-establish dataCurrent
+      dataCurrent <- dbReadTable(con, "current")
       dbDisconnect(con)
       message("after database connection closed")
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
@@ -984,12 +986,12 @@ shinyServer(function(input, output, session) {
       # re-structure according to layout of Brenda's spreadsheet
    })
    
-   dataHOT <- dataCurrent # R object data frame stored as ASCII text
-   values <- list() 
-   setHot <- function(x) values[["hot"]] <<- x 
+   # dataHOT <- dataCurrent # R object data frame stored as ASCII text
+   # values <- list() 
+   # setHot <- function(x) values[["hot"]] <<- x 
    
-   observe({ 
-      input$SAVECHANGES5 # update csv file each time the button is pressed
+   # observe({ 
+      # input$SAVECHANGES5 # update csv file each time the button is pressed
       # message("inside SAVECHANGES5")
       # # openning connection to database 
       # pass  = readLines('/home/hbef/RMySQL.config')
@@ -1017,7 +1019,7 @@ shinyServer(function(input, output, session) {
       # #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
       # # }
       # showNotification("Save Complete")
-   })
+   #  })
    
    output$hot <- renderRHandsontable({
       
@@ -1028,7 +1030,7 @@ shinyServer(function(input, output, session) {
       #    setHot(dataSummary) # set the rhandsontable values
       # }
       
-      rhandsontable(dataSummary) %>% 
+        rhandsontable(dataSummary) %>% 
          hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
          hot_col("uniqueID", readOnly = TRUE) 
    })
