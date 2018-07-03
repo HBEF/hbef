@@ -2,6 +2,7 @@
 # -Import all data
 # -Create variables that can be accessed by ui.R and server.R
 
+library(dplyr)
 library(RMariaDB)
 library(stringr) 
 
@@ -103,6 +104,13 @@ con = dbConnect(y,
                 host = 'localhost',
                 dbname = 'hbef')
 tables = dbListTables(con)
+
+dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+dataChemistry <- read.csv("data/chemistry_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) #, na.strings=c(""," ","NA")
+   dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
+dbWriteTable(con, "initial", dataInitial, append=TRUE)
+dbWriteTable(con, "chemistry", dataChemistry, append=TRUE)
 
 dataInitial <- dbReadTable(con, "initial")
 dataChemistry <- dbReadTable(con, "chemistry")
