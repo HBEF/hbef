@@ -223,12 +223,30 @@ shinyServer(function(input, output, session) {
       dataNew <- standardizeClasses(dataNew())
       message("after standardize classes")
       message(head(dataNew))
-      # upload data
-      dbWriteTable(con, "current", dataNew, overwrite=TRUE, row.names=FALSE)
-      # re-establish dataCurrent
-      dataCurrent <- dbReadTable(con, "current")
+      i <- 1
+      c <- 1
+      if ("spCond" %in% dataNew) {
+         # upload data
+         dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
+         # re-establish dataCurrent
+         dataInitial <- dbReadTable(con, "initial")
+      } else { i <- 0 }
+      if ("Ca" %in% dataNew){
+         # upload data
+         dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
+         # re-establish dataCurrent
+         dataChemistry <- dbReadTable(con, "chemistry")
+      } else { i <- 0 }
+      if ((i+c) == 0) {
+         showNotification("ERROR: Data is missing required columns.")
+      }
+         
       dbDisconnect(con)
       message("after database connection closed")
+      
+      # Recreate dataCurrent
+      dataInitial <- select(dataInitial, -waterYr)
+      dataCurrent <- full_join(dataInitial, dataChemistry, by = "uniqueID")
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
       showNotification("Submit Complete")
       message("after show Notification")
