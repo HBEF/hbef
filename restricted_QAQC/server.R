@@ -893,6 +893,11 @@ shinyServer(function(input, output, session) {
    defClassesSample$date <- as.Date(defClassesSample$date, format="%m/%d/%y")
    defClassesSample$date <- as.Date(defClassesSample$date, format="%Y-%m-%d")
    dataHistorical <- standardizeClasses(dataHistorical)
+   message(names(dataHistorical))
+   # write.csv(dataCurrent, "test", col.names=TRUE)
+   message("After dataHistorical, about to do standardizeClasses on dataCurrent")
+   message(names(dataCurrent))
+   message(head(dataCurrent))
    dataCurrent <- standardizeClasses(dataCurrent)
       # !!! for some reason 'precipCatch' needs to be corrected
       dataCurrent$precipCatch <- as.numeric(dataCurrent$precipCatch)

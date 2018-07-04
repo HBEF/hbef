@@ -145,20 +145,24 @@ con = dbConnect(y,
                 dbname = 'hbef')
 tables = dbListTables(con)
 
-dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-   dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-   dataInitial <- standardizeClasses(dataInitial)
-dataChemistry <- read.csv("data/chemistry_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) #, na.strings=c(""," ","NA")
-   dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
-   dataChemistry <- standardizeClasses(dataChemistry)
-dbWriteTable(con, "initial", dataInitial, append=TRUE)
-dbWriteTable(con, "chemistry", dataChemistry, append=TRUE)
+# dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   # dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+   # dataInitial <- standardizeClasses(dataInitial)
+# dataChemistry <- read.csv("data/chemistry_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   # dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
+   # dataChemistry <- standardizeClasses(dataChemistry)
+# dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
 
 dataInitial <- dbReadTable(con, "initial")
 dataChemistry <- dbReadTable(con, "chemistry")
 dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor")
 dbDisconnect(con)
+
+dataInitial <- standardizeClasses(dataInitial)
+dataChemistry <- standardizeClasses(dataChemistry)
+dataHistorical <- standardizeClasses(dataHistorical)
 
 # # Grabbing Data from Local Source ----
 # # USE WHEN TESTING ON LOCAL COMPUTER
@@ -207,6 +211,7 @@ dbDisconnect(con)
 # if (nrow(dataChemistry) > 1) {
    # !!! Need to check what happens when dataChemistry is empty!
    dataInitial <- select(dataInitial, -waterYr)
+   dataChemistry <- select(dataChemistry, -refNo)
    dataCurrent <- full_join(dataInitial, dataChemistry, by = "uniqueID")
 # } else {
 #    dataCurrent <- dataInitial
