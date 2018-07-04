@@ -2,6 +2,7 @@
 # -Import all data
 # -Create variables that can be accessed by ui.R and server.R
 
+library(dplyr)
 library(RMariaDB)
 library(stringr) 
 
@@ -110,7 +111,7 @@ dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor")
 dbDisconnect(con)
 
-# Grabbing Data from Local Source ----
+# # Grabbing Data from Local Source ----
 # # USE WHEN TESTING ON LOCAL COMPUTER
 # # Import all datasets & make needed changes
 # dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
