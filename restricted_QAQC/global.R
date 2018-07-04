@@ -105,6 +105,13 @@ con = dbConnect(y,
                 dbname = 'hbef')
 tables = dbListTables(con)
 
+dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+dataChemistry <- read.csv("data/chemistry_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) #, na.strings=c(""," ","NA")
+   dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
+dbWriteTable(con, "initial", dataInitial, append=TRUE)
+dbWriteTable(con, "chemistry", dataChemistry, append=TRUE)
+
 dataInitial <- dbReadTable(con, "initial")
 dataChemistry <- dbReadTable(con, "chemistry")
 dataHistorical <- dbReadTable(con, "historical")
