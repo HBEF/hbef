@@ -134,84 +134,85 @@ defClasses <- read.csv("data/Rclasses.csv", header = TRUE, stringsAsFactors = FA
 defClassesSample <- read.csv("data/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 
-# Grabbing Data from MySQL database ----
-# USE WHEN LIVE ON REMOTE SITE
-y = RMariaDB::MariaDB()
-pass  = readLines('/home/hbef/RMySQL.config')
-con = dbConnect(y,
-                user = 'root',
-                password = pass,
-                host = 'localhost',
-                dbname = 'hbef')
-tables = dbListTables(con)
-
-# dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-   # dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-   # dataInitial <- standardizeClasses(dataInitial)
-# dataChemistry <- read.csv("data/chemistry_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-   # dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
-   # dataChemistry <- standardizeClasses(dataChemistry)
-# dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
-# dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
-
-dataInitial <- dbReadTable(con, "initial")
-dataChemistry <- dbReadTable(con, "chemistry")
-dataHistorical <- dbReadTable(con, "historical")
-dataSensor <- dbReadTable(con, "sensor")
-dbDisconnect(con)
-
-dataInitial <- standardizeClasses(dataInitial)
-dataChemistry <- standardizeClasses(dataChemistry)
-dataHistorical <- standardizeClasses(dataHistorical)
-
-# # Grabbing Data from Local Source ----
-# # USE WHEN TESTING ON LOCAL COMPUTER
-# # Import all datasets & make needed changes
-# dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-# dataChemistry <- read.csv("data/chemistry_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) #, na.strings=c(""," ","NA")
-#    dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
-# dataSensor <- read.csv("data/sensor.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y")
-# dataHistorical <- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")
-#    # Dates before 1969 are incorrect after above transformation
-#    # Replace dates before 1970 with date information extracted from 'uniqueID' column
-#    pre1968_indices <- grep("_196", dataHistorical$uniqueID, value=FALSE)
-#    for (i in pre1968_indices){
-#       dateString <- str_extract(dataHistorical$uniqueID[i], "196.....")
-#       dataHistorical$date[i] <- as.Date(dateString, "%Y%m%d")
-#    }
-#    # !!! write a function that alerts user to duplicates uniqueID?
+# # Grabbing Data from MySQL database ----
+# # USE WHEN LIVE ON REMOTE SITE
+# y = RMariaDB::MariaDB()
+# pass  = readLines('/home/hbef/RMySQL.config')
+# con = dbConnect(y,
+#                 user = 'root',
+#                 password = pass,
+#                 host = 'localhost',
+#                 dbname = 'hbef')
+# tables = dbListTables(con)
 # 
-#    # # CODE TO DEAL WITH DUPLICATE ROWS IN HISTORICAL DATA (one-time use)
-#    # # remove rows that are exact duplicates
-#    # dataHistorical <- distinct(dataHistorical)
-#    # # find remaining duplicate uniqueID's and count number of them
-#    # duplicatesHist <- dataHistorical %>%
-#    #    group_by(uniqueID) %>%
-#    #    filter(n()>1) %>%
-#    #    count(uniqueID)
-#    # # add "Dup" (or "Dup2") to remaining duplicate's 'uniqueID' and 'duplicate' columns
-#    # for (i in 1:nrow(duplicatesHist)) {
-#    #    indices <- which(duplicatesHist$uniqueID[i] == dataHistorical$uniqueID)
-#    #    for (j in 1:length(indices)) {
-#    #       if (j > 1) {
-#    #          index <- indices[j]
-#    #          if (j == 2 ) num <- c() else num <- j-1
-#    #          dataHistorical$uniqueID[index] <- paste0(dataHistorical$uniqueID[index] ,"_Dup", num)
-#    #          dataHistorical$duplicate[index]  <- paste0("Dup",num)
-#    #       }
-#    #    }
-#    # }
-#    # # export
-#    # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
+# # dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+#    # dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+#    # dataInitial <- standardizeClasses(dataInitial)
+# # dataChemistry <- read.csv("data/chemistry_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+#    # dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
+#    # dataChemistry <- standardizeClasses(dataChemistry)
+# # dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+# # dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
+# 
+# dataInitial <- dbReadTable(con, "initial")
+# dataChemistry <- dbReadTable(con, "chemistry")
+# dataHistorical <- dbReadTable(con, "historical")
+# dataSensor <- dbReadTable(con, "sensor")
+# dbDisconnect(con)
+# 
+# dataInitial <- standardizeClasses(dataInitial)
+# dataChemistry <- standardizeClasses(dataChemistry)
+# dataHistorical <- standardizeClasses(dataHistorical)
+
+# Grabbing Data from Local Source ----
+# USE WHEN TESTING ON LOCAL COMPUTER
+# Import all datasets & make needed changes
+dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+   # substitute all commas with ";" in notess (otherwise sentences get separated in .csv file)
+   dataInitial$notes <- gsub(",", ";",dataInitial$notes)
+dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) 
+dataSensor <- read.csv("data/sensor.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y")
+dataHistorical <- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+   dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")
+   # Dates before 1969 are incorrect after above transformation
+   # Replace dates before 1970 with date information extracted from 'uniqueID' column
+   pre1968_indices <- grep("_196", dataHistorical$uniqueID, value=FALSE)
+   for (i in pre1968_indices){
+      dateString <- str_extract(dataHistorical$uniqueID[i], "196.....")
+      dataHistorical$date[i] <- as.Date(dateString, "%Y%m%d")
+   }
+   # !!! write a function that alerts user to duplicates uniqueID?
+
+   # # CODE TO DEAL WITH DUPLICATE ROWS IN HISTORICAL DATA (one-time use)
+   # # remove rows that are exact duplicates
+   # dataHistorical <- distinct(dataHistorical)
+   # # find remaining duplicate uniqueID's and count number of them
+   # duplicatesHist <- dataHistorical %>%
+   #    group_by(uniqueID) %>%
+   #    filter(n()>1) %>%
+   #    count(uniqueID)
+   # # add "Dup" (or "Dup2") to remaining duplicate's 'uniqueID' and 'duplicate' columns
+   # for (i in 1:nrow(duplicatesHist)) {
+   #    indices <- which(duplicatesHist$uniqueID[i] == dataHistorical$uniqueID)
+   #    for (j in 1:length(indices)) {
+   #       if (j > 1) {
+   #          index <- indices[j]
+   #          if (j == 2 ) num <- c() else num <- j-1
+   #          dataHistorical$uniqueID[index] <- paste0(dataHistorical$uniqueID[index] ,"_Dup", num)
+   #          dataHistorical$duplicate[index]  <- paste0("Dup",num)
+   #       }
+   #    }
+   # }
+   # # export
+   # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
    
 # Create dataCurrent by binding dataInitial with dataChemistry
 # if (nrow(dataChemistry) > 1) {
    # !!! Need to check what happens when dataChemistry is empty!
    dataInitial <- select(dataInitial, -waterYr)
-   dataChemistry <- select(dataChemistry, -refNo)
+   # dataChemistry <- select(dataChemistry, -refNo)
    dataCurrent <- full_join(dataInitial, dataChemistry, by = "uniqueID")
 # } else {
 #    dataCurrent <- dataInitial

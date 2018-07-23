@@ -1413,8 +1413,9 @@ shinyServer(function(input, output, session) {
    datasetInput <- reactive({
       # Fetch the appropriate data object, depending on the value
       # of input$DATASET
-      switch(input$DOWNLOAD_DATASET,
+      datasetInput <- switch(input$DOWNLOAD_DATASET,
              "Current" = dataCurrent,
+             "Initial" = dataInitial,
              "Historical" = dataHistorical,
              "All" = dataAll)
    })
@@ -1434,7 +1435,7 @@ shinyServer(function(input, output, session) {
       # browser what name to use when saving the file.
       filename = function() {
          maxDownloadDate = max(datasetInput()$date, na.rm = TRUE)
-         paste(paste('HBEFdata', input$DOWNLOAD_DATASET, paste('upto', maxDownloadDate, sep=""), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
+         paste(paste('HBEFdata', input$DOWNLOAD_DATASET, paste('upto', Sys.Date(), sep=""), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
       },
       
       # This function should write data to a file given to it by

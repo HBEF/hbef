@@ -518,7 +518,8 @@ shinyUI(
             sidebarLayout(
                sidebarPanel(
                   selectInput("DOWNLOAD_DATASET", "Choose a dataset:", 
-                              choices = c("Current", 
+                              choices = c("Current",
+                                          "Initial",
                                           "Historical", 
                                           "All")),
                   radioButtons("DOWNLOAD_FILETYPE", "File type:",
