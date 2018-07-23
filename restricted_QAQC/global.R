@@ -146,14 +146,14 @@ con = dbConnect(y,
 tables = dbListTables(con)
 
 # Code for Loading Data into mysql
-dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-   dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-   dataInitial <- standardizeClasses(dataInitial)
-dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-   dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
-   dataChemistry <- standardizeClasses(dataChemistry)
-dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
-dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
+# dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+  #  dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+  # dataInitial <- standardizeClasses(dataInitial)
+# dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+  # dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
+  # dataChemistry <- standardizeClasses(dataChemistry)
+# dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+# dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
 
 dataInitial <- dbReadTable(con, "initial")
 dataChemistry <- dbReadTable(con, "chemistry")
@@ -162,7 +162,7 @@ dataSensor <- dbReadTable(con, "sensor")
 dbDisconnect(con)
 
 dataInitial <- standardizeClasses(dataInitial)
-  dataInitial$notes <- gsub("[\n]", "", dataInitial$notes)
+  dataInitial$notes <- gsub(",", ";", dataInitial$notes)
 dataChemistry <- standardizeClasses(dataChemistry)
 dataHistorical <- standardizeClasses(dataHistorical)
 
