@@ -514,7 +514,7 @@ shinyUI(
          #*********************************************************
          # ***DATA DOWNLOAD tab***----
          #*********************************************************
-         tabPanel("Data Download",
+         tabPanel("Download",
             sidebarLayout(
                sidebarPanel(
                   selectInput("DOWNLOAD_DATASET", "Choose a dataset:", 

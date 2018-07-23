@@ -261,7 +261,8 @@ shinyServer(function(input, output, session) {
    # Solute limit (MDL & LOQ)
    # Finding MDL and LOQ value for solute, if they exist
    MDL1 <- reactive({
-      if (input$SOLUTES1 %in% dataLimits$Analyte) {dataLimits$MDL[dataLimits$Analyte == input$SOLUTES1]}
+      if (input$SOLUTES1 %in% dataLimits$Analyte) {dataLimits$MDL[dataLimits$Analyte == input$SOLUTES1]
+message(print(input$SOLUTES1))}
       else {NA} 
    })
    LOQ1 <- reactive({

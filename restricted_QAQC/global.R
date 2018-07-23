@@ -129,13 +129,14 @@ standardizeClasses <- function(d) {
 # import MDL/LOQ data
 dataLimits <- read.csv("data/Limits_MDL_LOQ.csv")
 
-# data needed for standardizeClasses() funciton to work
+# data needed for standardizeClasses() function to work
 defClasses <- read.csv("data/Rclasses.csv", header = TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 defClassesSample <- read.csv("data/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 
 # # Grabbing Data from MySQL database ----
 # # USE WHEN LIVE ON REMOTE SITE
+# #########################################################################
 # y = RMariaDB::MariaDB()
 # pass  = readLines('/home/hbef/RMySQL.config')
 # con = dbConnect(y,
@@ -145,27 +146,58 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 #                 dbname = 'hbef')
 # tables = dbListTables(con)
 # 
-# # dataInitial <- read.csv("data/initial_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    # dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-#    # dataInitial <- standardizeClasses(dataInitial)
-# # dataChemistry <- read.csv("data/chemistry_upto20180328.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#    # dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
-#    # dataChemistry <- standardizeClasses(dataChemistry)
+# # Code for one-time use: to load data into mysql
+# # dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+#   # dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+#   # dataInitial <- standardizeClasses(dataInitial)
+# # dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+#   # dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
+#   # dataChemistry <- standardizeClasses(dataChemistry)
 # # dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
 # # dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
 # 
+# # Get data from mysql 
 # dataInitial <- dbReadTable(con, "initial")
 # dataChemistry <- dbReadTable(con, "chemistry")
 # dataHistorical <- dbReadTable(con, "historical")
 # dataSensor <- dbReadTable(con, "sensor")
 # dbDisconnect(con)
 # 
+# # Format data as needed
 # dataInitial <- standardizeClasses(dataInitial)
+#   # necessary to prevent problems when downloading csv files
+#   dataInitial$notes <- gsub(",", ";", dataInitial$notes)
 # dataChemistry <- standardizeClasses(dataChemistry)
 # dataHistorical <- standardizeClasses(dataHistorical)
+# 
+# # Create dataCurrent, to be used from here on out
+# dataInitial_minus_refNo_waterYr <- select(dataInitial, -refNo, -waterYr)
+# dataCurrent <- full_join(dataInitial_minus_refNo_waterYr, dataChemistry, by = "uniqueID")
+# 
+# # FOR TESTING on remote server
+# message("dataInitial from mysql: names, rows, col's")
+# message(names(dataInitial))
+# message(nrow(dataInitial))
+# message(ncol(dataInitial))
+# message("dataChemistry from mysql: names, rows, col's")   
+# message(names(dataChemistry))                                               
+# message(nrow(dataChemistry))
+# message(ncol(dataChemistry))
+# message("dataCurrent from mysql: names, rows, col's")                                   
+# message(names(dataCurrent))  
+# message(nrow(dataCurrent))
+# message(ncol(dataCurrent))
+# # Writing files to .csv files for checking
+# message(getwd())
+# write.csv(dataInitial, file="/home/hbef/shiny/temp_csv/dataInitial.csv", append=FALSE)
+# write.csv(dataChemistry, file="data/tests/dataChemistry.csv") 
+# write.csv(dataHistorical, file="data/tests/dataHistorical.csv")
+# write.csv(dataSensor, file="data/tests/Sensor.csv")
+# write.csv(dataCurrent, file="data/tests/dataCurrent.csv")
 
 # Grabbing Data from Local Source ----
 # USE WHEN TESTING ON LOCAL COMPUTER
+#########################################################################
 # Import all datasets & make needed changes
 dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
@@ -217,7 +249,6 @@ dataHistorical <- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.s
 # } else {
 #    dataCurrent <- dataInitial
 # }
-
 
 # ****  END OF DATA IMPORT & PREP ****
 
