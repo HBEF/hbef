@@ -503,6 +503,7 @@ shinyUI(
                   selectInput("DOWNLOAD_DATASET", "Choose a dataset:", 
                               choices = c("Current",
                                           "Initial",
+                                          "Chemistry",
                                           "Historical", 
                                           "All")),
                   radioButtons("DOWNLOAD_FILETYPE", "File type:",

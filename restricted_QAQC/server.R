@@ -1417,6 +1417,7 @@ message(print(input$SOLUTES1))}
       datasetInput <- switch(input$DOWNLOAD_DATASET,
              "Current" = dataCurrent,
              "Initial" = dataInitial,
+             "Chemistry" = dataChemistry,
              "Historical" = dataHistorical,
              "All" = dataAll)
    })
