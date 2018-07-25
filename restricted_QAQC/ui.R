@@ -16,6 +16,7 @@ library(shiny)            # basis of entire app, allows us to create reactive da
 
 message("hello, I'm in ui.R")
 
+
 # **********************************************************************
 #                    ---- USER INTERFACE CODE ----
 # **********************************************************************
@@ -25,9 +26,13 @@ message("hello, I'm in ui.R")
 shinyUI(
    
    fluidPage(
-     
+      # useShinyjs(),
+      #tags$head(
+         #includeCSS("//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css"),
+         #includeScript(path="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js")
+      #),     
       #includeCSS("style.css"),
-
+      #HMTL(<script type="text/javascript" src="/www/dygraph-combined.js"></script>),
       navbarPage(title = p(strong("HBEF Dashboard")),
          tabPanel("Main",
             h3("Welcome!"),
@@ -94,6 +99,7 @@ shinyUI(
                   #              selected = '"'),
                   ), # end of sidebarPanel
                   mainPanel(
+                     #tags$head(tags$script(src="www/dygraphs-1.1.1/dygraph-combined.js")),
                      # Shows data file as a table 
                      dataTableOutput("FILE_PREVIEW")
                   ) # end of mainPanel
@@ -145,20 +151,9 @@ shinyUI(
                      conditionalPanel(
                         # this panel only appears when Hydrology button is clicked AND a stream site is selected
                         # !!! this condition could be optimized to be when sites %in% sites_stream (in javascript)
-                        condition = "input.HYDROLOGY1 == true &&
-                                      (input.SITES1 == 'W1' ||
-                                       input.SITES1 =='W2' ||
-                                       input.SITES1 == 'W3' ||
-                                       input.SITES1 == 'W4' ||
-                                       input.SITES1 == 'W5' ||
-                                       input.SITES1 == 'W6' |
-                                       input.SITES1 == 'W7' ||
-                                       input.SITES1 == 'W8' ||
-                                       input.SITES1 == 'W9' ||
-                                       input.SITES1 == 'HBK' ||
-                                       input.SITES1 == 'ML70' ||
-                                       input.SITES1 == 'PLY')", 
-                        p(radioButtons("Flow_or_Precip1", 
+                        condition = "input.HYDROLOGY1 == true && (input.SITES1 == 'W1' || input.SITES1 == 'W2' || input.SITES1 == 'W3' || input.SITES1 == 'W4' || input.SITES1 == 'W5' || input.SITES1 == 'W6' || input.SITES1 == 'W7' || input.SITES1 == 'W8' || input.SITES1 == 'W9' || input.SITES1 == 'HBK' || input.SITES1 == 'ML70' || input.SITES1 == 'PLY')", 
+                       # sites_stream.includes(input.SITES1)  
+                      p(radioButtons("Flow_or_Precip1", 
                                        "Select data source:",
                                        choices = c("Gage Height (mm)" = "gageHt", 
                                                    "Q from Gage Height (L/s)" = "flowGageHt"),
@@ -234,19 +229,7 @@ shinyUI(
                      conditionalPanel(
                         # this panel only appears when Hydrology button is clicked AND a stream site is selected
                         # !!! this condition could be optimized to be when sites %in% sites_stream (in javascript)
-                        condition = "input.HYDROLOGY2 == true &&
-                        (input.SITES2 == 'W1' ||
-                        input.SITES2 =='W2' ||
-                        input.SITES2 == 'W3' ||
-                        input.SITES2 == 'W4' ||
-                        input.SITES2 == 'W5' ||
-                        input.SITES2 == 'W6' |
-                        input.SITES2 == 'W7' ||
-                        input.SITES2 == 'W8' ||
-                        input.SITES2 == 'W9' ||
-                        input.SITES2 == 'HBK' ||
-                        input.SITES2 == 'ML70' ||
-                        input.SITES2 == 'PLY')", 
+                        condition = "input.HYDROLOGY2 == true && (input.SITES2 == 'W1' || input.SITES2 =='W2' || input.SITES2 == 'W3' || input.SITES2 == 'W4' || input.SITES2 == 'W5' || input.SITES2 == 'W6' || input.SITES2 == 'W7' || input.SITES2 == 'W8' || input.SITES2 == 'W9' || input.SITES2 == 'HBK' || input.SITES2 == 'ML70' || input.SITES2 == 'PLY')", 
                         p(radioButtons("Flow_or_Precip2", 
                                        "Select data source:",
                                        choices = c("Gage Height (mm)" = "gageHt", 
