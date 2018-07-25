@@ -245,8 +245,9 @@ shinyServer(function(input, output, session) {
       message("after database connection closed")
       
       # Recreate dataCurrent
-      dataInitial <- select(dataInitial, -waterYr)
-      dataCurrent <- full_join(dataInitial, dataChemistry, by = "uniqueID")
+      # Create dataCurrent, to be used from here on out
+      dataInitial_minus_refNo_waterYr <- select(dataInitial, -refNo, -waterYr)
+      dataCurrent <- full_join(dataInitial_minus_refNo_waterYr, dataChemistry, by = "uniqueID")
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
       showNotification("Submit Complete")
       message("after show Notification")
