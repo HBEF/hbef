@@ -226,19 +226,25 @@ shinyServer(function(input, output, session) {
       message(head(dataNew))
       i <- 1
       c <- 1
+      # procedure if data is 'initial' data
       if ("spCond" %in% names(dataNew)) {
+         dataNew$notes <- gsub(",", ";", dataNew$notes) # remove all commas, as they interfere with downloading csv's
          # upload data
          dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataCurrent
-         dataInitial <- dbReadTable(con, "initial")
+         dataInitial <<- dbReadTable(con, "initial")
+         dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
          showNotification("Submit Complete.")
       } else { i <- 0 }
+      # procedure if data is 'chemistry' data
       if ("Ca" %in% names(dataNew)) {
+         dataNew$sampleType <- gsub(",", ";", dataNew$sampleType)
          # upload data
          message(names(dataNew))
          dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataCurrent
-         dataChemistry <- dbReadTable(con, "chemistry")
+         dataChemistry <<- dbReadTable(con, "chemistry")
+         dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
          showNotification("Submit Complete.")
       } else { i <- 0 }
       if ((i+c) == 0) {
@@ -250,10 +256,24 @@ shinyServer(function(input, output, session) {
       
       # Recreate dataCurrent
       # Create dataCurrent, to be used from here on out
-      dataInitial_minus_refNo_waterYr <- select(dataInitial, -refNo, -waterYr)
-      dataCurrent <- full_join(dataInitial_minus_refNo_waterYr, dataChemistry, by = "uniqueID")
+      dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
+      dataCurrent <<- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
-      message("after show Notification")
+   
+      # Recreate wateryears
+      wy <- levels(as.factor(dataCurrent$waterYr))
+      wy1 <- c()
+      for (i in 1:length(wy)) {
+        wy1 <- c(wy1, wy[i])
+      }
+      wateryears <<- as.list(wy1)
+      # Update user interface
+      updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
+      message("after show Notification")  
+
    })
    
    # *QA/QC Tab* #### 
@@ -1424,7 +1444,7 @@ message(print(input$SOLUTES1))}
              "Chemistry" = dataChemistry,
              "Historical" = dataHistorical,
              "All" = dataAll)
-   })
+      })
    
    output$table <- renderTable({
       datasetInput()
