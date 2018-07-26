@@ -202,8 +202,9 @@ shinyServer(function(input, output, session) {
          message("just ran read.csv")
          dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
          message("ran remove NA rows")
-         dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
-         message("after date")
+         if ("date" %in% names(dataNew)) {
+            dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
+         }
          # message(print(head(dataNew))) 
          return(dataNew)  
     })
@@ -225,17 +226,20 @@ shinyServer(function(input, output, session) {
       message(head(dataNew))
       i <- 1
       c <- 1
-      if ("spCond" %in% dataNew) {
+      if ("spCond" %in% names(dataNew)) {
          # upload data
          dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataCurrent
          dataInitial <- dbReadTable(con, "initial")
+         showNotification("Submit Complete.")
       } else { i <- 0 }
-      if ("Ca" %in% dataNew){
+      if ("Ca" %in% names(dataNew)) {
          # upload data
+         message(names(dataNew))
          dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataCurrent
          dataChemistry <- dbReadTable(con, "chemistry")
+         showNotification("Submit Complete.")
       } else { i <- 0 }
       if ((i+c) == 0) {
          showNotification("ERROR: Data is missing required columns.")
@@ -249,7 +253,6 @@ shinyServer(function(input, output, session) {
       dataInitial_minus_refNo_waterYr <- select(dataInitial, -refNo, -waterYr)
       dataCurrent <- full_join(dataInitial_minus_refNo_waterYr, dataChemistry, by = "uniqueID")
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
-      showNotification("Submit Complete")
       message("after show Notification")
    })
    
@@ -1055,7 +1058,7 @@ message(print(input$SOLUTES1))}
       #    setHot(dataSummary) # set the rhandsontable values
       # }
       
-        rhandsontable(dataSummary) %>% 
+      rhandsontable(dataSummary) %>% 
          hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
          hot_col("uniqueID", readOnly = TRUE) 
    })
@@ -1438,7 +1441,8 @@ message(print(input$SOLUTES1))}
       # browser what name to use when saving the file.
       filename = function() {
          maxDownloadDate = max(datasetInput()$date, na.rm = TRUE)
-         paste(paste('HBEFdata', input$DOWNLOAD_DATASET, paste('upto', Sys.Date(), sep=""), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
+         #paste(paste('HBEFdata', input$DOWNLOAD_DATASET, paste('upto', Sys.Date(), sep=""), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
+         paste(paste('HBEFdata', input$DOWNLOAD_DATASET, Sys.Date(), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
       },
       
       # This function should write data to a file given to it by
