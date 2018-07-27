@@ -202,8 +202,9 @@ shinyServer(function(input, output, session) {
          message("just ran read.csv")
          dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
          message("ran remove NA rows")
-         dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
-         message("after date")
+         if ("date" %in% names(dataNew)) {
+            dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
+         }
          # message(print(head(dataNew))) 
          return(dataNew)  
     })
@@ -225,17 +226,26 @@ shinyServer(function(input, output, session) {
       message(head(dataNew))
       i <- 1
       c <- 1
-      if ("spCond" %in% dataNew) {
+      # procedure if data is 'initial' data
+      if ("spCond" %in% names(dataNew)) {
+         dataNew$notes <- gsub(",", ";", dataNew$notes) # remove all commas, as they interfere with downloading csv's
          # upload data
          dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataCurrent
-         dataInitial <- dbReadTable(con, "initial")
+         dataInitial <<- dbReadTable(con, "initial")
+         dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
+         showNotification("Submit Complete.")
       } else { i <- 0 }
-      if ("Ca" %in% dataNew){
+      # procedure if data is 'chemistry' data
+      if ("Ca" %in% names(dataNew)) {
+         dataNew$sampleType <- gsub(",", ";", dataNew$sampleType)
          # upload data
+         message(names(dataNew))
          dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataCurrent
-         dataChemistry <- dbReadTable(con, "chemistry")
+         dataChemistry <<- dbReadTable(con, "chemistry")
+         dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+         showNotification("Submit Complete.")
       } else { i <- 0 }
       if ((i+c) == 0) {
          showNotification("ERROR: Data is missing required columns.")
@@ -246,11 +256,24 @@ shinyServer(function(input, output, session) {
       
       # Recreate dataCurrent
       # Create dataCurrent, to be used from here on out
-      dataInitial_minus_refNo_waterYr <- select(dataInitial, -refNo, -waterYr)
-      dataCurrent <- full_join(dataInitial_minus_refNo_waterYr, dataChemistry, by = "uniqueID")
+      dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
+      dataCurrent <<- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
-      showNotification("Submit Complete")
-      message("after show Notification")
+   
+      # Recreate wateryears
+      wy <- levels(as.factor(dataCurrent$waterYr))
+      wy1 <- c()
+      for (i in 1:length(wy)) {
+        wy1 <- c(wy1, wy[i])
+      }
+      wateryears <<- as.list(wy1)
+      # Update user interface
+      updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
+      message("after show Notification")  
+
    })
    
    # *QA/QC Tab* #### 
@@ -1055,7 +1078,7 @@ message(print(input$SOLUTES1))}
       #    setHot(dataSummary) # set the rhandsontable values
       # }
       
-        rhandsontable(dataSummary) %>% 
+      rhandsontable(dataSummary) %>% 
          hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
          hot_col("uniqueID", readOnly = TRUE) 
    })
@@ -1418,9 +1441,10 @@ message(print(input$SOLUTES1))}
       datasetInput <- switch(input$DOWNLOAD_DATASET,
              "Current" = dataCurrent,
              "Initial" = dataInitial,
+             "Chemistry" = dataChemistry,
              "Historical" = dataHistorical,
              "All" = dataAll)
-   })
+      })
    
    output$table <- renderTable({
       datasetInput()
@@ -1437,7 +1461,8 @@ message(print(input$SOLUTES1))}
       # browser what name to use when saving the file.
       filename = function() {
          maxDownloadDate = max(datasetInput()$date, na.rm = TRUE)
-         paste(paste('HBEFdata', input$DOWNLOAD_DATASET, paste('upto', Sys.Date(), sep=""), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
+         #paste(paste('HBEFdata', input$DOWNLOAD_DATASET, paste('upto', Sys.Date(), sep=""), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
+         paste(paste('HBEFdata', input$DOWNLOAD_DATASET, Sys.Date(), sep="_"), input$DOWNLOAD_FILETYPE, sep = ".")
       },
       
       # This function should write data to a file given to it by

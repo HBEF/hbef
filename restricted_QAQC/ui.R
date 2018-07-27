@@ -177,7 +177,7 @@ shinyUI(
                           these lines are derived from median values per month."
                         ), 
                         p("Historical data finds the median value of all stream sites
-                          when a watershed site is selected, the median value of all
+                          when a watershed site is selected, and the median value of all
                           precipitation sites when a rain gage site is selected."),
                         style = "color:#666666; font-size:85%;"
                      ),
@@ -503,6 +503,7 @@ shinyUI(
                   selectInput("DOWNLOAD_DATASET", "Choose a dataset:", 
                               choices = c("Current",
                                           "Initial",
+                                          "Chemistry",
                                           "Historical", 
                                           "All")),
                   radioButtons("DOWNLOAD_FILETYPE", "File type:",
@@ -511,7 +512,7 @@ shinyUI(
                   downloadButton('DOWNLOAD_DATA', 'Download')
                ),
                mainPanel(
-                  #tableOutput('table')
+                 # tableOutput("table")
                )
             ) # end of sidebarLayout
          ) # end of tabPanel for Data Download

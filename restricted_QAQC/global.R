@@ -170,9 +170,10 @@ dataInitial <- standardizeClasses(dataInitial)
 dataChemistry <- standardizeClasses(dataChemistry)
 dataHistorical <- standardizeClasses(dataHistorical)
 
-# Create dataCurrent, to be used from here on out
-dataInitial_minus_refNo_waterYr <- select(dataInitial, -refNo, -waterYr)
-dataCurrent <- full_join(dataInitial_minus_refNo_waterYr, dataChemistry, by = "uniqueID")
+# USE LOWER CODE !!! delete when you're done
+# # Create dataCurrent, to be used from here on out
+# dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
+# dataCurrent <- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
 
 # # FOR TESTING on remote server
 # message("dataInitial from mysql: names, rows, col's")
@@ -240,15 +241,15 @@ dataCurrent <- full_join(dataInitial_minus_refNo_waterYr, dataChemistry, by = "u
 #    # # export
 #    # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
 #    
-# # Create dataCurrent by binding dataInitial with dataChemistry
-# # if (nrow(dataChemistry) > 1) {
-#    # !!! Need to check what happens when dataChemistry is empty!
-#    dataInitial <- select(dataInitial, -waterYr)
-#    # dataChemistry <- select(dataChemistry, -refNo)
-#    dataCurrent <- full_join(dataInitial, dataChemistry, by = "uniqueID")
-# # } else {
-# #    dataCurrent <- dataInitial
-# # }
+# Create dataCurrent by binding dataInitial with dataChemistry
+# if (nrow(dataChemistry) > 1) {
+   # !!! Need to check what happens when dataChemistry is empty!
+   # dataInitial <- select(dataInitial, -waterYr)
+   dataChemistry_minus_waterYr_refNo <- select(dataChemistry, -waterYr, -refNo)
+   dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "uniqueID")
+# } else {
+#    dataCurrent <- dataInitial
+# }
 
 # ****  END OF DATA IMPORT & PREP ****
 
