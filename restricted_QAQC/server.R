@@ -186,7 +186,7 @@ shinyServer(function(input, output, session) {
    #   paste(histYears, sep=" ")
    # })
    
-   # *DATA INPUT Tab* #### 
+   # *Upload Tab* #### 
    #************************
 
    # Upon choosing csv file, grabs and displays file contents
@@ -898,7 +898,7 @@ message(print(input$SOLUTES1))}
    }) # END of dataOrigQ3()
    # **** END of Panel 3 Reactivity ****   
    
-      # Panel 4 Reactivity####
+   # Panel 4 Reactivity ####
    #************************
 
    # Solute limit (MDL & LOQ)
@@ -1001,30 +1001,10 @@ message(print(input$SOLUTES1))}
    # **** END of Panel 4 Reactivity ****
    
    
-   # ***OUTPUT*** ----
-   # ***********************************
    
-   
-   # *DATA INPUT Tab* #########################################
-   
-   output$FILE_PREVIEW <- renderDataTable({
-      
-      # input$file1 will be NULL initially. After the user selects
-      # and uploads a file, head of that data file by default,
-      # or all rows if selected, will be shown.
-      
-      if(input$UPLOAD_DISPLAY == "head") {
-         head(dataNew())
-      }
-      else {
-         dataNew()
-      }
-      
-   })
-   
-   # Summary Table Output ####
+   # Panel 5 Reactivity ####
    #*****************************
-   
+
    dataSummary <- reactive({
       # filter data to selected water year and site
       dataSummary <- dataCurrent %>% 
@@ -1069,20 +1049,40 @@ message(print(input$SOLUTES1))}
    #    # showNotification("Save Complete")
    # })
    
-   output$hot <- renderRHandsontable({
-      
-      dataSummary <- dataSummary()
-      
-      # if (!is.null(input$hot)) { # if there is an rhot user input...
-      #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
-      #    setHot(dataSummary) # set the rhandsontable values
-      # }
-      
-      rhandsontable(dataSummary) %>% 
-         hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
-         hot_col("uniqueID", readOnly = TRUE) 
+   # *Download Tab* ########################################
+   
+   datasetInput <- reactive({
+      # Fetch the appropriate data object, depending on the value
+      # of input$DATASET
+      datasetInput <- switch(input$DOWNLOAD_DATASET,
+                             "Current" = dataCurrent,
+                             "Initial" = dataInitial,
+                             "Chemistry" = dataChemistry,
+                             "Historical" = dataHistorical,
+                             "All" = dataAll)
    })
    
+   
+   # ***    OUTPUT     *** ----
+   # ***********************************
+   
+   
+   # *Upload Tab* #########################################
+   
+   output$FILE_PREVIEW <- renderDataTable({
+      
+      # input$file1 will be NULL initially. After the user selects
+      # and uploads a file, head of that data file by default,
+      # or all rows if selected, will be shown.
+      
+      if(input$UPLOAD_DISPLAY == "head") {
+         head(dataNew())
+      }
+      else {
+         dataNew()
+      }
+      
+   })
    
    # *QA/QC Tab* #########################################
    
@@ -1433,18 +1433,26 @@ message(print(input$SOLUTES1))}
       #head(dataCurrent)
    }) # end of output$TABLE4
    
-   # *DATA DOWNLOAD Tab* ########################################
+   # Panel 5 Output ####
+   #*****************************
    
-   datasetInput <- reactive({
-      # Fetch the appropriate data object, depending on the value
-      # of input$DATASET
-      datasetInput <- switch(input$DOWNLOAD_DATASET,
-             "Current" = dataCurrent,
-             "Initial" = dataInitial,
-             "Chemistry" = dataChemistry,
-             "Historical" = dataHistorical,
-             "All" = dataAll)
-      })
+   output$hot <- renderRHandsontable({
+      
+      dataSummary <- dataSummary()
+      
+      # if (!is.null(input$hot)) { # if there is an rhot user input...
+      #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
+      #    setHot(dataSummary) # set the rhandsontable values
+      # }
+      
+      rhandsontable(dataSummary) %>% 
+         hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
+         hot_col("uniqueID", readOnly = TRUE) 
+   })
+   
+   
+   
+   # *Download Tab* ########################################
    
    output$table <- renderTable({
       datasetInput()

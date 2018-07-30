@@ -54,10 +54,10 @@ shinyUI(
          ), #end of Main tabPanel
                   
          #*********************************************************
-         # ***DATA INPUT tab *** ----
+         # ***UPLOAD tab *** ----
          #*********************************************************
          # Code initially copied from: https://github.com/rstudio/shiny-examples/blob/master/009-upload/app.R
-         tabPanel("Upload", # Upload Panel ----
+         tabPanel("Upload", 
                # Sidebar layout with input and output definitions
                sidebarLayout(
                 # Sidebar panel for inputs
@@ -495,7 +495,7 @@ shinyUI(
          ),# END of QA/QC navbarMenu
         
          #*********************************************************
-         # ***DATA DOWNLOAD tab***----
+         # ***DOWNLOAD tab***----
          #*********************************************************
          tabPanel("Download",
             sidebarLayout(
