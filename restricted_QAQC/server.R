@@ -36,43 +36,6 @@ message("hello, I'm at the top of server.R")
 # Functions ----
 # ***********************************
    
-## Function to re-classify data class (e.g. numeric, character, etc.) of each variable (column) in a data 
-## frame. Uses defClasses & defClassesSample data frames to match data column with its intended
-## data class.
-standardizeClasses <- function(d) {
-      # d:              data.frame to be checked for columns with only NA's
-      # ColClasses :    vector of desired class types for the data.frame
-      message("In standardizeClasses")
-      message(head(d))
-      r <- nrow(d)
-      message(r)
-      c <- ncol(d)
-      message(c)
-      for (i in 1:c) {
-         ## 1. Insert an additional row with a sample value for each column
-         ### Find index in defClassesSample that corresponds to column in d, save that index
-         current_col_ofData <- colnames(d[i])
-         ind_col <- which(current_col_ofData == colnames(defClassesSample), arr.ind = TRUE)
-         ### Add corresponding sample value to last row of d
-         d[r+1,i] <- defClassesSample[1,ind_col]
-         ## 2. Define class of each column according to what you specified in defClasses
-         ind_row <- which(current_col_ofData == defClasses$VariableName, arr.ind = TRUE)
-         switch(defClasses$Class[ind_row],
-                integer=as.integer(d[[i]]),
-                character=as.character(d[[i]]),
-                #numeric=as.numeric(as.character(d[[i]])),
-                numeric=as.numeric(d[[i]]),
-                Date=as.Date(d[[i]]), #, origin='1970-01-01'
-                ### !!! Class below not being used, causing problems
-                #POSIXct=as.POSIXct(d[[i]], "%Y-%m-%d %H:%M", tz="EST", usetz=FALSE, na.rm=TRUE),
-                factor=as.factor(d[[i]])
-         )
-      }
-      ## 3. Delete last row of sample values
-      d <- d[-(r+1),]
-      d
-   }
-   
 # Find units for y-axis, depending on solute selected
 ylabel <- function(solute) {
       mu <- "\U00B5" 
