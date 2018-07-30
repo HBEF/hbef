@@ -48,7 +48,7 @@ shinyUI(
                           Hubbard Brook Ecosystem Study: A Record of Sampling Protocols and 
                           Analytical Procedures.</a></strong> USDA Forest Service, Northeastern Research
                           Station, General Technical Report NE-275.</li>
-                          <li> Data Structures Template <em>(Forthcoming...)</em> </li>
+                          <li> Data Upload Templates <em>(Forthcoming...)</em></li>
                           <li> Developer Documentation <em>(Forthcoming...)</em> </li>
                           </ul>"))
          ), #end of Main tabPanel
