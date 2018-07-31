@@ -92,21 +92,21 @@ standardizeClasses <- function(d) {
    # d:              data.frame to be checked for columns with only NA's
    # ColClasses :    vector of desired class types for the data.frame
    message("In standardizeClasses")
-   message(head(d))
+   message(paste("Head of dataset:", head(d)))
    r <- nrow(d)
-   message(r)
+   message(paste("Number of rows in dataset:", r))
    c <- ncol(d)
-   message(c)
+   message(paste("Number of columns in dataset:", c))
    for (i in 1:c) {
-      ## 1. Insert an additional row with a sample value for each column
-      ### Find index in defClassesSample that corresponds to column in d, save that index
-      current_col_ofData <- colnames(d[i])
-      ind_col <- which(current_col_ofData == colnames(defClassesSample), arr.ind = TRUE)
-      ### Add corresponding sample value to last row of d
-      d[r+1,i] <- defClassesSample[1,ind_col]
-      ## 2. Define class of each column according to what you specified in defClasses
-      ind_row <- which(current_col_ofData == defClasses$VariableName, arr.ind = TRUE)
-      switch(defClasses$Class[ind_row],
+      # 1. Insert an additional row with a sample value for each column
+         ## Find index in defClassesSample that corresponds to column in d, save that index
+         current_col_ofData <- colnames(d[i])
+         ind_col <- which(current_col_ofData == colnames(defClassesSample), arr.ind = TRUE)
+         ## Add corresponding sample value to last row of d
+         d[r+1,i] <- defClassesSample[1,ind_col]
+      # 2. Define class of each column according to what you specified in defClasses
+         ind_row <- which(current_col_ofData == defClasses$VariableName, arr.ind = TRUE)
+         switch(defClasses$Class[ind_row],
              integer=as.integer(d[[i]]),
              character=as.character(d[[i]]),
              #numeric=as.numeric(as.character(d[[i]])),
@@ -115,7 +115,7 @@ standardizeClasses <- function(d) {
              ### !!! Class below not being used, causing problems
              #POSIXct=as.POSIXct(d[[i]], "%Y-%m-%d %H:%M", tz="EST", usetz=FALSE, na.rm=TRUE),
              factor=as.factor(d[[i]])
-      )
+         )
    }
    ## 3. Delete last row of sample values
    d <- d[-(r+1),]
@@ -136,7 +136,7 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 
 # Grabbing Data from MySQL database ----
 # USE WHEN LIVE ON REMOTE SITE
-#########################################################################
+#**********************************************
 y = RMariaDB::MariaDB()
 pass  = readLines('/home/hbef/RMySQL.config')
 con = dbConnect(y,
@@ -170,41 +170,48 @@ dataInitial <- standardizeClasses(dataInitial)
 dataChemistry <- standardizeClasses(dataChemistry)
 dataHistorical <- standardizeClasses(dataHistorical)
 
-# USE LOWER CODE !!! delete when you're done
-# # Create dataCurrent, to be used from here on out
-# dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
-# dataCurrent <- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
+# Create dataCurrrent when from MySQL----
+#**********************************************
+# Create dataCurrent by binding dataInitial with dataChemistry
+# if (nrow(dataChemistry) > 1) {
+# !!! Need to check what happens when dataChemistry is empty!
+# dataInitial <- select(dataInitial, -waterYr)
+dataChemistry_minus_waterYr_refNo <- select(dataChemistry, -waterYr, -refNo)
+dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "uniqueID")
+# } else {
+#    dataCurrent <- dataInitial
+# }
 
 # # FOR TESTING on remote server
 # message("dataInitial from mysql: names, rows, col's")
 # message(names(dataInitial))
 # message(nrow(dataInitial))
 # message(ncol(dataInitial))
-# message("dataChemistry from mysql: names, rows, col's")   
-# message(names(dataChemistry))                                               
+# message("dataChemistry from mysql: names, rows, col's")
+# message(names(dataChemistry))
 # message(nrow(dataChemistry))
 # message(ncol(dataChemistry))
-# message("dataCurrent from mysql: names, rows, col's")                                   
-# message(names(dataCurrent))  
+# message("dataCurrent from mysql: names, rows, col's")
+# message(names(dataCurrent))
 # message(nrow(dataCurrent))
 # message(ncol(dataCurrent))
 # # Writing files to .csv files for checking
 # message(getwd())
 # write.csv(dataInitial, file="/home/hbef/shiny/temp_csv/dataInitial.csv", append=FALSE)
-# write.csv(dataChemistry, file="data/tests/dataChemistry.csv") 
+# write.csv(dataChemistry, file="data/tests/dataChemistry.csv")
 # write.csv(dataHistorical, file="data/tests/dataHistorical.csv")
 # write.csv(dataSensor, file="data/tests/Sensor.csv")
 # write.csv(dataCurrent, file="data/tests/dataCurrent.csv")
 
 # # Grabbing Data from Local Source ----
 # # USE WHEN TESTING ON LOCAL COMPUTER
-# #########################################################################
+# #**********************************************
 # # Import all datasets & make needed changes
 # dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 #    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
 #    # substitute all commas with ";" in notess (otherwise sentences get separated in .csv file)
 #    dataInitial$notes <- gsub(",", ";",dataInitial$notes)
-# dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) 
+# dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 # dataSensor <- read.csv("data/sensor.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 #    dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y")
 # dataHistorical <- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
@@ -240,16 +247,19 @@ dataHistorical <- standardizeClasses(dataHistorical)
 #    # }
 #    # # export
 #    # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
-#    
-# Create dataCurrent by binding dataInitial with dataChemistry
-# if (nrow(dataChemistry) > 1) {
-   # !!! Need to check what happens when dataChemistry is empty!
-   # dataInitial <- select(dataInitial, -waterYr)
-   dataChemistry_minus_waterYr_refNo <- select(dataChemistry, -waterYr, -refNo)
-   dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "uniqueID")
-# } else {
-#    dataCurrent <- dataInitial
-# }
+# 
+# 
+# # Create dataCurrrent when on Local Source ----
+# #**********************************************
+# # Create dataCurrent by binding dataInitial with dataChemistry
+# # if (nrow(dataChemistry) > 1) {
+#    # !!! Need to check what happens when dataChemistry is empty!
+#    # dataInitial <- select(dataInitial, -waterYr)
+#    dataChemistry_minus_waterYr <- select(dataChemistry, -waterYr)
+#    dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr, by = "uniqueID")
+# # } else {
+# #    dataCurrent <- dataInitial
+# # }
 
 # ****  END OF DATA IMPORT & PREP ****
 
