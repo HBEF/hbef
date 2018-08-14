@@ -15,8 +15,9 @@ library(dplyr)
 library(dygraphs)          # allows for interactivity
 library(ggplot2)
 library(ggthemes)
+library(jsonlite)
 library(plotly)
-#library(lubridate)        # Does not work with shinyapps.io: https://stackoverflow.com/questions/28656683/r-script-working-locally-not-working-on-shinyapp-io
+library(lubridate)        # Does not work with shinyapps.io: https://stackoverflow.com/questions/28656683/r-script-working-locally-not-working-on-shinyapp-io
 library(RColorBrewer)
 library(RMariaDB)
 library(RMySQL)
@@ -1042,7 +1043,8 @@ message(print(input$SOLUTES1))}
       dataSummary <- dataCurrent %>% 
          filter(waterYr %in% input$WATERYEAR5) %>% 
          filter(site %in% input$SITES5) 
-      dataSummary
+     message(paste("Class of data in dataSummary:", class(dataSummary$date))) 
+     dataSummary
       # re-structure according to layout of Brenda's spreadsheet
    }) 
    
@@ -1477,6 +1479,8 @@ message(print(input$SOLUTES1))}
    output$hot <- renderRHandsontable({
       
       dataSummary <- dataSummary()
+      #the following is necessary to prevent error on remote server
+      dataSummary$timeEST = as.character(dataSummary$timeEST)
       
       # if (!is.null(input$hot)) { # if there is an rhot user input...
       #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
