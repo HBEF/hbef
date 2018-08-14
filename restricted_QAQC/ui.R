@@ -11,6 +11,7 @@
 #
 
 library(dygraphs)         # makes dynamic graphs used in QA/QC tab
+library(lubridate)
 library(rhandsontable)    # essential for "Excel-like Entry" tab
 library(shiny)            # basis of entire app, allows us to create reactive dashboard
 
