@@ -61,8 +61,7 @@ sites_streams <- list("Watershed 1" = "W1",
                       "Watershed 8" = "W8",
                       "Watershed 9" = "W9",
                       "HBK", 
-                      "ML70",
-                      "PLY")
+                      "ML70")
 
 #Precipitation sites
 # If you update this list, also update conditional panel below

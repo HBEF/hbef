@@ -975,6 +975,7 @@ message(print(input$SOLUTES1))}
       data4 <- dataAll %>%
          filter(date >= input$DATE4[1]) %>%
          filter(date <= input$DATE4[2])
+      data4 <- removeCodes(data4)
       data4
    })
    ## Data for Precip plot
@@ -1428,7 +1429,6 @@ message(print(input$SOLUTES1))}
    }, height = 100) # end of output$GRAPH_PRECIP4
    output$GRAPH_MAIN4 <- renderPlot({
       data <- dataMain4()
-      data <- removeCodes(data)
       x <- data$date
       y <- data$solute_value
       # build ggplot function
