@@ -1,15 +1,1 @@
-uniqueID,site,date,timeEST,waterYr,pH,pHmetrohm,DIC,spCond,temp,ANCMet,gageHt,hydroGraph,flowGageHt,precipCatch,fieldCode,notes,archived
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
-_19000100_0000,,,,1899,,,,,,,,,,,,,
+uniqueID,site,date,timeEST,waterYr,pH,pHmetrohm,DIC,spCond,temp,ANCMet,gageHt,hydroGraph,flowGageHt,precipCatch,fieldCode,notes,archived,au254,au275,au295,au350,au400
