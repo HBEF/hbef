@@ -490,7 +490,7 @@ shinyUI(
                             class='rightAlign'
                          ))
                ), #end of fluidRow  
-               rHandsontableOutput("hot") # hot = Hands On Table 
+               rHandsontableOutput("HOT") # HOT = Hands On Table 
             ) # closes Panel 5 tabPanel
         
          ),# END of QA/QC navbarMenu

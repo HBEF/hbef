@@ -969,6 +969,7 @@ message(print(input$SOLUTES1))}
       data4 <- dataAll %>%
          filter(date >= input$DATE4[1]) %>%
          filter(date <= input$DATE4[2])
+      data4 <- removeCodes(data4)
       data4
    })
    ## Data for Precip plot
@@ -1038,50 +1039,18 @@ message(print(input$SOLUTES1))}
    # Panel 5 Reactivity ####
    #*****************************
 
-   dataSummary <- reactive({
+   data5 <- reactive({
       # filter data to selected water year and site
-      dataSummary <- dataCurrent %>% 
+      data5 <- dataCurrent %>% 
          filter(waterYr %in% input$WATERYEAR5) %>% 
          filter(site %in% input$SITES5) 
-     message(paste("Class of data in dataSummary:", class(dataSummary$date))) 
-     dataSummary
+      data5
       # re-structure according to layout of Brenda's spreadsheet
    }) 
    
    # dataHOT <- dataCurrent # R object data frame stored as ASCII text
    # values <- list() 
    # setHot <- function(x) values[["hot"]] <<- x 
-   
-   # observe({ 
-   #    input$SAVECHANGES5 # update csv file each time the button is pressed
-   #    message("inside SAVECHANGES5")
-   #    # openning connection to database
-   #    pass  = readLines('/home/hbef/RMySQL.config')
-   #    con = dbConnect(MariaDB(),
-   #                    user = 'root',
-   #                    password = pass,
-   #                    host = 'localhost',
-   #                    dbname = 'hbef')
-   #    
-   #    # # Repeating this here to make sure that hot input & output match
-   #    # if (!is.null(input$hot)) { # if there is an rhot user input...
-   #    #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
-   #    #    setHot(dataSummary) # set the rhandsontable values
-   #    # }
-   #    # # # make needed data type changes to data before uploading
-   #    # # dataNew <- standardizeClasses(dataNew())
-   #    # # message("after standardize classes")
-   #    # message(head(dataNew))
-   #    # # upload data
-   #    # dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
-   #    # dbDisconnect(con)
-   #    # message("after database connection closed")
-   #    # # if (!is.null(values[["hot"]])) { # if there's a table input
-   #    # #    write.csv(values[["hot"]], fname) # overwrite the temporary database file
-   #    # #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
-   #    # # }
-   #    # showNotification("Save Complete")
-   # })
    
    # *Download Tab* ########################################
    
@@ -1422,7 +1391,6 @@ message(print(input$SOLUTES1))}
    }, height = 100) # end of output$GRAPH_PRECIP4
    output$GRAPH_MAIN4 <- renderPlot({
       data <- dataMain4()
-      data <- removeCodes(data)
       x <- data$date
       y <- data$solute_value
       # build ggplot function
@@ -1476,23 +1444,58 @@ message(print(input$SOLUTES1))}
    # Panel 5 Output ####
    #*****************************
    
-   output$hot <- renderRHandsontable({
+   output$HOT <- renderRHandsontable({
       
-      dataSummary <- dataSummary()
+      data5 <- data5()
       #the following is necessary to prevent error on remote server
-      dataSummary$timeEST = as.character(dataSummary$timeEST)
+      data5$timeEST <- as.character(data5$timeEST)
       
       # if (!is.null(input$hot)) { # if there is an rhot user input...
       #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
       #    setHot(dataSummary) # set the rhandsontable values
       # }
       
-      rhandsontable(dataSummary) %>% 
+      rhandsontable(data5) %>% 
          hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
          hot_col("uniqueID", readOnly = TRUE) 
    })
    
-   
+   observeEvent(input$SAVECHANGES5, 
+      # update csv file each time the button is pressed
+      #message("inside SAVECHANGES5"),
+      # # openning connection to database
+      # pass  = readLines('/home/hbef/RMySQL.config')
+      # con = dbConnect(MariaDB(),
+      #                 user = 'root',
+      #                 password = pass,
+      #                 host = 'localhost',
+      #                 dbname = 'hbef')
+      # # upload data
+      # dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
+      # dbDisconnect(con)
+      
+      write.csv(hot_to_r(input$HOT),
+                file = paste(paste('HBEFdata_CHANGES_', paste("WY", input$WATERYEAR5, sep=""), Sys.Date(), sep="_"), "csv", sep = "."),
+                row.names = FALSE)
+      
+      
+      # Repeating this here to make sure that hot input & output match
+      # if (!is.null(input$hot)) { # if there is an rhot user input...
+      #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
+      #    setHot(dataSummary) # set the rhandsontable values
+      # }
+      # # # make needed data type changes to data before uploading
+      # # dataNew <- standardizeClasses(dataNew())
+      # # message("after standardize classes")
+      # message(head(dataNew))
+      
+      # message("after database connection closed")
+      # # if (!is.null(values[["hot"]])) { # if there's a table input
+      # #    write.csv(values[["hot"]], fname) # overwrite the temporary database file
+      # #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
+      # # }
+      # showNotification("Save Complete")
+   )
    
    # *Download Tab* ########################################
    

@@ -69,8 +69,7 @@ sites_streams <- list("Watershed 1" = "W1",
                       "Watershed 8" = "W8",
                       "Watershed 9" = "W9",
                       "HBK", 
-                      "ML70",
-                      "PLY")
+                      "ML70")
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
@@ -218,11 +217,11 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 # USE WHEN TESTING ON LOCAL COMPUTER
 #**********************************************
 # Import all datasets & make needed changes
-dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+dataInitial <- read.csv("data/initial_withWY2013_minusPLY.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
    # substitute all commas with ";" in notess (otherwise sentences get separated in .csv file)
    dataInitial$notes <- gsub(",", ";",dataInitial$notes)
-dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+dataChemistry <- read.csv("data/chemistry_withWY2013_minusPLY.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 dataSensor <- read.csv("data/sensor.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
    dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y")
 dataHistorical <- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
@@ -289,7 +288,7 @@ dataHistorical <- standardizeClasses(dataHistorical)
 # ****  END OF DATA IMPORT & PREP ****
 
 
-# Create water years list ----
+# Create water years *list* ----
 # used in ui.R and server.R for Panels 1-3 (QA/QC graphs)
 wy <- levels(as.factor(dataCurrent$waterYr))
 wy1 <- c()
