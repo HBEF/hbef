@@ -48,6 +48,14 @@ solutes_other <- list("pH (3 Star)" = "pH",
                       "Water Temperature" = "temp", 
                       "Ion Balance" = "ionBalance")
 
+codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet", 
+                "ionError", "ionBalance")
+codes123 <- c("pH", "pHmetrohm", "spCond", "au254", "au275",
+              "au295", "au350", "au400", "Ca", "Mg", 
+              "K", "Na", "TMAl", "OMAl", "Al_ICP", "NH4", 
+              "SO4", "NO3", "Cl", "PO4", "DOC", "TDN", "DIC",
+              "DON", "SiO2", "Mn", "Fe", "F")
+
 
 # Lists of Sites 
 #***************
@@ -169,7 +177,7 @@ dataInitial <- standardizeClasses(dataInitial)
 dataChemistry <- standardizeClasses(dataChemistry)
 dataHistorical <- standardizeClasses(dataHistorical)
 
-# Create dataCurrrent when from MySQL----
+# Create dataCurrrent and dataAll when from MySQL----
 #**********************************************
 # Create dataCurrent by binding dataInitial with dataChemistry
 # if (nrow(dataChemistry) > 1) {
@@ -177,9 +185,12 @@ dataHistorical <- standardizeClasses(dataHistorical)
 # dataInitial <- select(dataInitial, -waterYr)
 dataChemistry_minus_waterYr_refNo <- select(dataChemistry, -waterYr, -refNo)
 dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "uniqueID")
+dataCurrent <- standardizeClasses(dataCurrent)
 # } else {
 #    dataCurrent <- dataInitial
 # }
+dataAll <- bind_rows(dataHistorical, dataCurrent)
+dataAll <- standardizeClasses(dataAll)
 
 # # FOR TESTING on remote server
 # message("dataInitial from mysql: names, rows, col's")
@@ -206,11 +217,11 @@ dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "u
 # # USE WHEN TESTING ON LOCAL COMPUTER
 # #**********************************************
 # # Import all datasets & make needed changes
-# dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+# dataInitial <- read.csv("data/initial_withWY2013_minusPLY.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 #    dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
 #    # substitute all commas with ";" in notess (otherwise sentences get separated in .csv file)
 #    dataInitial$notes <- gsub(",", ";",dataInitial$notes)
-# dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+# dataChemistry <- read.csv("data/chemistry_withWY2013_minusPLY.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 # dataSensor <- read.csv("data/sensor.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 #    dataSensor$date <- as.Date(dataSensor$date, "%m/%d/%y")
 # dataHistorical <- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
@@ -222,6 +233,17 @@ dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "u
 #       dateString <- str_extract(dataHistorical$uniqueID[i], "196.....")
 #       dataHistorical$date[i] <- as.Date(dateString, "%Y%m%d")
 #    }
+# 
+# # Format data as needed
+# dataInitial <- standardizeClasses(dataInitial)
+#    # necessary to prevent problems when downloading csv files
+#    dataInitial$notes <- gsub(",", ";", dataInitial$notes)
+# dataChemistry <- standardizeClasses(dataChemistry)
+#    # necessary to prevent problems when downloading csv files
+#    dataChemistry$sampleType <- gsub(",", ";", dataChemistry$sampleType)
+# dataHistorical <- standardizeClasses(dataHistorical)
+# 
+# #Standardize datasets
 #    # !!! write a function that alerts user to duplicates uniqueID?
 # 
 #    # # CODE TO DEAL WITH DUPLICATE ROWS IN HISTORICAL DATA (one-time use)
@@ -247,8 +269,7 @@ dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "u
 #    # # export
 #    # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
 # 
-# 
-# # Create dataCurrrent when on Local Source ----
+# # Create dataCurrrent & dataAll when on Local Source ----
 # #**********************************************
 # # Create dataCurrent by binding dataInitial with dataChemistry
 # # if (nrow(dataChemistry) > 1) {
@@ -256,21 +277,27 @@ dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "u
 #    # dataInitial <- select(dataInitial, -waterYr)
 #    dataChemistry_minus_waterYr <- select(dataChemistry, -waterYr)
 #    dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr, by = "uniqueID")
-# # } else {
+#    dataCurrent <- standardizeClasses(dataCurrent)
+#    # } else {
 # #    dataCurrent <- dataInitial
 # # }
+#    dataAll <- bind_rows(dataHistorical, dataCurrent)
+#    dataAll <- standardizeClasses(dataAll)
+   
 
 # ****  END OF DATA IMPORT & PREP ****
 
 
-# Create water years list ----
+# Create water years *list* ----
 # used in ui.R and server.R for Panels 1-3 (QA/QC graphs)
 wy <- levels(as.factor(dataCurrent$waterYr))
 wy1 <- c()
 for (i in 1:length(wy)) {
    wy1 <- c(wy1, wy[i])
 }
+#wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
 wateryears <- as.list(wy1)
+
       
 # Find maximum date ----
 # used in ui.R for Panel 4 (QA/QC "Free-for-all" graph)

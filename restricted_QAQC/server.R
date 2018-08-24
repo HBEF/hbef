@@ -64,12 +64,6 @@ ylabel <- function(solute) {
 
 # Replaces codes -999.9, -1, -2, and -3 from data (used before graphing)
 removeCodes <- function(dataSet) {
-   codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet", 
-                   "ionError", "ionBalance")
-   codes123 <- c("pH", "pHmetrohm", "spCond", "Ca", "Mg", 
-                 "K", "Na", "TMAl", "OMAl", "Al_ICP", "NH4", 
-                 "SO4", "NO3", "Cl", "PO4", "DOC", "TDN", "DIC",
-                 "DON", "SiO2", "Mn", "Fe", "F")
    # if value -999.9 is present in certain columns, replace with NA
    for (i in 1:6) {
       # test data set when needed:
@@ -102,12 +96,6 @@ removeCodes <- function(dataSet) {
 # Serves same funciton as removeCodes() function, but tailored for specific 
 # data format used in Panel 3
 removeCodes3 <- function(dataSet, solute) {
-   codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet", 
-                   "ionError", "ionBalance")
-   codes123 <- c("pH", "pHmetrohm", "spCond", "Ca", "Mg", 
-                 "K", "Na", "TMAl", "OMAl", "Al_ICP", "NH4", 
-                 "SO4", "NO3", "Cl", "PO4", "DOC", "TDN", "DIC",
-                 "DON", "SiO2", "Mn", "Fe", "F")
    sites_all <- c(sites_streams, sites_precip)
    # Go through each column of data, and change the 
    # columns associated with a site (i.e. the ones that contain solute data)
@@ -241,6 +229,7 @@ shinyServer(function(input, output, session) {
    
    # Upon pressing submit, transfer uploaded file content to 'current' table in database
    observeEvent(input$SUBMIT, {
+      # !!! will likely want to make this more advanced later (only show success if there are no errors)
       message("inside submit")
       # openning connection to database 
       pass  = readLines('/home/hbef/RMySQL.config')
@@ -263,6 +252,7 @@ shinyServer(function(input, output, session) {
          dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataCurrent
          dataInitial <<- dbReadTable(con, "initial")
+         dataInitial <<- standardizeClasses(dataInitial)
          dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
          showNotification("Submit Complete.")
       } else { i <- 0 }
@@ -274,6 +264,7 @@ shinyServer(function(input, output, session) {
          dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataCurrent
          dataChemistry <<- dbReadTable(con, "chemistry")
+         dataChemistry <<- standardizeClasses(dataChemistry)
          dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
          showNotification("Submit Complete.")
       } else { i <- 0 }
@@ -284,18 +275,21 @@ shinyServer(function(input, output, session) {
       dbDisconnect(con)
       message("after database connection closed")
       
-      # Recreate dataCurrent
+      # Recreate dataCurrent & dataAll
       # Create dataCurrent, to be used from here on out
       dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
       dataCurrent <<- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
-      # !!! will likely want to make this more advanced later (only show success if there are no errors)
-   
+      dataCurrent <<- standardizeClasses(dataCurrent)
+      dataAll <<- bind_rows(dataHistorical, dataCurrent)
+      dataAll <<- standardizeClasses(dataAll)
+      
       # Recreate wateryears
       wy <- levels(as.factor(dataCurrent$waterYr))
       wy1 <- c()
       for (i in 1:length(wy)) {
-        wy1 <- c(wy1, wy[i])
+         wy1 <- c(wy1, wy[i])
       }
+      #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
       wateryears <<- as.list(wy1)
       # Update user interface
       updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
@@ -359,7 +353,7 @@ message(print(input$SOLUTES1))}
    # and IQR for historical data are necessary because dygraphs cannot plot boxplots when the 
    # x-axis is continuous.
    
-   # Grab selected wateryear, site, solute data from recent data
+   # Grab selected wateryear, site, solute data from data
    dataCurrent1 <- reactive({
      dataCurrent1 <- dataCurrent %>% 
        filter(waterYr %in% input$WATERYEAR1) %>%      # Filter data to selected water year
@@ -367,7 +361,7 @@ message(print(input$SOLUTES1))}
        select(one_of("date", input$SOLUTES1))         # Select desired columns of data
    }) # END of dataCurrent1
    
-   # Grab selected wateryear, site, solute, and discharge data from recent data
+   # Grab selected wateryear, site, solute, and discharge data from data
    dataCurQ1 <- reactive({
       if (input$SITES1 %in% sites_streams) {
          if (input$Flow_or_Precip1 == 'gageHt'){
@@ -1045,50 +1039,18 @@ message(print(input$SOLUTES1))}
    # Panel 5 Reactivity ####
    #*****************************
 
-   dataSummary <- reactive({
+   data5 <- reactive({
       # filter data to selected water year and site
-      dataSummary <- dataCurrent %>% 
+      data5 <- dataCurrent %>% 
          filter(waterYr %in% input$WATERYEAR5) %>% 
          filter(site %in% input$SITES5) 
-     message(paste("Class of data in dataSummary:", class(dataSummary$date))) 
-     dataSummary
+      data5
       # re-structure according to layout of Brenda's spreadsheet
    }) 
    
    # dataHOT <- dataCurrent # R object data frame stored as ASCII text
    # values <- list() 
    # setHot <- function(x) values[["hot"]] <<- x 
-   
-   # observe({ 
-   #    input$SAVECHANGES5 # update csv file each time the button is pressed
-   #    message("inside SAVECHANGES5")
-   #    # openning connection to database
-   #    pass  = readLines('/home/hbef/RMySQL.config')
-   #    con = dbConnect(MariaDB(),
-   #                    user = 'root',
-   #                    password = pass,
-   #                    host = 'localhost',
-   #                    dbname = 'hbef')
-   #    
-   #    # # Repeating this here to make sure that hot input & output match
-   #    # if (!is.null(input$hot)) { # if there is an rhot user input...
-   #    #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
-   #    #    setHot(dataSummary) # set the rhandsontable values
-   #    # }
-   #    # # # make needed data type changes to data before uploading
-   #    # # dataNew <- standardizeClasses(dataNew())
-   #    # # message("after standardize classes")
-   #    # message(head(dataNew))
-   #    # # upload data
-   #    # dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
-   #    # dbDisconnect(con)
-   #    # message("after database connection closed")
-   #    # # if (!is.null(values[["hot"]])) { # if there's a table input
-   #    # #    write.csv(values[["hot"]], fname) # overwrite the temporary database file
-   #    # #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
-   #    # # }
-   #    # showNotification("Save Complete")
-   # })
    
    # *Download Tab* ########################################
    
@@ -1482,23 +1444,58 @@ message(print(input$SOLUTES1))}
    # Panel 5 Output ####
    #*****************************
    
-   output$hot <- renderRHandsontable({
+   output$HOT <- renderRHandsontable({
       
-      dataSummary <- dataSummary()
+      data5 <- data5()
       #the following is necessary to prevent error on remote server
-      dataSummary$timeEST = as.character(dataSummary$timeEST)
+      data5$timeEST <- as.character(data5$timeEST)
       
       # if (!is.null(input$hot)) { # if there is an rhot user input...
       #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
       #    setHot(dataSummary) # set the rhandsontable values
       # }
       
-      rhandsontable(dataSummary) %>% 
+      rhandsontable(data5) %>% 
          hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
          hot_col("uniqueID", readOnly = TRUE) 
    })
    
-   
+   observeEvent(input$SAVECHANGES5, 
+      # update csv file each time the button is pressed
+      #message("inside SAVECHANGES5"),
+      # # openning connection to database
+      # pass  = readLines('/home/hbef/RMySQL.config')
+      # con = dbConnect(MariaDB(),
+      #                 user = 'root',
+      #                 password = pass,
+      #                 host = 'localhost',
+      #                 dbname = 'hbef')
+      # # upload data
+      # dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
+      # dbDisconnect(con)
+      
+      write.csv(hot_to_r(input$HOT),
+                file = paste(paste('HBEFdata_CHANGES_', paste("WY", input$WATERYEAR5, sep=""), Sys.Date(), sep="_"), "csv", sep = "."),
+                row.names = FALSE)
+      
+      
+      # Repeating this here to make sure that hot input & output match
+      # if (!is.null(input$hot)) { # if there is an rhot user input...
+      #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
+      #    setHot(dataSummary) # set the rhandsontable values
+      # }
+      # # # make needed data type changes to data before uploading
+      # # dataNew <- standardizeClasses(dataNew())
+      # # message("after standardize classes")
+      # message(head(dataNew))
+      
+      # message("after database connection closed")
+      # # if (!is.null(values[["hot"]])) { # if there's a table input
+      # #    write.csv(values[["hot"]], fname) # overwrite the temporary database file
+      # #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
+      # # }
+      # showNotification("Save Complete")
+   )
    
    # *Download Tab* ########################################
    
