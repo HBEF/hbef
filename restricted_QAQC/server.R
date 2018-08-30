@@ -192,7 +192,12 @@ solute_palette <- c(colors_cations, colors_anions, colors_other)
 # **********************************************************************
 
 shinyServer(function(input, output, session) {
-   
+  
+   # make sure app stops upon closing broswer
+   session$onSessionEnded(function() {
+        stopApp()
+   })
+ 
    # ***REACTIVITY*** ----
    # ***********************************
    
@@ -247,10 +252,9 @@ shinyServer(function(input, output, session) {
       c <- 1
       # procedure if data is 'initial' data
       if ("spCond" %in% names(dataNew)) {
-         dataNew$notes <- gsub(",", ";", dataNew$notes) # remove all commas, as they interfere with downloading csv's
          # upload data
          dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
-         # re-establish dataCurrent
+         # re-establish dataInitial
          dataInitial <<- dbReadTable(con, "initial")
          dataInitial <<- standardizeClasses(dataInitial)
          dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
@@ -258,11 +262,10 @@ shinyServer(function(input, output, session) {
       } else { i <- 0 }
       # procedure if data is 'chemistry' data
       if ("Ca" %in% names(dataNew)) {
-         dataNew$sampleType <- gsub(",", ";", dataNew$sampleType)
          # upload data
          message(names(dataNew))
          dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
-         # re-establish dataCurrent
+         # re-establish dataChemistry
          dataChemistry <<- dbReadTable(con, "chemistry")
          dataChemistry <<- standardizeClasses(dataChemistry)
          dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
@@ -276,7 +279,6 @@ shinyServer(function(input, output, session) {
       message("after database connection closed")
       
       # Recreate dataCurrent & dataAll
-      # Create dataCurrent, to be used from here on out
       dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
       dataCurrent <<- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
       dataCurrent <<- standardizeClasses(dataCurrent)
@@ -1084,6 +1086,9 @@ message(print(input$SOLUTES1))}
       else {
          dataNew()
       }
+
+      # !!! Need to add in code to warn users if uniqueID will be duplicate with what's in MySQL
+      # !!! Need to allow users to delete lines
       
    })
    
@@ -1460,43 +1465,97 @@ message(print(input$SOLUTES1))}
          hot_col("uniqueID", readOnly = TRUE) 
    })
    
-   observeEvent(input$SAVECHANGES5, 
-      # update csv file each time the button is pressed
-      #message("inside SAVECHANGES5"),
-      # # openning connection to database
-      # pass  = readLines('/home/hbef/RMySQL.config')
-      # con = dbConnect(MariaDB(),
-      #                 user = 'root',
-      #                 password = pass,
-      #                 host = 'localhost',
-      #                 dbname = 'hbef')
-      # # upload data
-      # dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
-      # dbDisconnect(con)
+   observeEvent(input$SAVECHANGES5,{ 
+       message("inside SAVECHANGES5")
+       # openning connection to database
+       pass  = readLines('/home/hbef/RMySQL.config')
+       con = dbConnect(MariaDB(),
+                       user = 'root',
+                       password = pass,
+                       host = 'localhost',
+                       dbname = 'hbef')
+             
+        # make handsontable data object into R data frame
+        dataChanged <- hot_to_r(input$HOT)
+        dataChanged <- standardizeClasses(dataChanged)
+        # replace all commas with ";", as commas interfere with downloading csv's
+        dataChanged$notes <- gsub(",", ";", dataChanged$notes) 
+        dataChanged$sampleType <- gsub(",", ";", dataChanged$sampleType)
+        # split changed data table into dataInitial and dataChemistry
+        dataInitialChanged <- dataChanged[,1:18]
+        dataChemistryChanged <- dataChanged[, (names(dataChanged) %in% c("uniqueID", names(dataChemistry)))]
+
+        # build MySQL queries, used to delete data that will be replaced
+        wateryear5 <- input$WATERYEAR5
+        site5 <- input$SITES5
+        queryDeleteInitial <- paste0('DELETE FROM initial ', 
+                                     ' WHERE waterYr = ', wateryear5, 
+                                     ' AND site = "', site5, 
+                                     '" ORDER BY uniqueID;') 
+        # finds and uses uniqueID's for chemistry data by: 
+        # 1) isolating data in question from initial table (contains needed uniqueID's)
+        # 2) isolating data in question from chemistry table (using uniqueID's from temporary initial table)
+        # 3) deleting data in question from chemistry table (using uniqueID's from temporary chemistry table)
+        # the above sequence is needed because chemistry data does not contain 'site' column,
+        # eliminating the possibility to simply filter chemistry data by 'waterYr' and 'site' 
+        queryCreateInitialSumTbl <- paste0("CREATE TABLE initialSummaryTable SELECT * FROM initial WHERE waterYr = ", wateryear5, " AND site = '", site5,"';")
+
+        queryCreateChemSumTbl <- paste0(
+            'CREATE TABLE chemistrySummaryTable SELECT c.uniqueID, datetime, Ca, Mg, K, Na, TMAl, OMAl, Al_ICP, NH4, SO4, NO3, Cl, PO4, DOC, TDN, DON, SiO2, Mn, Fe, F, cationCharge, anionCharge, theoryCond, ionBalance, ionError, duplicate, sampleType FROM chemistry c INNER JOIN initialSummaryTable i ON c.uniqueID  = i.uniqueID;'
+        )
+
+        queryDeleteChemistry <- paste0 (
+            'DELETE c FROM chemistry c LEFT JOIN chemistrySummaryTable s ON s.uniqueID = c.uniqueID WHERE s.uniqueID IS NOT NULL;'
+        )
+
+        # delete old chemistry data in MySQL (but first check if chemistry isn't empty)
+        dataChemistryChanged_noOverlap <- select(dataChemistryChanged, 
+                                                 -uniqueID, -refNo, -waterYr)
+        if (all(is.na(dataChemistryChanged_noOverlap)) == FALSE) {
+            dbExecute(con, queryCreateInitialSumTbl)
+            message(dbListTables(con))
+            dbExecute(con, queryCreateChemSumTbl)
+            message(dbListTables(con))
+            dbExecute(con, queryDeleteChemistry)
+            dbExecute(con, 'DROP TABLE initialSummaryTable;')
+            dbExecute(con, 'DROP TABLE chemistrySummaryTable;')
+            message(dbListTables(con))
+        }
+
+        # delete old initial data in MySQL
+        dbExecute(con, queryDeleteInitial)
+        
+        # add changed data
+        dbWriteTable(con, "initial", dataInitialChanged, append=TRUE, row.names=FALSE)
+        dbWriteTable(con, "chemistry", dataChemistryChanged, append=TRUE, row.names=FALSE)
+
+        # re-establish dataInitial
+        #dataInitial <<- dbReadTable(con, "initial")
+        #dataInitial <<- standardizeClasses(dataInitial)
+        #dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
+        # re-establish dataChemistry
+        #dataChemistry <<- dbReadTable(con, "chemistry")
+        #dataChemistry <<- standardizeClasses(dataChemistry)
+        #dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+
+        showNotification("Changes Saved.")
+
+        # Recreate wateryears
+        wy <- names(dataInitial)
+        wy1 <- c()
+        for (i in 1:length(wy)) {
+           wy1 <- paste(wy1,", ", wy[i], sep="")
+
+        }
+
+        dbDisconnect(con)
+          
+      # write.csv(hot_to_r(input$HOT),
+      #           file = paste(paste('HBEFdata_CHANGES_', paste("WY", input$WATERYEAR5, sep=""), Sys.Date(), sep="_"), "csv", sep = "."),
+      #           row.names = FALSE)
       
-      write.csv(hot_to_r(input$HOT),
-                file = paste(paste('HBEFdata_CHANGES_', paste("WY", input$WATERYEAR5, sep=""), Sys.Date(), sep="_"), "csv", sep = "."),
-                row.names = FALSE)
-      
-      
-      # Repeating this here to make sure that hot input & output match
-      # if (!is.null(input$hot)) { # if there is an rhot user input...
-      #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
-      #    setHot(dataSummary) # set the rhandsontable values
-      # }
-      # # # make needed data type changes to data before uploading
-      # # dataNew <- standardizeClasses(dataNew())
-      # # message("after standardize classes")
-      # message(head(dataNew))
-      
-      # message("after database connection closed")
-      # # if (!is.null(values[["hot"]])) { # if there's a table input
-      # #    write.csv(values[["hot"]], fname) # overwrite the temporary database file
-      # #    write.csv(x = values[["hot"]], file = paste0(fname, ".csv"), row.names = FALSE) # overwrite the csv
-      # # }
-      # showNotification("Save Complete")
-   )
-   
+      }
+   ) 
    # *Download Tab* ########################################
    
    output$table <- renderTable({
