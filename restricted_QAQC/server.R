@@ -1482,7 +1482,7 @@ message(print(input$SOLUTES1))}
         dataChanged$notes <- gsub(",", ";", dataChanged$notes) 
         dataChanged$sampleType <- gsub(",", ";", dataChanged$sampleType)
         # split changed data table into dataInitial and dataChemistry
-        dataInitialChanged <- dataChanged[,1:18]
+        dataInitialChanged <- dataChanged[, (names(dataChanged) %in% names(dataInitial))]
         dataChemistryChanged <- dataChanged[, (names(dataChanged) %in% c("uniqueID", names(dataChemistry)))]
 
         # build MySQL queries, used to delete data that will be replaced
@@ -1508,7 +1508,7 @@ message(print(input$SOLUTES1))}
             'DELETE c FROM chemistry c LEFT JOIN chemistrySummaryTable s ON s.uniqueID = c.uniqueID WHERE s.uniqueID IS NOT NULL;'
         )
 
-        # delete old chemistry data in MySQL (but first check if chemistry isn't empty)
+        # delete old chemistry data in MySQL (but first check that chemistry isn't empty)
         dataChemistryChanged_noOverlap <- select(dataChemistryChanged, 
                                                  -uniqueID, -refNo, -waterYr)
         if (all(is.na(dataChemistryChanged_noOverlap)) == FALSE) {
@@ -1530,13 +1530,13 @@ message(print(input$SOLUTES1))}
         dbWriteTable(con, "chemistry", dataChemistryChanged, append=TRUE, row.names=FALSE)
 
         # re-establish dataInitial
-        #dataInitial <<- dbReadTable(con, "initial")
-        #dataInitial <<- standardizeClasses(dataInitial)
-        #dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
+        dataInitial <<- dbReadTable(con, "initial")
+        dataInitial <<- standardizeClasses(dataInitial)
+        dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
         # re-establish dataChemistry
-        #dataChemistry <<- dbReadTable(con, "chemistry")
-        #dataChemistry <<- standardizeClasses(dataChemistry)
-        #dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+        dataChemistry <<- dbReadTable(con, "chemistry")
+        dataChemistry <<- standardizeClasses(dataChemistry)
+        dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
 
         showNotification("Changes Saved.")
 
@@ -1549,10 +1549,6 @@ message(print(input$SOLUTES1))}
         }
 
         dbDisconnect(con)
-          
-      # write.csv(hot_to_r(input$HOT),
-      #           file = paste(paste('HBEFdata_CHANGES_', paste("WY", input$WATERYEAR5, sep=""), Sys.Date(), sep="_"), "csv", sep = "."),
-      #           row.names = FALSE)
       
       }
    ) 
