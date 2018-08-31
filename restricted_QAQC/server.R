@@ -1551,7 +1551,49 @@ message(print(input$SOLUTES1))}
         dbDisconnect(con)
       
       }
-   ) 
+   )
+
+
+   observeEvent(input$DELETEROW5,{ 
+       message("inside DELETEROW5")
+       # openning connection to database
+       pass  = readLines('/home/hbef/RMySQL.config')
+       con = dbConnect(MariaDB(),
+                       user = 'root',
+                       password = pass,
+                       host = 'localhost',
+                       dbname = 'hbef')
+        # check that row exists; if so, delete, if not, send notification 
+        # !!! could make cleaner with validate()
+        if (input$ROWNUM_DELETE5 %in% dataCurrent$uniqueID) {
+            uID <- input$ROWNUM_DELETE5
+            query <- paste0("DELETE FROM initial WHERE uniqueID = '", uID, "';")
+            message(print(query))
+            dbExecute(con, query) # delete row with matching uniqueID from initial table
+            query <- paste0("DELETE FROM chemistry WHERE uniqueID = '", uID, "';")
+            message(print(query))
+            dbExecute(con, query) # delete row with matching uniqueID from chemistry table
+            # re-establish dataInitial
+            dataInitial <<- dbReadTable(con, "initial")
+            dataInitial <<- standardizeClasses(dataInitial)
+            dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
+            # re-establish dataChemistry
+            dataChemistry <<- dbReadTable(con, "chemistry")
+            dataChemistry <<- standardizeClasses(dataChemistry)
+            dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+            # re-create wateryears
+            wy <- names(dataInitial)
+            wy1 <- c()
+            for (i in 1:length(wy)) {
+               wy1 <- paste(wy1,", ", wy[i], sep="")
+            }
+            dbDisconnect(con)
+            showNotification("Delete Complete.")
+        } else {
+            showNotification("ERROR: Unable to find uniqueID in current dataset.")
+        }
+    }
+   )
    # *Download Tab* ########################################
    
    output$table <- renderTable({
