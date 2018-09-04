@@ -467,6 +467,10 @@ shinyUI(
         
             # Panel 5 - Summary Table ###############
             tabPanel("Summary Table",
+               # change in CSS to make a label in line with the input box
+               # to use, wrap input function in tags$div(id = "inline", [input function])
+               tags$head(tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }  
+               #inline .form-group { display: table-row;}")),
                fluidRow(
                   column(3, 
                      selectInput(
@@ -490,7 +494,22 @@ shinyUI(
                             class='rightAlign'
                          ))
                ), #end of fluidRow  
-               rHandsontableOutput("HOT") # HOT = Hands On Table 
+               rHandsontableOutput("HOT"), # HOT = Hands On Table 
+               hr(),
+               fluidRow(
+                  column(3,
+                     tags$div(id = "inline",
+                              textInput(
+                                 "ROWNUM_DELETE5",
+                                  label = "UniqueID:  "
+                  ))),
+                  column(1,
+                     actionButton(
+                     "DELETEROW5",
+                     label = strong("Delete Row"),
+                     class = 'bottomAlign'
+                  ))
+              ) # end of fluidRow
             ) # closes Panel 5 tabPanel
         
          ),# END of QA/QC navbarMenu
