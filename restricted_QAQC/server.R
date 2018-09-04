@@ -1460,9 +1460,9 @@ message(print(input$SOLUTES1))}
          hot_col("uniqueID", readOnly = TRUE) 
    })
    
-   observeEvent(input$SAVECHANGES5, 
+   observeEvent(input$SAVECHANGES5, {
       # update csv file each time the button is pressed
-      #message("inside SAVECHANGES5"),
+      message("inside SAVECHANGES5")
       # # openning connection to database
       # pass  = readLines('/home/hbef/RMySQL.config')
       # con = dbConnect(MariaDB(),
@@ -1473,12 +1473,11 @@ message(print(input$SOLUTES1))}
       # # upload data
       # dbWriteTable(con, "current", dataSummary, overwrite=TRUE, row.names=FALSE)
       # dbDisconnect(con)
-      
       write.csv(hot_to_r(input$HOT),
                 file = paste(paste('HBEFdata_CHANGES_', paste("WY", input$WATERYEAR5, sep=""), Sys.Date(), sep="_"), "csv", sep = "."),
                 row.names = FALSE)
       
-      
+      }
       # Repeating this here to make sure that hot input & output match
       # if (!is.null(input$hot)) { # if there is an rhot user input...
       #    dataSummary <- hot_to_r(input$hot) # convert rhandsontable data to R object and store in data frame
