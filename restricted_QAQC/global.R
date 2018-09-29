@@ -150,15 +150,14 @@ con = dbConnect(y,
                 dbname = 'hbef')
 tables = dbListTables(con)
 
-# Code for one-time use: to load data into mysql
-# dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-  # dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-  # dataInitial <- standardizeClasses(dataInitial)
-# dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-  # dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
-  # dataChemistry <- standardizeClasses(dataChemistry)
-# dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
-# dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
+## Code for one-time use: to load data into mysql
+#dataInitial <- read.csv("data/initial_clean.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+#  dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+#  dataInitial <- standardizeClasses(dataInitial)
+# dataChemistry <- read.csv("data/chemistry_clean.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+#  dataChemistry <- standardizeClasses(dataChemistry)
+#dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
+#dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
 
 # Get data from mysql
 dataInitial <- dbReadTable(con, "initial")
