@@ -1,3 +1,4 @@
+
 # Used to:
 # -Import all data
 # -Create variables that can be accessed by ui.R and server.R
@@ -99,7 +100,7 @@ standardizeClasses <- function(d) {
    # d:              data.frame to be checked for columns with only NA's
    # ColClasses :    vector of desired class types for the data.frame
    message("In standardizeClasses")
-   message(paste("Head of dataset:", head(d)))
+   #message(paste("Head of dataset:", head(d)))
    r <- nrow(d)
    message(paste("Number of rows in dataset:", r))
    c <- ncol(d)
@@ -153,13 +154,12 @@ con = dbConnect(y,
                 dbname = 'hbef')
 tables = dbListTables(con)
 
-# Code for one-time use: to load data into mysql
+## Code for one-time use: to load data into mysql
 # dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-  # dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-  # dataInitial <- standardizeClasses(dataInitial)
+#  dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
+#  dataInitial <- standardizeClasses(dataInitial)
 # dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-  # dataChemistry$date <- as.Date(dataChemistry$date, "%m/%d/%y")
-  # dataChemistry <- standardizeClasses(dataChemistry)
+#  dataChemistry <- standardizeClasses(dataChemistry)
 # dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
 # dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
 
