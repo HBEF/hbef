@@ -506,9 +506,20 @@ shinyUI(
                   column(1,
                      actionButton(
                      "DELETEROW5",
-                     label = strong("Delete Row"),
+                     label = strong("Delete Entire Row"),
                      class = 'bottomAlign'
                   ))
+              ), # end of fluidRow
+            br(),  
+            fluidRow(
+                 column(3),
+                 column(1,
+                    actionButton(
+                    "DELETECHEM5",
+                    label = strong("Delete Chemistry"),
+                    class = 'bottomAlign'
+                    )
+                 )
               ) # end of fluidRow
             ) # closes Panel 5 tabPanel
         
