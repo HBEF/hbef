@@ -193,7 +193,7 @@ solute_palette <- c(colors_cations, colors_anions, colors_other)
 
 shinyServer(function(input, output, session) {
   
-   # make sure app stops upon closing broswer
+   # make sure app stops upon closing browser
    session$onSessionEnded(function() {
         stopApp()
    })
@@ -217,14 +217,12 @@ shinyServer(function(input, output, session) {
    
          #for testing
          #dataNew <-read.csv("data/formatted/current_testADD.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-         message("I'm inside event reactive")
+         message("in dataNew() because of FILE_UPLOAD")
          dataNew <- read.csv(input$FILE_UPLOAD$datapath,
                              header = input$HEADER, 
                              stringsAsFactors = FALSE, 
                              na.strings=c(""," ","NA"))
-         message("just ran read.csv")
          dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
-         message("ran remove NA rows")
          if ("date" %in% names(dataNew)) {
             dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
          }
@@ -235,7 +233,7 @@ shinyServer(function(input, output, session) {
    # Upon pressing submit, transfer uploaded file content to 'current' table in database
    observeEvent(input$SUBMIT, {
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
-      message("inside submit")
+      message("in submit")
       # openning connection to database 
       pass  = readLines('/home/hbef/RMySQL.config')
       con = dbConnect(MariaDB(),
@@ -246,8 +244,6 @@ shinyServer(function(input, output, session) {
 
       # make needed data type changes to data before uploading
       dataNew <- standardizeClasses(dataNew())
-      message("after standardize classes")
-      message(head(dataNew))
       i <- 1
       c <- 1
       # procedure if data is 'initial' data
@@ -263,7 +259,6 @@ shinyServer(function(input, output, session) {
       # procedure if data is 'chemistry' data
       if ("Ca" %in% names(dataNew)) {
          # upload data
-         message(names(dataNew))
          dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
          # re-establish dataChemistry
          dataChemistry <<- dbReadTable(con, "chemistry")
@@ -276,7 +271,6 @@ shinyServer(function(input, output, session) {
       }
          
       dbDisconnect(con)
-      message("after database connection closed")
       
       # Recreate dataCurrent & dataAll
       dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
@@ -293,12 +287,12 @@ shinyServer(function(input, output, session) {
       }
       #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
       wateryears <<- as.list(wy1)
+
       # Update user interface
       updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
       updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
       updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
       updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
-      message("after show Notification")  
 
    })
    
@@ -1553,7 +1547,7 @@ message(print(input$SOLUTES1))}
       }
    )
 
-
+   # deletes data from both initial and chemistry tables in MySQL
    observeEvent(input$DELETEROW5,{ 
        message("inside DELETEROW5")
        # openning connection to database
@@ -1594,6 +1588,36 @@ message(print(input$SOLUTES1))}
         }
     }
    )
+
+   # deletes data only from chemistry MySQL table
+   observeEvent(input$DELETECHEM5,{ 
+       message("inside DELETECHEM5")
+       # openning connection to database
+       pass  = readLines('/home/hbef/RMySQL.config')
+       con = dbConnect(MariaDB(),
+                       user = 'root',
+                       password = pass,
+                       host = 'localhost',
+                       dbname = 'hbef')
+        # check that row exists; if so, delete, if not, send notification 
+        # !!! could make cleaner with validate()
+        if (input$ROWNUM_DELETE5 %in% dataCurrent$uniqueID) {
+            uID <- input$ROWNUM_DELETE5
+            query <- paste0("DELETE FROM chemistry WHERE uniqueID = '", uID, "';")
+            message(print(query))
+            dbExecute(con, query) # delete row with matching uniqueID from chemistry table
+            # re-establish dataChemistry
+            dataChemistry <<- dbReadTable(con, "chemistry")
+            dataChemistry <<- standardizeClasses(dataChemistry)
+            dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+            dbDisconnect(con)
+            showNotification("Delete Complete.")
+        } else {
+            showNotification("ERROR: Unable to find uniqueID in current dataset.")
+        }
+    }
+   )
+
    # *Download Tab* ########################################
    
    output$table <- renderTable({
@@ -1633,3 +1657,7 @@ message(print(input$SOLUTES1))}
 
 
 
+# Shiny server instructions for HBEF Dashboard
+# Created by Maria-Carolina Simao (carolina.m.simao - at - gmail - dot - com)
+# Shiny server instructions for HBEF Dashboard
+# Created by Maria-Carolina Simao (carolina.m.simao - at - gmail - dot - com)

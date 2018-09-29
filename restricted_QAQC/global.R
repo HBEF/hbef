@@ -93,17 +93,14 @@ other_units <- c("pH",
 # ***********************************
 
 ## Function to re-classify data class (e.g. numeric, character, etc.) of each variable (column) in a data 
-## frame. Uses defClasses & defClassesSample data frames to match data column with its intended
+## frame. Uses defClasses & defClassesSample data to match data column with its intended
 ## data class.
 standardizeClasses <- function(d) {
    # d:              data.frame to be checked for columns with only NA's
    # ColClasses :    vector of desired class types for the data.frame
-   message("In standardizeClasses")
-   message(paste("Head of dataset:", head(d)))
+   message(paste("In standardizeClasses for", deparse(substitute(d))))
    r <- nrow(d)
-   message(paste("Number of rows in dataset:", r))
    c <- ncol(d)
-   message(paste("Number of columns in dataset:", c))
    for (i in 1:c) {
       # 1. Insert an additional row with a sample value for each column
          ## Find index in defClassesSample that corresponds to column in d, save that index
@@ -165,6 +162,9 @@ tables = dbListTables(con)
 
 # Get data from mysql
 dataInitial <- dbReadTable(con, "initial")
+message("dataInitial class of date and min waterYr:")
+message(class(dataInitial$date))
+message(min(dataInitial$waterYr, na.rm=TRUE))
 dataChemistry <- dbReadTable(con, "chemistry")
 dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor")
@@ -174,6 +174,9 @@ dbDisconnect(con)
 dataInitial <- standardizeClasses(dataInitial)
   # necessary to prevent problems when downloading csv files
   dataInitial$notes <- gsub(",", ";", dataInitial$notes)
+  message("dataInitial class of date and min waterYr:")
+  message(class(dataInitial$date))
+  message(min(dataInitial$waterYr, na.rm=TRUE))
 dataChemistry <- standardizeClasses(dataChemistry)
 dataHistorical <- standardizeClasses(dataHistorical)
 
