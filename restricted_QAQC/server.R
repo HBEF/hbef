@@ -192,7 +192,10 @@ solute_palette <- c(colors_cations, colors_anions, colors_other)
 # **********************************************************************
 
 shinyServer(function(input, output, session) {
-  
+ 
+   # show start date and time
+   message(Sys.time())
+
    # make sure app stops upon closing browser
    session$onSessionEnded(function() {
         stopApp()
@@ -226,7 +229,7 @@ shinyServer(function(input, output, session) {
          if ("date" %in% names(dataNew)) {
             dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
          }
-         # message(print(head(dataNew))) 
+         # message(paste("Head of dataNew:",print(head(dataNew)))) 
          return(dataNew)  
     })
    
@@ -244,38 +247,45 @@ shinyServer(function(input, output, session) {
 
       # make needed data type changes to data before uploading
       dataNew <- standardizeClasses(dataNew())
-      i <- 1
-      c <- 1
-      # procedure if data is 'initial' data
-      if ("spCond" %in% names(dataNew)) {
-         # upload data
-         dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
-         # re-establish dataInitial
-         dataInitial <<- dbReadTable(con, "initial")
-         dataInitial <<- standardizeClasses(dataInitial)
-         dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
-         showNotification("Submit Complete.")
-      } else { i <- 0 }
-      # procedure if data is 'chemistry' data
-      if ("Ca" %in% names(dataNew)) {
-         # upload data
-         dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
-         # re-establish dataChemistry
-         dataChemistry <<- dbReadTable(con, "chemistry")
-         dataChemistry <<- standardizeClasses(dataChemistry)
-         dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
-         showNotification("Submit Complete.")
-      } else { i <- 0 }
-      if ((i+c) == 0) {
-         showNotification("ERROR: Data is missing required columns.")
-      }
-         
+#      i <- 1
+#      c <- 1
+#      # procedure if data is 'initial' data
+#      if ("spCond" %in% names(dataNew)) {
+#         # upload data
+#         dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
+#         # re-establish dataInitial
+#         dataInitial <<- dbReadTable(con, "initial")
+#         dataInitial <<- standardizeClasses(dataInitial)
+#         dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
+#         showNotification("Submit Complete.")
+#      } else { i <- 0 }
+#      # procedure if data is 'chemistry' data
+#      if ("Ca" %in% names(dataNew)) {
+#         # upload data
+#         dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
+#         # re-establish dataChemistry
+#         dataChemistry <<- dbReadTable(con, "chemistry")
+#         dataChemistry <<- standardizeClasses(dataChemistry)
+#         dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+#         showNotification("Submit Complete.")
+#      } else { i <- 0 }
+#      if ((i+c) == 0) {
+#         showNotification("ERROR: Data is missing required columns.")
+#      }
+
+      # upload data
+      dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
+      dataCurrent <<- dbReadTable(con, "current")
+      dataCurrent <<- standardizeClasses(dataCurrent)          
+      dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
+      dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType)
+      showNotification("Submit Complete.")
       dbDisconnect(con)
       
       # Recreate dataCurrent & dataAll
-      dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
-      dataCurrent <<- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
-      dataCurrent <<- standardizeClasses(dataCurrent)
+      # dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
+      # dataCurrent <<- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
+      #dataCurrent <<- standardizeClasses(dataCurrent)
       dataAll <<- bind_rows(dataHistorical, dataCurrent)
       dataAll <<- standardizeClasses(dataAll)
       
@@ -298,7 +308,40 @@ shinyServer(function(input, output, session) {
    
    # *QA/QC Tab* #### 
    #************************
-   
+  
+   # Make a reactive dataCurrent data frame, to be called whenever data is updated
+   dataCurrent_updated <- reactive({
+
+        # Open database connection
+        y = RMariaDB::MariaDB()
+        pass  = readLines('/home/hbef/RMySQL.config')
+        con = dbConnect(y,
+                user = 'root',
+                password = pass,
+                host = 'localhost',
+                dbname = 'hbef')
+
+        # Read current data and disconnect from table
+        dataCurrent_updated <- dbReadTable(con, "current")
+        dbDisconnect(con)
+
+        # Clean up data
+        dataCurrent_updated <- standardizeClasses(dataCurrent_updated)
+        # substituting commas with semi-colons. (necessary to prevent problems when downloading csv files)
+        dataCurrent_updated$notes <- gsub(",", ";", dataCurrent_updated$notes)
+        dataCurrent_updated$sampleType <- gsub(",", ";", dataCurrent_updated$sampleType)
+
+        # Re-calculate and assign water year variable
+        wy <- levels(as.factor(dataCurrent_updated$waterYr))
+        wy1 <- c()
+        for (i in 1:length(wy)) {
+            wy1 <- c(wy1, wy[i])
+        }
+        #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
+        wateryears <<- as.list(wy1)
+   })
+
+
    # Panel 1 Reactivity #### 
    #************************
    
@@ -1055,8 +1098,8 @@ message(print(input$SOLUTES1))}
       # of input$DATASET
       datasetInput <- switch(input$DOWNLOAD_DATASET,
                              "Current" = dataCurrent,
-                             "Initial" = dataInitial,
-                             "Chemistry" = dataChemistry,
+                            # "Initial" = dataInitial,
+                            # "Chemistry" = dataChemistry,
                              "Historical" = dataHistorical,
                              "All" = dataAll)
    })
@@ -1110,48 +1153,48 @@ message(print(input$SOLUTES1))}
    
    #output$TABLE1 <- renderDataTable(dataOrig1()) # for testing purposes
    
-   output$PRINT1 <- downloadHandler(
-      # For PDF output, change this to "report.pdf"
-      filename = function() {
-         paste("HBEF_1Solute1Site_", Sys.time(), ".pdf", sep="") #can add input$var3 if you want people to choose b/w pdf, png, etc.
-         },
-      content = function(file) {
-         # open the device
-         pdf(file) #, onefile = FALSE
-         # create the plot
-         dygraph1.fun()
-         # close the device
-         dev.off()
-         
-         # # Copy the report file to a temporary directory before processing it, in
-         # # case we don't have write permissions to the current working dir (which
-         # # can happen when deployed).
-         # tempReport <- file.path(tempdir(), "1Solute1Site.Rmd")
-         # file.copy("1Solute1Site.Rmd", tempReport, overwrite = TRUE)
-         # 
-         # # Set up parameters to pass to Rmd document
-         # params <- list(HYDROLOGY1 = input$HYDROLOGY1,
-         #                SOLUTES_HIST1 = input$SOLUTES_HIST1,
-         #                WATERYEAR1 = input$WATERYEAR1,
-         #                SOLUTES1 = input$SOLUTES1, 
-         #                LOQ1 = LOQ1(),
-         #                MDL1 = MDL1(),
-         #                dataOrigQHist1 = dataOrigQHist1(),
-         #                dataOrigQ1 = dataOrigQ1(),
-         #                dataOrigHist1 = dataOrigHist1(),
-         #                dataOrig1 = dataOrig1(),
-         #                dataHist1 = dataHist1())
-         # 
-         # # Knit the document, passing in the `params` list, and eval it in a
-         # # child of the global environment (this isolates the code in the document
-         # # from the code in this app).
-         # rmarkdown::render(tempReport, output_file = file,
-         #                   params = params,
-         #                   envir = new.env(parent = globalenv())) 
-         
-      }, # end of content
-      contentType = 'image/png'
-   ) # end of downloadHandler
+#   output$PRINT1 <- downloadHandler(
+#      # For PDF output, change this to "report.pdf"
+#      filename = function() {
+#         paste("HBEF_1Solute1Site_", Sys.time(), ".pdf", sep="") #can add input$var3 if you want people to choose b/w pdf, png, etc.
+#         },
+#      content = function(file) {
+#         # open the device
+#         pdf(file) #, onefile = FALSE
+#         # create the plot
+#         dygraph1.fun()
+#         # close the device
+#         dev.off()
+#         
+#         # # Copy the report file to a temporary directory before processing it, in
+#         # # case we don't have write permissions to the current working dir (which
+#         # # can happen when deployed).
+#         # tempReport <- file.path(tempdir(), "1Solute1Site.Rmd")
+#         # file.copy("1Solute1Site.Rmd", tempReport, overwrite = TRUE)
+#         # 
+#         # # Set up parameters to pass to Rmd document
+#         # params <- list(HYDROLOGY1 = input$HYDROLOGY1,
+#         #                SOLUTES_HIST1 = input$SOLUTES_HIST1,
+#         #                WATERYEAR1 = input$WATERYEAR1,
+#         #                SOLUTES1 = input$SOLUTES1, 
+#         #                LOQ1 = LOQ1(),
+#         #                MDL1 = MDL1(),
+#         #                dataOrigQHist1 = dataOrigQHist1(),
+#         #                dataOrigQ1 = dataOrigQ1(),
+#         #                dataOrigHist1 = dataOrigHist1(),
+#         #                dataOrig1 = dataOrig1(),
+#         #                dataHist1 = dataHist1())
+#         # 
+#         # # Knit the document, passing in the `params` list, and eval it in a
+#         # # child of the global environment (this isolates the code in the document
+#         # # from the code in this app).
+#         # rmarkdown::render(tempReport, output_file = file,
+#         #                   params = params,
+#         #                   envir = new.env(parent = globalenv())) 
+#         
+#      }, # end of content
+#      contentType = 'image/png'
+#   ) # end of downloadHandler
    
    
    # Panel 2 Output ####
@@ -1475,67 +1518,86 @@ message(print(input$SOLUTES1))}
         # replace all commas with ";", as commas interfere with downloading csv's
         dataChanged$notes <- gsub(",", ";", dataChanged$notes) 
         dataChanged$sampleType <- gsub(",", ";", dataChanged$sampleType)
-        # split changed data table into dataInitial and dataChemistry
-        dataInitialChanged <- dataChanged[, (names(dataChanged) %in% names(dataInitial))]
-        dataChemistryChanged <- dataChanged[, (names(dataChanged) %in% c("uniqueID", names(dataChemistry)))]
+#        # split changed data table into dataInitial and dataChemistry
+#        dataInitialChanged <- dataChanged[, (names(dataChanged) %in% names(dataInitial))]
+#        dataChemistryChanged <- dataChanged[, (names(dataChanged) %in% c("uniqueID", names(dataChemistry)))]
 
         # build MySQL queries, used to delete data that will be replaced
         wateryear5 <- input$WATERYEAR5
         site5 <- input$SITES5
-        queryDeleteInitial <- paste0('DELETE FROM initial ', 
+
+        queryDelete <- paste0('DELETE FROM current ', 
                                      ' WHERE waterYr = ', wateryear5, 
                                      ' AND site = "', site5, 
                                      '" ORDER BY uniqueID;') 
-        # finds and uses uniqueID's for chemistry data by: 
-        # 1) isolating data in question from initial table (contains needed uniqueID's)
-        # 2) isolating data in question from chemistry table (using uniqueID's from temporary initial table)
-        # 3) deleting data in question from chemistry table (using uniqueID's from temporary chemistry table)
-        # the above sequence is needed because chemistry data does not contain 'site' column,
-        # eliminating the possibility to simply filter chemistry data by 'waterYr' and 'site' 
-        queryCreateInitialSumTbl <- paste0("CREATE TABLE initialSummaryTable SELECT * FROM initial WHERE waterYr = ", wateryear5, " AND site = '", site5,"';")
+#        queryDeleteInitial <- paste0('DELETE FROM initial ', 
+#                                     ' WHERE waterYr = ', wateryear5, 
+#                                     ' AND site = "', site5, 
+#                                     '" ORDER BY uniqueID;') 
+#        # finds and uses uniqueID's for chemistry data by: 
+#        # 1) isolating data in question from initial table (contains needed uniqueID's)
+#        # 2) isolating data in question from chemistry table (using uniqueID's from temporary initial table)
+#        # 3) deleting data in question from chemistry table (using uniqueID's from temporary chemistry table)
+#        # the above sequence is needed because chemistry data does not contain 'site' column,
+#        # eliminating the possibility to simply filter chemistry data by 'waterYr' and 'site' 
+#        queryCreateInitialSumTbl <- paste0("CREATE TABLE initialSummaryTable SELECT * FROM initial WHERE waterYr = ", wateryear5, " AND site = '", site5,"';")
+#
+#        queryCreateChemSumTbl <- paste0(
+#            'CREATE TABLE chemistrySummaryTable SELECT c.uniqueID, datetime, Ca, Mg, K, Na, TMAl, OMAl, Al_ICP, NH4, SO4, NO3, Cl, PO4, DOC, TDN, DON, SiO2, Mn, Fe, F, cationCharge, anionCharge, theoryCond, ionBalance, ionError, duplicate, sampleType FROM chemistry c INNER JOIN initialSummaryTable i ON c.uniqueID  = i.uniqueID;'
+#        )
+#
+#        queryDeleteChemistry <- paste0 (
+#            'DELETE c FROM chemistry c LEFT JOIN chemistrySummaryTable s ON s.uniqueID = c.uniqueID WHERE s.uniqueID IS NOT NULL;'
+#        )
+#
+       
+        # delete old current data
+        dbExecute(con, queryDelete)
 
-        queryCreateChemSumTbl <- paste0(
-            'CREATE TABLE chemistrySummaryTable SELECT c.uniqueID, datetime, Ca, Mg, K, Na, TMAl, OMAl, Al_ICP, NH4, SO4, NO3, Cl, PO4, DOC, TDN, DON, SiO2, Mn, Fe, F, cationCharge, anionCharge, theoryCond, ionBalance, ionError, duplicate, sampleType FROM chemistry c INNER JOIN initialSummaryTable i ON c.uniqueID  = i.uniqueID;'
-        )
+#        # delete old chemistry data in MySQL (but first check that chemistry isn't empty)
+#        dataChemistryChanged_noOverlap <- select(dataChemistryChanged, 
+#                                                 -uniqueID, -refNo, -waterYr)
+#        if (all(is.na(dataChemistryChanged_noOverlap)) == FALSE) {
+#            dbExecute(con, queryCreateInitialSumTbl)
+#            message(dbListTables(con))
+#            dbExecute(con, queryCreateChemSumTbl)
+#            message(dbListTables(con))
+#            dbExecute(con, queryDeleteChemistry)
+#            dbExecute(con, 'DROP TABLE initialSummaryTable;')
+#            dbExecute(con, 'DROP TABLE chemistrySummaryTable;')
+#            message(dbListTables(con))
+#        }
+#
+#        # delete old initial data in MySQL
+#        dbExecute(con, queryDeleteInitial)
+       
 
-        queryDeleteChemistry <- paste0 (
-            'DELETE c FROM chemistry c LEFT JOIN chemistrySummaryTable s ON s.uniqueID = c.uniqueID WHERE s.uniqueID IS NOT NULL;'
-        )
-
-        # delete old chemistry data in MySQL (but first check that chemistry isn't empty)
-        dataChemistryChanged_noOverlap <- select(dataChemistryChanged, 
-                                                 -uniqueID, -refNo, -waterYr)
-        if (all(is.na(dataChemistryChanged_noOverlap)) == FALSE) {
-            dbExecute(con, queryCreateInitialSumTbl)
-            message(dbListTables(con))
-            dbExecute(con, queryCreateChemSumTbl)
-            message(dbListTables(con))
-            dbExecute(con, queryDeleteChemistry)
-            dbExecute(con, 'DROP TABLE initialSummaryTable;')
-            dbExecute(con, 'DROP TABLE chemistrySummaryTable;')
-            message(dbListTables(con))
-        }
-
-        # delete old initial data in MySQL
-        dbExecute(con, queryDeleteInitial)
-        
         # add changed data
-        dbWriteTable(con, "initial", dataInitialChanged, append=TRUE, row.names=FALSE)
-        dbWriteTable(con, "chemistry", dataChemistryChanged, append=TRUE, row.names=FALSE)
+        dbWriteTable(con, "current", dataChanged, append=TRUE, row.names=FALSE)
+ 
+#        # add changed data
+#        dbWriteTable(con, "initial", dataInitialChanged, append=TRUE, row.names=FALSE)
+#        dbWriteTable(con, "chemistry", dataChemistryChanged, append=TRUE, row.names=FALSE)
 
-        # re-establish dataInitial
-        dataInitial <<- dbReadTable(con, "initial")
-        dataInitial <<- standardizeClasses(dataInitial)
-        dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
-        # re-establish dataChemistry
-        dataChemistry <<- dbReadTable(con, "chemistry")
-        dataChemistry <<- standardizeClasses(dataChemistry)
-        dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+        # re-establish dataCurrent
+        dataCurrent <<- dbReadTable(con, "current")
+        dataCurrent <<- standardizeClasses(dataCurrent)
+        dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
+        dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType) 
+        
+#        # re-establish dataInitial
+#        dataInitial <<- dbReadTable(con, "initial")
+#        dataInitial <<- standardizeClasses(dataInitial)
+#        dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
+#        # re-establish dataChemistry
+#        dataChemistry <<- dbReadTable(con, "chemistry")
+#        dataChemistry <<- standardizeClasses(dataChemistry)
+#        dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
 
         showNotification("Changes Saved.")
 
         # Recreate wateryears
-        wy <- names(dataInitial)
+        wy <- names(dataCurrent)
         wy1 <- c()
         for (i in 1:length(wy)) {
            wy1 <- paste(wy1,", ", wy[i], sep="")
@@ -1547,7 +1609,7 @@ message(print(input$SOLUTES1))}
       }
    )
 
-   # deletes data from both initial and chemistry tables in MySQL
+   # deletes data from current table in MySQL
    observeEvent(input$DELETEROW5,{ 
        message("inside DELETEROW5")
        # openning connection to database
@@ -1561,22 +1623,16 @@ message(print(input$SOLUTES1))}
         # !!! could make cleaner with validate()
         if (input$ROWNUM_DELETE5 %in% dataCurrent$uniqueID) {
             uID <- input$ROWNUM_DELETE5
-            query <- paste0("DELETE FROM initial WHERE uniqueID = '", uID, "';")
+            query <- paste0("DELETE FROM current WHERE uniqueID = '", uID, "';")
             message(print(query))
-            dbExecute(con, query) # delete row with matching uniqueID from initial table
-            query <- paste0("DELETE FROM chemistry WHERE uniqueID = '", uID, "';")
-            message(print(query))
-            dbExecute(con, query) # delete row with matching uniqueID from chemistry table
-            # re-establish dataInitial
-            dataInitial <<- dbReadTable(con, "initial")
-            dataInitial <<- standardizeClasses(dataInitial)
-            dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
-            # re-establish dataChemistry
-            dataChemistry <<- dbReadTable(con, "chemistry")
-            dataChemistry <<- standardizeClasses(dataChemistry)
-            dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+            dbExecute(con, query) # delete row with matching uniqueID from current table
+            # re-establish dataCurrent
+            dataCurrent <<- dbReadTable(con, "current")
+            dataCurrent <<- standardizeClasses(dataCurrent)
+            dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
+            dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType) 
             # re-create wateryears
-            wy <- names(dataInitial)
+            wy <- names(dataCurrent)
             wy1 <- c()
             for (i in 1:length(wy)) {
                wy1 <- paste(wy1,", ", wy[i], sep="")
@@ -1589,34 +1645,34 @@ message(print(input$SOLUTES1))}
     }
    )
 
-   # deletes data only from chemistry MySQL table
-   observeEvent(input$DELETECHEM5,{ 
-       message("inside DELETECHEM5")
-       # openning connection to database
-       pass  = readLines('/home/hbef/RMySQL.config')
-       con = dbConnect(MariaDB(),
-                       user = 'root',
-                       password = pass,
-                       host = 'localhost',
-                       dbname = 'hbef')
-        # check that row exists; if so, delete, if not, send notification 
-        # !!! could make cleaner with validate()
-        if (input$ROWNUM_DELETE5 %in% dataCurrent$uniqueID) {
-            uID <- input$ROWNUM_DELETE5
-            query <- paste0("DELETE FROM chemistry WHERE uniqueID = '", uID, "';")
-            message(print(query))
-            dbExecute(con, query) # delete row with matching uniqueID from chemistry table
-            # re-establish dataChemistry
-            dataChemistry <<- dbReadTable(con, "chemistry")
-            dataChemistry <<- standardizeClasses(dataChemistry)
-            dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
-            dbDisconnect(con)
-            showNotification("Delete Complete.")
-        } else {
-            showNotification("ERROR: Unable to find uniqueID in current dataset.")
-        }
-    }
-   )
+#   # deletes data only from chemistry MySQL table
+#   observeEvent(input$DELETECHEM5,{ 
+#       message("inside DELETECHEM5")
+#       # openning connection to database
+#       pass  = readLines('/home/hbef/RMySQL.config')
+#       con = dbConnect(MariaDB(),
+#                       user = 'root',
+#                       password = pass,
+#                       host = 'localhost',
+#                       dbname = 'hbef')
+#        # check that row exists; if so, delete, if not, send notification 
+#        # !!! could make cleaner with validate()
+#        if (input$ROWNUM_DELETE5 %in% dataCurrent$uniqueID) {
+#            uID <- input$ROWNUM_DELETE5
+#            query <- paste0("DELETE FROM chemistry WHERE uniqueID = '", uID, "';")
+#            message(print(query))
+#            dbExecute(con, query) # delete row with matching uniqueID from chemistry table
+#            # re-establish dataChemistry
+#            dataChemistry <<- dbReadTable(con, "chemistry")
+#            dataChemistry <<- standardizeClasses(dataChemistry)
+#            dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+#            dbDisconnect(con)
+#            showNotification("Delete Complete.")
+#        } else {
+#            showNotification("ERROR: Unable to find uniqueID in current dataset.")
+#        }
+#    }
+#   )
 
    # *Download Tab* ########################################
    

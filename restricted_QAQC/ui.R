@@ -510,17 +510,17 @@ shinyUI(
                      class = 'bottomAlign'
                   ))
               ), # end of fluidRow
-            br(),  
-            fluidRow(
-                 column(3),
-                 column(1,
-                    actionButton(
-                    "DELETECHEM5",
-                    label = strong("Delete Chemistry"),
-                    class = 'bottomAlign'
-                    )
-                 )
-              ) # end of fluidRow
+            br()  
+#            fluidRow(
+#                 column(3),
+#                 column(1,
+#                    actionButton(
+#                    "DELETECHEM5",
+#                    label = strong("Delete Chemistry"),
+#                    class = 'bottomAlign'
+#                    )
+#                 )
+#              ) # end of fluidRow
             ) # closes Panel 5 tabPanel
         
          ),# END of QA/QC navbarMenu
@@ -533,8 +533,8 @@ shinyUI(
                sidebarPanel(
                   selectInput("DOWNLOAD_DATASET", "Choose a dataset:", 
                               choices = c("Current",
-                                          "Initial",
-                                          "Chemistry",
+                                         # "Initial",
+                                         # "Chemistry",
                                           "Historical", 
                                           "All")),
                   radioButtons("DOWNLOAD_FILETYPE", "File type:",
