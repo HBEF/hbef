@@ -25,9 +25,9 @@ message("hello, I'm in ui.R")
 # Define User Interface for application (dashboard)
 
 shinyUI(
-   
    fluidPage(
-      # useShinyjs(),
+     titlePanel("", windowTitle = "HBEF Dashboard"),
+     # useShinyjs(),
       #tags$head(
          #includeCSS("//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css"),
          #includeScript(path="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js")
