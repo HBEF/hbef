@@ -5,9 +5,8 @@ account: data-by-carolina
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 263938
-bundleId: 1300718
+bundleId: 1466876
 url: https://data-by-carolina.shinyapps.io/shinyapp_hbef/
-when: 1522792372.70827
+when: 1530821162.75562
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: data/HBEF Data Review WY2016.xlsx|data/HBEF Stream and Precip WY2014 and 2015.xlsx
