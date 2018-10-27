@@ -64,18 +64,6 @@ ylabel <- function(solute) {
 
 # Replaces codes -999.9, -1, -2, and -3 from data (used before graphing)
 removeCodes <- function(dataSet) {
-
-         message(paste("head(dataCurrent):", head(dataCurrent)))
-         message(paste("ncol(dataCurrent):", ncol(dataCurrent)))
-         message(paste("nrow(dataCurrent):", nrow(dataCurrent)))
-         
-        # message(paste("head(dataCurrent1):", head(dataCurrent1())))
-        # message(paste("ncol(dataCurrent1):", ncol(dataCurrent1())))
-        # message(paste("nrow(dataCurrent1):", nrow(dataCurrent1())))
-
-         message(paste("ncol(dataSet):", ncol(dataSet)))
-         message(paste("nrow(dataSet):", nrow(dataSet)))
-         message(paste("head(dataSet):", head(dataSet)))
    # if value -999.9 is present in certain columns, replace with NA
    for (i in 1:6) {
       # test data set when needed:
@@ -95,28 +83,13 @@ removeCodes <- function(dataSet) {
    # if values are -1, -2, or -3, replace with NA
    for (i in 1:23) {
       current_col_ofData <- codes123[i]
-      message(paste("i:", i))
-      message(paste("current_col_ofData:", current_col_ofData))
       if (current_col_ofData %in% names(dataSet)) {
          ind_col <- which(current_col_ofData == colnames(dataSet), arr.ind = TRUE)
-         message(paste("ind_col:", ind_col))
-         message(paste("class(dataSet):", class(dataSet)))
-         message(paste("class(dataSet$date):", class(dataSet$date)))         
-         message(paste("class(dataSet$Ca):", class(dataSet$Ca)))         
-         message(paste("class(dataSet[1]):", class(dataSet[1])))         
-         message(paste("dataSet:", dataSet))         
-         message(paste("head(dataSet[ind_col]):", head(as.data.frame(dataSet[ind_col]))))
-         message(paste("ncol(dataSet):", ncol(dataSet)))
-         message(paste("nrow(dataSet):", nrow(dataSet)))
-         message(paste("head(dataSet):", head(dataSet)))
-         message(paste("dataSet:", dataSet))
-         message(paste("dataSet[ind_col][dataSet[ind_col]]",dataSet[ind_col][dataSet[ind_col] == 1.2008]))
          dataSet[ind_col][dataSet[ind_col] == -1] <- NA
          dataSet[ind_col][dataSet[ind_col] == -2] <- NA
          dataSet[ind_col][dataSet[ind_col] == -3] <- NA
       }
    }
-
    return(dataSet)
 }
 
@@ -231,12 +204,6 @@ shinyServer(function(input, output, session) {
    # ***REACTIVITY*** ----
    # ***********************************
    
-   # Create reactive value which will be used to signal when core data (e.g. 'current') 
-   # has changed and should be updated. Anytime current data is changed, the value  
-   # of this variable should be increased by 1.
-   changesInData <- reactiveValues()
-   changesInData$change <- 0
-   
    # # !!! See if you're going to use or delete, for 5 or all years of history
    # histYears <- reactive({
    #   # Select desired historical water years
@@ -270,7 +237,7 @@ shinyServer(function(input, output, session) {
    observeEvent(input$SUBMIT, {
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
       message("in submit")
-      # opening connection to database 
+      # openning connection to database 
       pass  = readLines('/home/hbef/RMySQL.config')
       con = dbConnect(MariaDB(),
                       user = 'root',
@@ -280,30 +247,70 @@ shinyServer(function(input, output, session) {
 
       # make needed data type changes to data before uploading
       dataNew <- standardizeClasses(dataNew())
+#      i <- 1
+#      c <- 1
+#      # procedure if data is 'initial' data
+#      if ("spCond" %in% names(dataNew)) {
+#         # upload data
+#         dbWriteTable(con, "initial", dataNew, append=TRUE, row.names=FALSE)
+#         # re-establish dataInitial
+#         dataInitial <<- dbReadTable(con, "initial")
+#         dataInitial <<- standardizeClasses(dataInitial)
+#         dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
+#         showNotification("Submit Complete.")
+#      } else { i <- 0 }
+#      # procedure if data is 'chemistry' data
+#      if ("Ca" %in% names(dataNew)) {
+#         # upload data
+#         dbWriteTable(con, "chemistry", dataNew, append=TRUE, row.names=FALSE)
+#         # re-establish dataChemistry
+#         dataChemistry <<- dbReadTable(con, "chemistry")
+#         dataChemistry <<- standardizeClasses(dataChemistry)
+#         dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+#         showNotification("Submit Complete.")
+#      } else { i <- 0 }
+#      if ((i+c) == 0) {
+#         showNotification("ERROR: Data is missing required columns.")
+#      }
 
       # upload data
       dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
-      #dataCurrent <<- dbReadTable(con, "current")
-      #dataCurrent <<- standardizeClasses(dataCurrent)          
-      #dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
-      #dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType)
-
-      # update reactive value to signal core data has changed
-      changesInData$change <- changesInData$change + 1
-      
+      dataCurrent <<- dbReadTable(con, "current")
+      dataCurrent <<- standardizeClasses(dataCurrent)          
+      dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
+      dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType)
       showNotification("Submit Complete.")
-
-      # close connection to database
       dbDisconnect(con)
       
+      # Recreate dataCurrent & dataAll
+      # dataChemistry_minus_refNo_waterYr <- select(dataChemistry, -refNo, -waterYr)
+      # dataCurrent <<- full_join(dataInitial, dataChemistry_minus_refNo_waterYr, by = "uniqueID")
+      #dataCurrent <<- standardizeClasses(dataCurrent)
+      dataAll <<- bind_rows(dataHistorical, dataCurrent)
+      dataAll <<- standardizeClasses(dataAll)
+      
+      # Recreate wateryears
+      wy <- levels(as.factor(dataCurrent$waterYr))
+      wy1 <- c()
+      for (i in 1:length(wy)) {
+         wy1 <- c(wy1, wy[i])
+      }
+      #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
+      wateryears <<- as.list(wy1)
+
+      # Update user interface
+      updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
+
    })
    
    # *QA/QC Tab* #### 
    #************************
-
+  
    # Make a reactive dataCurrent data frame, to be called whenever data is updated
-   # (R in dataCurrentR stands for reactive)
-   dataCurrentR <- eventReactive(changesInData$change, {
+   dataCurrent_updated <- reactive({
 
         # Open database connection
         y = RMariaDB::MariaDB()
@@ -315,43 +322,23 @@ shinyServer(function(input, output, session) {
                 dbname = 'hbef')
 
         # Read current data and disconnect from table
-        dataCurrentR <- dbReadTable(con, "current")
-        message(print(class(dataCurrentR)))
-        message(head(dataCurrentR))
-        dataCurrentR <- as.data.frame(dataCurrentR)
-        message(print(class(dataCurrentR)))
-        message(head(dataCurrentR))
+        dataCurrent_updated <- dbReadTable(con, "current")
         dbDisconnect(con)
 
         # Clean up data
-        dataCurrentR <- standardizeClasses(dataCurrentR)
+        dataCurrent_updated <- standardizeClasses(dataCurrent_updated)
         # substituting commas with semi-colons. (necessary to prevent problems when downloading csv files)
-        dataCurrentR$notes <- gsub(",", ";", dataCurrentR$notes)
-        dataCurrentR$sampleType <- gsub(",", ";", dataCurrentR$sampleType)
+        dataCurrent_updated$notes <- gsub(",", ";", dataCurrent_updated$notes)
+        dataCurrent_updated$sampleType <- gsub(",", ";", dataCurrent_updated$sampleType)
 
         # Re-calculate and assign water year variable
-        wy <- levels(as.factor(dataCurrentR$waterYr))
+        wy <- levels(as.factor(dataCurrent_updated$waterYr))
         wy1 <- c()
         for (i in 1:length(wy)) {
             wy1 <- c(wy1, wy[i])
         }
         #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
-        wateryears <<- as.list(wy1) #assign it globally
-
-        # Update user interface
-        updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
-
-        dataCurrentR
-
-   })
-
-
-   dataAllR <- eventReactive(changesInData$change, { 
-       dataAllR <<- bind_rows(dataHistorical, dataCurrentR())
-       dataAllR <<- standardizeClasses(dataAllR)
+        wateryears <<- as.list(wy1)
    })
 
 
@@ -361,7 +348,8 @@ shinyServer(function(input, output, session) {
    # Solute limit (MDL & LOQ)
    # Finding MDL and LOQ value for solute, if they exist
    MDL1 <- reactive({
-      if (input$SOLUTES1 %in% dataLimits$Analyte) {dataLimits$MDL[dataLimits$Analyte == input$SOLUTES1]}
+      if (input$SOLUTES1 %in% dataLimits$Analyte) {dataLimits$MDL[dataLimits$Analyte == input$SOLUTES1]
+message(print(input$SOLUTES1))}
       else {NA} 
    })
    LOQ1 <- reactive({
@@ -406,35 +394,28 @@ shinyServer(function(input, output, session) {
    
    # Grab selected wateryear, site, solute data from data
    dataCurrent1 <- reactive({
-     if (changesInData$change > 0) dataCurrent <- dataCurrentR()
      dataCurrent1 <- dataCurrent %>% 
        filter(waterYr %in% input$WATERYEAR1) %>%      # Filter data to selected water year
        filter(site %in% input$SITES1) %>%             # Filter data to selected site
-       select(one_of("date", input$SOLUTES1))         # Select desired columns of data    
-     dataCurrent1    
-     #dataCurrent1 <- removeCodes(dataCurrent1)
-
+       select(one_of("date", input$SOLUTES1))         # Select desired columns of data
    }) # END of dataCurrent1
    
    # Grab selected wateryear, site, solute, and discharge data from data
    dataCurQ1 <- reactive({
-      if (changesInData$change > 0) dataCurrent <- dataCurrentR()
       if (input$SITES1 %in% sites_streams) {
          if (input$Flow_or_Precip1 == 'gageHt'){
             dataCurQ1 <- dataCurrent %>% 
                filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
                filter(site %in% input$SITES1) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES1, "gageHt")) %>% # Selected desired columns of data
-               rename(Flow_or_Precip = gageHt)                      # Rename GageHt to standard name, so that don't have 
-                                                                    #   to create alternative graphs
+               rename(Flow_or_Precip = gageHt)                         # Rename GageHt to standard name, so that don't have to create alternative graphs
          }
          if (input$Flow_or_Precip1 == 'flowGageHt'){
             dataCurQ1 <- dataCurrent %>% 
                filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
                filter(site %in% input$SITES1) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES1, "flowGageHt")) %>%      # Selected desired columns of data
-               rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have 
-                                                                             #   to create alternative graphs
+               rename(Flow_or_Precip = flowGageHt)                              # Rename Q to standard name, so that don't have to create alternative graphs
          } 
       }
       if (input$SITES1 %in% sites_precip) {
@@ -442,8 +423,7 @@ shinyServer(function(input, output, session) {
             filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
             filter(site %in% input$SITES1) %>%                   # Filter data to selected site
             select(one_of("date", input$SOLUTES1, "precipCatch")) %>%      # Selected desired columns of data
-            rename(Flow_or_Precip = precipCatch)                           # Rename Q to standard name, so that don't have 
-                                                                           #   to create alternative graphs
+            rename(Flow_or_Precip = precipCatch)                              # Rename Q to standard name, so that don't have to create alternative graphs
       }
       dataCurQ1
    }) # END of dataCurrentQ1
@@ -495,8 +475,7 @@ shinyServer(function(input, output, session) {
       return(dataCurQHist1)
    }) #END of dataCurQHist1
    
-  
-   # Build graph (need different graphs depending on inputs) 
+   
    dygraph1 <- reactive ({
       ylabel <- ylabel1()
       if (input$HYDROLOGY1 == TRUE)   {
@@ -850,7 +829,6 @@ shinyServer(function(input, output, session) {
    
    # Isolate selected data from dataCurrent
    dataCurrent2 <- reactive({
-      if (changesInData$change > 0) dataCurrent <- dataCurrentR()
       dataCurrent2 <- dataCurrent %>% 
          filter(waterYr %in% input$WATERYEAR2) %>%     # Filter data to selected water year
          filter(site %in% input$SITES2) %>%            # Filter data to selected sites
@@ -859,32 +837,28 @@ shinyServer(function(input, output, session) {
    
    # Grab selected wateryear, site, solute, and discharge data from recent data
    dataCurQ2 <- reactive({
-      if (changesInData$change > 0) dataCurrent <- dataCurrentR()
       if (input$SITES2 %in% sites_streams) {
          if (input$Flow_or_Precip2 == 'gageHt'){
             dataCurQ2 <- dataCurrent %>% 
                filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
                filter(site %in% input$SITES2) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES2, "gageHt")) %>% # Selected desired columns of data
-               rename(Flow_or_Precip = gageHt)                      # Rename GageHt to standard name, so that don't have 
-                                                                    #   to create alternative graphs
+               rename(Flow_or_Precip = gageHt)                         # Rename GageHt to standard name, so that don't have to create alternative graphs
          }
          if (input$Flow_or_Precip2 == 'flowGageHt'){
             dataCurQ1 <- dataCurrent %>% 
                filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
                filter(site %in% input$SITES2) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%      # Selected desired columns of data
-               rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have 
-                                                                             #  to create alternative graphs
+               rename(Flow_or_Precip = flowGageHt)                              # Rename Q to standard name, so that don't have to create alternative graphs
          } 
-      } 
+      }
       if (input$SITES2 %in% sites_precip) {
          dataCurQ2 <- dataCurrent %>% 
             filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
             filter(site %in% input$SITES2) %>%                   # Filter data to selected site
             select(one_of("date", input$SOLUTES2, "precipCatch")) %>%      # Selected desired columns of data
-            rename(Flow_or_Precip = precipCatch)                           # Rename Q to standard name, so that don't have 
-                                                                           #    to create alternative graphs
+            rename(Flow_or_Precip = precipCatch)                              # Rename Q to standard name, so that don't have to create alternative graphs
       }
       dataCurQ2
    }) # END of dataCurrentQ1
@@ -941,7 +915,6 @@ shinyServer(function(input, output, session) {
    # filters Original (recent water year) data to only include data selected by inputs
    dataCurrent3 <- reactive({
    
-     if (changesInData$change > 0) dataCurrent <- dataCurrentR()
      dataCurrent3 <- dataCurrent %>% 
        filter(waterYr %in% input$WATERYEAR3) %>%          # Filter data to selected water year
        filter(site %in% input$SITES3) %>%                 # Filter data to selected sites
@@ -955,9 +928,7 @@ shinyServer(function(input, output, session) {
    
    # gathers hydrology data and calculates median hydrology values
    Q3 <- reactive({
-         
-     if (changesInData$change > 0) dataCurrent <- dataCurrentR()
-
+     
      # if Discharge is selected, finds data for all watershed (stream) sites, 
      # and calculates median
      if (input$HYDROLOGY3 == 'Discharge') {
@@ -1018,23 +989,22 @@ shinyServer(function(input, output, session) {
    ## (necessary for merging data tables)
    defClassesSample$date <- as.Date(defClassesSample$date, format="%m/%d/%y")
    defClassesSample$date <- as.Date(defClassesSample$date, format="%Y-%m-%d")
-#   dataHistorical <- standardizeClasses(dataHistorical)
-   #message(names(dataHistorical))
-   # write.csv(dataCurrentR(), "test", col.names=TRUE)
-   #message("After dataHistorical, about to do standardizeClasses on dataCurrent")
-   #message(names(dataCurrentR()))
-   #message(head(dataCurrentR()))
-#   dataCurrent <- standardizeClasses(dataCurrentR())
+   dataHistorical <- standardizeClasses(dataHistorical)
+   message(names(dataHistorical))
+   # write.csv(dataCurrent, "test", col.names=TRUE)
+   message("After dataHistorical, about to do standardizeClasses on dataCurrent")
+   message(names(dataCurrent))
+   message(head(dataCurrent))
+   dataCurrent <- standardizeClasses(dataCurrent)
       # !!! for some reason 'precipCatch' needs to be corrected
-#      dataCurrent$precipCatch <- as.numeric(dataCurrent$precipCatch)
+      dataCurrent$precipCatch <- as.numeric(dataCurrent$precipCatch)
       ## remove columns that don't match up between datasets
-#      dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
+      dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
    # 2. Join data together
-#   dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical) # !!! eventually need to add sensor data here
+   dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical) # !!! eventually need to add sensor data here
    # 3. Filter data according to inputs
    ## Base data
    data4 <- reactive ({
-      if (changesInData$change > 0) dataAll <- dataAllR()
       data4 <- dataAll %>%
          filter(date >= input$DATE4[1]) %>%
          filter(date <= input$DATE4[2])
@@ -1109,16 +1079,12 @@ shinyServer(function(input, output, session) {
    #*****************************
 
    data5 <- reactive({
-      if (changesInData$change > 0) dataCurrent <- dataCurrentR()
       # filter data to selected water year and site
       data5 <- dataCurrent %>% 
          filter(waterYr %in% input$WATERYEAR5) %>% 
          filter(site %in% input$SITES5) 
-      # make uniqueID first column
-      data5_uniqueID <- select(data5, uniqueID)
-      data5_remaining <- select(data5, -uniqueID)
-      data5 <- bind_cols(data5_uniqueID, data5_remaining)
       data5
+      # re-structure according to layout of Brenda's spreadsheet
    }) 
    
    # dataHOT <- dataCurrent # R object data frame stored as ASCII text
@@ -1128,10 +1094,6 @@ shinyServer(function(input, output, session) {
    # *Download Tab* ########################################
    
    datasetInput <- reactive({
-      if (changesInData$change > 0) {
-          dataCurrent <- dataCurrentR()
-          dataAll <- dataAllR()
-      }   
       # Fetch the appropriate data object, depending on the value
       # of input$DATASET
       datasetInput <- switch(input$DOWNLOAD_DATASET,
@@ -1189,7 +1151,7 @@ shinyServer(function(input, output, session) {
      dygraph1()
    }) # END of output$GRAPH1
    
-   output$TABLE1 <- renderDataTable(dataCurrent1()) # for testing purposes
+   #output$TABLE1 <- renderDataTable(dataOrig1()) # for testing purposes
    
 #   output$PRINT1 <- downloadHandler(
 #      # For PDF output, change this to "report.pdf"
@@ -1514,10 +1476,11 @@ shinyServer(function(input, output, session) {
          f
       }
    }, height = 100) # end of output$GRAPH_FLOW4
+   paste(head(dataCurrent))
 
    output$TABLE4 <- renderDataTable({
       dataFlowHydroGraph4()
-      #head(dataCurrentR())
+      #head(dataCurrent)
    }) # end of output$TABLE4
    
    # Panel 5 Output ####
@@ -1534,10 +1497,9 @@ shinyServer(function(input, output, session) {
       #    setHot(dataSummary) # set the rhandsontable values
       # }
       
-      rhandsontable(data5, height = 400) %>% 
+      rhandsontable(data5) %>% 
          hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
-         hot_col("uniqueID", readOnly = TRUE) %>%
-         hot_cols(fixedColumnsLeft = 1) 
+         hot_col("uniqueID", readOnly = TRUE) 
    })
    
    observeEvent(input$SAVECHANGES5,{ 
@@ -1617,24 +1579,30 @@ shinyServer(function(input, output, session) {
 #        dbWriteTable(con, "initial", dataInitialChanged, append=TRUE, row.names=FALSE)
 #        dbWriteTable(con, "chemistry", dataChemistryChanged, append=TRUE, row.names=FALSE)
 
-        # update reactive value to signal core data has changed
-        changesInData$change <- changesInData$change + 1
-
-#        # re-establish dataCurrent
-#        dataCurrent <<- dbReadTable(con, "current")
-#        dataCurrent <<- standardizeClasses(dataCurrent)
-#        dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
-#        dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType) 
+        # re-establish dataCurrent
+        dataCurrent <<- dbReadTable(con, "current")
+        dataCurrent <<- standardizeClasses(dataCurrent)
+        dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
+        dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType) 
         
+#        # re-establish dataInitial
+#        dataInitial <<- dbReadTable(con, "initial")
+#        dataInitial <<- standardizeClasses(dataInitial)
+#        dataInitial$notes <<- gsub(",", ":", dataInitial$notes)
+#        # re-establish dataChemistry
+#        dataChemistry <<- dbReadTable(con, "chemistry")
+#        dataChemistry <<- standardizeClasses(dataChemistry)
+#        dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
+
         showNotification("Changes Saved.")
 
-#        # Recreate wateryears
-#        wy <- names(dataCurrent)
-#        wy1 <- c()
-#        for (i in 1:length(wy)) {
-#           wy1 <- paste(wy1,", ", wy[i], sep="")
-#
-#        }
+        # Recreate wateryears
+        wy <- names(dataCurrent)
+        wy1 <- c()
+        for (i in 1:length(wy)) {
+           wy1 <- paste(wy1,", ", wy[i], sep="")
+
+        }
 
         dbDisconnect(con)
       
@@ -1656,21 +1624,19 @@ shinyServer(function(input, output, session) {
         if (input$ROWNUM_DELETE5 %in% dataCurrent$uniqueID) {
             uID <- input$ROWNUM_DELETE5
             query <- paste0("DELETE FROM current WHERE uniqueID = '", uID, "';")
-            #message(print(query))
+            message(print(query))
             dbExecute(con, query) # delete row with matching uniqueID from current table
-            # update reactive value to signal core data has changed
-            changesInData$change <- changesInData$change + 1
-#            # re-establish dataCurrent
-#            dataCurrent <<- dbReadTable(con, "current")
-#            dataCurrent <<- standardizeClasses(dataCurrent)
-#            dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
-#            dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType) 
-#            # re-create wateryears
-#            wy <- names(dataCurrent)
-#            wy1 <- c()
-#            for (i in 1:length(wy)) {
-#               wy1 <- paste(wy1,", ", wy[i], sep="")
-#            }
+            # re-establish dataCurrent
+            dataCurrent <<- dbReadTable(con, "current")
+            dataCurrent <<- standardizeClasses(dataCurrent)
+            dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
+            dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType) 
+            # re-create wateryears
+            wy <- names(dataCurrent)
+            wy1 <- c()
+            for (i in 1:length(wy)) {
+               wy1 <- paste(wy1,", ", wy[i], sep="")
+            }
             dbDisconnect(con)
             showNotification("Delete Complete.")
         } else {
@@ -1743,3 +1709,11 @@ shinyServer(function(input, output, session) {
    #**** END of Output ****
    
 }) # closes shinyServer
+
+
+
+
+# Shiny server instructions for HBEF Dashboard
+# Created by Maria-Carolina Simao (carolina.m.simao - at - gmail - dot - com)
+# Shiny server instructions for HBEF Dashboard
+# Created by Maria-Carolina Simao (carolina.m.simao - at - gmail - dot - com)

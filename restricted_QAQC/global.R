@@ -152,21 +152,16 @@ con = dbConnect(y,
 tables = dbListTables(con)
 
 ## Code for one-time use: to load data into mysql
-# dataInitial <- read.csv("data/initial_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#  dataInitial$date <- as.Date(dataInitial$date, "%m/%d/%y")
-#  dataInitial <- standardizeClasses(dataInitial)
-# dataChemistry <- read.csv("data/chemistry_withWY2013.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-#  dataChemistry <- standardizeClasses(dataChemistry)
-# dbWriteTable(con, "initial", dataInitial, append=TRUE, row.names=FALSE)
-# dbWriteTable(con, "chemistry", dataChemistry, append=TRUE, row.names=FALSE)
+# dataCurrent <- read.csv("data/current_clean.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
+#  dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
+#  dataCurrent <- standardizeClasses(dataCurrent)
+#  dbWriteTable(con, "current", dataCurrent, append = TRUE, row.names = FALSE)
 
 
 # Get data from mysql
 dataInitial <- dbReadTable(con, "initial")
-message("dataInitial class of date and min waterYr:")
-message(class(dataInitial$date))
-message(min(dataInitial$waterYr, na.rm=TRUE))
 dataChemistry <- dbReadTable(con, "chemistry")
+dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor")
 dbDisconnect(con)
@@ -175,10 +170,11 @@ dbDisconnect(con)
 dataInitial <- standardizeClasses(dataInitial)
   # necessary to prevent problems when downloading csv files
   dataInitial$notes <- gsub(",", ";", dataInitial$notes)
-  message("dataInitial class of date and min waterYr:")
-  message(class(dataInitial$date))
-  message(min(dataInitial$waterYr, na.rm=TRUE))
 dataChemistry <- standardizeClasses(dataChemistry)
+
+dataCurrent <- standardizeClasses(dataCurrent)
+  # necessary to prevent problems when downloading csv files
+  dataCurrent$notes <- gsub(",", ";", dataCurrent$notes)
 dataHistorical <- standardizeClasses(dataHistorical)
 
 # Create dataCurrrent and dataAll when from MySQL----
@@ -187,9 +183,9 @@ dataHistorical <- standardizeClasses(dataHistorical)
 # if (nrow(dataChemistry) > 1) {
 # !!! Need to check what happens when dataChemistry is empty!
 # dataInitial <- select(dataInitial, -waterYr)
-dataChemistry_minus_waterYr_refNo <- select(dataChemistry, -waterYr, -refNo)
-dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "uniqueID")
-dataCurrent <- standardizeClasses(dataCurrent)
+#  dataChemistry_minus_waterYr_refNo <- select(dataChemistry, -waterYr, -refNo)
+#  dataCurrent <- full_join(dataInitial, dataChemistry_minus_waterYr_refNo, by = "uniqueID")
+#  dataCurrent <- standardizeClasses(dataCurrent)
 # } else {
 #    dataCurrent <- dataInitial
 # }
