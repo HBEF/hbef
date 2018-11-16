@@ -110,7 +110,7 @@ removeCodes <- function(dataSet) {
          message(paste("nrow(dataSet):", nrow(dataSet)))
          message(paste("head(dataSet):", head(dataSet)))
          message(paste("dataSet:", dataSet))
-         message(paste("dataSet[ind_col][dataSet[ind_col]]",dataSet[ind_col][dataSet[ind_col] == 1.2008]))
+#         message(paste("dataSet[ind_col][dataSet[ind_col]]",dataSet[ind_col][dataSet[ind_col] == 1.2008]))
          dataSet[ind_col][dataSet[ind_col] == -1] <- NA
          dataSet[ind_col][dataSet[ind_col] == -2] <- NA
          dataSet[ind_col][dataSet[ind_col] == -3] <- NA
@@ -235,8 +235,9 @@ shinyServer(function(input, output, session) {
    # has changed and should be updated. Anytime current data is changed, the value  
    # of this variable should be increased by 1.
    changesInData <- reactiveValues()
-   changesInData$change <- 0
-   
+   changesInData$change_dataCurrent <- 0
+   changesInData$change_dataAll <- 0
+
    # # !!! See if you're going to use or delete, for 5 or all years of history
    # histYears <- reactive({
    #   # Select desired historical water years
@@ -289,7 +290,7 @@ shinyServer(function(input, output, session) {
       #dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType)
 
       # update reactive value to signal core data has changed
-      changesInData$change <- changesInData$change + 1
+      changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
       
       showNotification("Submit Complete.")
 
@@ -303,7 +304,7 @@ shinyServer(function(input, output, session) {
 
    # Make a reactive dataCurrent data frame, to be called whenever data is updated
    # (R in dataCurrentR stands for reactive)
-   dataCurrentR <- eventReactive(changesInData$change, {
+   dataCurrentR <- eventReactive(changesInData$change_dataCurrent, {
 
         # Open database connection
         y = RMariaDB::MariaDB()
@@ -344,14 +345,16 @@ shinyServer(function(input, output, session) {
         updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
         updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
 
+        changesInData$change_dataAll <- changesInData$change_dataAll
+
         dataCurrentR
 
    })
 
 
-   dataAllR <- eventReactive(changesInData$change, { 
-       dataAllR <<- bind_rows(dataHistorical, dataCurrentR())
-       dataAllR <<- standardizeClasses(dataAllR)
+   dataAllR <- eventReactive(changesInData$change_dataAll, { 
+       dataAllR <- bind_rows(dataHistorical, dataCurrentR())
+       dataAllR <- standardizeClasses(dataAllR)
    })
 
 
@@ -406,19 +409,19 @@ shinyServer(function(input, output, session) {
    
    # Grab selected wateryear, site, solute data from data
    dataCurrent1 <- reactive({
-     if (changesInData$change > 0) dataCurrent <- dataCurrentR()
+     if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
      dataCurrent1 <- dataCurrent %>% 
        filter(waterYr %in% input$WATERYEAR1) %>%      # Filter data to selected water year
        filter(site %in% input$SITES1) %>%             # Filter data to selected site
        select(one_of("date", input$SOLUTES1))         # Select desired columns of data    
-     dataCurrent1    
-     #dataCurrent1 <- removeCodes(dataCurrent1)
+     dataCurrent1 <- removeCodes(dataCurrent1)
+     dataCurrent1
 
    }) # END of dataCurrent1
    
    # Grab selected wateryear, site, solute, and discharge data from data
    dataCurQ1 <- reactive({
-      if (changesInData$change > 0) dataCurrent <- dataCurrentR()
+      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
       if (input$SITES1 %in% sites_streams) {
          if (input$Flow_or_Precip1 == 'gageHt'){
             dataCurQ1 <- dataCurrent %>% 
@@ -850,7 +853,7 @@ shinyServer(function(input, output, session) {
    
    # Isolate selected data from dataCurrent
    dataCurrent2 <- reactive({
-      if (changesInData$change > 0) dataCurrent <- dataCurrentR()
+      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
       dataCurrent2 <- dataCurrent %>% 
          filter(waterYr %in% input$WATERYEAR2) %>%     # Filter data to selected water year
          filter(site %in% input$SITES2) %>%            # Filter data to selected sites
@@ -859,7 +862,7 @@ shinyServer(function(input, output, session) {
    
    # Grab selected wateryear, site, solute, and discharge data from recent data
    dataCurQ2 <- reactive({
-      if (changesInData$change > 0) dataCurrent <- dataCurrentR()
+      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
       if (input$SITES2 %in% sites_streams) {
          if (input$Flow_or_Precip2 == 'gageHt'){
             dataCurQ2 <- dataCurrent %>% 
@@ -941,7 +944,7 @@ shinyServer(function(input, output, session) {
    # filters Original (recent water year) data to only include data selected by inputs
    dataCurrent3 <- reactive({
    
-     if (changesInData$change > 0) dataCurrent <- dataCurrentR()
+     if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
      dataCurrent3 <- dataCurrent %>% 
        filter(waterYr %in% input$WATERYEAR3) %>%          # Filter data to selected water year
        filter(site %in% input$SITES3) %>%                 # Filter data to selected sites
@@ -956,7 +959,7 @@ shinyServer(function(input, output, session) {
    # gathers hydrology data and calculates median hydrology values
    Q3 <- reactive({
          
-     if (changesInData$change > 0) dataCurrent <- dataCurrentR()
+     if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
 
      # if Discharge is selected, finds data for all watershed (stream) sites, 
      # and calculates median
@@ -1034,7 +1037,7 @@ shinyServer(function(input, output, session) {
    # 3. Filter data according to inputs
    ## Base data
    data4 <- reactive ({
-      if (changesInData$change > 0) dataAll <- dataAllR()
+      if (changesInData$change_dataAll > 0) dataAll <- dataAllR()
       data4 <- dataAll %>%
          filter(date >= input$DATE4[1]) %>%
          filter(date <= input$DATE4[2])
@@ -1109,7 +1112,7 @@ shinyServer(function(input, output, session) {
    #*****************************
 
    data5 <- reactive({
-      if (changesInData$change > 0) dataCurrent <- dataCurrentR()
+      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
       # filter data to selected water year and site
       data5 <- dataCurrent %>% 
          filter(waterYr %in% input$WATERYEAR5) %>% 
@@ -1128,7 +1131,7 @@ shinyServer(function(input, output, session) {
    # *Download Tab* ########################################
    
    datasetInput <- reactive({
-      if (changesInData$change > 0) {
+      if (changesInData$change_dataCurrent > 0) {
           dataCurrent <- dataCurrentR()
           dataAll <- dataAllR()
       }   
@@ -1618,7 +1621,7 @@ shinyServer(function(input, output, session) {
 #        dbWriteTable(con, "chemistry", dataChemistryChanged, append=TRUE, row.names=FALSE)
 
         # update reactive value to signal core data has changed
-        changesInData$change <- changesInData$change + 1
+        changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
 
 #        # re-establish dataCurrent
 #        dataCurrent <<- dbReadTable(con, "current")
@@ -1659,7 +1662,7 @@ shinyServer(function(input, output, session) {
             #message(print(query))
             dbExecute(con, query) # delete row with matching uniqueID from current table
             # update reactive value to signal core data has changed
-            changesInData$change <- changesInData$change + 1
+            changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
 #            # re-establish dataCurrent
 #            dataCurrent <<- dbReadTable(con, "current")
 #            dataCurrent <<- standardizeClasses(dataCurrent)
