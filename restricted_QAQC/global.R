@@ -143,7 +143,17 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 # USE WHEN LIVE ON REMOTE SITE
 #**********************************************
 y = RMariaDB::MariaDB()
-pass  = readLines('/home/hbef/RMySQL.config')
+
+# FOR USE ON REMOTE SERVER (comment out if working on local computer)
+# pass  = readLines('/home/hbef/RMySQL.config')
+# con = dbConnect(y,
+#                 user = 'root',
+#                 password = pass,
+#                 host = 'localhost',
+#                 dbname = 'hbef')
+
+# FOR USE ON LOCAL COMPUTER (comment out if working on remote server)
+pass = readLines('SQL.txt')
 con = dbConnect(y,
                 user = 'root',
                 password = pass,
@@ -151,26 +161,23 @@ con = dbConnect(y,
                 dbname = 'hbef')
 tables = dbListTables(con)
 
-## Code for one-time use: to load data into mysql
+# # Code for one-time use: to load data into mysql
 # dataCurrent <- read.csv("data/current_clean.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
 #  dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
 #  dataCurrent <- standardizeClasses(dataCurrent)
 #  dbWriteTable(con, "current", dataCurrent, append = TRUE, row.names = FALSE)
+#  
+# dataHistorical<- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
+#  dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")
+#  dataHistorical <- standardizeClasses(dataHistorical)
+#  dbWriteTable(con, "historical", dataHistorical, append = TRUE, row.names = FALSE)
 
 
 # Get data from mysql
-dataInitial <- dbReadTable(con, "initial")
-dataChemistry <- dbReadTable(con, "chemistry")
 dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor")
 dbDisconnect(con)
-
-# Format data as needed
-dataInitial <- standardizeClasses(dataInitial)
-  # necessary to prevent problems when downloading csv files
-  dataInitial$notes <- gsub(",", ";", dataInitial$notes)
-dataChemistry <- standardizeClasses(dataChemistry)
 
 dataCurrent <- standardizeClasses(dataCurrent)
   # necessary to prevent problems when downloading csv files
