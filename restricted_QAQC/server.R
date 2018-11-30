@@ -1547,7 +1547,7 @@ shinyServer(function(input, output, session) {
    observeEvent(input$SAVECHANGES5,{ 
        message("inside SAVECHANGES5")
        # openning connection to database
-       pass  = readLines('/home/hbef/RMySQL.config')
+       pass  =  'frenzied_plover_station'#readLines('/home/hbef/RMySQL.config')
        con = dbConnect(MariaDB(),
                        user = 'root',
                        password = pass,
