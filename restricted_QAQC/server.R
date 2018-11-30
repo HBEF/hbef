@@ -221,7 +221,7 @@ solute_palette <- c(colors_cations, colors_anions, colors_other)
 shinyServer(function(input, output, session) {
  
    # show start date and time
-   message(Sys.time())
+   message(paste("App opened:", Sys.time()))
 
    # make sure app stops upon closing browser
    session$onSessionEnded(function() {
@@ -254,7 +254,7 @@ shinyServer(function(input, output, session) {
    
          #for testing
          #dataNew <-read.csv("data/formatted/current_testADD.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-         message("in dataNew() because of FILE_UPLOAD")
+         message("in dataNew() because of FILE_UPLOAD.")
          dataNew <- read.csv(input$FILE_UPLOAD$datapath,
                              header = input$HEADER, 
                              stringsAsFactors = FALSE, 
@@ -272,7 +272,7 @@ shinyServer(function(input, output, session) {
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
       message("in submit")
       # opening connection to database 
-      pass  = readLines('/home/hbef/RMySQL.config')
+                pass  = readLines('/home/hbef/RMySQL.config')
       con = dbConnect(MariaDB(),
                       user = 'root',
                       password = pass,
@@ -285,7 +285,7 @@ shinyServer(function(input, output, session) {
       # upload data
       dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
       #dataCurrent <<- dbReadTable(con, "current")
-      #dataCurrent <<- standardizeClasses(dataCurrent)          
+      #dataCurrent <<- standardizeClasses(dataCurrent)
       #dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
       #dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType)
 
@@ -308,7 +308,7 @@ shinyServer(function(input, output, session) {
 
         # Open database connection
         y = RMariaDB::MariaDB()
-        pass  = readLines('/home/hbef/RMySQL.config')
+        pass  = 'frenzied_plover_station'#readLines('/home/hbef/RMySQL.config')
         con = dbConnect(y,
                 user = 'root',
                 password = pass,
@@ -345,7 +345,8 @@ shinyServer(function(input, output, session) {
         updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
         updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
 
-        changesInData$change_dataAll <- changesInData$change_dataAll
+        # Trigger update in dataAll
+        changesInData$change_dataAll <- changesInData$change_dataAll + 1
 
         dataCurrentR
 
