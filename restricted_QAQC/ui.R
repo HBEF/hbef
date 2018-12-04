@@ -497,31 +497,98 @@ shinyUI(
                ), #end of fluidRow  
                rHandsontableOutput("HOT"), # HOT = Hands On Table 
                hr(),
+               span(wellPanel(
+               span(h4("*CAUTION* Section for Deleting Data"), style="text-align: center;"),
                fluidRow(
-                  column(3,
-                     tags$div(id = "inline",
-                              textInput(
-                                 "ROWNUM_DELETE5",
-                                  label = "UniqueID:  "
-                  ))),
-                  column(1,
-                     actionButton(
-                     "DELETEROW5",
-                     label = strong("Delete Entire Row"),
-                     class = 'bottomAlign'
-                  ))
-              ), # end of fluidRow
-            br()  
-#            fluidRow(
-#                 column(3),
-#                 column(1,
-#                    actionButton(
-#                    "DELETECHEM5",
-#                    label = strong("Delete Chemistry"),
-#                    class = 'bottomAlign'
-#                    )
-#                 )
-#              ) # end of fluidRow
+                 # Column for "Delete Rows" button
+                 column (8, 
+                         wellPanel(style = "background: black;
+                                            color: white;",
+                           
+                           # Date options
+                           fluidRow(
+                             column(6,
+                                    # Date input panels, depending on selected date option
+                                    conditionalPanel(
+                                      condition = "input.DELETE_DATEOPTION5 == 'Date'",
+                                      dateInput(
+                                        "DELETE_DATE5",
+                                        label = "Date:"
+                                      )
+                                    ),
+                                    conditionalPanel(
+                                      condition = "input.DELETE_DATEOPTION5 == 'Date Range'",
+                                      dateRangeInput(
+                                        "DELETE_DATERANGE5",
+                                        label = "Date(s):"
+                                      )
+                                    ),
+                                    radioButtons(
+                                      "DELETE_DATEOPTION5",
+                                      label = "Date Input Options:",
+                                      choices = c("Date", "Date Range"),
+                                      selected = "Date"
+                                      #inline = TRUE
+                                    )
+                             ), # end of column
+                             
+                             # Site option & Delete Section button
+                             column(6,
+                                    selectInput(
+                                      "DELETE_SITE5",
+                                      label = "Site:",
+                                      choices = c("All Sites", sites_streams, sites_precip),
+                                      selected = "All Sites"
+                                    ),
+                                    br(),
+                                    actionButton(
+                                      "BUTTON_DELETE5",
+                                      label = strong("Delete Rows"),
+                                      class = 'rightAlign'
+                                    )
+                             ) # end of column
+                           
+                           ) # end of fluidRow
+                         ) # end of well Panel
+                ), #end of Column for "Delete Rows" button
+                
+                # Column for "Delete 1 Row" button
+                column(4,
+                     wellPanel(style = "background: black;
+                                            color: white;",
+                       
+                       textInput(
+                         "DELETE_UNIQUEID5",
+                         label = "UniqueID:  "
+                       ),
+                       br(),
+                       actionButton(
+                         "BUTTON_DELETEROW5",
+                         label = strong("Delete 1 Row"),
+                         class = 'rightAlign'
+                       )
+                       
+                       # column(3,
+                       #        tags$div(id = "inline",
+                       #                 textInput(
+                       #                   "ROWNUM_DELETE5",
+                       #                   label = "UniqueID:  "
+                       #                 )
+                       #        )
+                       # ),
+                       # 
+                       # column(1,
+                       #        actionButton(
+                       #          "DELETEROW5",
+                       #          label = strong("Delete Entire Row"),
+                       #          class = 'bottomAlign'
+                       #        ))
+                       
+                     ) # end of well Panel
+              ) # end of Column for "Delete 1 Row" button
+              
+            ) # end of fluidRow
+            ), style = "background: #474747;") # end of grey all- encompassing well Panel
             ) # closes Panel 5 tabPanel
         
          ),# END of QA/QC navbarMenu
