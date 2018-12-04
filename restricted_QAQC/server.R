@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-# pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-pass = readLines('SQL.txt')                        # for local computer
+pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+#pass = readLines('SQL.txt')                        # for local computer
 
 # ***********************************************************************
 #                    ---- IMPORTANT PRELIMINARY INFO ----
