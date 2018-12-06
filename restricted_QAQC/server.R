@@ -30,6 +30,11 @@ library(xts)
 
 message("hello, I'm at the top of server.R")
 
+# **Database Password**
+# SWITCH DEPENDING ON LOCATION
+pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+#pass = readLines('SQL.txt')                        # for local computer
+
 # ***********************************************************************
 #                    ---- IMPORTANT PRELIMINARY INFO ----
 # ***********************************************************************
@@ -221,7 +226,7 @@ solute_palette <- c(colors_cations, colors_anions, colors_other)
 shinyServer(function(input, output, session) {
  
    # show start date and time
-   message(Sys.time())
+   message(paste("App opened:", Sys.time()))
 
    # make sure app stops upon closing browser
    session$onSessionEnded(function() {
@@ -254,7 +259,7 @@ shinyServer(function(input, output, session) {
    
          #for testing
          #dataNew <-read.csv("data/formatted/current_testADD.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-         message("in dataNew() because of FILE_UPLOAD")
+         message("in dataNew() because of FILE_UPLOAD.")
          dataNew <- read.csv(input$FILE_UPLOAD$datapath,
                              header = input$HEADER, 
                              stringsAsFactors = FALSE, 
@@ -272,7 +277,6 @@ shinyServer(function(input, output, session) {
       # !!! will likely want to make this more advanced later (only show success if there are no errors)
       message("in submit")
       # opening connection to database 
-      pass  = readLines('/home/hbef/RMySQL.config')
       con = dbConnect(MariaDB(),
                       user = 'root',
                       password = pass,
@@ -285,7 +289,7 @@ shinyServer(function(input, output, session) {
       # upload data
       dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
       #dataCurrent <<- dbReadTable(con, "current")
-      #dataCurrent <<- standardizeClasses(dataCurrent)          
+      #dataCurrent <<- standardizeClasses(dataCurrent)
       #dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
       #dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType)
 
@@ -308,7 +312,6 @@ shinyServer(function(input, output, session) {
 
         # Open database connection
         y = RMariaDB::MariaDB()
-        pass  = readLines('/home/hbef/RMySQL.config')
         con = dbConnect(y,
                 user = 'root',
                 password = pass,
@@ -345,7 +348,8 @@ shinyServer(function(input, output, session) {
         updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
         updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
 
-        changesInData$change_dataAll <- changesInData$change_dataAll
+        # Trigger update in dataAll
+        changesInData$change_dataAll <- changesInData$change_dataAll + 1
 
         dataCurrentR
 
@@ -1546,7 +1550,6 @@ shinyServer(function(input, output, session) {
    observeEvent(input$SAVECHANGES5,{ 
        message("inside SAVECHANGES5")
        # openning connection to database
-       pass  = readLines('/home/hbef/RMySQL.config')
        con = dbConnect(MariaDB(),
                        user = 'root',
                        password = pass,
@@ -1571,84 +1574,64 @@ shinyServer(function(input, output, session) {
                                      ' WHERE waterYr = ', wateryear5, 
                                      ' AND site = "', site5, 
                                      '" ORDER BY uniqueID;') 
-#        queryDeleteInitial <- paste0('DELETE FROM initial ', 
-#                                     ' WHERE waterYr = ', wateryear5, 
-#                                     ' AND site = "', site5, 
-#                                     '" ORDER BY uniqueID;') 
-#        # finds and uses uniqueID's for chemistry data by: 
-#        # 1) isolating data in question from initial table (contains needed uniqueID's)
-#        # 2) isolating data in question from chemistry table (using uniqueID's from temporary initial table)
-#        # 3) deleting data in question from chemistry table (using uniqueID's from temporary chemistry table)
-#        # the above sequence is needed because chemistry data does not contain 'site' column,
-#        # eliminating the possibility to simply filter chemistry data by 'waterYr' and 'site' 
-#        queryCreateInitialSumTbl <- paste0("CREATE TABLE initialSummaryTable SELECT * FROM initial WHERE waterYr = ", wateryear5, " AND site = '", site5,"';")
-#
-#        queryCreateChemSumTbl <- paste0(
-#            'CREATE TABLE chemistrySummaryTable SELECT c.uniqueID, datetime, Ca, Mg, K, Na, TMAl, OMAl, Al_ICP, NH4, SO4, NO3, Cl, PO4, DOC, TDN, DON, SiO2, Mn, Fe, F, cationCharge, anionCharge, theoryCond, ionBalance, ionError, duplicate, sampleType FROM chemistry c INNER JOIN initialSummaryTable i ON c.uniqueID  = i.uniqueID;'
-#        )
-#
-#        queryDeleteChemistry <- paste0 (
-#            'DELETE c FROM chemistry c LEFT JOIN chemistrySummaryTable s ON s.uniqueID = c.uniqueID WHERE s.uniqueID IS NOT NULL;'
-#        )
-#
        
         # delete old current data
         dbExecute(con, queryDelete)
 
-#        # delete old chemistry data in MySQL (but first check that chemistry isn't empty)
-#        dataChemistryChanged_noOverlap <- select(dataChemistryChanged, 
-#                                                 -uniqueID, -refNo, -waterYr)
-#        if (all(is.na(dataChemistryChanged_noOverlap)) == FALSE) {
-#            dbExecute(con, queryCreateInitialSumTbl)
-#            message(dbListTables(con))
-#            dbExecute(con, queryCreateChemSumTbl)
-#            message(dbListTables(con))
-#            dbExecute(con, queryDeleteChemistry)
-#            dbExecute(con, 'DROP TABLE initialSummaryTable;')
-#            dbExecute(con, 'DROP TABLE chemistrySummaryTable;')
-#            message(dbListTables(con))
-#        }
-#
-#        # delete old initial data in MySQL
-#        dbExecute(con, queryDeleteInitial)
-       
-
         # add changed data
         dbWriteTable(con, "current", dataChanged, append=TRUE, row.names=FALSE)
  
-#        # add changed data
-#        dbWriteTable(con, "initial", dataInitialChanged, append=TRUE, row.names=FALSE)
-#        dbWriteTable(con, "chemistry", dataChemistryChanged, append=TRUE, row.names=FALSE)
-
         # update reactive value to signal core data has changed
         changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
-
-#        # re-establish dataCurrent
-#        dataCurrent <<- dbReadTable(con, "current")
-#        dataCurrent <<- standardizeClasses(dataCurrent)
-#        dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
-#        dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType) 
         
         showNotification("Changes Saved.")
-
-#        # Recreate wateryears
-#        wy <- names(dataCurrent)
-#        wy1 <- c()
-#        for (i in 1:length(wy)) {
-#           wy1 <- paste(wy1,", ", wy[i], sep="")
-#
-#        }
 
         dbDisconnect(con)
       
       }
    )
 
-   # deletes data from current table in MySQL
-   observeEvent(input$DELETEROW5,{ 
-       message("inside DELETEROW5")
-       # openning connection to database
-       pass  = readLines('/home/hbef/RMySQL.config')
+   # deletes section of data (specified by input) in current table in MySQL
+   observeEvent(input$BUTTON_DELETE5,{ 
+      message("inside BUTTON_DELETE5")
+      con = dbConnect(MariaDB(),
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = 'hbef')
+      # check that rows exist; if so, delete, if not, send notification 
+      # !!! could make cleaner with validate()
+      
+         # establish variables
+         if (input$DELETE_SITE5 == "All Sites") {
+            siteQuery <- ""
+         } else {
+            siteQuery <- paste0("site = '", input$DELETE_SITE5, "' AND ")
+         }
+         if (input$DELETE_DATEOPTION5 == "Date") {
+            dateQuery <- paste0("date = '", input$DELETE_DATE5, "'")
+         }
+         if (input$DELETE_DATEOPTION5 == "Date Range") {
+            date1 <- input$DELETE_DATERANGE5[1]
+            date2 <- input$DELETE_DATERANGE5[2]
+            dateQuery <- paste0("date >= '", input$DELETE_DATERANGE5[1], "' AND
+                                 date <= '", input$DELETE_DATERANGE5[2], "'")
+         }
+         query <- paste0("DELETE FROM current WHERE ", siteQuery, dateQuery, ";")
+         
+         #message(print(query))
+         dbExecute(con, query) # delete row with matching uniqueID from current table
+         # update reactive value to signal core data has changed
+         changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
+         dbDisconnect(con)
+         showNotification("Delete Complete.")
+
+   }
+   )
+   
+   # deletes 1 row of data in current table in MySQL
+   observeEvent(input$BUTTON_DELETEROW5,{ 
+       message("inside BUTTON_DELETEROW5")
        con = dbConnect(MariaDB(),
                        user = 'root',
                        password = pass,
@@ -1656,60 +1639,20 @@ shinyServer(function(input, output, session) {
                        dbname = 'hbef')
         # check that row exists; if so, delete, if not, send notification 
         # !!! could make cleaner with validate()
-        if (input$ROWNUM_DELETE5 %in% dataCurrent$uniqueID) {
-            uID <- input$ROWNUM_DELETE5
+        if (input$DELETE_UNIQUEID5 %in% dataCurrent$uniqueID) {
+            uID <- input$DELETE_UNIQUEID5
             query <- paste0("DELETE FROM current WHERE uniqueID = '", uID, "';")
             #message(print(query))
             dbExecute(con, query) # delete row with matching uniqueID from current table
             # update reactive value to signal core data has changed
             changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
-#            # re-establish dataCurrent
-#            dataCurrent <<- dbReadTable(con, "current")
-#            dataCurrent <<- standardizeClasses(dataCurrent)
-#            dataCurrent$notes <<- gsub(",", ":", dataCurrent$notes)
-#            dataCurrent$sampleType <<- gsub(",", ";", dataCurrent$sampleType) 
-#            # re-create wateryears
-#            wy <- names(dataCurrent)
-#            wy1 <- c()
-#            for (i in 1:length(wy)) {
-#               wy1 <- paste(wy1,", ", wy[i], sep="")
-#            }
             dbDisconnect(con)
             showNotification("Delete Complete.")
         } else {
-            showNotification("ERROR: Unable to find uniqueID in current dataset.")
+            showNotification("ERROR: Unable to find specified UniqueID in current dataset.")
         }
     }
    )
-
-#   # deletes data only from chemistry MySQL table
-#   observeEvent(input$DELETECHEM5,{ 
-#       message("inside DELETECHEM5")
-#       # openning connection to database
-#       pass  = readLines('/home/hbef/RMySQL.config')
-#       con = dbConnect(MariaDB(),
-#                       user = 'root',
-#                       password = pass,
-#                       host = 'localhost',
-#                       dbname = 'hbef')
-#        # check that row exists; if so, delete, if not, send notification 
-#        # !!! could make cleaner with validate()
-#        if (input$ROWNUM_DELETE5 %in% dataCurrent$uniqueID) {
-#            uID <- input$ROWNUM_DELETE5
-#            query <- paste0("DELETE FROM chemistry WHERE uniqueID = '", uID, "';")
-#            message(print(query))
-#            dbExecute(con, query) # delete row with matching uniqueID from chemistry table
-#            # re-establish dataChemistry
-#            dataChemistry <<- dbReadTable(con, "chemistry")
-#            dataChemistry <<- standardizeClasses(dataChemistry)
-#            dataChemistry$sampleType <<- gsub(",", ";", dataChemistry$sampleType) 
-#            dbDisconnect(con)
-#            showNotification("Delete Complete.")
-#        } else {
-#            showNotification("ERROR: Unable to find uniqueID in current dataset.")
-#        }
-#    }
-#   )
 
    # *Download Tab* ########################################
    

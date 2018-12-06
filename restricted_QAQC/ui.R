@@ -1,3 +1,4 @@
+# testing
 # User Interface instructions for HBEF Dashboard
 # Created by Maria-Carolina Simao (carolina.m.simao - at - gmail - dot - com)
 # Initialized January 2018
@@ -465,8 +466,8 @@ shinyUI(
                ) # closes sidebarLayout
             ), # Closes Panel 4 tabPanel
         
-            # Panel 5 - Summary Table ###############
-            tabPanel("Summary Table",
+            # Panel 5 - Data & Edits ###############
+            tabPanel("Data & Edits",
                # change in CSS to make a label in line with the input box
                # to use, wrap input function in tags$div(id = "inline", [input function])
                tags$head(tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }  
@@ -496,31 +497,89 @@ shinyUI(
                ), #end of fluidRow  
                rHandsontableOutput("HOT"), # HOT = Hands On Table 
                hr(),
+               wellPanel(style = "background: darkgray;",
+               span(p("- - - - - - - - - - - - - 
+                      *CAUTION* Section for Deleting Data - - - - - - - - - - - - -"), 
+                    style="text-align: center;"),
                fluidRow(
-                  column(3,
-                     tags$div(id = "inline",
-                              textInput(
-                                 "ROWNUM_DELETE5",
-                                  label = "UniqueID:  "
-                  ))),
-                  column(1,
-                     actionButton(
-                     "DELETEROW5",
-                     label = strong("Delete Entire Row"),
-                     class = 'bottomAlign'
-                  ))
-              ), # end of fluidRow
-            br()  
-#            fluidRow(
-#                 column(3),
-#                 column(1,
-#                    actionButton(
-#                    "DELETECHEM5",
-#                    label = strong("Delete Chemistry"),
-#                    class = 'bottomAlign'
-#                    )
-#                 )
-#              ) # end of fluidRow
+                 # Column for "Delete Rows" button
+                 column (8, 
+                         wellPanel(style = "background: black;
+                                            color: white;",
+                           
+                           # Date options
+                           fluidRow(
+                             
+                             column(6,
+                                    span(h4("Delete by Date(s) & Site(s)"), style="color: white;"),
+                                    # Date input panels, depending on selected date option
+                                    conditionalPanel(
+                                      condition = "input.DELETE_DATEOPTION5 == 'Date'",
+                                      dateInput(
+                                        "DELETE_DATE5",
+                                        label = "Date:"
+                                      )
+                                    ),
+                                    conditionalPanel(
+                                      condition = "input.DELETE_DATEOPTION5 == 'Date Range'",
+                                      dateRangeInput(
+                                        "DELETE_DATERANGE5",
+                                        label = "Date(s):"
+                                      ),
+                                      p("Dates listed above will also be deleted." , 
+                                        style = "color: white; font-size:80%;"
+                                      )
+                                    ),
+                                    radioButtons(
+                                      "DELETE_DATEOPTION5",
+                                      label = "Date Input Options:",
+                                      choices = c("Date", "Date Range"),
+                                      selected = "Date"
+                                      #inline = TRUE
+                                    )
+                             ), # end of column
+                             
+                             # Site option & Delete Section button
+                             column(6,
+                                    selectInput(
+                                      "DELETE_SITE5",
+                                      label = "Site:",
+                                      choices = c("All Sites", sites_streams, sites_precip),
+                                      selected = "All Sites"
+                                    ),
+                                    br(),
+                                    actionButton(
+                                      "BUTTON_DELETE5",
+                                      label = strong("Delete Rows"),
+                                      class = 'rightAlign'
+                                    )
+                             ) # end of column
+                           
+                           ) # end of fluidRow
+                         ) # end of well Panel
+                ), #end of Column for "Delete Rows" button
+                
+                # Column for "Delete 1 Row" button
+                column(4,
+                     wellPanel(style = "background: black;
+                                        color: white;",
+                       span(h4("Delete by UniqueID"), style="color: white;"),
+                       textInput(
+                         "DELETE_UNIQUEID5",
+                         label = "UniqueID:  "
+                       ),
+                       br(),
+                       actionButton(
+                         "BUTTON_DELETEROW5",
+                         label = strong("Delete 1 Row"),
+                         class = 'rightAlign'
+                       )
+                       
+                     ) # end of well Panel
+              ) # end of Column for "Delete 1 Row" button
+              
+            ) # end of fluidRow
+            )
             ) # closes Panel 5 tabPanel
         
          ),# END of QA/QC navbarMenu
