@@ -75,11 +75,12 @@ sites_streams <- list("Watershed 1" = "W1",
                       "Watershed 8" = "W8",
                       "Watershed 9" = "W9",
                       "HBK", 
-                      "ML70")
+                      "ML70",
+                     "SW")
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
-sites_precip <- list("RG11", "RG23", "STA/22", "N", "S") 
+sites_precip <- list("RG11", "RG23", "RG22", "N", "S","SP", "RG1") 
 
 # wateryears ----> see list after data import
 
@@ -157,11 +158,11 @@ con = dbConnect(y,
 tables = dbListTables(con)
 
 # # Code for one-time use: to load data into mysql
-# dataCurrent <- read.csv("data/current_clean.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
+# dataCurrent <- read.csv("data/current_clean20181202.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
 #  dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
 #  dataCurrent <- standardizeClasses(dataCurrent)
 #  dbWriteTable(con, "current", dataCurrent, append = TRUE, row.names = FALSE)
-#  
+
 # dataHistorical<- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
 #  dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")
 #  dataHistorical <- standardizeClasses(dataHistorical)
@@ -303,6 +304,7 @@ wateryears <- as.list(wy1)
       
 # Find maximum date ----
 # used in ui.R for Panel 4 (QA/QC "Free-for-all" graph)
+
 maxDate_current <- max(dataCurrent$date, na.rm=TRUE)
 maxDate_historical <- max(dataHistorical$date, na.rm=TRUE)
 maxDate_sensor <- max(dataSensor$date, na.rm=TRUE)
