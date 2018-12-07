@@ -9,6 +9,11 @@ library(stringr)
 
 message("hello, I'm in global.R")
 
+# **Database Password**
+# SWITCH DEPENDING ON LOCATION
+pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+#pass = readLines('SQL.txt')                        # for local computer
+
 # **********************************************************************
 #                      ---- LISTS ----
 # **********************************************************************
@@ -145,16 +150,6 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 #**********************************************
 y = RMariaDB::MariaDB()
 
-# FOR USE ON REMOTE SERVER (comment out if working on local computer)
-# pass  = readLines('/home/hbef/RMySQL.config')
-# con = dbConnect(y,
-#                 user = 'root',
-#                 password = pass,
-#                 host = 'localhost',
-#                 dbname = 'hbef')
-
-# FOR USE ON LOCAL COMPUTER (comment out if working on remote server)
-pass = readLines('SQL.txt')
 con = dbConnect(y,
                 user = 'root',
                 password = pass,
@@ -309,7 +304,7 @@ wateryears <- as.list(wy1)
       
 # Find maximum date ----
 # used in ui.R for Panel 4 (QA/QC "Free-for-all" graph)
-#maxDate_initial <- max(dataInitial$date, na.rm=TRUE)
+
 maxDate_current <- max(dataCurrent$date, na.rm=TRUE)
 maxDate_historical <- max(dataHistorical$date, na.rm=TRUE)
 maxDate_sensor <- max(dataSensor$date, na.rm=TRUE)
