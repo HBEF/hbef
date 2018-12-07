@@ -917,6 +917,7 @@ shinyServer(function(input, output, session) {
      if(input$SOLUTES3 %in% other_units) { 
        if (input$SOLUTES3 == "DIC")     ylabel3 <- paste(mu,"M/L")
        if (input$SOLUTES3 == "ANC960")  ylabel3 <- paste(mu, "eq/L")
+       if (input$SOLUTES3 == "ANCMet")  ylabel3 <- paste(mu, "eq/L")
        if (input$SOLUTES3 == "spCond") ylabel3 <- paste(mu, "S/cm")
        if (input$SOLUTES3 == "temp")    ylabel3 <- "Degrees Celsius"
        if (input$SOLUTES3 %in% c("pH",
