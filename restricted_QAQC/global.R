@@ -11,8 +11,8 @@ message("hello, I'm in global.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-#pass = readLines('SQL.txt')                        # for local computer
+#pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+pass = readLines('SQL.txt')                        # for local computer
 
 # **********************************************************************
 #                      ---- LISTS ----
@@ -76,11 +76,11 @@ sites_streams <- list("Watershed 1" = "W1",
                       "Watershed 9" = "W9",
                       "HBK", 
                       "ML70",
-                     "SW")
+                      "SW")
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
-sites_precip <- list("RG11", "RG23", "RG22", "N", "S","SP", "RG1") 
+sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP") 
 
 # wateryears ----> see list after data import
 
@@ -89,12 +89,12 @@ other_units <- c("pH",
                  "DIC", 
                  "ANC960", 
                  "ANCMet", 
-                 "CationCharge",
-                 "AnionCharge",
-                 "sp.cond", 
-                 "TheoryCond",
+                 "cationCharge",
+                 "anionCharge",
+                 "spCond", 
+                 "theoryCond",
                  "temp",
-                 "IonBalance")
+                 "ionBalance")
 
 # Functions ----
 # ***********************************
