@@ -157,7 +157,7 @@ shinyUI(
                        # sites_stream.includes(input.SITES1)  
                       p(radioButtons("Flow_or_Precip1", 
                                        "Select data source:",
-                                       choices = c("Gage Height (mm)" = "gageHt", 
+                                       choices = c("Gage Height (ft)" = "gageHt", 
                                                    "Q from Gage Height (L/s)" = "flowGageHt"),
                                        selected = "gageHt",
                                        inline = FALSE)
@@ -234,7 +234,7 @@ shinyUI(
                         condition = "input.HYDROLOGY2 == true && (input.SITES2 == 'W1' || input.SITES2 =='W2' || input.SITES2 == 'W3' || input.SITES2 == 'W4' || input.SITES2 == 'W5' || input.SITES2 == 'W6' || input.SITES2 == 'W7' || input.SITES2 == 'W8' || input.SITES2 == 'W9' || input.SITES2 == 'HBK' || input.SITES2 == 'ML70' || input.SITES2 == 'PLY')", 
                         p(radioButtons("Flow_or_Precip2", 
                                        "Select data source:",
-                                       choices = c("Gage Height (mm)" = "gageHt", 
+                                       choices = c("Gage Height (ft)" = "gageHt", 
                                                    "Q from Gage Height (L/s)" = "flowGageHt"),
                                        selected = "gageHt",
                                        inline = FALSE)
@@ -300,7 +300,7 @@ shinyUI(
                         condition = "input.HYDROLOGY3 == 'Discharge'", 
                         p(radioButtons("Flow_or_Precip3", 
                                         "Select discharge data source:",
-                                        choices = c("Gage Height (mm)" = "gageHt", 
+                                        choices = c("Gage Height (ft)" = "gageHt", 
                                                     "Q from Gage Height (L/s)" = "flowGageHt"),
                                         selected = "gageHt",
                                         inline = FALSE)), style = "color:#3182bd;"

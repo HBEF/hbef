@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-#pass = readLines('SQL.txt')                        # for local computer
+#pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+pass = readLines('SQL.txt')                        # for local computer
 
 # ***********************************************************************
 #                    ---- IMPORTANT PRELIMINARY INFO ----
@@ -42,30 +42,30 @@ pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
 # Functions ----
 # ***********************************
    
-# Find units for y-axis, depending on solute selected
-ylabel <- function(solute) {
-      mu <- "\U00B5" 
-      # If 'solute' belong to group with different set of units, label depending on what it is
-      if(input$solute %in% other_units) { 
-         if (input$solute == "DIC")     ylabel3 <- paste(mu,"M/L")
-         if (input$solute == "ANC960")  ylabel3 <- paste(mu, "eq/L")
-         if (input$solute == "spCond") ylabel3 <- paste(mu, "S/cm")
-         if (input$solute == "temp")    ylabel3 <- "Degrees Celsius"
-         if (input$solute %in% c("pH3star",
-                                 "pHmetrohm",
-                                 "cationCharge",
-                                 "anionCharge",
-                                 "theoryCond",
-                                 "ionBalance")) { ylabel3 <- "(No Units)" }
-         ylabel3 <- gsub(" ", "", ylabel3, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string   
-         return(ylabel3)
-      } 
-      # Otherwise, label as 'default' mg/L
-      else {        
-         ylabel3 <- "mg/L"
-         return(ylabel3)
-      }
-}
+# # Find units for y-axis, depending on solute selected
+# ylabel <- function(solute) {
+#       mu <- "\U00B5" 
+#       # If 'solute' belong to group with different set of units, label depending on what it is
+#       if(input$solute %in% other_units) { 
+#          if (input$solute == "DIC")     ylabel3 <- paste(mu,"M/L")
+#          if (input$solute == "ANC960")  ylabel3 <- paste(mu, "eq/L")
+#          if (input$solute == "spCond") ylabel3 <- paste(mu, "S/cm")
+#          if (input$solute == "temp")    ylabel3 <- "Degrees Celsius"
+#          if (input$solute %in% c("pH3star",
+#                                  "pHmetrohm",
+#                                  "cationCharge",
+#                                  "anionCharge",
+#                                  "theoryCond",
+#                                  "ionBalance")) { ylabel3 <- "(No Units)" }
+#          ylabel3 <- gsub(" ", "", ylabel3, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string   
+#          return(ylabel3)
+#       } 
+#       # Otherwise, label as 'default' mg/L
+#       else {        
+#          ylabel3 <- "mg/L"
+#          return(ylabel3)
+#       }
+# }
 
 # Replaces codes -999.9, -1, -2, and -3 from data (used before graphing)
 removeCodes <- function(dataSet) {
@@ -501,159 +501,6 @@ shinyServer(function(input, output, session) {
       dataCurQHist1 <- full_join(dataCurQ1(), dataHistorical1(), by = "date")
       return(dataCurQHist1)
    }) #END of dataCurQHist1
-   
-  
-   # Build graph (need different graphs depending on inputs) 
-   dygraph1 <- reactive ({
-      ylabel <- ylabel1()
-      if (input$HYDROLOGY1 == TRUE)   {
-         if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (mm or L/s)'
-         if (input$SITES1 %in% sites_precip) ylabel2 <- 'Precipitation (in)'
-         if (input$SOLUTES_HIST1 == TRUE) {
-            
-            # Plots Default + Discharge + Historical data
-            data1 <- dataCurQHist1()
-            data1 <- removeCodes(data1)
-            data1.xts <- xts(data1[,-1], order.by = data1$date)
-            #paste(c("XTS:", class(dataCur1$FieldCode)))
-            
-            dygraph1 <- dygraph(data1.xts) %>%
-               dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
-                      axisLabelColor = "black") %>%
-               dyAxis("y", label = ylabel,
-                      independentTicks=TRUE,
-                      axisLabelColor = "black") %>%
-               dyAxis('y2',label=ylabel2,
-                      independentTicks=TRUE,
-                      axisLabelColor = "#3182bd",
-                      axisLabelWidth = 70,
-                      axisLineColor = "#3182bd") %>%
-               dySeries(name = input$SOLUTES1,
-                        color = "black",
-                        drawPoints = TRUE,
-                        pointSize = 3,
-                        axis='y') %>%
-               dySeries(name = 'Flow_or_Precip',
-                        drawPoints = FALSE,
-                        fillGraph=T,
-                        color = "#3182bd",
-                        axis='y2') %>%
-               dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
-                        strokePattern = c("dashed"),
-                        color = c("#A9A9A9"),
-                        label = 'median + IQR',
-                        axis='y') %>%
-               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-               dyOptions(drawGrid = FALSE,
-                         strokeWidth = 1,
-                         fillAlpha = 0.5,
-                         connectSeparatedPoints=TRUE,
-                         includeZero = TRUE) %>%
-               dyLegend(width = 300, showZeroValues = FALSE)
-            
-            dygraph1
-            
-         } else {
-            
-            # Plots Default + Discharge data
-            data1 <- dataCurQ1()
-            data1 <- removeCodes(data1)
-            data1.xts <- xts(data1[,-1], order.by = data1$date)
-            
-            dygraph1 <- dygraph(data1.xts) %>%
-               dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-               dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-               dyAxis('y2',label=ylabel2, independentTicks=TRUE,
-                      axisLabelWidth = 70,
-                      axisLabelColor = "#3182bd",
-                      axisLineColor = "#3182bd") %>% # color is light blue
-               dySeries(name = input$SOLUTES1,
-                        color = "#black") %>%
-               dySeries(name = 'Flow_or_Precip',
-                        drawPoints = FALSE,
-                        fillGraph=T,
-                        color = "#3182bd",
-                        axis='y2') %>%
-               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-               dyOptions(drawGrid = FALSE,
-                         drawPoints = TRUE,
-                         strokeWidth = 1,
-                         pointSize = 3,
-                         fillAlpha = 0.5,
-                         connectSeparatedPoints=TRUE,
-                         includeZero = TRUE)
-            dygraph1 
-         }
-      } else {
-         
-         if (input$SOLUTES_HIST1 == TRUE) {
-            
-            # Plots Default + Historical data
-            data1 <- dataCurHist1()
-            data1 <- removeCodes(data1)
-            data1.xts <- xts(data1[,-1], order.by = data1$date)
-            
-            dygraph1 <- dygraph(data1.xts) %>%
-               dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-               dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-               dySeries(name = input$SOLUTES1,
-                        color = "black",
-                        drawPoints = TRUE,
-                        pointSize = 3,
-                        axis='y') %>%
-               dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
-                        strokePattern = c("dashed"),
-                        color = "#A9A9A9",
-                        label = 'median + IQR',
-                        axis='y') %>%
-               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-               dyOptions(drawGrid = FALSE,
-                         strokeWidth = 1,
-                         fillAlpha = 0.3,
-                         connectSeparatedPoints=TRUE,
-                         includeZero = TRUE)
-            
-            dygraph1
-            
-         } else {
-            
-            # Plots Default data
-            
-            data1 <- dataCurrent1()
-            data1 <- removeCodes(data1)
-            data1.xts <- xts(data1, order.by = data1$date)
-            
-            #padrange <- c(min(data1.xts$input$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$input$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
-            
-            dygraph1 <- dygraph(data1.xts) %>%
-               dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-               dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-               dySeries(name = input$SOLUTES1,
-                        color = "black",
-                        drawPoints = TRUE,
-                        strokeWidth = 1,
-                        pointSize = 3) %>%
-               # dySeries(name = "FieldCode",
-               #          color = "black",
-               #          drawPoints = TRUE,
-               #          strokeWidth = 0,
-               #          pointSize = 1) %>%
-               # for (i in 1:nrow(data1.xts)) {
-               #    dyAnnotation(index(i), data1.xts$FieldCode[i])
-               # } %>%
-               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-               dyOptions(drawGrid = FALSE,
-                         connectSeparatedPoints=TRUE,
-                         includeZero = TRUE)
-            
-            dygraph1
-         }
-      }
-   })
    
    # # For printing?
    # dygraph1.fun <- function() {
@@ -1194,7 +1041,156 @@ shinyServer(function(input, output, session) {
    # from input panel. Done in this manner because dygraph() cannot overlay plots, each
    # plot must be started from scratch because it graphs ALL the data within xts data.
    output$GRAPH1 <- renderDygraph({
-     dygraph1()
+      
+      ylabel <- ylabel1()
+      if (input$HYDROLOGY1 == TRUE)   {
+         if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (ft or L/s)'
+         if (input$SITES1 %in% sites_precip) ylabel2 <- 'Precipitation (mm)'
+         if (input$SOLUTES_HIST1 == TRUE) {
+            
+            # Plots Default + Discharge + Historical data
+            data1 <- dataCurQHist1()
+            data1 <- removeCodes(data1)
+            data1.xts <- xts(data1[,-1], order.by = data1$date)
+            #paste(c("XTS:", class(dataCur1$FieldCode)))
+            
+            dygraph1 <- dygraph(data1.xts) %>%
+               dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
+                      axisLabelColor = "black") %>%
+               dyAxis("y", label = ylabel,
+                      independentTicks=TRUE,
+                      axisLabelColor = "black") %>%
+               dyAxis('y2',label=ylabel2,
+                      independentTicks=TRUE,
+                      axisLabelColor = "#3182bd",
+                      axisLabelWidth = 70,
+                      axisLineColor = "#3182bd") %>%
+               dySeries(name = input$SOLUTES1,
+                        color = "black",
+                        drawPoints = TRUE,
+                        pointSize = 3,
+                        axis='y') %>%
+               dySeries(name = 'Flow_or_Precip',
+                        drawPoints = FALSE,
+                        fillGraph=T,
+                        color = "#3182bd",
+                        axis='y2') %>%
+               dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
+                        strokePattern = c("dashed"),
+                        color = c("#A9A9A9"),
+                        label = 'median + IQR',
+                        axis='y') %>%
+               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+               dyOptions(drawGrid = FALSE,
+                         strokeWidth = 1,
+                         fillAlpha = 0.5,
+                         connectSeparatedPoints=TRUE,
+                         includeZero = TRUE) %>%
+               dyLegend(width = 300, showZeroValues = FALSE)
+            
+            dygraph1
+            
+         } else {
+            
+            # Plots Default + Discharge data
+            data1 <- dataCurQ1()
+            data1 <- removeCodes(data1)
+            data1.xts <- xts(data1[,-1], order.by = data1$date)
+            
+            dygraph1 <- dygraph(data1.xts) %>%
+               dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
+               dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
+               dyAxis('y2',label=ylabel2, independentTicks=TRUE,
+                      axisLabelWidth = 70,
+                      axisLabelColor = "#3182bd",
+                      axisLineColor = "#3182bd") %>% # color is light blue
+               dySeries(name = input$SOLUTES1,
+                        color = "#black") %>%
+               dySeries(name = 'Flow_or_Precip',
+                        drawPoints = FALSE,
+                        fillGraph=T,
+                        color = "#3182bd",
+                        axis='y2') %>%
+               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+               dyOptions(drawGrid = FALSE,
+                         drawPoints = TRUE,
+                         strokeWidth = 1,
+                         pointSize = 3,
+                         fillAlpha = 0.5,
+                         connectSeparatedPoints=TRUE,
+                         includeZero = TRUE)
+            dygraph1 
+         }
+      } else {
+         
+         if (input$SOLUTES_HIST1 == TRUE) {
+            
+            # Plots Default + Historical data
+            data1 <- dataCurHist1()
+            data1 <- removeCodes(data1)
+            data1.xts <- xts(data1[,-1], order.by = data1$date)
+            
+            dygraph1 <- dygraph(data1.xts) %>%
+               dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
+               dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
+               dySeries(name = input$SOLUTES1,
+                        color = "black",
+                        drawPoints = TRUE,
+                        pointSize = 3,
+                        axis='y') %>%
+               dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
+                        strokePattern = c("dashed"),
+                        color = "#A9A9A9",
+                        label = 'median + IQR',
+                        axis='y') %>%
+               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+               dyOptions(drawGrid = FALSE,
+                         strokeWidth = 1,
+                         fillAlpha = 0.3,
+                         connectSeparatedPoints=TRUE,
+                         includeZero = TRUE)
+            
+            dygraph1
+            
+         } else {
+            
+            # Plots Default data
+            
+            data1 <- dataCurrent1()
+            data1 <- removeCodes(data1)
+            data1.xts <- xts(data1, order.by = data1$date)
+            
+            #padrange <- c(min(data1.xts$input$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$input$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
+            
+            dygraph1 <- dygraph(data1.xts) %>%
+               dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
+               dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
+               dySeries(name = input$SOLUTES1,
+                        color = "black",
+                        drawPoints = TRUE,
+                        strokeWidth = 1,
+                        pointSize = 3) %>%
+               # dySeries(name = "FieldCode",
+               #          color = "black",
+               #          drawPoints = TRUE,
+               #          strokeWidth = 0,
+               #          pointSize = 1) %>%
+               # for (i in 1:nrow(data1.xts)) {
+               #    dyAnnotation(index(i), data1.xts$FieldCode[i])
+               # } %>%
+               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+               dyOptions(drawGrid = FALSE,
+                         connectSeparatedPoints=TRUE,
+                         includeZero = TRUE)
+            
+            dygraph1
+         }
+      }
+      
    }) # END of output$GRAPH1
    
    output$TABLE1 <- renderDataTable(dataCurrent1()) # for testing purposes
@@ -1257,8 +1253,8 @@ shinyServer(function(input, output, session) {
      
      if (input$HYDROLOGY2 == TRUE)   {
            
-         if (input$SITES2 %in% sites_streams) ylabel2 <- 'Discharge (mm or L/s)'
-         if (input$SITES2 %in% sites_precip) ylabel2 <- 'Precipitation (in)'
+         if (input$SITES2 %in% sites_streams) ylabel2 <- 'Discharge (ft or L/s)'
+         if (input$SITES2 %in% sites_precip) ylabel2 <- 'Precipitation (mm)'
         
            # Plots Default + Discharge data
            data2 <- dataCurQ2()
@@ -1366,7 +1362,7 @@ shinyServer(function(input, output, session) {
          dygraph(data3.xts) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR3)) %>%
             dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
-            dyAxis('y2',label='Hydrology (mm or L/s)', independentTicks=TRUE,
+            dyAxis('y2',label='Hydrology (ft or L/s)', independentTicks=TRUE,
                 axisLabelWidth = 70,
                 axisLabelColor = "#3182bd",
                 axisLineColor = "#3182bd") %>% # color is light blue
@@ -1397,7 +1393,7 @@ shinyServer(function(input, output, session) {
            dygraph(data3.xts) %>%
              dyAxis("x", label = paste("Water Year", input$WATERYEAR3)) %>%
              dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
-             dyAxis('y2',label='Precipitation (in)', independentTicks=TRUE,
+             dyAxis('y2',label='Precipitation (mm)', independentTicks=TRUE,
                     axisLabelWidth = 70,
                     axisLabelColor = "#3182bd",
                     axisLineColor = "#3182bd") %>% # color is light blue
