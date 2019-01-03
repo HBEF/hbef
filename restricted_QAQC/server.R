@@ -243,6 +243,60 @@ shinyServer(function(input, output, session) {
    changesInData$change_dataCurrent <- 0
    changesInData$change_dataAll <- 0
 
+   # Make a reactive dataCurrent data frame, to be called whenever data is updated
+   # (R in dataCurrentR stands for reactive)
+   dataCurrentR <- eventReactive(changesInData$change_dataCurrent, {
+      
+      # Open database connection
+      y = RMariaDB::MariaDB()
+      con = dbConnect(y,
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = 'hbef')
+      
+      # Read current data and disconnect from table
+      dataCurrentR <- dbReadTable(con, "current")
+      message(print(class(dataCurrentR)))
+      message(head(dataCurrentR))
+      dataCurrentR <- as.data.frame(dataCurrentR)
+      message(print(class(dataCurrentR)))
+      message(head(dataCurrentR))
+      dbDisconnect(con)
+      
+      # Clean up data
+      dataCurrentR <- standardizeClasses(dataCurrentR)
+      # substituting commas with semi-colons. (necessary to prevent problems when downloading csv files)
+      dataCurrentR$notes <- gsub(",", ";", dataCurrentR$notes)
+      dataCurrentR$sampleType <- gsub(",", ";", dataCurrentR$sampleType)
+      
+      # Re-calculate and assign water year variable
+      wy <- levels(as.factor(dataCurrentR$waterYr))
+      wy1 <- c()
+      for (i in 1:length(wy)) {
+         wy1 <- c(wy1, wy[i])
+      }
+      #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
+      wateryears <<- as.list(wy1) #assign it globally
+      
+      # Update user interface
+      updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
+      
+      # Trigger update in dataAll
+      changesInData$change_dataAll <- changesInData$change_dataAll + 1
+      
+      dataCurrentR
+      
+   })
+   
+   
+   dataAllR <- eventReactive(changesInData$change_dataAll, { 
+      dataAllR <- bind_rows(dataHistorical, dataCurrentR())
+      dataAllR <- standardizeClasses(dataAllR)
+   })
    # # !!! See if you're going to use or delete, for 5 or all years of history
    # histYears <- reactive({
    #   # Select desired historical water years
@@ -305,61 +359,6 @@ shinyServer(function(input, output, session) {
    
    # *QA/QC Tab* #### 
    #************************
-
-   # Make a reactive dataCurrent data frame, to be called whenever data is updated
-   # (R in dataCurrentR stands for reactive)
-   dataCurrentR <- eventReactive(changesInData$change_dataCurrent, {
-
-        # Open database connection
-        y = RMariaDB::MariaDB()
-        con = dbConnect(y,
-                user = 'root',
-                password = pass,
-                host = 'localhost',
-                dbname = 'hbef')
-
-        # Read current data and disconnect from table
-        dataCurrentR <- dbReadTable(con, "current")
-        message(print(class(dataCurrentR)))
-        message(head(dataCurrentR))
-        dataCurrentR <- as.data.frame(dataCurrentR)
-        message(print(class(dataCurrentR)))
-        message(head(dataCurrentR))
-        dbDisconnect(con)
-
-        # Clean up data
-        dataCurrentR <- standardizeClasses(dataCurrentR)
-        # substituting commas with semi-colons. (necessary to prevent problems when downloading csv files)
-        dataCurrentR$notes <- gsub(",", ";", dataCurrentR$notes)
-        dataCurrentR$sampleType <- gsub(",", ";", dataCurrentR$sampleType)
-
-        # Re-calculate and assign water year variable
-        wy <- levels(as.factor(dataCurrentR$waterYr))
-        wy1 <- c()
-        for (i in 1:length(wy)) {
-            wy1 <- c(wy1, wy[i])
-        }
-        #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
-        wateryears <<- as.list(wy1) #assign it globally
-
-        # Update user interface
-        updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
-
-        # Trigger update in dataAll
-        changesInData$change_dataAll <- changesInData$change_dataAll + 1
-
-        dataCurrentR
-
-   })
-
-
-   dataAllR <- eventReactive(changesInData$change_dataAll, { 
-       dataAllR <- bind_rows(dataHistorical, dataCurrentR())
-       dataAllR <- standardizeClasses(dataAllR)
-   })
 
 
    # Panel 1 Reactivity #### 
