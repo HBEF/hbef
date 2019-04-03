@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-#pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-pass = readLines('SQL.txt')                        # for local computer
+pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+#pass = readLines('SQL.txt')                        # for local computer
 
 # ***********************************************************************
 #                    ---- IMPORTANT PRELIMINARY INFO ----
@@ -70,17 +70,17 @@ pass = readLines('SQL.txt')                        # for local computer
 # Replaces codes -999.9, -1, -2, and -3 from data (used before graphing)
 removeCodes <- function(dataSet) {
 
-         message(paste("head(dataCurrent):", head(dataCurrent)))
-         message(paste("ncol(dataCurrent):", ncol(dataCurrent)))
-         message(paste("nrow(dataCurrent):", nrow(dataCurrent)))
+        # message(paste("head(dataCurrent):", head(dataCurrent)))
+        # message(paste("ncol(dataCurrent):", ncol(dataCurrent)))
+        # message(paste("nrow(dataCurrent):", nrow(dataCurrent)))
          
         # message(paste("head(dataCurrent1):", head(dataCurrent1())))
         # message(paste("ncol(dataCurrent1):", ncol(dataCurrent1())))
         # message(paste("nrow(dataCurrent1):", nrow(dataCurrent1())))
 
-         message(paste("ncol(dataSet):", ncol(dataSet)))
-         message(paste("nrow(dataSet):", nrow(dataSet)))
-         message(paste("head(dataSet):", head(dataSet)))
+         # message(paste("ncol(dataSet):", ncol(dataSet)))
+         # message(paste("nrow(dataSet):", nrow(dataSet)))
+         # message(paste("head(dataSet):", head(dataSet)))
    # if value -999.9 is present in certain columns, replace with NA
    for (i in 1:6) {
       # test data set when needed:
