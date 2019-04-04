@@ -147,50 +147,7 @@ col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_co
    
 # **** END of Theme ****
 
-# Set consistent colors for solutes (used when more than one is displayed) - this is not working yet
-#***********************************
-pal_cations <- brewer.pal(length(solutes_cations), "Paired") # set color palette for group
-colors_cations <- list("cationCharge" = pal_cations[1],
-                       "Ca"= pal_cations[2], 
-                       "Mg" = pal_cations[3], 
-                       "K"= pal_cations[4], 
-                       "Na"= pal_cations[5], 
-                       "TMAl"= pal_cations[6], 
-                       "OMAl"= pal_cations[7], 
-                       "Al_ICP"= pal_cations[8], 
-                       "NH4"= pal_cations[9], 
-                       "Mn"= pal_cations[10], 
-                       "Fe"= pal_cations[11]) # warning: color palette used for cations group ("Paired") only has 11 colors. If you have >11 cations, need to add colors outside of palette.
-
-pal_anions <- brewer.pal(length(solutes_anions), "Set1")  # set color palette for group
-colors_anions <- list("anionCharge" = pal_anions[1],
-                       "SO4" = pal_anions[2], 
-                       "NO3" = pal_anions[3], 
-                       "Cl" = pal_anions[4], 
-                       "PO4" = pal_anions[5], 
-                       "F" = pal_anions[6]) # warning: color palette used for anions group ("Set1") only has 6 colors. If you have >6 anions, need to add colors outside of palette.
-
-pal_other <- brewer.pal(length(solutes_other), "Set3")  # set color palette for group
-colors_other <- list("pH3star" = pal_other[1],
-                     "pHmetrohm" = "#000000",
-                     "DOC" = pal_other[2], 
-                     "TDN" = pal_other[3], 
-                     "DON" = pal_other[4], 
-                     "DIC" = pal_other[5], 
-                     "SiO2" = pal_other[6], 
-                     "ANC960" = pal_other[7], 
-                     "ANCMet" = pal_other[8], 
-                     "spCond" = pal_other[9], 
-                     "theoryCond" = pal_other[10], 
-                     "temp" = pal_other[11], 
-                     "ionBalance" = pal_other[12]) # warning: color palette used for other group ("Set3") only has 12 colors. If you have >12 other solutes, need to add colors outside of palette.
-
-solute_palette <- c(colors_cations, colors_anions, colors_other)
-
-# **** END of Lists for the sidebar ****
-
 # **** END OF IMPORTANT PRELIMINARY INFO ****
-
 
 
 # **********************************************************************
