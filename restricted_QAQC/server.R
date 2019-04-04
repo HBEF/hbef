@@ -1432,14 +1432,14 @@ shinyServer(function(input, output, session) {
    # par(mar = c(5,10,4,2)+0.1)
    # output$TITLE4 <- renderText ({print(input$SITES4)})
    output$GRAPH_PRECIP4 <- renderPlot({
-      if (input$HYDROLOGY4 == TRUE) {
+      if (input$PRECIP4_OPTION == TRUE) {
          data <- dataPrecip4()
          x <- data$date
          # get column number of selected precipitation source
          # ind_col <- which(input$PRECIP_SOURCE4 == colnames(data), arr.ind = TRUE)
          y <- data$medianPrecip
          p <- ggplot(data, aes(x, y)) + my_theme +
-            geom_col(color="blue", fill = "lightblue", width = 1, na.rm=TRUE) +
+            geom_col(fill = "cadetblue3", width = 4, na.rm=TRUE) +
             labs(x = "", y = "Precipitation") +
             coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
             scale_y_reverse()
@@ -1457,6 +1457,7 @@ shinyServer(function(input, output, session) {
          geom_line(alpha = 0.5) +
          scale_x_date(date_labels = "%Y-%b")+
          coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+         scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
          labs(x = "", y = "Solutes") 
       # If show field code is selected, add to ggplot
       if (input$FIELDCODE4 == TRUE) {
@@ -1468,12 +1469,12 @@ shinyServer(function(input, output, session) {
       m
    }, height = 350) # end of output$GRAPH_MAIN4
    output$GRAPH_FLOW4 <- renderPlot({
-      if (input$HYDROLOGY4 == TRUE) {
+      if (input$DISCHARGE4_OPTION == TRUE) {
          data <- dataFlow4()
          x <- data$date
          y <- data$flowMaxPerDate
          f <- ggplot(data, aes(x, y)) + my_theme +
-            geom_area(color="blue", fill = "lightblue", na.rm=TRUE) +
+            geom_area(fill = "cadetblue3", na.rm=TRUE) +
             coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
             labs(x = "", y = "Discharge") 
          if (input$HYDROLIMB4 == TRUE) {

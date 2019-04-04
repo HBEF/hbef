@@ -349,55 +349,88 @@ shinyUI(
                         # General tab
                         #********************
                         tabPanel("General",
-                           p(checkboxInput(
-                                       "HYDROLOGY4",
-                                       label = strong("View hydrology"),
-                                       value = TRUE),
-                             style = "font-weight:bold;"
-                           ),
-                           # this panel only appears when hydology option is selected
+                           br(),
+                           p("View...", style = "font-weight:bold; font-size:1.2em;"),
+                           
+                           hr(),
+                           
+                           # Options for "Precipitation"
+                           #############################
+                           checkboxInput("PRECIP4_OPTION",
+                                    label = p("Precipitation", style = "font-weight:bold; margin-bottom:0px; font-size:1.2em;"),
+                                    value = TRUE
+                                 ),
+                           # below only appears if "Precipitation" is selected
                            conditionalPanel(
-                              condition = "input.HYDROLOGY4 == true",
+                              condition = "input.PRECIP4_OPTION == true",
                               radioButtons(
                                  "PRECIP_SOURCE4",
-                                 label = "PRECIPITATION data source",
+                                 label = "Precip data source:",
                                  choices = c("Collector Catch" = "precipCatch",
                                              "ETI" = "precipETI"
                                  ),
                                  selected = "precipCatch"
                               ),
-                              p("DISCHARGE data sources",
-                                style = "font-weight:bold;"),
-                              selectInput("FLOW_SITE4",
-                                          label = "Site:",
-                                          choices = c(sites_streams),
-                                          selected = "W1"), # !!! need to field this from what's in data...
+                              style = "color:#919191;"
+                           ), #end of conditional panel
+                           
+                           hr(),
+                           
+                           # Options for "Solutes"
+                           #######################
+                           checkboxInput("SOLUTE4_OPTION",
+                                         label = p("Solutes", style = "font-weight:bold; margin-bottom:0px; font-size:1.2em;"),
+                                         value = TRUE
+                           ),
+                           conditionalPanel(
+                              condition = "input.SOLUTE4_OPTION == true",
+                              checkboxInput("FIELDCODE4",
+                                            label = "Show field codes",
+                                            value = FALSE
+                              ),
+                              style = "color:#919191; font-weight:bold;"
+                           ), # end 
+                           
+                           hr(),
+                           
+                           # Options for "Discharge"
+                           #########################
+                           checkboxInput("DISCHARGE4_OPTION",
+                                         label = p("Discharge", style = "font-weight:bold; margin-bottom:0px; font-size:1.2em;"),
+                                         value = TRUE
+                           ),
+                           # below only appears if "Discharge" is selected
+                           conditionalPanel(
+                              condition = "input.DISCHARGE4_OPTION == true",
+                              checkboxInput("HYDROLIMB4",
+                                            label = "Add hydrograph limb",
+                                            value = FALSE
+                              ),
+                              p("Discharge data sources:", style = "font-weight:bold; margin-bottom:0px"), 
+                              p(selectInput("FLOW_SITE4",
+                                            label = "",
+                                            choices = c(sites_streams),
+                                            selected = "W1"),
+                                style = "margin-bottom:0px"
+                              ), # !!! need to field this from what's in data...
                               radioButtons(
                                  "FLOW_SOURCE4",
-                                 label = "Data type:",
+                                 label = "",
                                  choices = c("Gage Height" = "gageHt",
                                              "Q (estimated from Gage Height)" = "flowGageHt",
                                              "Q (ETI)" = "flowSensor"
                                  ),
                                  selected = "gageHt"
                               ),
-                              checkboxInput("HYDROLIMB4",
-                                              label = strong("Add hydrograph limb"),
-                                              value = FALSE
-                              ),
-                              style = "color:#919191; font-size:85%;"
-                           ), #end of conditional panel
-                           checkboxInput("FIELDCODE4",
-                                           label = strong("Show field codes"),
-                                           value = FALSE
-                           )
+                              style = "color:#919191; margin-top:0px;"
+                           ) #end of conditional panel
                         ), 
                         #********************
                         # Solutes tab
                         #********************
                         tabPanel("Solutes",
                            checkboxGroupInput("SOLUTES4",
-                                               label = "Solute",
+                                               label = "",
                                                choices = c(solutes_cations, solutes_anions, solutes_other),
                                                selected = "Ca"
                            ),
@@ -410,7 +443,7 @@ shinyUI(
                         #********************
                         tabPanel("Sites",
                           checkboxGroupInput("SITES4", 
-                                             label = "Sites",
+                                             label = "",
                                              choices = c(sites_streams, sites_precip),
                                              selected = "W1"
                            )
@@ -435,18 +468,21 @@ shinyUI(
                      ),
                      #tags$h4(textOutput("TITLE4")),
                      conditionalPanel(
-                        condition = "input.HYDROLOGY4 == true",
+                        condition = "input.PRECIP4_OPTION == true",
                         fluidRow(
                            column(12, style = "height:100px;",
                                  plotOutput("GRAPH_PRECIP4"))
                         )
                      ),  
-                     fluidRow(
-                        column(12, style = "height:350px;",
-                               plotOutput("GRAPH_MAIN4"))
+                     conditionalPanel(
+                        condition = "input.SOLUTE4_OPTION == true",
+                        fluidRow(
+                           column(12, style = "height:350px;",
+                                 plotOutput("GRAPH_MAIN4"))
+                        )
                      ),
                      conditionalPanel(
-                        condition = "input.HYDROLOGY4 == true",
+                        condition = "input.DISCHARGE4_OPTION == true",
                         fluidRow(
                            column(12, style = "height:100px;",
                                   plotOutput("GRAPH_FLOW4"))
