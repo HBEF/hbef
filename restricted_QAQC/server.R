@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-#pass = readLines('SQL.txt')                        # for local computer
+#pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+pass = readLines('SQL.txt')                        # for local computer
 
 # ***********************************************************************
 #                    ---- IMPORTANT PRELIMINARY INFO ----
@@ -69,18 +69,6 @@ pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
 
 # Replaces codes -999.9, -1, -2, and -3 from data (used before graphing)
 removeCodes <- function(dataSet) {
-
-        # message(paste("head(dataCurrent):", head(dataCurrent)))
-        # message(paste("ncol(dataCurrent):", ncol(dataCurrent)))
-        # message(paste("nrow(dataCurrent):", nrow(dataCurrent)))
-         
-        # message(paste("head(dataCurrent1):", head(dataCurrent1())))
-        # message(paste("ncol(dataCurrent1):", ncol(dataCurrent1())))
-        # message(paste("nrow(dataCurrent1):", nrow(dataCurrent1())))
-
-         # message(paste("ncol(dataSet):", ncol(dataSet)))
-         # message(paste("nrow(dataSet):", nrow(dataSet)))
-         # message(paste("head(dataSet):", head(dataSet)))
    # if value -999.9 is present in certain columns, replace with NA
    for (i in 1:6) {
       # test data set when needed:
@@ -100,22 +88,8 @@ removeCodes <- function(dataSet) {
    # if values are -1, -2, or -3, replace with NA
    for (i in 1:23) {
       current_col_ofData <- codes123[i]
-      message(paste("i:", i))
-      message(paste("current_col_ofData:", current_col_ofData))
       if (current_col_ofData %in% names(dataSet)) {
          ind_col <- which(current_col_ofData == colnames(dataSet), arr.ind = TRUE)
-         message(paste("ind_col:", ind_col))
-         message(paste("class(dataSet):", class(dataSet)))
-         message(paste("class(dataSet$date):", class(dataSet$date)))         
-         message(paste("class(dataSet$Ca):", class(dataSet$Ca)))         
-         message(paste("class(dataSet[1]):", class(dataSet[1])))         
-         message(paste("dataSet:", dataSet))         
-         message(paste("head(dataSet[ind_col]):", head(as.data.frame(dataSet[ind_col]))))
-         message(paste("ncol(dataSet):", ncol(dataSet)))
-         message(paste("nrow(dataSet):", nrow(dataSet)))
-         message(paste("head(dataSet):", head(dataSet)))
-         message(paste("dataSet:", dataSet))
-#         message(paste("dataSet[ind_col][dataSet[ind_col]]",dataSet[ind_col][dataSet[ind_col] == 1.2008]))
          dataSet[ind_col][dataSet[ind_col] == -1] <- NA
          dataSet[ind_col][dataSet[ind_col] == -2] <- NA
          dataSet[ind_col][dataSet[ind_col] == -3] <- NA
