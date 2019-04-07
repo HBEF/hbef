@@ -348,7 +348,7 @@ shinyUI(
                         #********************
                         # General tab
                         #********************
-                        tabPanel("General",
+                        tabPanel(p("General", style = "font-size:0.8em;"),
                            br(),
                            #p("View...", style = "font-weight:bold; font-size:1.1em;"),
                            
@@ -356,7 +356,7 @@ shinyUI(
                        
                            # Options for "Precipitation" Graph
                            #**********************************
-                           p("Precipitation Graph", style = "font-weight:bold; font-size:1.1em;"),
+                           p("Precipitation", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("PRECIP4_OPTION",
                                     label = "Show graph",
                                     value = TRUE
@@ -367,7 +367,7 @@ shinyUI(
                               radioButtons(
                                  "PRECIP_SOURCE4",
                                  label = "Precip data source:",
-                                 choices = c("Collector Catch" = "precipCatch",
+                                 choices = c("Collector Catch (mm)" = "precipCatch",
                                              "ETI" = "precipETI"
                                  ),
                                  selected = "precipCatch"
@@ -379,7 +379,7 @@ shinyUI(
                            
                            # Options for "Solutes" Graph
                            #****************************
-                           p("Solutes Graph", style = "font-weight:bold; font-size:1.1em;"),
+                           p("Solutes", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("SOLUTE4_OPTION",
                                          label = "Show graph",
                                          value = TRUE
@@ -401,7 +401,7 @@ shinyUI(
                            
                            # Options for "Discharge" Graph
                            #******************************
-                           p("Discharge Graph", style = "font-weight:bold; font-size:1.1em;"),
+                           p("Discharge", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("DISCHARGE4_OPTION",
                                          label = "Show graph",
                                          value = TRUE
@@ -424,8 +424,8 @@ shinyUI(
                               radioButtons(
                                  "FLOW_SOURCE4",
                                  label = p("Data type:", style = "font-weight:bold"),
-                                 choices = c("Gage Height" = "gageHt",
-                                             "Q (estimated from Gage Height)" = "flowGageHt",
+                                 choices = c("Gage Height (ft)" = "gageHt",
+                                             "Q (estimated from Gage Height) (L/s)" = "flowGageHt",
                                              "Q (ETI)" = "flowSensor"
                                  ),
                                  selected = "gageHt"
@@ -436,7 +436,7 @@ shinyUI(
                         #********************
                         # Solutes tab
                         #********************
-                        tabPanel("Solutes",
+                        tabPanel(p("Solutes", style = "font-size:0.8em;"),
                            checkboxGroupInput("SOLUTES4",
                                                label = "",
                                                choices = c(solutes_cations, solutes_anions, solutes_other),
@@ -449,7 +449,7 @@ shinyUI(
                         #********************
                         # Sites tab
                         #********************
-                        tabPanel("Sites",
+                        tabPanel(p("Sites", style = "font-size:0.8em;"),
                           checkboxGroupInput("SITES4", 
                                              label = "",
                                              choices = c(sites_streams, sites_precip),
