@@ -350,14 +350,15 @@ shinyUI(
                         #********************
                         tabPanel("General",
                            br(),
-                           p("View...", style = "font-weight:bold; font-size:1.2em;"),
+                           #p("View...", style = "font-weight:bold; font-size:1.1em;"),
                            
-                           hr(),
-                           
-                           # Options for "Precipitation"
-                           #############################
+                           #hr(),
+                       
+                           # Options for "Precipitation" Graph
+                           #**********************************
+                           p("Precipitation Graph", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("PRECIP4_OPTION",
-                                    label = p("Precipitation", style = "font-weight:bold; margin-bottom:0px; font-size:1.2em;"),
+                                    label = "Show graph",
                                     value = TRUE
                                  ),
                            # below only appears if "Precipitation" is selected
@@ -376,10 +377,11 @@ shinyUI(
                            
                            hr(),
                            
-                           # Options for "Solutes"
-                           #######################
+                           # Options for "Solutes" Graph
+                           #****************************
+                           p("Solutes Graph", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("SOLUTE4_OPTION",
-                                         label = p("Solutes", style = "font-weight:bold; margin-bottom:0px; font-size:1.2em;"),
+                                         label = "Show graph",
                                          value = TRUE
                            ),
                            conditionalPanel(
@@ -388,15 +390,20 @@ shinyUI(
                                             label = "Show field codes",
                                             value = FALSE
                               ),
-                              style = "color:#919191; font-weight:bold;"
+                              selectInput("SOLUTES4_COLOR",
+                                          label = "Colors apply to:",
+                                          choices = c("Solutes", "Sites"),
+                                          width = "80%"),
+                              style = "color:#919191; "
                            ), # end 
                            
                            hr(),
                            
-                           # Options for "Discharge"
-                           #########################
+                           # Options for "Discharge" Graph
+                           #******************************
+                           p("Discharge Graph", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("DISCHARGE4_OPTION",
-                                         label = p("Discharge", style = "font-weight:bold; margin-bottom:0px; font-size:1.2em;"),
+                                         label = "Show graph",
                                          value = TRUE
                            ),
                            # below only appears if "Discharge" is selected
@@ -406,16 +413,17 @@ shinyUI(
                                             label = "Add hydrograph limb",
                                             value = FALSE
                               ),
-                              p("Discharge data sources:", style = "font-weight:bold; margin-bottom:0px"), 
+                              p("Discharge data sources:", style = "font-weight:bold; text-decoration:underline;"), 
                               p(selectInput("FLOW_SITE4",
-                                            label = "",
+                                            label = p("Data from site:", style = "font-weight:bold"),
                                             choices = c(sites_streams),
-                                            selected = "W1"),
+                                            selected = "W1",
+                                            width = "80%"),
                                 style = "margin-bottom:0px"
-                              ), # !!! need to field this from what's in data...
+                              ), 
                               radioButtons(
                                  "FLOW_SOURCE4",
-                                 label = "",
+                                 label = p("Data type:", style = "font-weight:bold"),
                                  choices = c("Gage Height" = "gageHt",
                                              "Q (estimated from Gage Height)" = "flowGageHt",
                                              "Q (ETI)" = "flowSensor"

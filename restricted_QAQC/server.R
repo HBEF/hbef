@@ -798,26 +798,7 @@ shinyServer(function(input, output, session) {
       else {NA}
    })
 
-   # Join data together
-   # 1. Re-Classify data class of each column to ensure consistency aross tables
-   ## (necessary for merging data tables)
-   defClassesSample$date <- as.Date(defClassesSample$date, format="%m/%d/%y")
-   defClassesSample$date <- as.Date(defClassesSample$date, format="%Y-%m-%d")
-#   dataHistorical <- standardizeClasses(dataHistorical)
-   #message(names(dataHistorical))
-   # write.csv(dataCurrentR(), "test", col.names=TRUE)
-   #message("After dataHistorical, about to do standardizeClasses on dataCurrent")
-   #message(names(dataCurrentR()))
-   #message(head(dataCurrentR()))
-#   dataCurrent <- standardizeClasses(dataCurrentR())
-      # !!! for some reason 'precipCatch' needs to be corrected
-#      dataCurrent$precipCatch <- as.numeric(dataCurrent$precipCatch)
-      ## remove columns that don't match up between datasets
-#      dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
-   # 2. Join data together
-#   dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical) # !!! eventually need to add sensor data here
-   # 3. Filter data according to inputs
-   ## Base data
+   ## Filter data to desired dates
    data4 <- reactive ({
       if (changesInData$change_dataAll > 0) dataAll <- dataAllR()
       data4 <- dataAll %>%
@@ -826,7 +807,7 @@ shinyServer(function(input, output, session) {
       data4 <- removeCodes(data4)
       data4
    })
-   ## Data for Precip plot
+   ## Extract data for Precip plot
    dataPrecip4 <- reactive ({
       dataPrecip4 <- data4() %>%
          #filter(site %in% input$PRECIP_SITE4) %>%
@@ -844,7 +825,7 @@ shinyServer(function(input, output, session) {
       }
       dataPrecip4
    })
-   ## Data for Main plot
+   ## Extract data for Solutes (Main) plot
    dataMain4 <- reactive ({
       dataMain4 <- data4() %>%
          filter(site %in% input$SITES4) %>%
@@ -852,7 +833,7 @@ shinyServer(function(input, output, session) {
          group_by(date, site) %>%
          gather(key = solute, value = solute_value, -site, -date, -fieldCode)  # Reshape data for ggplot2 plotting
    })
-   ## Data for Flow plot
+   ## Extract data for Discharge (Flow) plot
    dataFlow4 <- reactive ({
       dataFlow4 <- data4() %>%
          filter(site %in% input$FLOW_SITE4) %>%
@@ -1408,14 +1389,40 @@ shinyServer(function(input, output, session) {
       x <- data$date
       y <- data$solute_value
       # build ggplot function
-      m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) +
-         my_theme +
-         geom_point(size = 2.5) +
-         geom_line(alpha = 0.5) +
-         scale_x_date(date_labels = "%Y-%b")+
-         coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
-         scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
-         labs(x = "", y = "Solutes") 
+      # design <- my_theme +
+      #    geom_point(size = 2.5) +
+      #    geom_line(alpha = 0.5) +
+      #    scale_x_date(date_labels = "%Y-%b")+
+      #    coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+      #    scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
+      #    labs(x = "", y = "Solutes") 
+      if(input$SOLUTES4_COLOR == "Solutes") {
+         m <- ggplot(data, aes(x, y, shape=data$site, color=data$solute)) + 
+            my_theme +
+            geom_point(size = 2.5) +
+            geom_line(alpha = 0.5) +
+            scale_x_date(date_labels = "%Y-%b")+
+            coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+            scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
+            labs(x = "", y = "Solutes") 
+      } else {
+         m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) + 
+            my_theme +
+            geom_point(size = 2.5) +
+            geom_line(alpha = 0.5) +
+            scale_x_date(date_labels = "%Y-%b")+
+            coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+            scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
+            labs(x = "", y = "Solutes") 
+      }
+      # m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) +
+      #    my_theme +
+      #    geom_point(size = 2.5) +
+      #    geom_line(alpha = 0.5) +
+      #    scale_x_date(date_labels = "%Y-%b")+
+      #    coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+      #    scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
+      #    labs(x = "", y = "Solutes") 
       # If show field code is selected, add to ggplot
       if (input$FIELDCODE4 == TRUE) {
          m <- m + geom_text(aes(label=data$fieldCode), 
