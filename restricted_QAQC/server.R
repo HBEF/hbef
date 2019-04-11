@@ -69,18 +69,6 @@ pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
 
 # Replaces codes -999.9, -1, -2, and -3 from data (used before graphing)
 removeCodes <- function(dataSet) {
-
-        # message(paste("head(dataCurrent):", head(dataCurrent)))
-        # message(paste("ncol(dataCurrent):", ncol(dataCurrent)))
-        # message(paste("nrow(dataCurrent):", nrow(dataCurrent)))
-         
-        # message(paste("head(dataCurrent1):", head(dataCurrent1())))
-        # message(paste("ncol(dataCurrent1):", ncol(dataCurrent1())))
-        # message(paste("nrow(dataCurrent1):", nrow(dataCurrent1())))
-
-         # message(paste("ncol(dataSet):", ncol(dataSet)))
-         # message(paste("nrow(dataSet):", nrow(dataSet)))
-         # message(paste("head(dataSet):", head(dataSet)))
    # if value -999.9 is present in certain columns, replace with NA
    for (i in 1:6) {
       # test data set when needed:
@@ -100,22 +88,8 @@ removeCodes <- function(dataSet) {
    # if values are -1, -2, or -3, replace with NA
    for (i in 1:23) {
       current_col_ofData <- codes123[i]
-      message(paste("i:", i))
-      message(paste("current_col_ofData:", current_col_ofData))
       if (current_col_ofData %in% names(dataSet)) {
          ind_col <- which(current_col_ofData == colnames(dataSet), arr.ind = TRUE)
-         message(paste("ind_col:", ind_col))
-         message(paste("class(dataSet):", class(dataSet)))
-         message(paste("class(dataSet$date):", class(dataSet$date)))         
-         message(paste("class(dataSet$Ca):", class(dataSet$Ca)))         
-         message(paste("class(dataSet[1]):", class(dataSet[1])))         
-         message(paste("dataSet:", dataSet))         
-         message(paste("head(dataSet[ind_col]):", head(as.data.frame(dataSet[ind_col]))))
-         message(paste("ncol(dataSet):", ncol(dataSet)))
-         message(paste("nrow(dataSet):", nrow(dataSet)))
-         message(paste("head(dataSet):", head(dataSet)))
-         message(paste("dataSet:", dataSet))
-#         message(paste("dataSet[ind_col][dataSet[ind_col]]",dataSet[ind_col][dataSet[ind_col] == 1.2008]))
          dataSet[ind_col][dataSet[ind_col] == -1] <- NA
          dataSet[ind_col][dataSet[ind_col] == -2] <- NA
          dataSet[ind_col][dataSet[ind_col] == -3] <- NA
@@ -173,50 +147,7 @@ col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_co
    
 # **** END of Theme ****
 
-# Set consistent colors for solutes (used when more than one is displayed) - this is not working yet
-#***********************************
-pal_cations <- brewer.pal(length(solutes_cations), "Paired") # set color palette for group
-colors_cations <- list("cationCharge" = pal_cations[1],
-                       "Ca"= pal_cations[2], 
-                       "Mg" = pal_cations[3], 
-                       "K"= pal_cations[4], 
-                       "Na"= pal_cations[5], 
-                       "TMAl"= pal_cations[6], 
-                       "OMAl"= pal_cations[7], 
-                       "Al_ICP"= pal_cations[8], 
-                       "NH4"= pal_cations[9], 
-                       "Mn"= pal_cations[10], 
-                       "Fe"= pal_cations[11]) # warning: color palette used for cations group ("Paired") only has 11 colors. If you have >11 cations, need to add colors outside of palette.
-
-pal_anions <- brewer.pal(length(solutes_anions), "Set1")  # set color palette for group
-colors_anions <- list("anionCharge" = pal_anions[1],
-                       "SO4" = pal_anions[2], 
-                       "NO3" = pal_anions[3], 
-                       "Cl" = pal_anions[4], 
-                       "PO4" = pal_anions[5], 
-                       "F" = pal_anions[6]) # warning: color palette used for anions group ("Set1") only has 6 colors. If you have >6 anions, need to add colors outside of palette.
-
-pal_other <- brewer.pal(length(solutes_other), "Set3")  # set color palette for group
-colors_other <- list("pH3star" = pal_other[1],
-                     "pHmetrohm" = "#000000",
-                     "DOC" = pal_other[2], 
-                     "TDN" = pal_other[3], 
-                     "DON" = pal_other[4], 
-                     "DIC" = pal_other[5], 
-                     "SiO2" = pal_other[6], 
-                     "ANC960" = pal_other[7], 
-                     "ANCMet" = pal_other[8], 
-                     "spCond" = pal_other[9], 
-                     "theoryCond" = pal_other[10], 
-                     "temp" = pal_other[11], 
-                     "ionBalance" = pal_other[12]) # warning: color palette used for other group ("Set3") only has 12 colors. If you have >12 other solutes, need to add colors outside of palette.
-
-solute_palette <- c(colors_cations, colors_anions, colors_other)
-
-# **** END of Lists for the sidebar ****
-
 # **** END OF IMPORTANT PRELIMINARY INFO ****
-
 
 
 # **********************************************************************
@@ -243,6 +174,60 @@ shinyServer(function(input, output, session) {
    changesInData$change_dataCurrent <- 0
    changesInData$change_dataAll <- 0
 
+   # Make a reactive dataCurrent data frame, to be called whenever data is updated
+   # (R in dataCurrentR stands for reactive)
+   dataCurrentR <- eventReactive(changesInData$change_dataCurrent, {
+      
+      # Open database connection
+      y = RMariaDB::MariaDB()
+      con = dbConnect(y,
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = 'hbef')
+      
+      # Read current data and disconnect from table
+      dataCurrentR <- dbReadTable(con, "current")
+      message(print(class(dataCurrentR)))
+      message(head(dataCurrentR))
+      dataCurrentR <- as.data.frame(dataCurrentR)
+      message(print(class(dataCurrentR)))
+      message(head(dataCurrentR))
+      dbDisconnect(con)
+      
+      # Clean up data
+      dataCurrentR <- standardizeClasses(dataCurrentR)
+      # substituting commas with semi-colons. (necessary to prevent problems when downloading csv files)
+      dataCurrentR$notes <- gsub(",", ";", dataCurrentR$notes)
+      dataCurrentR$sampleType <- gsub(",", ";", dataCurrentR$sampleType)
+      
+      # Re-calculate and assign water year variable
+      wy <- levels(as.factor(dataCurrentR$waterYr))
+      wy1 <- c()
+      for (i in 1:length(wy)) {
+         wy1 <- c(wy1, wy[i])
+      }
+      #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
+      wateryears <<- as.list(wy1) #assign it globally
+      
+      # Update user interface
+      updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
+      
+      # Trigger update in dataAll
+      changesInData$change_dataAll <- changesInData$change_dataAll + 1
+      
+      dataCurrentR
+      
+   })
+   
+   
+   dataAllR <- eventReactive(changesInData$change_dataAll, { 
+      dataAllR <- bind_rows(dataHistorical, dataCurrentR())
+      dataAllR <- standardizeClasses(dataAllR)
+   })
    # # !!! See if you're going to use or delete, for 5 or all years of history
    # histYears <- reactive({
    #   # Select desired historical water years
@@ -305,61 +290,6 @@ shinyServer(function(input, output, session) {
    
    # *QA/QC Tab* #### 
    #************************
-
-   # Make a reactive dataCurrent data frame, to be called whenever data is updated
-   # (R in dataCurrentR stands for reactive)
-   dataCurrentR <- eventReactive(changesInData$change_dataCurrent, {
-
-        # Open database connection
-        y = RMariaDB::MariaDB()
-        con = dbConnect(y,
-                user = 'root',
-                password = pass,
-                host = 'localhost',
-                dbname = 'hbef')
-
-        # Read current data and disconnect from table
-        dataCurrentR <- dbReadTable(con, "current")
-        message(print(class(dataCurrentR)))
-        message(head(dataCurrentR))
-        dataCurrentR <- as.data.frame(dataCurrentR)
-        message(print(class(dataCurrentR)))
-        message(head(dataCurrentR))
-        dbDisconnect(con)
-
-        # Clean up data
-        dataCurrentR <- standardizeClasses(dataCurrentR)
-        # substituting commas with semi-colons. (necessary to prevent problems when downloading csv files)
-        dataCurrentR$notes <- gsub(",", ";", dataCurrentR$notes)
-        dataCurrentR$sampleType <- gsub(",", ";", dataCurrentR$sampleType)
-
-        # Re-calculate and assign water year variable
-        wy <- levels(as.factor(dataCurrentR$waterYr))
-        wy1 <- c()
-        for (i in 1:length(wy)) {
-            wy1 <- c(wy1, wy[i])
-        }
-        #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
-        wateryears <<- as.list(wy1) #assign it globally
-
-        # Update user interface
-        updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
-        updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
-
-        # Trigger update in dataAll
-        changesInData$change_dataAll <- changesInData$change_dataAll + 1
-
-        dataCurrentR
-
-   })
-
-
-   dataAllR <- eventReactive(changesInData$change_dataAll, { 
-       dataAllR <- bind_rows(dataHistorical, dataCurrentR())
-       dataAllR <- standardizeClasses(dataAllR)
-   })
 
 
    # Panel 1 Reactivity #### 
@@ -868,26 +798,7 @@ shinyServer(function(input, output, session) {
       else {NA}
    })
 
-   # Join data together
-   # 1. Re-Classify data class of each column to ensure consistency aross tables
-   ## (necessary for merging data tables)
-   defClassesSample$date <- as.Date(defClassesSample$date, format="%m/%d/%y")
-   defClassesSample$date <- as.Date(defClassesSample$date, format="%Y-%m-%d")
-#   dataHistorical <- standardizeClasses(dataHistorical)
-   #message(names(dataHistorical))
-   # write.csv(dataCurrentR(), "test", col.names=TRUE)
-   #message("After dataHistorical, about to do standardizeClasses on dataCurrent")
-   #message(names(dataCurrentR()))
-   #message(head(dataCurrentR()))
-#   dataCurrent <- standardizeClasses(dataCurrentR())
-      # !!! for some reason 'precipCatch' needs to be corrected
-#      dataCurrent$precipCatch <- as.numeric(dataCurrent$precipCatch)
-      ## remove columns that don't match up between datasets
-#      dataCurrent_without_pHmetrohm <- select(dataCurrent, -pHmetrohm)
-   # 2. Join data together
-#   dataAll <- bind_rows(dataCurrent_without_pHmetrohm, dataHistorical) # !!! eventually need to add sensor data here
-   # 3. Filter data according to inputs
-   ## Base data
+   ## Filter data to desired dates
    data4 <- reactive ({
       if (changesInData$change_dataAll > 0) dataAll <- dataAllR()
       data4 <- dataAll %>%
@@ -896,7 +807,7 @@ shinyServer(function(input, output, session) {
       data4 <- removeCodes(data4)
       data4
    })
-   ## Data for Precip plot
+   ## Extract data for Precip plot
    dataPrecip4 <- reactive ({
       dataPrecip4 <- data4() %>%
          #filter(site %in% input$PRECIP_SITE4) %>%
@@ -914,7 +825,7 @@ shinyServer(function(input, output, session) {
       }
       dataPrecip4
    })
-   ## Data for Main plot
+   ## Extract data for Solutes (Main) plot
    dataMain4 <- reactive ({
       dataMain4 <- data4() %>%
          filter(site %in% input$SITES4) %>%
@@ -922,7 +833,7 @@ shinyServer(function(input, output, session) {
          group_by(date, site) %>%
          gather(key = solute, value = solute_value, -site, -date, -fieldCode)  # Reshape data for ggplot2 plotting
    })
-   ## Data for Flow plot
+   ## Extract data for Discharge (Flow) plot
    dataFlow4 <- reactive ({
       dataFlow4 <- data4() %>%
          filter(site %in% input$FLOW_SITE4) %>%
@@ -1459,14 +1370,14 @@ shinyServer(function(input, output, session) {
    # par(mar = c(5,10,4,2)+0.1)
    # output$TITLE4 <- renderText ({print(input$SITES4)})
    output$GRAPH_PRECIP4 <- renderPlot({
-      if (input$HYDROLOGY4 == TRUE) {
+      if (input$PRECIP4_OPTION == TRUE) {
          data <- dataPrecip4()
          x <- data$date
          # get column number of selected precipitation source
          # ind_col <- which(input$PRECIP_SOURCE4 == colnames(data), arr.ind = TRUE)
          y <- data$medianPrecip
          p <- ggplot(data, aes(x, y)) + my_theme +
-            geom_col(color="blue", fill = "lightblue", width = 1, na.rm=TRUE) +
+            geom_col(fill = "cadetblue3", width = 4, na.rm=TRUE) +
             labs(x = "", y = "Precipitation") +
             coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
             scale_y_reverse()
@@ -1478,13 +1389,40 @@ shinyServer(function(input, output, session) {
       x <- data$date
       y <- data$solute_value
       # build ggplot function
-      m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) +
-         my_theme +
-         geom_point(size = 2.5) +
-         geom_line(alpha = 0.5) +
-         scale_x_date(date_labels = "%Y-%b")+
-         coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
-         labs(x = "", y = "Solutes") 
+      # design <- my_theme +
+      #    geom_point(size = 2.5) +
+      #    geom_line(alpha = 0.5) +
+      #    scale_x_date(date_labels = "%Y-%b")+
+      #    coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+      #    scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
+      #    labs(x = "", y = "Solutes") 
+      if(input$SOLUTES4_COLOR == "Solutes") {
+         m <- ggplot(data, aes(x, y, shape=data$site, color=data$solute)) + 
+            my_theme +
+            geom_point(size = 2.5) +
+            geom_line(alpha = 0.5) +
+            scale_x_date(date_labels = "%Y-%b")+
+            coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+            scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
+            labs(x = "", y = "Solutes") 
+      } else {
+         m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) + 
+            my_theme +
+            geom_point(size = 2.5) +
+            geom_line(alpha = 0.5) +
+            scale_x_date(date_labels = "%Y-%b")+
+            coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+            scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
+            labs(x = "", y = "Solutes") 
+      }
+      # m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) +
+      #    my_theme +
+      #    geom_point(size = 2.5) +
+      #    geom_line(alpha = 0.5) +
+      #    scale_x_date(date_labels = "%Y-%b")+
+      #    coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
+      #    scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
+      #    labs(x = "", y = "Solutes") 
       # If show field code is selected, add to ggplot
       if (input$FIELDCODE4 == TRUE) {
          m <- m + geom_text(aes(label=data$fieldCode), 
@@ -1495,12 +1433,12 @@ shinyServer(function(input, output, session) {
       m
    }, height = 350) # end of output$GRAPH_MAIN4
    output$GRAPH_FLOW4 <- renderPlot({
-      if (input$HYDROLOGY4 == TRUE) {
+      if (input$DISCHARGE4_OPTION == TRUE) {
          data <- dataFlow4()
          x <- data$date
          y <- data$flowMaxPerDate
          f <- ggplot(data, aes(x, y)) + my_theme +
-            geom_area(color="blue", fill = "lightblue", na.rm=TRUE) +
+            geom_area(fill = "cadetblue3", na.rm=TRUE) +
             coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
             labs(x = "", y = "Discharge") 
          if (input$HYDROLIMB4 == TRUE) {
