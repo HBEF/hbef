@@ -348,19 +348,16 @@ shinyUI(
                         #********************
                         # General tab
                         #********************
-                        tabPanel(p("General", style = "font-size:0.8em;"),
+                        tabPanel("General",
                            br(),
-                           #p("View...", style = "font-weight:bold; font-size:1.1em;"),
                            
-                           #hr(),
-                       
                            # Options for "Precipitation" Graph
                            #**********************************
                            p("Precipitation", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("PRECIP4_OPTION",
-                                    label = "Show graph",
+                                    label = p("Show graph", style = "font-size:0.9em; color:#919191;"),
                                     value = TRUE
-                                 ),
+                           ),
                            # below only appears if "Precipitation" is selected
                            conditionalPanel(
                               condition = "input.PRECIP4_OPTION == true",
@@ -372,7 +369,7 @@ shinyUI(
                                  ),
                                  selected = "precipCatch"
                               ),
-                              style = "color:#919191;"
+                              style = "color:#919191; font-size:0.9em;"
                            ), #end of conditional panel
                            
                            hr(),
@@ -381,7 +378,7 @@ shinyUI(
                            #****************************
                            p("Solutes", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("SOLUTE4_OPTION",
-                                         label = "Show graph",
+                                         label = p("Show graph", style = "font-size:0.9em; color:#919191;"),
                                          value = TRUE
                            ),
                            conditionalPanel(
@@ -394,7 +391,7 @@ shinyUI(
                                           label = "Colors apply to:",
                                           choices = c("Solutes", "Sites"),
                                           width = "80%"),
-                              style = "color:#919191; "
+                              style = "color:#919191; font-size:0.9em;"
                            ), # end 
                            
                            hr(),
@@ -403,7 +400,7 @@ shinyUI(
                            #******************************
                            p("Discharge", style = "font-weight:bold; font-size:1.1em;"),
                            checkboxInput("DISCHARGE4_OPTION",
-                                         label = "Show graph",
+                                         label = p("Show graph", style = "font-size:0.9em; color:#919191;"),
                                          value = TRUE
                            ),
                            # below only appears if "Discharge" is selected
@@ -419,7 +416,7 @@ shinyUI(
                                             choices = c(sites_streams),
                                             selected = "W1",
                                             width = "80%"),
-                                style = "margin-bottom:0px"
+                                style = "margin-bottom:0px; font-size:0.9em;"
                               ), 
                               radioButtons(
                                  "FLOW_SOURCE4",
@@ -430,13 +427,13 @@ shinyUI(
                                  ),
                                  selected = "gageHt"
                               ),
-                              style = "color:#919191; margin-top:0px;"
+                              style = "color:#919191; margin-top:0px; font-size:0.9em;"
                            ) #end of conditional panel
                         ), 
                         #********************
                         # Solutes tab
                         #********************
-                        tabPanel(p("Solutes", style = "font-size:0.8em;"),
+                        tabPanel("Solutes", 
                            checkboxGroupInput("SOLUTES4",
                                                label = "",
                                                choices = c(solutes_cations, solutes_anions, solutes_other),
@@ -449,7 +446,7 @@ shinyUI(
                         #********************
                         # Sites tab
                         #********************
-                        tabPanel(p("Sites", style = "font-size:0.8em;"),
+                        tabPanel("Sites",
                           checkboxGroupInput("SITES4", 
                                              label = "",
                                              choices = c(sites_streams, sites_precip),
