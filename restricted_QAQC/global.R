@@ -310,7 +310,7 @@ wateryears <- as.list(wy1)
 
 maxDate_current <- max(dataCurrent$date, na.rm=TRUE)
 maxDate_historical <- max(dataHistorical$date, na.rm=TRUE)
-maxDate_sensor <- max(dataSensor$date, na.rm=TRUE)
+maxDate_sensor <- max(as.Date(dataSensor$date), na.rm=TRUE)
 
 maxDate <- maxDate_historical # default value if dataCurrent or dataSensor are empty
 if (maxDate_sensor > maxDate_current) maxDate <- maxDate_sensor
