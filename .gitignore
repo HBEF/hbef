@@ -13,3 +13,4 @@ restricted_QAQC/SQL.txt
 **/.DS_Store
 **/._.DS_Store:
 streampulse_diagnostic_plots
+streampulse_summary_plots
