@@ -5,13 +5,14 @@
 
 library(dplyr)
 library(RMariaDB)
-library(stringr) 
+library(stringr)
 
 message("hello, I'm in global.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
 pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+# pass = readLines('~/git/hbef/RMySQL.config')       # for mike
 #pass = readLines('SQL.txt')                        # for local computer
 
 # **********************************************************************
@@ -20,53 +21,53 @@ pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
 
 # If you add to this list, must update colors_cations list as well
 solutes_cations <- list("TOTAL Cation Charge" = "cationCharge",
-                        "Calcium (Ca)" = "Ca", 
-                        "Magnesium (Mg)" = "Mg", 
-                        "Potassium (K)" = "K", 
-                        "Sodium (Na)" = "Na", 
-                        "TM Aluminum (Al)" = "TMAl", 
-                        "OM Aluminum (Al)" = "OMAl", 
-                        "Aluminum (Al) ICP" = "Al_ICP", 
-                        "Ammonium (NH4)" = "NH4", 
-                        "Manganese (Mn)" = "Mn", 
+                        "Calcium (Ca)" = "Ca",
+                        "Magnesium (Mg)" = "Mg",
+                        "Potassium (K)" = "K",
+                        "Sodium (Na)" = "Na",
+                        "TM Aluminum (Al)" = "TMAl",
+                        "OM Aluminum (Al)" = "OMAl",
+                        "Aluminum (Al) ICP" = "Al_ICP",
+                        "Ammonium (NH4)" = "NH4",
+                        "Manganese (Mn)" = "Mn",
                         "Iron (Fe)" = "Fe")
 
 # If you add to this list, must update colors_anions list as well
 solutes_anions <- list("TOTAL Anion Charge" = "anionCharge",
-                       "Sulfate (SO4)" = "SO4", 
-                       "Nitrate (NO3)" = "NO3", 
-                       "Chloride (Cl)" = "Cl", 
-                       "Phosphate (PO4)" = "PO4", 
+                       "Sulfate (SO4)" = "SO4",
+                       "Nitrate (NO3)" = "NO3",
+                       "Chloride (Cl)" = "Cl",
+                       "Phosphate (PO4)" = "PO4",
                        "Fluorine (F)" = "F")
 
 # If you add to this list, must update colors_other list as well
-solutes_other <- list("pH (3 Star)" = "pH", 
+solutes_other <- list("pH (3 Star)" = "pH",
                       "pH (Metrohm)"="pHmetrohm",
-                      "Dissolved Organic Carbon (DOC)" = "DOC", 
-                      "Total Dissolved Nitrogen (TDN)" = "TDN", 
-                      "Dissolved Organic Nitrogen (DON)" = "DON", 
-                      "Dissolved Inorganic Carbon (DIC)" = "DIC", 
-                      "Silica (SiO2)" = "SiO2", 
-                      "Acid Neutralizing Capacity 960" = "ANC960", 
-                      "Acid Neutralizing Capacity Met" = "ANCMet", 
-                      "Specific Conductivity" = "spCond", 
-                      "Theoretical Conductivity" = "theoryCond", 
-                      "Water Temperature" = "temp", 
+                      "Dissolved Organic Carbon (DOC)" = "DOC",
+                      "Total Dissolved Nitrogen (TDN)" = "TDN",
+                      "Dissolved Organic Nitrogen (DON)" = "DON",
+                      "Dissolved Inorganic Carbon (DIC)" = "DIC",
+                      "Silica (SiO2)" = "SiO2",
+                      "Acid Neutralizing Capacity 960" = "ANC960",
+                      "Acid Neutralizing Capacity Met" = "ANCMet",
+                      "Specific Conductivity" = "spCond",
+                      "Theoretical Conductivity" = "theoryCond",
+                      "Water Temperature" = "temp",
                       "Ion Balance" = "ionBalance")
 
-codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet", 
+codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet",
                 "ionError", "ionBalance")
 codes123 <- c("pH", "pHmetrohm", "spCond", "au254", "au275",
-              "au295", "au350", "au400", "Ca", "Mg", 
-              "K", "Na", "TMAl", "OMAl", "Al_ICP", "NH4", 
+              "au295", "au350", "au400", "Ca", "Mg",
+              "K", "Na", "TMAl", "OMAl", "Al_ICP", "NH4",
               "SO4", "NO3", "Cl", "PO4", "DOC", "TDN", "DIC",
               "DON", "SiO2", "Mn", "Fe", "F")
 
 
-# Lists of Sites 
+# Lists of Sites
 #***************
 sites_streams <- list("Watershed 1" = "W1",
-                      "Watershed 2" = "W2", 
+                      "Watershed 2" = "W2",
                       "Watershed 3" = "W3",
                       "Watershed 4" = "W4",
                       "Watershed 5" = "W5",
@@ -74,24 +75,24 @@ sites_streams <- list("Watershed 1" = "W1",
                       "Watershed 7" = "W7",
                       "Watershed 8" = "W8",
                       "Watershed 9" = "W9",
-                      "HBK", 
+                      "HBK",
                       "ML70",
                       "SW")
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
-sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP") 
+sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP")
 
 # wateryears ----> see list after data import
 
-# list of solutes that have units other than mg/L for data items 
+# list of solutes that have units other than mg/L for data items
 other_units <- c("pH",
-                 "DIC", 
-                 "ANC960", 
-                 "ANCMet", 
+                 "DIC",
+                 "ANC960",
+                 "ANCMet",
                  "cationCharge",
                  "anionCharge",
-                 "spCond", 
+                 "spCond",
                  "theoryCond",
                  "temp",
                  "ionBalance")
@@ -99,7 +100,7 @@ other_units <- c("pH",
 # Functions ----
 # ***********************************
 
-## Function to re-classify data class (e.g. numeric, character, etc.) of each variable (column) in a data 
+## Function to re-classify data class (e.g. numeric, character, etc.) of each variable (column) in a data
 ## frame. Uses defClasses & defClassesSample data to match data column with its intended
 ## data class.
 standardizeClasses <- function(d) {
@@ -172,7 +173,9 @@ tables = dbListTables(con)
 # Get data from mysql
 dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
-dataSensor <- dbReadTable(con, "sensor")
+dataSensor <- dbReadTable(con, "sensor2")
+dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
+# dataSensor$datetime = as.Date(dataSensor$datetime)
 dbDisconnect(con)
 
 dataCurrent <- standardizeClasses(dataCurrent)
@@ -236,7 +239,7 @@ dataAll <- standardizeClasses(dataAll)
 #       dateString <- str_extract(dataHistorical$uniqueID[i], "196.....")
 #       dataHistorical$date[i] <- as.Date(dateString, "%Y%m%d")
 #    }
-# 
+#
 # # Format data as needed
 # dataInitial <- standardizeClasses(dataInitial)
 #    # necessary to prevent problems when downloading csv files
@@ -245,10 +248,10 @@ dataAll <- standardizeClasses(dataAll)
 #    # necessary to prevent problems when downloading csv files
 #    dataChemistry$sampleType <- gsub(",", ";", dataChemistry$sampleType)
 # dataHistorical <- standardizeClasses(dataHistorical)
-# 
+#
 # #Standardize datasets
 #    # !!! write a function that alerts user to duplicates uniqueID?
-# 
+#
 #    # # CODE TO DEAL WITH DUPLICATE ROWS IN HISTORICAL DATA (one-time use)
 #    # # remove rows that are exact duplicates
 #    # dataHistorical <- distinct(dataHistorical)
@@ -271,7 +274,7 @@ dataAll <- standardizeClasses(dataAll)
 #    # }
 #    # # export
 #    # write.csv(dataHistorical, 'dataHistorical_Duplicates.csv')
-# 
+#
 # # Create dataCurrrent & dataAll when on Local Source ----
 # #**********************************************
 # # Create dataCurrent by binding dataInitial with dataChemistry
@@ -286,7 +289,7 @@ dataAll <- standardizeClasses(dataAll)
 # # }
 #    dataAll <- bind_rows(dataHistorical, dataCurrent)
 #    dataAll <- standardizeClasses(dataAll)
-   
+
 
 # ****  END OF DATA IMPORT & PREP ****
 
@@ -301,7 +304,7 @@ for (i in 1:length(wy)) {
 #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
 wateryears <- as.list(wy1)
 
-      
+
 # Find maximum date ----
 # used in ui.R for Panel 4 (QA/QC "Free-for-all" graph)
 

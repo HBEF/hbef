@@ -7,7 +7,7 @@
 # run the application by clicking 'Run App' above.
 #
 # Find out more about building applications with Shiny here:
-# 
+#
 #    http://shiny.rstudio.com/
 #
 
@@ -32,7 +32,7 @@ shinyUI(
       #tags$head(
          #includeCSS("//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css"),
          #includeScript(path="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js")
-      #),     
+      #),
       #includeCSS("style.css"),
       #HMTL(<script type="text/javascript" src="/www/dygraph-combined.js"></script>),
       navbarPage(title = p(strong("HBEF Dashboard")),
@@ -45,21 +45,21 @@ shinyUI(
             tags$br(),
             h4("Helpful Resources:"),
             tags$div(HTML("<ul>
-                          <li> Buso et al. 2000. <strong><a href=https://www.esf.edu/quest/documents/Busoetal.2000.HBstreamflowandchemistryGTR..pdf> 
-                          Chemistry of Precipitation, Streamwater, and Lakewater from the 
-                          Hubbard Brook Ecosystem Study: A Record of Sampling Protocols and 
+                          <li> Buso et al. 2000. <strong><a href=https://www.esf.edu/quest/documents/Busoetal.2000.HBstreamflowandchemistryGTR..pdf>
+                          Chemistry of Precipitation, Streamwater, and Lakewater from the
+                          Hubbard Brook Ecosystem Study: A Record of Sampling Protocols and
                           Analytical Procedures.</a></strong> USDA Forest Service, Northeastern Research
                           Station, General Technical Report NE-275.</li>
                           <li> Data Upload Templates <em>(Forthcoming...)</em></li>
                           <li> Developer Documentation <em>(Forthcoming...)</em> </li>
                           </ul>"))
          ), #end of Main tabPanel
-                  
+
          #*********************************************************
          # ***UPLOAD tab *** ----
          #*********************************************************
          # Code initially copied from: https://github.com/rstudio/shiny-examples/blob/master/009-upload/app.R
-         tabPanel("Upload", 
+         tabPanel("Upload",
                # Sidebar layout with input and output definitions
                sidebarLayout(
                 # Sidebar panel for inputs
@@ -74,12 +74,12 @@ shinyUI(
                   # Input: Checkbox to indicate whether file has header
                   checkboxInput("HEADER", "Data includes header (column names)", TRUE),
                   # Input: Select number of rows to display in output chart
-                  p("Note: The above must be checked for upload to work." , 
+                  p("Note: The above must be checked for upload to work." ,
                     style = "color:#666666; font-size:85%;"
                   ),
                   tags$hr(), # horizontal line
                   radioButtons("UPLOAD_DISPLAY", "Display",
-                               choices = c("Head" = "head", 
+                               choices = c("Head" = "head",
                                            "All" = "all"),
                                selected = "head"
                   ),
@@ -102,21 +102,21 @@ shinyUI(
                   ), # end of sidebarPanel
                   mainPanel(
                      #tags$head(tags$script(src="www/dygraphs-1.1.1/dygraph-combined.js")),
-                     # Shows data file as a table 
+                     # Shows data file as a table
                      dataTableOutput("FILE_PREVIEW")
                   ) # end of mainPanel
                ) # end of Sidebar Layout
-         ), # END of "Upload" tabPanel 
-        
+         ), # END of "Upload" tabPanel
+
          #*********************************************************
          # ***QA/QC tab ***----
          #*********************************************************
          # Each input is given an name ID based on the data it contains + the number
          # panel it's in, e.g. WATERYEAR1 (datatype+PanelNumber)
          # These names are what's used in the server.R file.
-         navbarMenu("QA/QC", 
+         navbarMenu("QA/QC",
             # Panel 1 - 1 Solute/1 Site ###############
-            tabPanel("1 Solute/1 Site", 
+            tabPanel("1 Solute/1 Site",
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
@@ -133,7 +133,7 @@ shinyUI(
                        choices = c(solutes_cations, solutes_anions, solutes_other),
                        selected = "Ca"
                      ),
-                     helpText(textOutput("LIMITS1"), 
+                     helpText(textOutput("LIMITS1"),
                               style = "color:#fc9272; font-size:85%;"
                      ),
                      hr(),
@@ -153,19 +153,19 @@ shinyUI(
                      conditionalPanel(
                         # this panel only appears when Hydrology button is clicked AND a stream site is selected
                         # !!! this condition could be optimized to be when sites %in% sites_stream (in javascript)
-                        condition = "input.HYDROLOGY1 == true && (input.SITES1 == 'W1' || input.SITES1 == 'W2' || input.SITES1 == 'W3' || input.SITES1 == 'W4' || input.SITES1 == 'W5' || input.SITES1 == 'W6' || input.SITES1 == 'W7' || input.SITES1 == 'W8' || input.SITES1 == 'W9' || input.SITES1 == 'HBK' || input.SITES1 == 'ML70' || input.SITES1 == 'PLY')", 
-                       # sites_stream.includes(input.SITES1)  
-                      p(radioButtons("Flow_or_Precip1", 
-                                       "Select data source:",
-                                       choices = c("Gage Height (ft)" = "gageHt", 
-                                                   "Q from Gage Height (L/s)" = "flowGageHt"),
-                                       selected = "gageHt",
-                                       inline = FALSE)
-                        ), 
-                        style = "color:#3182bd;"
+                        condition = "input.HYDROLOGY1 == true && (input.SITES1 == 'W1' || input.SITES1 == 'W2' || input.SITES1 == 'W3' || input.SITES1 == 'W4' || input.SITES1 == 'W5' || input.SITES1 == 'W6' || input.SITES1 == 'W7' || input.SITES1 == 'W8' || input.SITES1 == 'W9' || input.SITES1 == 'HBK' || input.SITES1 == 'ML70' || input.SITES1 == 'PLY')",
+                       # sites_stream.includes(input.SITES1)
+                      p(radioButtons("Flow_or_Precip1",
+                       "Select data source:",
+                       choices = c("Gage Height (ft)" = "gageHt",
+                           "Q from Gage Height (L/s)" = "flowGageHt"),
+                       selected = "gageHt",
+                       inline = FALSE)
+                      ),
+                      style = "color:#3182bd;"
                      ),
-                     p("Hydrology shows discharge for watershed sites, 
-                       and precipitation for rain gage sites." , 
+                     p("Hydrology shows discharge for watershed sites,
+                       and precipitation for rain gage sites." ,
                        style = "color:#666666; font-size:85%;"
                      ),
                      checkboxInput("SOLUTES_HIST1",
@@ -175,9 +175,9 @@ shinyUI(
                      conditionalPanel(
                         # this panel appears when historical data is clicked
                         condition = "input.SOLUTES_HIST1 == true",
-                        p("Although historical data are shown as continuous, 
+                        p("Although historical data are shown as continuous,
                           these lines are derived from median values per month."
-                        ), 
+                        ),
                         p("Historical data finds the median value of all stream sites
                           when a watershed site is selected, and the median value of all
                           precipitation sites when a rain gage site is selected."),
@@ -185,15 +185,15 @@ shinyUI(
                      ),
                      width = 3
                   ), #closes sidebarPanel
-                   
+
                   mainPanel(
                      # Where outputs ('results') are shown
-                     #flowLayout(), 
+                     #flowLayout(),
                      fluidRow(column(width = 9, tags$h4(textOutput("TITLE1"))),    # Title
                               column(width = 3,                                    # Print button
-                                     downloadButton("PRINT1", "Print Graph"), 
+                                     downloadButton("PRINT1", "Print Graph"),
                                      class='rightAlign'
-                              ) 
+                              )
                      ),
                      hr(),
                      dygraphOutput("GRAPH1")
@@ -201,15 +201,15 @@ shinyUI(
                      # hr(),
                      # h4("Table of Selected Data"),
                      # HTML("<p>Search bar finds specific values within selected data (e.g. '2014-06', '5.'). <br> Arrows (to the right of column names) sort data in ascending or descending order.</p>"),
-                     # dataTableOutput("TABLE1") 
+                     # dataTableOutput("TABLE1")
                   ) # closes mainPanel
-                   
+
                ) #closes sidebarLayout
-                 
+
             ), # END of Panel 1 tabPanel
-         
+
             # Panel 2 - Multiple Solutes ###############
-            tabPanel("Multiple Solutes", 
+            tabPanel("Multiple Solutes",
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
@@ -231,28 +231,28 @@ shinyUI(
                      conditionalPanel(
                         # this panel only appears when Hydrology button is clicked AND a stream site is selected
                         # !!! this condition could be optimized to be when sites %in% sites_stream (in javascript)
-                        condition = "input.HYDROLOGY2 == true && (input.SITES2 == 'W1' || input.SITES2 =='W2' || input.SITES2 == 'W3' || input.SITES2 == 'W4' || input.SITES2 == 'W5' || input.SITES2 == 'W6' || input.SITES2 == 'W7' || input.SITES2 == 'W8' || input.SITES2 == 'W9' || input.SITES2 == 'HBK' || input.SITES2 == 'ML70' || input.SITES2 == 'PLY')", 
-                        p(radioButtons("Flow_or_Precip2", 
+                        condition = "input.HYDROLOGY2 == true && (input.SITES2 == 'W1' || input.SITES2 =='W2' || input.SITES2 == 'W3' || input.SITES2 == 'W4' || input.SITES2 == 'W5' || input.SITES2 == 'W6' || input.SITES2 == 'W7' || input.SITES2 == 'W8' || input.SITES2 == 'W9' || input.SITES2 == 'HBK' || input.SITES2 == 'ML70' || input.SITES2 == 'PLY')",
+                        p(radioButtons("Flow_or_Precip2",
                                        "Select data source:",
-                                       choices = c("Gage Height (ft)" = "gageHt", 
+                                       choices = c("Gage Height (ft)" = "gageHt",
                                                    "Q from Gage Height (L/s)" = "flowGageHt"),
                                        selected = "gageHt",
                                        inline = FALSE)
-                        ), 
+                        ),
                         style = "color:#3182bd;"
                      ),
-                     p("Hydrology shows discharge for watershed sites, 
-                       and precipitation for rain gage sites." , 
+                     p("Hydrology shows discharge for watershed sites,
+                       and precipitation for rain gage sites." ,
                        style = "color:#666666; font-size:85%;"
                      ),
-                     checkboxGroupInput("SOLUTES2", 
+                     checkboxGroupInput("SOLUTES2",
                                        label = "Solutes",
                                        choices = c(solutes_cations, solutes_anions, solutes_other),
                                        selected = "Ca"
                      ),
                      width = 3
                   ), # closes sidebarPanel
-          
+
                   # Plot
                   mainPanel(
                      tags$h4(textOutput("TITLE2")),
@@ -261,7 +261,7 @@ shinyUI(
                      #plotOutput("GRAPH")
                      hr(),
                      h4("Table of Selected Data"),
-                     HTML("<p>Search bar finds specific values within selected 
+                     HTML("<p>Search bar finds specific values within selected
                           data (e.g. '2014-06', '5.'). <br> Arrows (to the right
                           of column names) sort data in ascending or descending
                           order.</p>"
@@ -271,9 +271,9 @@ shinyUI(
                   ) # closes mainPanel
                ) # closes sidebarLayout
             ),# END of Panel 2 tabPanel
-       
+
             # Panel 3 - Multiple Sites ###############
-            tabPanel("Multiple Sites", 
+            tabPanel("Multiple Sites",
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
@@ -288,7 +288,7 @@ shinyUI(
                                 choices = c(solutes_cations, solutes_anions, solutes_other),
                                 selected = "Ca"
                      ),
-                     helpText(textOutput("LIMITS3"), 
+                     helpText(textOutput("LIMITS3"),
                               style = "color:#fc9272; font-size:85%;"),
                      radioButtons("HYDROLOGY3",
                                   label = "Hydrology (median):",
@@ -297,28 +297,28 @@ shinyUI(
                      ),
                      conditionalPanel(
                      # this panel only appears when discharge/precipitation button is clicked
-                        condition = "input.HYDROLOGY3 == 'Discharge'", 
-                        p(radioButtons("Flow_or_Precip3", 
+                        condition = "input.HYDROLOGY3 == 'Discharge'",
+                        p(radioButtons("Flow_or_Precip3",
                                         "Select discharge data source:",
-                                        choices = c("Gage Height (ft)" = "gageHt", 
+                                        choices = c("Gage Height (ft)" = "gageHt",
                                                     "Q from Gage Height (L/s)" = "flowGageHt"),
                                         selected = "gageHt",
                                         inline = FALSE)), style = "color:#3182bd;"
                      ),
-                     p("Discharge shows daily median of all watershed sites." , 
+                     p("Discharge shows daily median of all watershed sites." ,
                        style = "color:#666666; font-size:85%;"
                      ),
-                     p("Precipitation shows daily median of all rain gage sites." , 
+                     p("Precipitation shows daily median of all rain gage sites." ,
                        style = "color:#666666; font-size:85%;"
                      ),
-                     checkboxGroupInput("SITES3", 
+                     checkboxGroupInput("SITES3",
                                        label = "Sites",
                                        choices = c(sites_streams, sites_precip),
                                        selected = "W1"
                      ),
                      width = 3
                   ), # closes sidebarPanel
-                    
+
                   # Plot
                   mainPanel(
                        tags$h4(textOutput("TITLE3")),
@@ -327,20 +327,20 @@ shinyUI(
                        #plotOutput("GRAPH")
                        hr(),
                        h4("Table of Selected Data"),
-                       HTML("<p>Search bar finds specific values within selected data 
-                            (e.g. '2014-06', '5.'). <br> Arrows (to the right of column names) 
+                       HTML("<p>Search bar finds specific values within selected data
+                            (e.g. '2014-06', '5.'). <br> Arrows (to the right of column names)
                             sort data in ascending or descending order.</p>"
                         ),
                        # used when testing data sorting
                        dataTableOutput("TABLE3")
                        #textOutput("TEST3.TEXT")
-                       
+
                   ) # closes mainPanel
                ) # closes sidebarLayout
             ), # END of Panel 3 tabPanel
-         
+
             # Panel 4 - Free-for-all ###############
-            tabPanel("Free-for-all", 
+            tabPanel("Free-for-all",
                sidebarLayout(
                  # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
@@ -350,7 +350,7 @@ shinyUI(
                         #********************
                         tabPanel("General",
                            br(),
-                           
+
                            # Options for "Precipitation" Graph
                            #**********************************
                            p("Precipitation", style = "font-weight:bold; font-size:1.1em;"),
@@ -371,9 +371,9 @@ shinyUI(
                               ),
                               style = "color:#919191; font-size:0.9em;"
                            ), #end of conditional panel
-                           
+
                            hr(),
-                           
+
                            # Options for "Solutes" Graph
                            #****************************
                            p("Solutes", style = "font-weight:bold; font-size:1.1em;"),
@@ -392,10 +392,10 @@ shinyUI(
                                           choices = c("Solutes", "Sites"),
                                           width = "80%"),
                               style = "color:#919191; font-size:0.9em;"
-                           ), # end 
-                           
+                           ), # end
+
                            hr(),
-                           
+
                            # Options for "Discharge" Graph
                            #******************************
                            p("Discharge", style = "font-weight:bold; font-size:1.1em;"),
@@ -410,36 +410,36 @@ shinyUI(
                                             label = "Add hydrograph limb",
                                             value = FALSE
                               ),
-                              p("Discharge data sources:", style = "font-weight:bold; text-decoration:underline;"), 
+                              p("Discharge data sources:", style = "font-weight:bold; text-decoration:underline;"),
                               p(selectInput("FLOW_SITE4",
                                             label = p("Data from site:", style = "font-weight:bold"),
                                             choices = c(sites_streams),
                                             selected = "W1",
                                             width = "80%"),
                                 style = "margin-bottom:0px; font-size:0.9em;"
-                              ), 
+                              ),
                               radioButtons(
                                  "FLOW_SOURCE4",
                                  label = p("Data type:", style = "font-weight:bold"),
                                  choices = c("Gage Height (ft)" = "gageHt",
-                                             "Q (estimated from Gage Height) (L/s)" = "flowGageHt",
-                                             "Q (ETI)" = "flowSensor"
+                                             "Q from Gage Height (L/s)" = "flowGageHt",
+                                             "Q from Sensor (L/s)" = "flowSens"
                                  ),
                                  selected = "gageHt"
                               ),
                               style = "color:#919191; margin-top:0px; font-size:0.9em;"
                            ) #end of conditional panel
-                        ), 
+                        ),
                         #********************
                         # Solutes tab
                         #********************
-                        tabPanel("Solutes", 
+                        tabPanel("Solutes",
                            checkboxGroupInput("SOLUTES4",
                                                label = "",
                                                choices = c(solutes_cations, solutes_anions, solutes_other),
                                                selected = "Ca"
                            ),
-                           helpText(textOutput("LIMITS4"), 
+                           helpText(textOutput("LIMITS4"),
                                     style = "color:#fc9272; font-size:85%;"
                            )
                         ),
@@ -447,7 +447,7 @@ shinyUI(
                         # Sites tab
                         #********************
                         tabPanel("Sites",
-                          checkboxGroupInput("SITES4", 
+                          checkboxGroupInput("SITES4",
                                              label = "",
                                              choices = c(sites_streams, sites_precip),
                                              selected = "W1"
@@ -456,7 +456,7 @@ shinyUI(
                      ), #end of tabsetPanel
                      width = 3
                   ), # closes sidebarPanel
-                       
+
                   # Plot
                   mainPanel(
                      wellPanel(
@@ -478,7 +478,7 @@ shinyUI(
                            column(12, style = "height:100px;",
                                  plotOutput("GRAPH_PRECIP4"))
                         )
-                     ),  
+                     ),
                      conditionalPanel(
                         condition = "input.SOLUTE4_OPTION == true",
                         fluidRow(
@@ -496,9 +496,9 @@ shinyUI(
                      # use for when testing data selection
                      # hr(),
                      # h4("Table of Selected Data"),
-                     # HTML("<p>Search bar finds specific values within selected 
-                     #      data (e.g. '2014-06', '5.'). <br> Arrows (to the right 
-                     #      of column names) sort data in ascending or descending 
+                     # HTML("<p>Search bar finds specific values within selected
+                     #      data (e.g. '2014-06', '5.'). <br> Arrows (to the right
+                     #      of column names) sort data in ascending or descending
                      #      order.</p>"
                      # ),
                      # used when testing data sorting
@@ -506,22 +506,22 @@ shinyUI(
                   ) # closes mainPanel
                ) # closes sidebarLayout
             ), # Closes Panel 4 tabPanel
-        
+
             # Panel 5 - Data & Edits ###############
             tabPanel("Data & Edits",
                # change in CSS to make a label in line with the input box
                # to use, wrap input function in tags$div(id = "inline", [input function])
-               tags$head(tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }  
+               tags$head(tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }
                #inline .form-group { display: table-row;}")),
                fluidRow(
-                  column(3, 
+                  column(3,
                      selectInput(
                         "WATERYEAR5",
                         label = "Water Year",
                         choices = wateryears,
                         selected = wateryears[1]
                      )),
-                  column(3, 
+                  column(3,
                      selectInput(
                          "SITES5",
                          label = "Site",
@@ -529,28 +529,28 @@ shinyUI(
                          selected = "W1"
                      )),
                   column(4),
-                  column(2, 
+                  column(2,
                          actionButton(
                             "SAVECHANGES5",
                             label = strong("Save Changes"),
                             class='rightAlign'
                          ))
-               ), #end of fluidRow  
-               rHandsontableOutput("HOT"), # HOT = Hands On Table 
+               ), #end of fluidRow
+               rHandsontableOutput("HOT"), # HOT = Hands On Table
                hr(),
                wellPanel(style = "background: darkgray;",
-               span(p("- - - - - - - - - - - - - 
-                      *CAUTION* Section for Deleting Data - - - - - - - - - - - - -"), 
+               span(p("- - - - - - - - - - - - -
+                      *CAUTION* Section for Deleting Data - - - - - - - - - - - - -"),
                     style="text-align: center;"),
                fluidRow(
                  # Column for "Delete Rows" button
-                 column (8, 
+                 column (8,
                          wellPanel(style = "background: black;
                                             color: white;",
-                           
+
                            # Date options
                            fluidRow(
-                             
+
                              column(6,
                                     span(h4("Delete by Date(s) & Site(s)"), style="color: white;"),
                                     # Date input panels, depending on selected date option
@@ -567,7 +567,7 @@ shinyUI(
                                         "DELETE_DATERANGE5",
                                         label = "Date(s):"
                                       ),
-                                      p("Dates listed above will also be deleted." , 
+                                      p("Dates listed above will also be deleted." ,
                                         style = "color: white; font-size:80%;"
                                       )
                                     ),
@@ -579,7 +579,7 @@ shinyUI(
                                       #inline = TRUE
                                     )
                              ), # end of column
-                             
+
                              # Site option & Delete Section button
                              column(6,
                                     selectInput(
@@ -595,11 +595,11 @@ shinyUI(
                                       class = 'rightAlign'
                                     )
                              ) # end of column
-                           
+
                            ) # end of fluidRow
                          ) # end of well Panel
                 ), #end of Column for "Delete Rows" button
-                
+
                 # Column for "Delete 1 Row" button
                 column(4,
                      wellPanel(style = "background: black;
@@ -615,30 +615,30 @@ shinyUI(
                          label = strong("Delete 1 Row"),
                          class = 'rightAlign'
                        )
-                       
+
                      ) # end of well Panel
               ) # end of Column for "Delete 1 Row" button
-              
+
             ) # end of fluidRow
             )
             ) # closes Panel 5 tabPanel
-        
+
          ),# END of QA/QC navbarMenu
-        
+
          #*********************************************************
          # ***DOWNLOAD tab***----
          #*********************************************************
          tabPanel("Download",
             sidebarLayout(
                sidebarPanel(
-                  selectInput("DOWNLOAD_DATASET", "Choose a dataset:", 
+                  selectInput("DOWNLOAD_DATASET", "Choose a dataset:",
                               choices = c("Current",
                                          # "Initial",
                                          # "Chemistry",
-                                          "Historical", 
+                                          "Historical",
                                           "All")),
                   radioButtons("DOWNLOAD_FILETYPE", "File type:",
-                               choices = c("csv", 
+                               choices = c("csv",
                                            "tsv")),
                   downloadButton('DOWNLOAD_DATA', 'Download')
                ),
@@ -647,15 +647,15 @@ shinyUI(
                )
             ) # end of sidebarLayout
          ) # end of tabPanel for Data Download
-         #********************************************************* 
+         #*********************************************************
          # ***DATA ARCHIVE? tab*** ----
          #*********************************************************
          # tabPanel("Approve & Archive Data")
-        
-         # *REMEMBER* that when data is archived, the data in 'initial' and 
+
+         # *REMEMBER* that when data is archived, the data in 'initial' and
          # 'current' tables should be cleared in MySQL hbef database
-        
+
       ) # END of navbarPage()
-   ) # closes fluidPage()  
+   ) # closes fluidPage()
 ) # closes shinyUI()
 
