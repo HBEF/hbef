@@ -14,16 +14,19 @@ for(i in 1:length(weirfiles)){
     x$Q_Ls = as.numeric(x$Q_Ls) * 28.31685
     x = x[! is.na(x$Q_Ls),]
     x['watershed_id'] = watershed_id
+    x = mutate(x, datetime=as.POSIXct(datetime))
     recent = rbind.fill(recent, x)
 }
 
-histfiles = list.files('lter_historical', pattern='stmflow')
+setwd('/home/lter/data/lter_historical')
+histfiles = list.files('.', pattern='stmflow')
 
 hist = data.frame()
 for(i in 1:length(histfiles)){
    watershed_id = str_match(histfiles[i], 'w([0-9]+)_')[,2]
    x = read.csv(histfiles[i], stringsAsFactors=FALSE)
-   x = select(x, datetime=DATETIME, Q_Ls=Discharge_ls, watershed_id=WS)
+   x = select(x, datetime=DATETIME, Q_Ls=Discharge_ls, watershed_id=WS) %>%
+      mutate(datetime=as.POSIXct(datetime))
    x = x[! is.na(x$Q_Ls),]
    hist = rbind.fill(hist, x)
 }
