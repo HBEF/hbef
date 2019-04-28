@@ -16,6 +16,7 @@ for(i in 1:length(weirfiles)){
     x = x[! is.na(x$Q_Ls),]
     x['watershed_id'] = watershed_id
     x = mutate(x, datetime=as.POSIXct(datetime))
+    x = filter(x, minute(datetime) %% 30 == 0)
     recent = rbind.fill(recent, x)
 }
 
