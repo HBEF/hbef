@@ -1,6 +1,7 @@
 library(plyr)
 library(dplyr)
 library(stringr)
+library(lubridate)
 
 setwd('/home/lter/data')
 weirfiles = list.files('.', pattern='weir')
@@ -27,6 +28,9 @@ for(i in 1:length(histfiles)){
    x = read.csv(histfiles[i], stringsAsFactors=FALSE)
    x = select(x, datetime=DATETIME, Q_Ls=Discharge_ls, watershed_id=WS) %>%
       mutate(datetime=as.POSIXct(datetime))
+   if(grepl('5min', histfiles[i])){
+      x = filter(x, minute(datetime) %% 30 == 0)
+   }
    x = x[! is.na(x$Q_Ls),]
    hist = rbind.fill(hist, x)
 }
