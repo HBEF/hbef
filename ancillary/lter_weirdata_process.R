@@ -1,8 +1,8 @@
 library(plyr)
 library(stringr)
 
-# setwd('/home/lter/data')
-weirfiles = list.files('/home/lter/data', pattern='weir')
+setwd('/home/lter/data')
+weirfiles = list.files('.', pattern='weir')
 
 out = data.frame()
 for(i in 1:length(weirfiles)){
@@ -18,4 +18,4 @@ for(i in 1:length(weirfiles)){
 }
 
 out = out[order(out$watershed_id, out$TIMESTAMP),]
-write.csv(out, '/var/lib/mysql-files/lter_Qdata.csv', row.names=FALSE)
+write.csv(out, '/var/lib/mysql-files/lter_Qdata.csv', row.names=TRUE)

@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-# pass = readLines('~/git/hbef/RMySQL.config')       # for mike
+# pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+pass = readLines('~/git/hbef/RMySQL.config')       # for mike
 #pass = readLines('SQL.txt')                        # for local computer
 
 # ***********************************************************************
@@ -454,19 +454,35 @@ shinyServer(function(input, output, session) {
                                                                              #   to create alternative graphs
          }
          if (input$Flow_or_Precip1 == 'flowSens'){
+            dataSensor = dataSensor[order(dataSensor$datetime),]
+            # dataSensor$Q_Ls = log(dataSensor$Q_Ls)
+            # zl = substr(dataSensor$datetime, 1, 4) == '2017'
+            # plot(dataSensor$datetime[zl], dataSensor$Q_Ls[zl], type='l',
+            #    xlim=c(as.POSIXct('2017-12-26 '), as.POSIXct('2017-12-27')))
+            # ds = dataSensor
+            # ds = filter(ds, datetime > min(dataCurrent$datetime),
+            #    datetime < max(dataCurrent$datetime))
+            yrstart = as.POSIXct(paste0(input$WATERYEAR1, '-06-01'))
+            yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR1) + 1, '-05-31'))
+            dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
             dataCurQ1 <- dataCurrent %>%
+               # filter(waterYr %in% 2017) %>%            # Filter data to selected water year
+               # filter(site %in% 'W1') %>%                   # Filter data to selected site
                filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
                filter(site %in% input$SITES1) %>%                   # Filter data to selected site
                select(-flowGageHt) %>%
                mutate(datetime=as.POSIXct(paste(as.character(date),
                   as.character(timeEST)))) %>%
                # mutate(datetime=as.POSIXct(datetime, format='%m/%d/%Y %H:%M')) %>%
-               left_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
+               full_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
                   by=c('site'='watershedID', 'datetime'='datetime')) %>%
-               rename(flowGageHt = Q_Ls) %>%
+               select(-date) %>%
+               rename(flowGageHt = Q_Ls, date = datetime) %>%
+               # select(one_of("date", 'Ca', "flowGageHt")) %>%      # Selected desired columns of data
                select(one_of("date", input$SOLUTES1, "flowGageHt")) %>%      # Selected desired columns of data
                rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have
                                                                              #   to create alternative graphs
+               # head(dataCurQ1)
          }
       }
       if (input$SITES1 %in% sites_precip) {
@@ -512,6 +528,7 @@ shinyServer(function(input, output, session) {
                              solute.IQRlower = IQR.lower,
                              solute.median = median,
                              solute.IQRupper = IQR.upper)
+
       dataHistorical1
    }) # END of dataHistorical1
 
@@ -1092,48 +1109,58 @@ shinyServer(function(input, output, session) {
          if (input$SITES1 %in% sites_precip) ylabel2 <- 'Precipitation (mm)'
          if (input$SOLUTES_HIST1 == TRUE) {
 
-            # Plots Default + Discharge + Historical data
-            data1 <- dataCurQHist1()
-            data1 <- removeCodes(data1)
-            data1.xts <- xts(data1[,-1], order.by = data1$date)
-            #paste(c("XTS:", class(dataCur1$FieldCode)))
+            if(input$Flow_or_Precip1 == 'flowSens'){
+               dygraph(xts(c(NA,2,NA), order.by=as.Date(1:3))) %>%
+                  dyOptions(drawGrid=FALSE, drawXAxis=FALSE, drawYAxis=FALSE,
+                     drawPoints=FALSE, colors='red') %>%
+                  dyAnnotation(as.Date(2), width=200, height=70,
+                     paste('Historical data not currently plottable when',
+                     'data source = "Q from sensor"'))
+            } else {
 
-            dygraph1 <- dygraph(data1.xts) %>%
-               dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
-                      axisLabelColor = "black") %>%
-               dyAxis("y", label = ylabel,
-                      independentTicks=TRUE,
-                      axisLabelColor = "black") %>%
-               dyAxis('y2',label=ylabel2,
-                      independentTicks=TRUE,
-                      axisLabelColor = "#3182bd",
-                      axisLabelWidth = 70,
-                      axisLineColor = "#3182bd") %>%
-               dySeries(name = input$SOLUTES1,
-                        color = "black",
-                        drawPoints = TRUE,
-                        pointSize = 3,
-                        axis='y') %>%
-               dySeries(name = 'Flow_or_Precip',
-                        drawPoints = FALSE,
-                        fillGraph=T,
-                        color = "#3182bd",
-                        axis='y2') %>%
-               dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
-                        strokePattern = c("dashed"),
-                        color = c("#A9A9A9"),
-                        label = 'median + IQR',
-                        axis='y') %>%
-               dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-               dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-               dyOptions(drawGrid = FALSE,
-                         strokeWidth = 1,
-                         fillAlpha = 0.5,
-                         connectSeparatedPoints=TRUE,
-                         includeZero = TRUE) %>%
-               dyLegend(width = 300, showZeroValues = FALSE)
+               # Plots Default + Discharge + Historical data
+               data1 <- dataCurQHist1()
+               data1 <- removeCodes(data1)
+               data1.xts <- xts(data1[,-1], order.by = data1$date)
+               #paste(c("XTS:", class(dataCur1$FieldCode)))
 
-            dygraph1
+               dygraph1 <- dygraph(data1.xts) %>%
+                  dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
+                         axisLabelColor = "black") %>%
+                  dyAxis("y", label = ylabel,
+                         independentTicks=TRUE,
+                         axisLabelColor = "black") %>%
+                  dyAxis('y2',label=ylabel2,
+                         independentTicks=TRUE,
+                         axisLabelColor = "#3182bd",
+                         axisLabelWidth = 70,
+                         axisLineColor = "#3182bd") %>%
+                  dySeries(name = input$SOLUTES1,
+                           color = "black",
+                           drawPoints = TRUE,
+                           pointSize = 3,
+                           axis='y') %>%
+                  dySeries(name = 'Flow_or_Precip',
+                           drawPoints = FALSE,
+                           fillGraph=T,
+                           color = "#3182bd",
+                           axis='y2') %>%
+                  dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
+                           strokePattern = c("dashed"),
+                           color = c("#A9A9A9"),
+                           label = 'median + IQR',
+                           axis='y') %>%
+                  dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+                  dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+                  dyOptions(drawGrid = FALSE,
+                            strokeWidth = 1,
+                            fillAlpha = 0.5,
+                            connectSeparatedPoints=TRUE,
+                            includeZero = TRUE) %>%
+                  dyLegend(width = 300, showZeroValues = FALSE)
+
+               dygraph1
+            }
 
          } else {
 
