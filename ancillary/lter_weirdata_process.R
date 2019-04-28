@@ -3,22 +3,23 @@ library(dplyr)
 library(stringr)
 library(lubridate)
 
-setwd('/home/lter/data')
-weirfiles = list.files('.', pattern='weir')
-
-recent = data.frame()
-for(i in 1:length(weirfiles)){
-    watershed_id = str_match(weirfiles[i], 'weir([0-9]+)_')[,2]
-    x = read.csv(weirfiles[i], skip=1, stringsAsFactors=FALSE)
-    x = x[-c(1:2), c('TIMESTAMP', 'Q')]
-    colnames(x)[1:2] = c('datetime', 'Q_Ls')
-    x$Q_Ls = as.numeric(x$Q_Ls) * 28.31685
-    x = x[! is.na(x$Q_Ls),]
-    x['watershed_id'] = watershed_id
-    x = mutate(x, datetime=as.POSIXct(datetime))
-    x = filter(x, minute(datetime) %% 30 == 0)
-    recent = rbind.fill(recent, x)
-}
+#recent data is bogus. we'll just wait till it's on the hbef data portal
+# setwd('/home/lter/data')
+# weirfiles = list.files('.', pattern='weir')
+#
+# recent = data.frame()
+# for(i in 1:length(weirfiles)){
+#     watershed_id = str_match(weirfiles[i], 'weir([0-9]+)_')[,2]
+#     x = read.csv(weirfiles[i], skip=1, stringsAsFactors=FALSE)
+#     x = x[-c(1:2), c('TIMESTAMP', 'Q')]
+#     colnames(x)[1:2] = c('datetime', 'Q_Ls')
+#     x$Q_Ls = as.numeric(x$Q_Ls) * 28.31685
+#     x = x[! is.na(x$Q_Ls),]
+#     x['watershed_id'] = watershed_id
+#     x = mutate(x, datetime=as.POSIXct(datetime))
+#     x = filter(x, minute(datetime) %% 30 == 0)
+#     recent = rbind.fill(recent, x)
+# }
 
 setwd('/home/lter/data/lter_historical')
 histfiles = list.files('.', pattern='stmflow')
@@ -36,6 +37,7 @@ for(i in 1:length(histfiles)){
    hist = rbind.fill(hist, x)
 }
 
-out = rbind.fill(recent, hist)
+# out = rbind.fill(recent, hist)
+out = hist
 out = out[order(out$watershed_id, out$datetime),]
 write.csv(out, '/var/lib/mysql-files/lter_Qdata.csv', row.names=TRUE)
