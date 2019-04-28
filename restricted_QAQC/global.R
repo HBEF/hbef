@@ -173,6 +173,7 @@ tables = dbListTables(con)
 # Get data from mysql
 dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
+dataCurrent = bind_rows(dataCurrent, select(dataHistorical, -canonical))
 dataSensor <- dbReadTable(con, "sensor2")
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
 # dataSensor$datetime = as.Date(dataSensor$datetime)
