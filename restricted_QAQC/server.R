@@ -454,35 +454,24 @@ shinyServer(function(input, output, session) {
                                                                              #   to create alternative graphs
          }
          if (input$Flow_or_Precip1 == 'flowSens'){
-            dataSensor = dataSensor[order(dataSensor$datetime),]
-            # dataSensor$Q_Ls = log(dataSensor$Q_Ls)
-            # zl = substr(dataSensor$datetime, 1, 4) == '2017'
-            # plot(dataSensor$datetime[zl], dataSensor$Q_Ls[zl], type='l',
-            #    xlim=c(as.POSIXct('2017-12-26 '), as.POSIXct('2017-12-27')))
-            # ds = dataSensor
-            # ds = filter(ds, datetime > min(dataCurrent$datetime),
-            #    datetime < max(dataCurrent$datetime))
+            # dataSensor = dataSensor[order(dataSensor$datetime),]
             yrstart = as.POSIXct(paste0(input$WATERYEAR1, '-06-01'))
             yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR1) + 1, '-05-31'))
             dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
             dataCurQ1 <- dataCurrent %>%
-               # filter(waterYr %in% 2017) %>%            # Filter data to selected water year
-               # filter(site %in% 'W1') %>%                   # Filter data to selected site
                filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
                filter(site %in% input$SITES1) %>%                   # Filter data to selected site
                select(-flowGageHt) %>%
                mutate(datetime=as.POSIXct(paste(as.character(date),
                   as.character(timeEST)))) %>%
-               # mutate(datetime=as.POSIXct(datetime, format='%m/%d/%Y %H:%M')) %>%
                full_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
                   by=c('site'='watershedID', 'datetime'='datetime')) %>%
                select(-date) %>%
+               filter(site %in% input$SITES1) %>%
                rename(flowGageHt = Q_Ls, date = datetime) %>%
-               # select(one_of("date", 'Ca', "flowGageHt")) %>%      # Selected desired columns of data
                select(one_of("date", input$SOLUTES1, "flowGageHt")) %>%      # Selected desired columns of data
                rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have
                                                                              #   to create alternative graphs
-               # head(dataCurQ1)
          }
       }
       if (input$SITES1 %in% sites_precip) {
@@ -774,19 +763,23 @@ shinyServer(function(input, output, session) {
                                                                              #  to create alternative graphs
          }
          if (input$Flow_or_Precip2 == 'flowSens'){
+            yrstart = as.POSIXct(paste0(input$WATERYEAR2, '-06-01'))
+            yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR2) + 1, '-05-31'))
+            dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
             dataCurQ2 <- dataCurrent %>%
                filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
                filter(site %in% input$SITES2) %>%                   # Filter data to selected site
                select(-flowGageHt) %>%
                mutate(datetime=as.POSIXct(paste(as.character(date),
                   as.character(timeEST)))) %>%
-               # mutate(datetime=as.POSIXct(datetime, format='%m/%d/%Y %H:%M')) %>%
-               left_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
+               full_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
                   by=c('site'='watershedID', 'datetime'='datetime')) %>%
-               rename(flowGageHt = Q_Ls) %>%
+               select(-date) %>%
+               filter(site %in% input$SITES2) %>%
+               rename(flowGageHt = Q_Ls, date = datetime) %>%
                select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%      # Selected desired columns of data
                rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have
-                                                                             #   to create alternative graphs
+            #   to create alternative graphs
          }
       }
       if (input$SITES2 %in% sites_precip) {
@@ -881,22 +874,25 @@ shinyServer(function(input, output, session) {
            group_by(date) %>%
            summarise(Hydro.med = median(gageHt, na.rm=TRUE))}
        else if(input$Flow_or_Precip3 == 'flowSens'){
-          print(input$Flow_or_Precip3)
+         # dataCurrent$timeEST[is.na(dataCurrent$timeEST)] = hms('00:00:00')
+         yrstart = as.POSIXct(paste0(input$WATERYEAR3, '-06-01'))
+         yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR3) + 1, '-05-31'))
+         dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
          Q3 <- dataCurrent %>%
-            filter(waterYr %in% '2017') %>%            # Filter data to selected water year
-            filter(site %in% 'W7') %>%                   # Filter data to selected sites
-            # filter(waterYr %in% input$WATERYEAR3) %>%            # Filter data to selected water year
-            # filter(site %in% sites_streams) %>%                   # Filter data to selected sites
+         filter(waterYr %in% input$WATERYEAR3) %>%
+         filter(site %in% input$SITES3) %>%
             select(-gageHt) %>%
             mutate(datetime=as.POSIXct(paste(as.character(date),
                as.character(timeEST)))) %>%
-            left_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
+            full_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
                by=c('site'='watershedID', 'datetime'='datetime')) %>%
-            rename(flowSens = Q_Ls) %>%
-            select(one_of("date", input$Flow_or_Precip3)) %>%      # Selected desired columns of data
+            select(-date) %>%
+            filter(site %in% input$SITES3) %>%
+            rename(flowSens = Q_Ls, date = datetime) %>%
+            select(one_of("date", input$Flow_or_Precip3)) %>%
             group_by(date) %>%
-            summarise(Hydro.med = median(flowSens, na.rm=TRUE))}
-       else { #i.e. if input$Flow_or_Precip3 == 'flowGageHt'
+            summarise(Hydro.med = median(flowSens, na.rm=TRUE))
+       } else { #i.e. if input$Flow_or_Precip3 == 'flowGageHt'
          Q3 <- dataCurrent %>%
            filter(waterYr %in% input$WATERYEAR3) %>%
            filter(site %in% sites_streams) %>%
@@ -922,7 +918,10 @@ shinyServer(function(input, output, session) {
 
    # filters Original (recent water year) data to include data selected by inputs AND discharge/precip
    dataCurQ3 <- reactive({
-     dataCurQ3 <- full_join(dataCurrent3(), Q3(), by = "date")
+     dataCur3 = dataCurrent3()
+     dataQ3 = Q3()
+     if(class(dataQ3$date) != 'Date') dataCur3$date = as.POSIXct(dataCur3$date)
+     dataCurQ3 <- full_join(dataCur3, dataQ3, by = "date")
      return(dataCurQ3)
    }) # END of dataOrigQ3()
    # **** END of Panel 3 Reactivity ****
@@ -948,14 +947,6 @@ shinyServer(function(input, output, session) {
          filter(date >= input$DATE4[1]) %>%
          filter(date <= input$DATE4[2])
       data4 <- removeCodes(data4)
-
-      data4 = data4 %>%
-         mutate(datetime=as.POSIXct(paste(as.character(date),
-            as.character(timeEST)))) %>%
-         left_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
-            by=c('site'='watershedID', 'datetime'='datetime')) %>%
-         rename(flowSens = Q_Ls)
-
    })
    ## Extract data for Precip plot
    dataPrecip4 <- reactive ({
@@ -986,24 +977,29 @@ shinyServer(function(input, output, session) {
    ## Extract data for Discharge (Flow) plot
    dataFlow4 <- reactive ({
       dataFlow4 <- data4() %>%
-         filter(site %in% input$FLOW_SITE4) %>%
-         select(one_of("date", input$FLOW_SOURCE4))
+         filter(site %in% input$FLOW_SITE4)
       # flow values need to be summarized with median per date,
       # because multiple values for one date make flow graph look strange
       if (input$FLOW_SOURCE4 == "gageHt") {
          dataFlow4 <- dataFlow4 %>%
+            select(one_of("date", input$FLOW_SOURCE4)) %>%
             group_by(date) %>%
             summarise(flowMaxPerDate = max(gageHt, na.rm=TRUE))
       }
       if (input$FLOW_SOURCE4 == "flowGageHt") {
          dataFlow4 <- dataFlow4 %>%
+            select(one_of("date", input$FLOW_SOURCE4)) %>%
             group_by(date) %>%
             summarise(flowMaxPerDate = max(flowGageHt, na.rm=TRUE))
       }
       if (input$FLOW_SOURCE4 == "flowSens") {
-         dataFlow4 <- dataFlow4 %>%
+         dataFlow4 = filter(dataSensor, datetime > input$DATE4[1],
+            datetime < input$DATE4[2], watershedID %in% input$SITES4) %>%
+            mutate(date=as.Date(datetime)) %>%
+            select(date, Q_Ls) %>%
             group_by(date) %>%
-            summarise(flowMaxPerDate = max(flowSens, na.rm=TRUE))
+            summarise(flowMaxPerDate = max(Q_Ls, na.rm=TRUE))
+
       }
       dataFlow4
    })
