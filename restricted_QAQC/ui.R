@@ -120,27 +120,32 @@ shinyUI(
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
-                     # radioButtons('wateryearOrRange1',
-                     #    'Choose date selection method',
-                     #    choices=c('Water Year'='wateryr', 'Date Range'='daterng')),
-                     # conditionalPanel(
-                     #    condition = "input.wateryearOrRange1 == wateryr",
+                     radioButtons('wateryearOrRange1',
+                        'Choose date selection method',
+                        choices=c('Water Year'='wateryr', 'Date Range'='daterng')),
+                     conditionalPanel(
+                        condition = "input.wateryearOrRange1 == 'wateryr'",
                         selectInput(
                           "WATERYEAR1",
                           label = "Water Year",
                           choices = wateryears,
                           selected = wateryears[1]
-                        ),
-                     # ),
-                     # conditionalPanel(
-                     #    condition = "input.wateryearOrRange1 == daterng",
-                     #    selectInput(
-                     #      "DATERANGE1",
-                     #      label = "Date Range",
-                     #      # choices = wateryears,
-                     #      # selected = wateryears[1]
-                     #    )
-                     # ),
+                        )
+                     ),
+                     conditionalPanel(
+                        condition = "input.wateryearOrRange1 == 'daterng'",
+                        sliderInput(
+                           "DATE1",
+                           label = "Date Range",
+                           min =as.Date("1963-06-01"),
+                           max = maxDate_current,
+                           value = c(maxDate_current-365, maxDate_current),
+                           width = "100%",
+                           timeFormat = "%b %Y",
+                           step = 30,
+                           dragRange = TRUE
+                        )
+                     ),
                      hr(),
                      selectInput(
                        "SOLUTES1",

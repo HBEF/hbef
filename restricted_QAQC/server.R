@@ -342,12 +342,16 @@ shinyServer(function(input, output, session) {
    # and IQR for historical data are necessary because dygraphs cannot plot boxplots when the
    # x-axis is continuous.
 
-   # Grab selected wateryear, site, solute data from data
+   # Grab selected wateryear/daterange, site, solute data from data
    dataCurrent1 <- reactive({
      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
-     dataCurrent1 <- dataCurrent %>%
-       filter(waterYr %in% input$WATERYEAR1) %>%      # Filter data to selected water year
-       filter(site %in% input$SITES1) %>%             # Filter data to selected site
+     if(input$wateryearOrRange1 == 'wateryr'){
+        dataCurrent1 = filter(dataCurrent, waterYr %in% input$WATERYEAR1)
+     } else {
+        dataCurrent1 = filter(dataCurrent, date > input$DATE1[1] &
+           date < input$DATE1[2])
+     }
+     dataCurrent1 = filter(dataCurrent1, site %in% input$SITES1) %>%   # Filter data to selected site
        select(one_of("date", input$SOLUTES1))         # Select desired columns of data
      dataCurrent1 <- removeCodes(dataCurrent1)
      dataCurrent1
@@ -436,59 +440,45 @@ shinyServer(function(input, output, session) {
    # Grab selected wateryear, site, solute, and discharge data from data
    dataCurQ1 <- reactive({
       if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
+      if(input$wateryearOrRange1 == 'wateryr'){
+         dataCurQ1 = filter(dataCurrent, waterYr %in% input$WATERYEAR1)
+      } else {
+         dataCurQ1 = filter(dataCurrent, date > input$DATE1[1] &
+               date < input$DATE1[2])
+      }
       if (input$SITES1 %in% sites_streams) {
          if (input$Flow_or_Precip1 == 'gageHt'){
-            dataCurQ1 <- dataCurrent %>%
-               filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
-               filter(site %in% input$SITES1) %>%                   # Filter data to selected site
+            dataCurQ1 = filter(dataCurrent, site %in% input$SITES1) %>%          # Filter data to selected site
                select(one_of("date", input$SOLUTES1, "gageHt")) %>% # Selected desired columns of data
                rename(Flow_or_Precip = gageHt)                      # Rename GageHt to standard name, so that don't have
                                                                     #   to create alternative graphs
          }
          if (input$Flow_or_Precip1 == 'flowGageHt'){
-            dataCurQ1 <- dataCurrent %>%
-               filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
-               filter(site %in% input$SITES1) %>%                   # Filter data to selected site
+            dataCurQ1 = filter(dataCurrent, site %in% input$SITES1) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES1, "flowGageHt")) %>%      # Selected desired columns of data
                rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have
                                                                              #   to create alternative graphs
          }
          if (input$Flow_or_Precip1 == 'flowSens'){
             dataSensor = dataSensor[order(dataSensor$datetime),]
-            # dataSensor$Q_Ls = log(dataSensor$Q_Ls)
-            # zl = substr(dataSensor$datetime, 1, 4) == '2017'
-            # plot(dataSensor$datetime[zl], dataSensor$Q_Ls[zl], type='l',
-            #    xlim=c(as.POSIXct('2017-12-26 '), as.POSIXct('2017-12-27')))
-            # ds = dataSensor
-            # ds = filter(ds, datetime > min(dataCurrent$datetime),
-            #    datetime < max(dataCurrent$datetime))
             yrstart = as.POSIXct(paste0(input$WATERYEAR1, '-06-01'))
             yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR1) + 1, '-05-31'))
             dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
-            dataCurQ1 <- dataCurrent %>%
-               # filter(waterYr %in% 2017) %>%            # Filter data to selected water year
-               # filter(site %in% 'W1') %>%                   # Filter data to selected site
-               filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
-               filter(site %in% input$SITES1) %>%                   # Filter data to selected site
+            dataCurQ1 = filter(dataCurrent, site %in% input$SITES1) %>%                   # Filter data to selected site
                select(-flowGageHt) %>%
                mutate(datetime=as.POSIXct(paste(as.character(date),
                   as.character(timeEST)))) %>%
-               # mutate(datetime=as.POSIXct(datetime, format='%m/%d/%Y %H:%M')) %>%
                full_join(dataSensor[,c('datetime', 'Q_Ls', 'watershedID')],
                   by=c('site'='watershedID', 'datetime'='datetime')) %>%
                select(-date) %>%
                rename(flowGageHt = Q_Ls, date = datetime) %>%
-               # select(one_of("date", 'Ca', "flowGageHt")) %>%      # Selected desired columns of data
                select(one_of("date", input$SOLUTES1, "flowGageHt")) %>%      # Selected desired columns of data
                rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have
                                                                              #   to create alternative graphs
-               # head(dataCurQ1)
          }
       }
       if (input$SITES1 %in% sites_precip) {
-         dataCurQ1 <- dataCurrent %>%
-            filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
-            filter(site %in% input$SITES1) %>%                   # Filter data to selected site
+         dataCurQ1 = filter(dataCurrent, site %in% input$SITES1) %>%                   # Filter data to selected site
             select(one_of("date", input$SOLUTES1, "precipCatch")) %>%      # Selected desired columns of data
             rename(Flow_or_Precip = precipCatch)                           # Rename Q to standard name, so that don't have
                                                                            #   to create alternative graphs
