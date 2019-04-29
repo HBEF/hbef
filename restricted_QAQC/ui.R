@@ -228,12 +228,38 @@ shinyUI(
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
-                     selectInput(
-                        "WATERYEAR2",
-                        label = "Water Year",
-                        choices = wateryears,
-                        selected = wateryears[1]
+                     radioButtons('wateryearOrRange2',
+                        'Choose date selection method',
+                        choices=c('Water Year'='wateryr', 'Date Range'='daterng')),
+                     conditionalPanel(
+                        condition = "input.wateryearOrRange2 == 'wateryr'",
+                        selectInput(
+                           "WATERYEAR2",
+                           label = "Water Year",
+                           choices = wateryears,
+                           selected = wateryears[1]
+                        )
                      ),
+                     conditionalPanel(
+                        condition = "input.wateryearOrRange2 == 'daterng'",
+                        sliderInput(
+                           "DATE2",
+                           label = "Date Range",
+                           min =as.Date("1963-06-01"),
+                           max = maxDate_current,
+                           value = c(maxDate_current-365, maxDate_current),
+                           width = "100%",
+                           timeFormat = "%b %Y",
+                           step = 30,
+                           dragRange = TRUE
+                        )
+                     ),
+                     # selectInput(
+                     #    "WATERYEAR2",
+                     #    label = "Water Year",
+                     #    choices = wateryears,
+                     #    selected = wateryears[1]
+                     # ),
                      selectInput("SITES2",
                                 label = "Site",
                                 choices = c(sites_streams, sites_precip),
@@ -292,12 +318,38 @@ shinyUI(
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
-                     selectInput(
-                       "WATERYEAR3",
-                       label = "Water Year",
-                       choices = wateryears,
-                       selected = wateryears[1]
+                     radioButtons('wateryearOrRange3',
+                        'Choose date selection method',
+                        choices=c('Water Year'='wateryr', 'Date Range'='daterng')),
+                     conditionalPanel(
+                        condition = "input.wateryearOrRange3 == 'wateryr'",
+                        selectInput(
+                           "WATERYEAR3",
+                           label = "Water Year",
+                           choices = wateryears,
+                           selected = wateryears[1]
+                        )
                      ),
+                     conditionalPanel(
+                        condition = "input.wateryearOrRange3 == 'daterng'",
+                        sliderInput(
+                           "DATE3",
+                           label = "Date Range",
+                           min =as.Date("1963-06-01"),
+                           max = maxDate_current,
+                           value = c(maxDate_current-365, maxDate_current),
+                           width = "100%",
+                           timeFormat = "%b %Y",
+                           step = 30,
+                           dragRange = TRUE
+                        )
+                     ),
+                     # selectInput(
+                     #   "WATERYEAR3",
+                     #   label = "Water Year",
+                     #   choices = wateryears,
+                     #   selected = wateryears[1]
+                     # ),
                      selectInput("SOLUTES3",
                                 label = "Solute",
                                 choices = c(solutes_cations, solutes_anions, solutes_other),

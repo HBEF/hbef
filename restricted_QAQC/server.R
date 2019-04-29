@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-# pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-pass = readLines('~/git/hbef/RMySQL.config')       # for mike
+pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+# pass = readLines('~/git/hbef/RMySQL.config')       # for mike
 #pass = readLines('SQL.txt')                        # for local computer
 
 # ***********************************************************************
@@ -736,38 +736,48 @@ shinyServer(function(input, output, session) {
    # Isolate selected data from dataCurrent
    dataCurrent2 <- reactive({
       if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
-      dataCurrent2 <- dataCurrent %>%
-         filter(waterYr %in% input$WATERYEAR2) %>%     # Filter data to selected water year
-         filter(site %in% input$SITES2) %>%            # Filter data to selected sites
+      if(input$wateryearOrRange2 == 'wateryr'){
+         dataCurrent2 = filter(dataCurrent, waterYr %in% input$WATERYEAR2)
+      } else {
+         dataCurrent2 = filter(dataCurrent, date > input$DATE2[1] &
+               date < input$DATE2[2])
+      }
+      dataCurrent2 = filter(dataCurrent2, site %in% input$SITES2) %>% # Filter data to selected sites
          select(one_of("date", input$SOLUTES2))        # Keep date and selected input data
    }) # END of dataCurrent2()
 
    # Grab selected wateryear, site, solute, and discharge data from recent data
    dataCurQ2 <- reactive({
       if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
+      if(input$wateryearOrRange2 == 'wateryr'){
+         dataCurQ2 = filter(dataCurrent, waterYr %in% input$WATERYEAR2)
+      } else {
+         dataCurQ2 = filter(dataCurrent, date > input$DATE2[1] &
+               date < input$DATE2[2])
+      }
       if (input$SITES2 %in% sites_streams) {
          if (input$Flow_or_Precip2 == 'gageHt'){
-            dataCurQ2 <- dataCurrent %>%
-               filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
-               filter(site %in% input$SITES2) %>%                   # Filter data to selected site
+            dataCurQ2 = filter(dataCurQ2, site %in% input$SITES2) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES2, "gageHt")) %>% # Selected desired columns of data
                rename(Flow_or_Precip = gageHt)                      # Rename GageHt to standard name, so that don't have
                                                                     #   to create alternative graphs
          }
          if (input$Flow_or_Precip2 == 'flowGageHt'){
-            dataCurQ2 <- dataCurrent %>%
-               filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
-               filter(site %in% input$SITES2) %>%                   # Filter data to selected site
+            dataCurQ2 = filter(dataCurQ2, site %in% input$SITES2) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%      # Selected desired columns of data
                rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have
                                                                              #  to create alternative graphs
          }
          if (input$Flow_or_Precip2 == 'flowSens'){
-            yrstart = as.POSIXct(paste0(input$WATERYEAR2, '-06-01'))
-            yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR2) + 1, '-05-31'))
+            if(input$wateryearOrRange2 == 'wateryr'){
+               yrstart = as.POSIXct(paste0(input$WATERYEAR2, '-06-01'))
+               yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR2) + 1, '-05-31'))
+            } else {
+               yrstart = as.POSIXct(input$DATE2[1])
+               yrend = as.POSIXct(input$DATE2[2])
+            }
             dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
-            dataCurQ2 <- dataCurrent %>%
-               filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
+            dataCurQ2 <- dataCurQ2 %>%
                filter(site %in% input$SITES2) %>%                   # Filter data to selected site
                select(-flowGageHt) %>%
                mutate(datetime=as.POSIXct(paste(as.character(date),
@@ -847,8 +857,13 @@ shinyServer(function(input, output, session) {
    dataCurrent3 <- reactive({
 
      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
-     dataCurrent3 <- dataCurrent %>%
-       filter(waterYr %in% input$WATERYEAR3) %>%          # Filter data to selected water year
+     if(input$wateryearOrRange3 == 'wateryr'){
+        dataCurrent3 = filter(dataCurrent, waterYr %in% input$WATERYEAR3)
+     } else {
+        dataCurrent3 = filter(dataCurrent, date > input$DATE3[1] &
+           date < input$DATE3[2])
+     }
+     dataCurrent3 <- dataCurrent3 %>%
        filter(site %in% input$SITES3) %>%                 # Filter data to selected sites
        select(one_of("date", "site", input$SOLUTES3)) %>% # Keep date, site, and solute data
        mutate(i = row_number()) %>%                       # Create new columns of data of just row numbers. Necessary to prevent error message of duplicate values after next line of code, but inefficient because doesn't combine rows with duplicate columns.)
@@ -862,24 +877,33 @@ shinyServer(function(input, output, session) {
    Q3 <- reactive({
 
      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
+     if(input$wateryearOrRange3 == 'wateryr'){
+        Q3 = filter(dataCurrent, waterYr %in% input$WATERYEAR3)
+     } else {
+        Q3 = filter(dataCurrent, date > input$DATE3[1] &
+              date < input$DATE3[2])
+     }
 
      # if Discharge is selected, finds data for all watershed (stream) sites,
      # and calculates median
      if (input$HYDROLOGY3 == 'Discharge') {
        if (input$Flow_or_Precip3 == 'gageHt') {
-         Q3 <- dataCurrent %>%
-           filter(waterYr %in% input$WATERYEAR3) %>%
+         Q3 <- Q3 %>%
            filter(site %in% sites_streams) %>%
            select(one_of("date", input$Flow_or_Precip3)) %>%
            group_by(date) %>%
            summarise(Hydro.med = median(gageHt, na.rm=TRUE))}
        else if(input$Flow_or_Precip3 == 'flowSens'){
          # dataCurrent$timeEST[is.na(dataCurrent$timeEST)] = hms('00:00:00')
-         yrstart = as.POSIXct(paste0(input$WATERYEAR3, '-06-01'))
-         yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR3) + 1, '-05-31'))
+         if(input$wateryearOrRange3 == 'wateryr'){
+            yrstart = as.POSIXct(paste0(input$WATERYEAR3, '-06-01'))
+            yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR3) + 1, '-05-31'))
+         } else {
+            yrstart = as.POSIXct(input$DATE3[1])
+            yrend = as.POSIXct(input$DATE3[2])
+         }
          dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
-         Q3 <- dataCurrent %>%
-         filter(waterYr %in% input$WATERYEAR3) %>%
+         Q3 <- Q3 %>%
          filter(site %in% input$SITES3) %>%
             select(-gageHt) %>%
             mutate(datetime=as.POSIXct(paste(as.character(date),
@@ -893,8 +917,7 @@ shinyServer(function(input, output, session) {
             group_by(date) %>%
             summarise(Hydro.med = median(flowSens, na.rm=TRUE))
        } else { #i.e. if input$Flow_or_Precip3 == 'flowGageHt'
-         Q3 <- dataCurrent %>%
-           filter(waterYr %in% input$WATERYEAR3) %>%
+         Q3 <- Q3 %>%
            filter(site %in% sites_streams) %>%
            select(one_of("date", input$Flow_or_Precip3)) %>%
            group_by(date) %>%
