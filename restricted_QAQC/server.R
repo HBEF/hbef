@@ -737,12 +737,12 @@ shinyServer(function(input, output, session) {
    dataCurrent2 <- reactive({
       if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
       if(input$wateryearOrRange2 == 'wateryr'){
-         dataCurrent2 = filter(dataAll2, waterYr %in% input$WATERYEAR2)
+         dataCurrent2 = filter(dataCurrent, waterYr %in% input$WATERYEAR2)
       } else {
-         dataCurrent2 = filter(dataAll2, date > input$DATE2[1] &
+         dataCurrent2 = filter(dataCurrent, date > input$DATE2[1] &
                date < input$DATE2[2])
       }
-      dataCurrent2 = filter(dataAll2, site %in% input$SITES2) %>% # Filter data to selected sites
+      dataCurrent2 = filter(dataCurrent, site %in% input$SITES2) %>% # Filter data to selected sites
          select(one_of("date", input$SOLUTES2))        # Keep date and selected input data
    }) # END of dataCurrent2()
 
@@ -750,9 +750,9 @@ shinyServer(function(input, output, session) {
    dataCurQ2 <- reactive({
       if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
       if(input$wateryearOrRange2 == 'wateryr'){
-         dataCurQ2 = filter(dataAll2, waterYr %in% input$WATERYEAR2)
+         dataCurQ2 = filter(dataCurrent, waterYr %in% input$WATERYEAR2)
       } else {
-         dataCurQ2 = filter(dataAll2, date > input$DATE2[1] &
+         dataCurQ2 = filter(dataCurrent, date > input$DATE2[1] &
                date < input$DATE2[2])
       }
       if (input$SITES2 %in% sites_streams) {
@@ -858,9 +858,9 @@ shinyServer(function(input, output, session) {
 
      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
      if(input$wateryearOrRange3 == 'wateryr'){
-        dataCurrent3 = filter(dataAll2, waterYr %in% input$WATERYEAR3)
+        dataCurrent3 = filter(dataCurrent, waterYr %in% input$WATERYEAR3)
      } else {
-        dataCurrent3 = filter(dataAll2, date > input$DATE3[1] &
+        dataCurrent3 = filter(dataCurrent, date > input$DATE3[1] &
            date < input$DATE3[2])
      }
      dataCurrent3 <- dataCurrent3 %>%
@@ -878,9 +878,9 @@ shinyServer(function(input, output, session) {
 
      if (changesInData$change_dataCurrent > 0) dataCurrent <- dataCurrentR()
      if(input$wateryearOrRange3 == 'wateryr'){
-        Q3 = filter(dataAll2, waterYr %in% input$WATERYEAR3)
+        Q3 = filter(dataCurrent, waterYr %in% input$WATERYEAR3)
      } else {
-        Q3 = filter(dataAll2, date > input$DATE3[1] &
+        Q3 = filter(dataCurrent, date > input$DATE3[1] &
               date < input$DATE3[2])
      }
 
