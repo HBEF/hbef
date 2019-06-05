@@ -173,7 +173,6 @@ tables = dbListTables(con)
 # Get data from mysql
 dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
-# dataCurrent = bind_rows(dataCurrent, select(dataHistorical, -canonical))
 dataSensor <- dbReadTable(con, "sensor2")
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
 # dataSensor$datetime = as.Date(dataSensor$datetime)
@@ -198,6 +197,7 @@ dataHistorical <- standardizeClasses(dataHistorical)
 # }
 dataAll <- bind_rows(dataHistorical, dataCurrent)
 dataAll <- standardizeClasses(dataAll)
+dataAll2 = bind_rows(dataCurrent, select(dataHistorical, -canonical))
 
 # # FOR TESTING on remote server
 # message("dataInitial from mysql: names, rows, col's")
