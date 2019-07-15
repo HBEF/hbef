@@ -298,7 +298,7 @@ dataAll2 = bind_rows(dataCurrent, select(dataHistorical, -canonical))
 
 # Create water years *list* ----
 # used in ui.R and server.R for Panels 1-3 (QA/QC graphs)
-wy <- levels(as.factor(dataCurrent$waterYr))
+wy <- levels(as.factor(dataAll2$waterYr))
 wy1 <- c()
 for (i in 1:length(wy)) {
    wy1 <- c(wy1, wy[i])
