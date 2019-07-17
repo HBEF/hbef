@@ -306,6 +306,26 @@ shinyServer(function(input, output, session) {
    # Panel 1 Reactivity ####
    #************************
 
+   #add sensor Q option to hydrology radio buttons if site W1-W9 selected
+   observeEvent(input$SITES1, {
+      
+      current_selection = input$Flow_or_Precip1
+      ws_site_selected = grepl("^W[0-9]+$", input$SITES1)
+      if(! ws_site_selected && current_selection == 'flowSens'){
+         current_selection = 'flowGageHt'
+      }
+      
+      flow_opts = c("Gage Height (ft)" = "gageHt",
+                    "Q from Gage Height (L/s)" = "flowGageHt")
+      if(ws_site_selected){
+         flow_opts = append(flow_opts,
+                            c("Q from Sensor (L/s)" = "flowSens"))
+      }
+      
+      updateRadioButtons(session, 'Flow_or_Precip1', "Select data source:",
+                         choices=flow_opts, selected = current_selection, inline = FALSE)
+   })
+   
    # Solute limit (MDL & LOQ)
    # Finding MDL and LOQ value for solute, if they exist
    MDL1 <- reactive({
@@ -363,85 +383,6 @@ shinyServer(function(input, output, session) {
      dataAll1
 
    }) # END of dataAll1
-
-   #add sensor Q option to hydrology radio buttons if site W1-W9 selected
-   observeEvent(input$SITES1, {
-
-      current_selection = input$Flow_or_Precip1
-      ws_site_selected = grepl("^W[0-9]+$", input$SITES1)
-      if(! ws_site_selected && current_selection == 'flowSens'){
-         current_selection = 'flowGageHt'
-      }
-
-      flow_opts = c("Gage Height (ft)" = "gageHt",
-         "Q from Gage Height (L/s)" = "flowGageHt")
-      if(ws_site_selected){
-         flow_opts = append(flow_opts,
-            c("Q from Sensor (L/s)" = "flowSens"))
-      }
-
-      updateRadioButtons(session, 'Flow_or_Precip1', "Select data source:",
-         choices=flow_opts, selected = current_selection, inline = FALSE)
-   })
-
-   observeEvent(input$SITES2, {
-
-      current_selection = input$Flow_or_Precip2
-      ws_site_selected = grepl("^W[0-9]+$", input$SITES2)
-      if(! ws_site_selected && current_selection == 'flowSens'){
-         current_selection = 'flowGageHt'
-      }
-
-      flow_opts = c("Gage Height (ft)" = "gageHt",
-         "Q from Gage Height (L/s)" = "flowGageHt")
-      if(ws_site_selected){
-         flow_opts = append(flow_opts,
-            c("Q from Sensor (L/s)" = "flowSens"))
-      }
-
-      updateRadioButtons(session, 'Flow_or_Precip2', "Select data source:",
-         choices=flow_opts, selected = current_selection, inline = FALSE)
-   })
-
-   observeEvent(input$SITES3, {
-
-      current_selection = input$Flow_or_Precip3
-      ws_sites_selected = all(grepl("^W[0-9]+$", input$SITES3))
-      if(! ws_sites_selected && current_selection == 'flowSens'){
-         current_selection = 'flowGageHt'
-      }
-
-      flow_opts = c("Gage Height (ft)" = "gageHt",
-         "Q from Gage Height (L/s)" = "flowGageHt")
-      if(ws_sites_selected){
-         flow_opts = append(flow_opts,
-            c("Q from Sensor (L/s)" = "flowSens"))
-      }
-
-      updateRadioButtons(session, 'Flow_or_Precip3', "Select data source:",
-         choices=flow_opts, selected = current_selection, inline = FALSE)
-   })
-
-   observeEvent(input$SITES4, {
-
-      current_selection = input$FLOW_SOURCE4
-      ws_sites_selected = all(grepl("^W[0-9]+$", input$SITES4))
-      if(! ws_sites_selected && current_selection == 'flowSens'){
-         current_selection = 'flowGageHt'
-      }
-
-      flow_opts = c("Gage Height (ft)" = "gageHt",
-         "Q from Gage Height (L/s)" = "flowGageHt")
-      if(ws_sites_selected){
-         flow_opts = append(flow_opts,
-            c("Q from Sensor (L/s)" = "flowSens"))
-      }
-
-      updateRadioButtons(session, 'FLOW_SOURCE4', "Select data source:",
-         choices=flow_opts, selected = current_selection, inline = FALSE)
-   })
-
-
 
    # Grab selected wateryear, site, solute, and discharge data from data
    dataAllQ1 <- reactive({
@@ -548,6 +489,26 @@ shinyServer(function(input, output, session) {
    # Panel 2 Reactivity ####
    #************************
 
+   #add sensor Q option to hydrology radio buttons if site W1-W9 selected
+   observeEvent(input$SITES2, {
+      
+      current_selection = input$Flow_or_Precip2
+      ws_site_selected = grepl("^W[0-9]+$", input$SITES2)
+      if(! ws_site_selected && current_selection == 'flowSens'){
+         current_selection = 'flowGageHt'
+      }
+      
+      flow_opts = c("Gage Height (ft)" = "gageHt",
+                    "Q from Gage Height (L/s)" = "flowGageHt")
+      if(ws_site_selected){
+         flow_opts = append(flow_opts,
+                            c("Q from Sensor (L/s)" = "flowSens"))
+      }
+      
+      updateRadioButtons(session, 'Flow_or_Precip2', "Select data source:",
+                         choices=flow_opts, selected = current_selection, inline = FALSE)
+   })
+   
    # !!! Still trying to figure out
    # Solute units
    # Finding appropriate units for selected solutes and assigning to ylabel2
@@ -671,6 +632,26 @@ shinyServer(function(input, output, session) {
    # Panel 3 Reactivity####
    #************************
 
+   #add sensor Q option to hydrology radio buttons if site W1-W9 selected
+   observeEvent(input$SITES3, {
+      
+      current_selection = input$Flow_or_Precip3
+      ws_sites_selected = all(grepl("^W[0-9]+$", input$SITES3))
+      if(! ws_sites_selected && current_selection == 'flowSens'){
+         current_selection = 'flowGageHt'
+      }
+      
+      flow_opts = c("Gage Height (ft)" = "gageHt",
+                    "Q from Gage Height (L/s)" = "flowGageHt")
+      if(ws_sites_selected){
+         flow_opts = append(flow_opts,
+                            c("Q from Sensor (L/s)" = "flowSens"))
+      }
+      
+      updateRadioButtons(session, 'Flow_or_Precip3', "Select data source:",
+                         choices=flow_opts, selected = current_selection, inline = FALSE)
+   })
+   
    # Solute limit (MDL & LOQ)
    # Finding MDL and LOQ value for solute, if they exist
    MDL3 <- reactive({
@@ -816,6 +797,26 @@ shinyServer(function(input, output, session) {
    # Panel 4 Reactivity ####
    #************************
 
+   #add sensor Q option to hydrology radio buttons if site W1-W9 selected
+   observeEvent(input$SITES4, {
+      
+      current_selection = input$FLOW_SOURCE4
+      ws_sites_selected = all(grepl("^W[0-9]+$", input$SITES4))
+      if(! ws_sites_selected && current_selection == 'flowSens'){
+         current_selection = 'flowGageHt'
+      }
+      
+      flow_opts = c("Gage Height (ft)" = "gageHt",
+                    "Q from Gage Height (L/s)" = "flowGageHt")
+      if(ws_sites_selected){
+         flow_opts = append(flow_opts,
+                            c("Q from Sensor (L/s)" = "flowSens"))
+      }
+      
+      updateRadioButtons(session, 'FLOW_SOURCE4', "Select data source:",
+                         choices=flow_opts, selected = current_selection, inline = FALSE)
+   })
+   
    # Solute limit (MDL & LOQ)
    # Finding MDL and LOQ value for solute, if they exist
    MDL4 <- reactive({
@@ -936,8 +937,6 @@ shinyServer(function(input, output, session) {
       # of input$DATASET
       datasetInput <- switch(input$DOWNLOAD_DATASET,
                              "Current" = dataCurrent,
-                            # "Initial" = dataInitial,
-                            # "Chemistry" = dataChemistry,
                              "Historical" = dataHistorical,
                              "Sensor" = dataSensor,
                              "All" = dataAll)
