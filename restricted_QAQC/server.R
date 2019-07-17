@@ -43,31 +43,6 @@ pass = readLines('SQL.txt')                     # for CSR's local computer
 # Functions ----
 # ***********************************
 
-# # Find units for y-axis, depending on solute selected
-# ylabel <- function(solute) {
-#       mu <- "\U00B5"
-#       # If 'solute' belong to group with different set of units, label depending on what it is
-#       if(input$solute %in% other_units) {
-#          if (input$solute == "DIC")     ylabel3 <- paste(mu,"M/L")
-#          if (input$solute == "ANC960")  ylabel3 <- paste(mu, "eq/L")
-#          if (input$solute == "spCond") ylabel3 <- paste(mu, "S/cm")
-#          if (input$solute == "temp")    ylabel3 <- "Degrees Celsius"
-#          if (input$solute %in% c("pH3star",
-#                                  "pHmetrohm",
-#                                  "cationCharge",
-#                                  "anionCharge",
-#                                  "theoryCond",
-#                                  "ionBalance")) { ylabel3 <- "(No Units)" }
-#          ylabel3 <- gsub(" ", "", ylabel3, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
-#          return(ylabel3)
-#       }
-#       # Otherwise, label as 'default' mg/L
-#       else {
-#          ylabel3 <- "mg/L"
-#          return(ylabel3)
-#       }
-# }
-
 # Replaces codes -999.9, -1, -2, and -3 from data (used before graphing)
 removeCodes <- function(dataSet) {
    # if value -999.9 is present in certain columns, replace with NA
@@ -238,13 +213,6 @@ shinyServer(function(input, output, session) {
       #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
       wateryears <<- as.list(wy1) #assign it globally
    })
-   # # !!! See if you're going to use or delete, for 5 or all years of history
-   # histYears <- reactive({
-   #   # Select desired historical water years
-   #   if (input$SOLUTES_HIST1 == "5") {histYears <- seq((input$WATERYEAR - 5), (input$WATERYEAR - 1))}
-   #   if (input$SOLUTES_HIST1 == "all")  {histYears <- seq(min(dataHist$waterYr), (input$WATERYEAR - 1))}
-   #   paste(histYears, sep=" ")
-   # })
 
    # *Upload Tab* ####
    #************************
@@ -922,10 +890,6 @@ shinyServer(function(input, output, session) {
       data5
    })
 
-   # dataHOT <- dataCurrent # R object data frame stored as ASCII text
-   # values <- list()
-   # setHot <- function(x) values[["hot"]] <<- x
-
    # *Download Tab* ########################################
 
    datasetInput <- reactive({
@@ -1411,14 +1375,7 @@ shinyServer(function(input, output, session) {
             scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
             labs(x = "", y = "Solutes")
       }
-      # m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) +
-      #    my_theme +
-      #    geom_point(size = 2.5) +
-      #    geom_line(alpha = 0.5) +
-      #    scale_x_date(date_labels = "%Y-%b")+
-      #    coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
-      #    scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
-      #    labs(x = "", y = "Solutes")
+
       # If show field code is selected, add to ggplot
       if (input$FIELDCODE4 == TRUE) {
          m <- m + geom_text(aes(label=data$fieldCode),
