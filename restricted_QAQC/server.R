@@ -33,8 +33,8 @@ message("hello, I'm at the top of server.R")
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
 pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-# pass = readLines('~/git/hbef/RMySQL.config')       # for mike
-#pass = readLines('SQL.txt')                        # for local computer
+#pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
+#pass = readLines('SQL.txt')                     # for CSR's local computer
 
 # ***********************************************************************
 #                    ---- IMPORTANT PRELIMINARY INFO ----
@@ -226,7 +226,7 @@ shinyServer(function(input, output, session) {
 
 
    dataAllR <- eventReactive(changesInData$change_dataAll, {
-      dataAllR <- bind_rows(dataHistorical, dataCurrentR())
+      dataAllR <- bind_rows(select(dataHistorical, -canonical), dataCurrentR())
       dataAllR <- standardizeClasses(dataAllR)
    })
    # # !!! See if you're going to use or delete, for 5 or all years of history
