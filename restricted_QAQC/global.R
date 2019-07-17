@@ -1,7 +1,7 @@
 
 # Used to:
-# -Import all data
-# -Create variables that can be accessed by ui.R and server.R
+# -Import all data from hbef (mysql) database upon startup
+# -Create variables and functions that can be accessed by ui.R and server.R
 
 library(dplyr)
 library(RMariaDB)
@@ -11,9 +11,9 @@ message("hello, I'm in global.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-# pass = readLines('~/git/hbef/RMySQL.config')       # for mike
-#pass = readLines('SQL.txt')                        # for local computer
+#pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+#pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
+pass = readLines('SQL.txt')                     # for CSR's local computer
 
 # **********************************************************************
 #                      ---- LISTS ----
@@ -297,6 +297,8 @@ dataAll2 = bind_rows(dataCurrent, select(dataHistorical, -canonical))
 
 
 # Create water years *list* ----
+
+# Water years list for dataAll
 # used in ui.R and server.R for Panels 1-3 (QA/QC graphs)
 wy <- levels(as.factor(dataAll2$waterYr))
 wy1 <- c()
@@ -305,6 +307,16 @@ for (i in 1:length(wy)) {
 }
 #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
 wateryears <- as.list(wy1)
+
+# Water years list for dataCurrent
+# used for Panels 5 (DataEdits)
+wy_current <- levels(as.factor(dataCurrent$waterYr))
+wy1_current <- c()
+for (i in 1:length(wy_current)) {
+   wy1_current <- c(wy1_current, wy_current[i])
+}
+#wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
+wateryears_current <- as.list(wy1_current)
 
 
 # Find maximum date ----

@@ -585,8 +585,8 @@ shinyUI(
                      selectInput(
                         "WATERYEAR5",
                         label = "Water Year",
-                        choices = wateryears,
-                        selected = wateryears[1]
+                        choices = wateryears_current,
+                        selected = wateryears_current[1]
                      )),
                   column(3,
                      selectInput(
