@@ -32,9 +32,9 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
+#pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
 #pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
-#pass = readLines('SQL.txt')                     # for CSR's local computer
+pass = readLines('SQL.txt')                     # for CSR's local computer
 
 # ***********************************************************************
 #                    ---- IMPORTANT PRELIMINARY INFO ----
@@ -73,7 +73,7 @@ removeCodes <- function(dataSet) {
    # if value -999.9 is present in certain columns, replace with NA
    for (i in 1:6) {
       # test data set when needed:
-      # test<-dataAll2[which(dataAll2$temp == -999.9),] #selects all temp -999.9
+      # test<-dataAll[which(dataAll$temp == -999.9),] #selects all temp -999.9
       current_col_ofData <- codes999.9[i]
       if (current_col_ofData %in% names(dataSet)) {
          ind_col <- which(current_col_ofData == colnames(dataSet), arr.ind = TRUE)
@@ -202,14 +202,14 @@ shinyServer(function(input, output, session) {
       dataCurrentR$notes <- gsub(",", ";", dataCurrentR$notes)
       dataCurrentR$sampleType <- gsub(",", ";", dataCurrentR$sampleType)
 
-      # Re-calculate and assign water year variable
-      wy <- levels(as.factor(dataCurrentR$waterYr))
-      wy1 <- c()
-      for (i in 1:length(wy)) {
-         wy1 <- c(wy1, wy[i])
+      # Re-calculate and assign water year variable for current data
+      wy_current <- levels(as.factor(dataCurrentR$waterYr))
+      wy1_current <- c()
+      for (i in 1:length(wy_current)) {
+         wy1_current <- c(wy1_current, wy_current[i])
       }
       #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
-      wateryears <<- as.list(wy1) #assign it globally
+      wateryears_current <<- as.list(wy1_current) #assign it globally
 
       # Update user interface
       updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
@@ -228,6 +228,15 @@ shinyServer(function(input, output, session) {
    dataAllR <- eventReactive(changesInData$change_dataAll, {
       dataAllR <- bind_rows(select(dataHistorical, -canonical), dataCurrentR())
       dataAllR <- standardizeClasses(dataAllR)
+      
+      # Re-calculate and assign water year variable for all data
+      wy <- levels(as.factor(dataAllR$waterYr))
+      wy1 <- c()
+      for (i in 1:length(wy)) {
+         wy1 <- c(wy1, wy[i])
+      }
+      #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
+      wateryears <<- as.list(wy1) #assign it globally
    })
    # # !!! See if you're going to use or delete, for 5 or all years of history
    # histYears <- reactive({
@@ -279,7 +288,8 @@ shinyServer(function(input, output, session) {
       #dataAll2$notes <<- gsub(",", ":", dataAll2$notes)
       #dataAll2$sampleType <<- gsub(",", ";", dataAll2$sampleType)
 
-      # update reactive value to signal core data has changed
+      # update reactive value to signal core data has changed, 
+      # so that dataCurrent & dataAll are recalculated
       changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
 
       showNotification("Submit Complete.")
@@ -343,16 +353,16 @@ shinyServer(function(input, output, session) {
    # x-axis is continuous.
 
    # Grab selected wateryear, site, solute data from data
-   dataCurrent1 <- reactive({
-     if (changesInData$change_dataCurrent > 0) dataAll2 <- dataCurrentR()
-     dataCurrent1 <- dataAll2 %>%
+   dataAll1 <- reactive({
+     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
+     dataAll1 <- dataAll %>%
        filter(waterYr %in% input$WATERYEAR1) %>%      # Filter data to selected water year
        filter(site %in% input$SITES1) %>%             # Filter data to selected site
        select(one_of("date", input$SOLUTES1))         # Select desired columns of data
-     dataCurrent1 <- removeCodes(dataCurrent1)
-     dataCurrent1
+     dataAll1 <- removeCodes(dataAll1)
+     dataAll1
 
-   }) # END of dataCurrent1
+   }) # END of dataAll1
 
    #add sensor Q option to hydrology radio buttons if site W1-W9 selected
    observeEvent(input$SITES1, {
@@ -434,11 +444,11 @@ shinyServer(function(input, output, session) {
 
 
    # Grab selected wateryear, site, solute, and discharge data from data
-   dataCurQ1 <- reactive({
-      if (changesInData$change_dataCurrent > 0) dataAll2 <- dataCurrentR()
+   dataAllQ1 <- reactive({
+      if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
       if (input$SITES1 %in% sites_streams) {
          if (input$Flow_or_Precip1 == 'gageHt'){
-            dataCurQ1 <- dataAll2 %>%
+            dataAllQ1 <- dataAll %>%
                filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
                filter(site %in% input$SITES1) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES1, "gageHt")) %>% # Selected desired columns of data
@@ -446,7 +456,7 @@ shinyServer(function(input, output, session) {
                                                                     #   to create alternative graphs
          }
          if (input$Flow_or_Precip1 == 'flowGageHt'){
-            dataCurQ1 <- dataAll2 %>%
+            dataAllQ1 <- dataAll %>%
                filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
                filter(site %in% input$SITES1) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES1, "flowGageHt")) %>%      # Selected desired columns of data
@@ -458,7 +468,7 @@ shinyServer(function(input, output, session) {
             yrstart = as.POSIXct(paste0(input$WATERYEAR1, '-06-01'))
             yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR1) + 1, '-05-31'))
             dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
-            dataCurQ1 <- dataAll2 %>%
+            dataAllQ1 <- dataAll %>%
                filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
                filter(site %in% input$SITES1) %>%                   # Filter data to selected site
                select(-flowGageHt) %>%
@@ -475,14 +485,14 @@ shinyServer(function(input, output, session) {
          }
       }
       if (input$SITES1 %in% sites_precip) {
-         dataCurQ1 <- dataAll2 %>%
+         dataAllQ1 <- dataAll %>%
             filter(waterYr %in% input$WATERYEAR1) %>%            # Filter data to selected water year
             filter(site %in% input$SITES1) %>%                   # Filter data to selected site
             select(one_of("date", input$SOLUTES1, "precipCatch")) %>%      # Selected desired columns of data
             rename(Flow_or_Precip = precipCatch)                           # Rename Q to standard name, so that don't have
                                                                            #   to create alternative graphs
       }
-      dataCurQ1
+      dataAllQ1
    }) # END of dataCurrentQ1
 
    # filters historical data; i.e. site, solute, from historical data
@@ -522,169 +532,16 @@ shinyServer(function(input, output, session) {
    }) # END of dataHistorical1
 
    # combines site, solute data from recent water year data with historical data
-   dataCurHist1 <- reactive ({
-      dataCurHist1 <- full_join(dataCurrent1(), dataHistorical1(), by = "date")
+   dataAllHist1 <- reactive ({
+      dataAllHist1 <- full_join(dataAll1(), dataHistorical1(), by = "date")
       return(dataCurHist1)
-   }) #END of dataCurHist1
+   }) #END of dataAllHist1
 
    # combines site, solute, and discharge data from recent water year dataset with historical data
-   dataCurQHist1 <- reactive ({
-      dataCurQHist1 <- full_join(dataCurQ1(), dataHistorical1(), by = "date")
-      return(dataCurQHist1)
-   }) #END of dataCurQHist1
-
-   # # For printing?
-   # dygraph1.fun <- function() {
-   #    if (input$HYDROLOGY1 == TRUE)   {
-   #       if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (mm or L/s)'
-   #       if (input$SITES1 %in% sites_precip) ylabel2 <- 'Precipitation (in)'
-   #
-   #       if (input$SOLUTES_HIST1 == TRUE) {
-   #
-   #          # Plots Default + Discharge + Historical data
-   #          data1 <- dataCurQHist1()
-   #          data1 <- removeCodes(data1)
-   #          data1.xts <- xts(data1[,-1], order.by = data1$date)
-   #          #paste(c("XTS:", class(dataOrig1$FieldCode)))
-   #
-   #          dygraph1 <- dygraph(data1.xts) %>%
-   #             dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
-   #                    axisLabelColor = "black") %>%
-   #             dyAxis("y", label = ylabel,
-   #                    independentTicks=TRUE,
-   #                    axisLabelColor = "black") %>%
-   #             dyAxis('y2',label=ylabel2,
-   #                    independentTicks=TRUE,
-   #                    axisLabelColor = "#3182bd",
-   #                    axisLabelWidth = 70,
-   #                    axisLineColor = "#3182bd") %>%
-   #             dySeries(name = input$SOLUTES1,
-   #                      color = "black",
-   #                      drawPoints = TRUE,
-   #                      pointSize = 3,
-   #                      axis='y') %>%
-   #             dySeries(name = 'Flow_or_Precip',
-   #                      drawPoints = FALSE,
-   #                      fillGraph=T,
-   #                      color = "#3182bd",
-   #                      axis='y2') %>%
-   #             dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
-   #                      strokePattern = c("dashed"),
-   #                      color = c("#A9A9A9"),
-   #                      label = 'median + IQR',
-   #                      axis='y') %>%
-   #             dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-   #             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-   #             dyOptions(drawGrid = FALSE,
-   #                       strokeWidth = 1,
-   #                       fillAlpha = 0.5,
-   #                       connectSeparatedPoints=TRUE,
-   #                       includeZero = TRUE) %>%
-   #             dyLegend(width = 300, showZeroValues = FALSE)
-   #
-   #          dygraph1
-   #
-   #       } else {
-   #
-   #          # Plots Default + Discharge data
-   #          data1 <- dataCurQ1()
-   #          data1 <- removeCodes(data1)
-   #          data1.xts <- xts(data1[,-1], order.by = data1$date)
-   #
-   #          dygraph1 <- dygraph(data1.xts) %>%
-   #             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-   #             dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-   #             dyAxis('y2',label=ylabel2, independentTicks=TRUE,
-   #                    axisLabelWidth = 70,
-   #                    axisLabelColor = "#3182bd",
-   #                    axisLineColor = "#3182bd") %>% # color is light blue
-   #             dySeries(name = input$SOLUTES1,
-   #                      color = "#black") %>%
-   #             dySeries(name = 'Flow_or_Precip',
-   #                      drawPoints = FALSE,
-   #                      fillGraph=T,
-   #                      color = "#3182bd",
-   #                      axis='y2') %>%
-   #             dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-   #             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-   #             dyOptions(drawGrid = FALSE,
-   #                       drawPoints = TRUE,
-   #                       strokeWidth = 1,
-   #                       pointSize = 3,
-   #                       fillAlpha = 0.5,
-   #                       connectSeparatedPoints=TRUE,
-   #                       includeZero = TRUE)
-   #          dygraph1
-   #       }
-   #    } else {
-   #
-   #       if (input$SOLUTES_HIST1 == TRUE) {
-   #
-   #          # Plots Default + Historical data
-   #          data1 <- dataCurHist1()
-   #          data1 <- removeCodes(data1)
-   #          data1.xts <- xts(data1[,-1], order.by = data1$date)
-   #
-   #          dygraph1 <- dygraph(data1.xts) %>%
-   #             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-   #             dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-   #             dySeries(name = input$SOLUTES1,
-   #                      color = "black",
-   #                      drawPoints = TRUE,
-   #                      pointSize = 3,
-   #                      axis='y') %>%
-   #             dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
-   #                      strokePattern = c("dashed"),
-   #                      color = "#A9A9A9",
-   #                      label = 'median + IQR',
-   #                      axis='y') %>%
-   #             dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-   #             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-   #             dyOptions(drawGrid = FALSE,
-   #                       strokeWidth = 1,
-   #                       fillAlpha = 0.3,
-   #                       connectSeparatedPoints=TRUE,
-   #                       includeZero = TRUE)
-   #
-   #          dygraph1
-   #
-   #       } else {
-   #
-   #          # Plots Default data
-   #
-   #          data1 <- dataCurrent1()
-   #          data1 <- removeCodes(data1)
-   #          data1.xts <- xts(data1, order.by = data1$date)
-   #
-   #          #padrange <- c(min(data1.xts$input$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$input$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
-   #
-   #          dygraph1 <- dygraph(data1.xts) %>%
-   #             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-   #             dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-   #             dySeries(name = input$SOLUTES1,
-   #                      color = "black",
-   #                      drawPoints = TRUE,
-   #                      strokeWidth = 1,
-   #                      pointSize = 3) %>%
-   #             # dySeries(name = "FieldCode",
-   #             #          color = "black",
-   #             #          drawPoints = TRUE,
-   #             #          strokeWidth = 0,
-   #             #          pointSize = 1) %>%
-   #             # for (i in 1:nrow(data1.xts)) {
-   #             #    dyAnnotation(index(i), data1.xts$FieldCode[i])
-   #             # } %>%
-   #             dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-   #             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-   #             dyOptions(drawGrid = FALSE,
-   #                       connectSeparatedPoints=TRUE,
-   #                       includeZero = TRUE)
-   #
-   #          dygraph1
-   #       }
-   #    }
-   # } # END of graphs1
-
+   dataAllQHist1 <- reactive ({
+      dataAllQHist1 <- full_join(dataAllQ1(), dataHistorical1(), by = "date")
+      return(dataAllQHist1)
+   }) #END of dataAllQHist1
 
    # END of PANEL 1
 
@@ -1138,7 +995,7 @@ shinyServer(function(input, output, session) {
             } else {
 
                # Plots Default + Discharge + Historical data
-               data1 <- dataCurQHist1()
+               data1 <- dataAllQHist1()
                data1 <- removeCodes(data1)
                data1.xts <- xts(data1[,-1], order.by = data1$date)
                #paste(c("XTS:", class(dataCur1$FieldCode)))
@@ -1184,7 +1041,7 @@ shinyServer(function(input, output, session) {
          } else {
 
             # Plots Default + Discharge data
-            data1 <- dataCurQ1()
+            data1 <- dataAllQ1()
             data1 <- removeCodes(data1)
             data1.xts <- xts(data1[,-1], order.by = data1$date)
 
@@ -1218,7 +1075,7 @@ shinyServer(function(input, output, session) {
          if (input$SOLUTES_HIST1 == TRUE) {
 
             # Plots Default + Historical data
-            data1 <- dataCurHist1()
+            data1 <- dataAllHist1()
             data1 <- removeCodes(data1)
             data1.xts <- xts(data1[,-1], order.by = data1$date)
 
@@ -1249,7 +1106,7 @@ shinyServer(function(input, output, session) {
 
             # Plots Default data
 
-            data1 <- dataCurrent1()
+            data1 <- dataAll1()
             data1 <- removeCodes(data1)
             data1.xts <- xts(data1, order.by = data1$date)
 
@@ -1283,50 +1140,7 @@ shinyServer(function(input, output, session) {
 
    }) # END of output$GRAPH1
 
-   output$TABLE1 <- renderDataTable(dataCurrent1()) # for testing purposes
-
-#   output$PRINT1 <- downloadHandler(
-#      # For PDF output, change this to "report.pdf"
-#      filename = function() {
-#         paste("HBEF_1Solute1Site_", Sys.time(), ".pdf", sep="") #can add input$var3 if you want people to choose b/w pdf, png, etc.
-#         },
-#      content = function(file) {
-#         # open the device
-#         pdf(file) #, onefile = FALSE
-#         # create the plot
-#         dygraph1.fun()
-#         # close the device
-#         dev.off()
-#
-#         # # Copy the report file to a temporary directory before processing it, in
-#         # # case we don't have write permissions to the current working dir (which
-#         # # can happen when deployed).
-#         # tempReport <- file.path(tempdir(), "1Solute1Site.Rmd")
-#         # file.copy("1Solute1Site.Rmd", tempReport, overwrite = TRUE)
-#         #
-#         # # Set up parameters to pass to Rmd document
-#         # params <- list(HYDROLOGY1 = input$HYDROLOGY1,
-#         #                SOLUTES_HIST1 = input$SOLUTES_HIST1,
-#         #                WATERYEAR1 = input$WATERYEAR1,
-#         #                SOLUTES1 = input$SOLUTES1,
-#         #                LOQ1 = LOQ1(),
-#         #                MDL1 = MDL1(),
-#         #                dataOrigQHist1 = dataOrigQHist1(),
-#         #                dataOrigQ1 = dataOrigQ1(),
-#         #                dataOrigHist1 = dataOrigHist1(),
-#         #                dataOrig1 = dataOrig1(),
-#         #                dataHist1 = dataHist1())
-#         #
-#         # # Knit the document, passing in the `params` list, and eval it in a
-#         # # child of the global environment (this isolates the code in the document
-#         # # from the code in this app).
-#         # rmarkdown::render(tempReport, output_file = file,
-#         #                   params = params,
-#         #                   envir = new.env(parent = globalenv()))
-#
-#      }, # end of content
-#      contentType = 'image/png'
-#   ) # end of downloadHandler
+   output$TABLE1 <- renderDataTable(dataAll1()) # for testing purposes
 
 
    # Panel 2 Output ####
