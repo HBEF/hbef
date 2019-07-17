@@ -590,37 +590,37 @@ shinyServer(function(input, output, session) {
       else {paste(input$SOLUTES2, sep=", ")}
    })
 
-   # Isolate selected data from dataAll2
-   dataCurrent2 <- reactive({
-      if (changesInData$change_dataCurrent > 0) dataAll2 <- dataCurrentR()
+   # Isolate selected data from dataAll
+   dataAll2 <- reactive({
+      if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
       if(input$wateryearOrRange2 == 'wateryr'){
-         dataCurrent2 = filter(dataAll2, waterYr %in% input$WATERYEAR2)
+         dataAll2 = filter(dataAll, waterYr %in% input$WATERYEAR2)
       } else {
-         dataCurrent2 = filter(dataAll2, date > input$DATE2[1] &
+         dataAll2 = filter(dataAll, date > input$DATE2[1] &
                date < input$DATE2[2])
       }
-      dataCurrent2 = filter(dataAll2, site %in% input$SITES2) %>% # Filter data to selected sites
+      dataAll2 = filter(dataAll, site %in% input$SITES2) %>% # Filter data to selected sites
          select(one_of("date", input$SOLUTES2))        # Keep date and selected input data
    }) # END of dataCurrent2()
 
    # Grab selected wateryear, site, solute, and discharge data from recent data
-   dataCurQ2 <- reactive({
-      if (changesInData$change_dataCurrent > 0) dataAll2 <- dataCurrentR()
+   dataAllQ2 <- reactive({
+      if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
       if(input$wateryearOrRange2 == 'wateryr'){
-         dataCurQ2 = filter(dataAll2, waterYr %in% input$WATERYEAR2)
+         dataAllQ2 = filter(dataAll, waterYr %in% input$WATERYEAR2)
       } else {
-         dataCurQ2 = filter(dataAll2, date > input$DATE2[1] &
+         dataAllQ2 = filter(dataAll, date > input$DATE2[1] &
                date < input$DATE2[2])
       }
       if (input$SITES2 %in% sites_streams) {
          if (input$Flow_or_Precip2 == 'gageHt'){
-            dataCurQ2 = filter(dataCurQ2, site %in% input$SITES2) %>%                   # Filter data to selected site
+            dataAllQ2 = filter(dataAllQ2, site %in% input$SITES2) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES2, "gageHt")) %>% # Selected desired columns of data
                rename(Flow_or_Precip = gageHt)                      # Rename GageHt to standard name, so that don't have
                                                                     #   to create alternative graphs
          }
          if (input$Flow_or_Precip2 == 'flowGageHt'){
-            dataCurQ2 = filter(dataCurQ2, site %in% input$SITES2) %>%                   # Filter data to selected site
+            dataAllQ2 = filter(dataAllQ2, site %in% input$SITES2) %>%                   # Filter data to selected site
                select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%      # Selected desired columns of data
                rename(Flow_or_Precip = flowGageHt)                           # Rename Q to standard name, so that don't have
                                                                              #  to create alternative graphs
@@ -634,7 +634,7 @@ shinyServer(function(input, output, session) {
                yrend = as.POSIXct(input$DATE2[2])
             }
             dataSensor = filter(dataSensor, datetime > yrstart, datetime < yrend)
-            dataCurQ2 <- dataCurQ2 %>%
+            dataAllQ2 <- dataAllQ2 %>%
                filter(site %in% input$SITES2) %>%                   # Filter data to selected site
                select(-flowGageHt) %>%
                mutate(datetime=as.POSIXct(paste(as.character(date),
@@ -650,15 +650,14 @@ shinyServer(function(input, output, session) {
          }
       }
       if (input$SITES2 %in% sites_precip) {
-         dataCurQ2 <- dataAll2 %>%
-            filter(waterYr %in% input$WATERYEAR2) %>%            # Filter data to selected water year
+         dataAllQ2 <- dataAllQ2 %>%
             filter(site %in% input$SITES2) %>%                   # Filter data to selected site
             select(one_of("date", input$SOLUTES2, "precipCatch")) %>%      # Selected desired columns of data
             rename(Flow_or_Precip = precipCatch)                           # Rename Q to standard name, so that don't have
                                                                            #    to create alternative graphs
       }
-      dataCurQ2
-   }) # END of dataCurrentQ1
+      dataAllQ2
+   }) # END of dataAllQ2
 
    # **** END of Panel 2 Reactivity ****
 
@@ -1161,7 +1160,7 @@ shinyServer(function(input, output, session) {
          if (input$SITES2 %in% sites_precip) ylabel2 <- 'Precipitation (mm)'
 
            # Plots Default + Discharge data
-           data2 <- dataCurQ2()
+           data2 <- dataAllQ2()
            data2 <- removeCodes(data2)
            data2.xts <- xts(data2[,-1], order.by = data2$date)
 
@@ -1191,7 +1190,7 @@ shinyServer(function(input, output, session) {
 
            # Plots Default data
 
-           data2 <- dataCurrent2()
+           data2 <- dataAll2()
            data2 <- removeCodes(data2)
            data2.xts <- xts(data2, order.by = data2$date)
 
@@ -1215,31 +1214,14 @@ shinyServer(function(input, output, session) {
 
    }) # END of output$GRAPH2
 
-   # output$GRAPH <- renderPlot({
-
-      # basePlot <-  ggplot(data = dataOrigSelected(), aes(x = date, y = SOLUTES_value)) +
-      #   scale_x_date(date_labels = "%b", date_break = "1 month") +
-      #   geom_point(aes(x = date, y = SOLUTES_value, color = SOLUTES)) +
-      #   theme_minimal()
-      #
-      # basePlot
-
-      # if (input$DISCHARGE == TRUE) {
-      #     # Base map
-      #     basePlot +
-      #       geom_area(aes(x = date, y = Flow), bg = rgb(204,204,204, maxColorValue = 255), na.rm = TRUE, show.legend = TRUE)
-      # }
-
-
-   # }) # END of output$graph
-
    # For testing purposes (of data sorting):
    # ***************************************
    output$TABLE2 <- renderDataTable({
-      if (input$HYDROLOGY2 == FALSE) dataCurrent2()
-      else dataCurQ2()
+      if (input$HYDROLOGY2 == FALSE) dataAll2()
+      else dataAllQ2()
    }) # END of output$TABLE2
 
+   
    # Panel 3 Output ####
    #********************
 
