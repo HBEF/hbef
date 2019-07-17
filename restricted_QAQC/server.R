@@ -559,14 +559,14 @@ shinyServer(function(input, output, session) {
       if(input$wateryearOrRange2 == 'wateryr'){
          dataAll2 = filter(dataAll, waterYr %in% input$WATERYEAR2)
       } else {
-         dataAll2 = filter(dataAll, date > input$DATE2[1] &
-               date < input$DATE2[2])
+         dataAll2 = filter(dataAll, date > input$DATE2[1] & date < input$DATE2[2])
       }
       # remaining filtering
-      dataAll2 = filter(dataAll, site %in% input$SITES2) %>% # Filter data to selected sites
+      dataAll2 = filter(dataAll2, site %in% input$SITES2) %>% # Filter data to selected sites
          select(one_of("date", input$SOLUTES2))        # Keep date and selected input data
-   }) # END of dataCurrent2()
-
+      dataAll2
+   }) # END of dataAll2()
+   
    # Grab selected wateryear, site, solute, and discharge data from recent data
    dataAllQ2 <- reactive({
       # update data variable if underlying data was updated
@@ -1159,12 +1159,17 @@ shinyServer(function(input, output, session) {
    })
 
    output$GRAPH2 <- renderDygraph({
-
-     # ylabel2 <- ylabel2()
-     # print(ylabel2)
+      
+      # determine x-axis label
+      if(input$wateryearOrRange2 == 'wateryr'){
+         xlabel <- paste("Water Year ", input$WATERYEAR2)
+      } else {
+         xlabel = paste("Dates ", input$DATE2[1], " to ", input$DATE2[2])
+      }
 
      if (input$HYDROLOGY2 == TRUE)   {
 
+         #determine y2-axis labels
          if (input$SITES2 %in% sites_streams) ylabel2 <- 'Discharge (ft or L/s)'
          if (input$SITES2 %in% sites_precip) ylabel2 <- 'Precipitation (mm)'
 
@@ -1174,7 +1179,7 @@ shinyServer(function(input, output, session) {
            data2.xts <- xts(data2[,-1], order.by = data2$date)
 
            dygraph(data2.xts) %>%
-              dyAxis("x", label = paste("Water Year", input$WATERYEAR2)) %>%
+              dyAxis("x", label=xlabel) %>%
               dyAxis("y", label = "(various units, dependent on input)", independentTicks=TRUE) %>%
               dyAxis('y2',label=ylabel2, independentTicks=TRUE,
                      axisLabelWidth = 70,
@@ -1198,7 +1203,7 @@ shinyServer(function(input, output, session) {
         } else {
 
            # Plots Default data
-
+           
            data2 <- dataAll2()
            data2 <- removeCodes(data2)
            data2.xts <- xts(data2, order.by = data2$date)
@@ -1207,7 +1212,7 @@ shinyServer(function(input, output, session) {
            # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
 
            dygraph(data2.xts) %>%
-              dyAxis("x", label = paste("Water Year", input$WATERYEAR2)) %>%
+              dyAxis("x", label = xlabel) %>%
               dyAxis("y", label = "(various units, dependent on input)", independentTicks=TRUE) %>%
               # dySeries(name = input$SOLUTES2,
               #          drawPoints = TRUE,
@@ -1244,7 +1249,14 @@ shinyServer(function(input, output, session) {
    })
 
    output$GRAPH3 <- renderDygraph({
-
+      
+      # determine x-axis label
+      if(input$wateryearOrRange3 == 'wateryr'){
+         xlabel <- paste("Water Year ", input$WATERYEAR3)
+      } else {
+         xlabel = paste("Dates ", input$DATE3[1], " to ", input$DATE3[2])
+      }
+      
        # Plots Default + Discharge data
        if (input$HYDROLOGY3 == "Discharge" | input$HYDROLOGY3 == "Precipitation") {
 
@@ -1255,7 +1267,7 @@ shinyServer(function(input, output, session) {
          data3.xts <- xts(data3[,-1], order.by = data3$date)
 
          dygraph(data3.xts) %>%
-            dyAxis("x", label = paste("Water Year", input$WATERYEAR3)) %>%
+            dyAxis("x", label = xlabel) %>%
             dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
             dyAxis('y2',label='Hydrology (ft or L/s)', independentTicks=TRUE,
                 axisLabelWidth = 70,
@@ -1286,7 +1298,7 @@ shinyServer(function(input, output, session) {
            data3.xts <- xts(data3[,-1], order.by = data3$date)
 
            dygraph(data3.xts) %>%
-             dyAxis("x", label = paste("Water Year", input$WATERYEAR3)) %>%
+             dyAxis("x", label = xlabel) %>%
              dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
              dyAxis('y2',label='Precipitation (mm)', independentTicks=TRUE,
                     axisLabelWidth = 70,
@@ -1322,7 +1334,7 @@ shinyServer(function(input, output, session) {
        # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
 
        dygraph(data3.xts) %>%
-         dyAxis("x", label = paste("Water Year", input$WATERYEAR3)) %>%
+         dyAxis("x", label = xlabel) %>%
          dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
          # dySeries(name = input$SOLUTES3,
          #          drawPoints = TRUE,

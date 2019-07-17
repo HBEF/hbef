@@ -228,7 +228,7 @@ shinyUI(
                sidebarLayout(
                   # Sidebar with tabs for Solute, Sites, Options
                   sidebarPanel(
-                     radioButtons('wateryearOrRange2',
+                     radioButtons("wateryearOrRange2",
                         'Choose date selection method',
                         choices=c('Water Year'='wateryr', 'Date Range'='daterng')),
                      conditionalPanel(
@@ -237,9 +237,7 @@ shinyUI(
                            "WATERYEAR2",
                            label = "Water Year",
                            choices = wateryears,
-                           selected = wateryears[1]
-                        )
-                     ),
+                           selected = wateryears[1])),
                      conditionalPanel(
                         condition = "input.wateryearOrRange2 == 'daterng'",
                         sliderInput(
@@ -251,10 +249,8 @@ shinyUI(
                            width = "100%",
                            timeFormat = "%b %Y",
                            step = 30,
-                           dragRange = TRUE
-                        )
-                     ),
-                     # selectInput(
+                           dragRange = TRUE)),
+                                          # selectInput(
                      #    "WATERYEAR2",
                      #    label = "Water Year",
                      #    choices = wateryears,
