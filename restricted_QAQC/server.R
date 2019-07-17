@@ -592,26 +592,32 @@ shinyServer(function(input, output, session) {
 
    # Isolate selected data from dataAll
    dataAll2 <- reactive({
+      # update data variable if underlying data was updated
       if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
+      # do initial filter of data depending on whether water year or range was chosen
       if(input$wateryearOrRange2 == 'wateryr'){
          dataAll2 = filter(dataAll, waterYr %in% input$WATERYEAR2)
       } else {
          dataAll2 = filter(dataAll, date > input$DATE2[1] &
                date < input$DATE2[2])
       }
+      # remaining filtering
       dataAll2 = filter(dataAll, site %in% input$SITES2) %>% # Filter data to selected sites
          select(one_of("date", input$SOLUTES2))        # Keep date and selected input data
    }) # END of dataCurrent2()
 
    # Grab selected wateryear, site, solute, and discharge data from recent data
    dataAllQ2 <- reactive({
+      # update data variable if underlying data was updated
       if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
+      # do initial filter of data depending on whether water year or range was chosen
       if(input$wateryearOrRange2 == 'wateryr'){
          dataAllQ2 = filter(dataAll, waterYr %in% input$WATERYEAR2)
       } else {
          dataAllQ2 = filter(dataAll, date > input$DATE2[1] &
                date < input$DATE2[2])
       }
+      # remaining filtering
       if (input$SITES2 %in% sites_streams) {
          if (input$Flow_or_Precip2 == 'gageHt'){
             dataAllQ2 = filter(dataAllQ2, site %in% input$SITES2) %>%                   # Filter data to selected site
