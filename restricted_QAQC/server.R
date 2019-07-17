@@ -880,6 +880,7 @@ shinyServer(function(input, output, session) {
             summarise(flowMaxPerDate = max(flowGageHt, na.rm=TRUE))
       }
       if (input$FLOW_SOURCE4 == "flowSens") {
+         #!!! Not selecting by input$FLOW_SITE4, but by all SITES4 selected - is this intentional?
          dataFlow4 = filter(dataSensor, datetime > input$DATE4[1],
             datetime < input$DATE4[2], watershedID %in% input$SITES4) %>%
             mutate(date=as.Date(datetime)) %>%
