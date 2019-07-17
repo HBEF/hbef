@@ -196,9 +196,10 @@ dataHistorical <- standardizeClasses(dataHistorical)
 # } else {
 #    dataCurrent <- dataInitial
 # }
-dataAll <- bind_rows(dataHistorical, dataCurrent)
-dataAll <- standardizeClasses(dataAll)
-dataAll2 = bind_rows(dataCurrent, select(dataHistorical, -canonical))
+
+#dataAll <- bind_rows(dataHistorical, dataCurrent)
+#dataAll <- standardizeClasses(dataAll)
+dataAll = bind_rows(dataCurrent, select(dataHistorical, -canonical))
 
 # # FOR TESTING on remote server
 # message("dataInitial from mysql: names, rows, col's")
