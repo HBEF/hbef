@@ -3,8 +3,11 @@
 # -Import all data from hbef (mysql) database upon startup
 # -Create variables and functions that can be accessed by ui.R and server.R
 
+options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
+
 library(dplyr)
 library(RMariaDB)
+library(reactlog)
 library(stringr)
 
 message("hello, I'm in global.R")
@@ -163,9 +166,9 @@ tables = dbListTables(con)
 #  dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
 #  dataCurrent <- standardizeClasses(dataCurrent)
 #  dbWriteTable(con, "current", dataCurrent, append = TRUE, row.names = FALSE)
-
+# 
 # dataHistorical<- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
-#  dataHistorical$date <- as.Date(dataHistorical$date, "%m/%d/%y")
+#  dataHistorical$date <- as.POSIXct(dataHistorical$date, "%Y-%m-%d")
 #  dataHistorical <- standardizeClasses(dataHistorical)
 #  dbWriteTable(con, "historical", dataHistorical, append = TRUE, row.names = FALSE)
 
@@ -301,7 +304,7 @@ dataAll = bind_rows(dataCurrent, select(dataHistorical, -canonical))
 
 # Water years list for dataAll
 # used in ui.R and server.R for Panels 1-3 (QA/QC graphs)
-wy <- levels(as.factor(dataAll2$waterYr))
+wy <- levels(as.factor(dataAll$waterYr))
 wy1 <- c()
 for (i in 1:length(wy)) {
    wy1 <- c(wy1, wy[i])
