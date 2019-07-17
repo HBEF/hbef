@@ -939,6 +939,7 @@ shinyServer(function(input, output, session) {
                             # "Initial" = dataInitial,
                             # "Chemistry" = dataChemistry,
                              "Historical" = dataHistorical,
+                             "Sensor" = dataSensor,
                              "All" = dataAll)
    })
 
