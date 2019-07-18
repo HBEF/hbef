@@ -186,11 +186,8 @@ shinyServer(function(input, output, session) {
       #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
       wateryears_current <<- as.list(wy1_current) #assign it globally
 
-      # Update user interface
-      updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
-      updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
-      updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
-      updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears)
+      # Update Panel 5 user interface
+      updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears_current)
 
       # Trigger update in dataAll
       changesInData$change_dataAll <- changesInData$change_dataAll + 1
@@ -212,6 +209,24 @@ shinyServer(function(input, output, session) {
       }
       #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
       wateryears <<- as.list(wy1) #assign it globally
+      
+      # Get new maximum date ----
+      # used in ui.R for Panel 4 (QA/QC "Free-for-all" graph)
+      maxDate <- max(dataAllR$date, na.rm=TRUE)
+
+      # Update Panel 1-4 user interfaces
+      updateSelectInput(session, "WATERYEAR1", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR2", label = "Water Year", choices = wateryears)
+      updateSelectInput(session, "WATERYEAR3", label = "Water Year", choices = wateryears)
+      updateSliderInput(session, "DATE4",
+                        label = "Date Range",
+                        value = as.Date(c(maxDate-365, maxDate)),
+                        min =as.Date("1963-06-01"),
+                        max = as.Date(maxDate),
+                        step = 30)
+      
+      dataAllR
+      
    })
 
    # *Upload Tab* ####
@@ -221,7 +236,7 @@ shinyServer(function(input, output, session) {
    dataNew <- eventReactive(input$FILE_UPLOAD,{
 
          #for testing
-         #dataNew <-read.csv("data/formatted/current_testADD.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+         #dataNew <-read.csv("data/tests/test_current.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
          message("in dataNew() because of FILE_UPLOAD.")
          dataNew <- read.csv(input$FILE_UPLOAD$datapath,
                              header = input$HEADER,
@@ -251,19 +266,15 @@ shinyServer(function(input, output, session) {
 
       # upload data
       dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
-      #dataAll2 <<- dbReadTable(con, "current")
-      #dataAll2 <<- standardizeClasses(dataAll2)
-      #dataAll2$notes <<- gsub(",", ":", dataAll2$notes)
-      #dataAll2$sampleType <<- gsub(",", ";", dataAll2$sampleType)
 
+      # close connection to database
+      dbDisconnect(con)
+      
       # update reactive value to signal core data has changed, 
       # so that dataCurrent & dataAll are recalculated
       changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
 
       showNotification("Submit Complete.")
-
-      # close connection to database
-      dbDisconnect(con)
 
    })
 
