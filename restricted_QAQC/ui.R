@@ -79,8 +79,8 @@ shinyUI(
                   ),
                   tags$hr(), # horizontal line
                   radioButtons("UPLOAD_DISPLAY", "Display",
-                               choices = c("Head" = "head",
-                                           "All" = "all"),
+                               choices = c("First few rows" = "head",
+                                           "All rows" = "all"),
                                selected = "head"
                   ),
                   tags$hr(), # horizontal line
