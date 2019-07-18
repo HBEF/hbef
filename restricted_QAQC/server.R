@@ -1130,7 +1130,12 @@ shinyServer(function(input, output, session) {
    #********************
 
    output$TITLE2 <-  renderText({
-     paste(c(title.Solutes2(), "from site", input$SITES2,"in water year", input$WATERYEAR2))
+      if(input$wateryearOrRange2 == 'wateryr'){
+         paste(c(title.Solutes2(), "from site", input$SITES2,"in water year", input$WATERYEAR2))
+      } else {
+         paste(c(title.Solutes2(), "from site", input$SITES2,"from range of dates")) 
+      }
+      
    })
 
    output$GRAPH2 <- renderDygraph({
@@ -1215,7 +1220,11 @@ shinyServer(function(input, output, session) {
    #********************
 
    output$TITLE3 <-  renderText({
-     paste(c(input$SOLUTES3, "from site", title.Sites3(),"in water year", input$WATERYEAR3))
+      if(input$wateryearOrRange3 == 'wateryr'){
+         paste(c(input$SOLUTES3, "from site(s)", title.Sites3(),"in water year", input$WATERYEAR3))
+      } else {
+         paste(c(input$SOLUTES3, "from site(s)", title.Sites3(),"from range of dates")) 
+      }
    })
 
 
