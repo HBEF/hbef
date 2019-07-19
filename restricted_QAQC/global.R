@@ -15,8 +15,8 @@ message("hello, I'm in global.R")
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
 pass  = readLines('/home/hbef/RMySQL.config')    # for remote server
-#pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
-#pass = readLines('SQL.txt')                     # for CSR's local computer
+# pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
+# pass = readLines('SQL.txt')                     # for CSR's local computer
 
 # **********************************************************************
 #                      ---- LISTS ----
@@ -166,7 +166,7 @@ tables = dbListTables(con)
 #  dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
 #  dataCurrent <- standardizeClasses(dataCurrent)
 #  dbWriteTable(con, "current", dataCurrent, append = TRUE, row.names = FALSE)
-# 
+#
 # dataHistorical<- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
 #  dataHistorical$date <- as.POSIXct(dataHistorical$date, "%Y-%m-%d")
 #  dataHistorical <- standardizeClasses(dataHistorical)
