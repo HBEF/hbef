@@ -920,7 +920,26 @@ shinyServer(function(input, output, session) {
 
    # ***    OUTPUT     *** ----
    # ***********************************
-
+   # *Main Tab* ###########################################
+   output$DOWNLOAD_TEMPLATE <- downloadHandler(
+      filename = function() {
+         paste("DataTemplate_current", "csv", sep=".")
+      },
+      content = function(file) {
+         file.copy("documentation/DataTemplate_current.csv", file)
+      },
+      contentType = "text/csv"
+   )
+   
+   output$DOWNLOAD_TEMPLATE_EXAMPLE <- downloadHandler(
+      filename = function() {
+         paste("DataTemplate_current_example", "csv", sep=".")
+      },
+      content = function(file) {
+         file.copy("documentation/DataTemplate_current_example.csv", file)
+      },
+      contentType = "text/csv"
+   )
 
    # *Upload Tab* #########################################
 

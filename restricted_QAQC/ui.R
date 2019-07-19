@@ -38,21 +38,21 @@ shinyUI(
       navbarPage(title = p(strong("HBEF Dashboard")),
          tabPanel("Main",
             h3("Welcome!"),
-            p("Please send any issues or comments to Carolina Simao at",
-              a(href="mailto:carolina.m.simao@gmail.com?subject=[HBEF%20Dashboard]", "carolina.m.simao@gmail.com"),
+            p("Please send any issues or comments to Mike Vlah at",
+              a(href="mailto:vlahm13@gmail.com?subject=[HBEF%20Dashboard]", "vlahm13@gmail.com"),
               style="font-size:85%;"
             ),
             tags$br(),
             h4("Helpful Resources:"),
-            tags$div(HTML("<ul>
-                          <li> Buso et al. 2000. <strong><a href=https://www.esf.edu/quest/documents/Busoetal.2000.HBstreamflowandchemistryGTR..pdf>
+            tags$div(HTML('Buso et al. 2000. <strong><a href=https://www.esf.edu/quest/documents/Busoetal.2000.HBstreamflowandchemistryGTR..pdf>
                           Chemistry of Precipitation, Streamwater, and Lakewater from the
                           Hubbard Brook Ecosystem Study: A Record of Sampling Protocols and
                           Analytical Procedures.</a></strong> USDA Forest Service, Northeastern Research
-                          Station, General Technical Report NE-275.</li>
-                          <li> Data Upload Templates <em>(Forthcoming...)</em></li>
-                          <li> Developer Documentation <em>(Forthcoming...)</em> </li>
-                          </ul>"))
+                          Station, General Technical Report NE-275.</li>')),
+            tags$br(),
+            downloadLink("DOWNLOAD_TEMPLATE", label = "Template for Data Uploads"),
+            tags$br(),
+            downloadLink("DOWNLOAD_TEMPLATE_EXAMPLE", label = "Template Example for Data Uploads")
          ), #end of Main tabPanel
 
          #*********************************************************
