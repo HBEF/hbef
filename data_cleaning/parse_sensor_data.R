@@ -1,13 +1,16 @@
 library(dplyr)
 library(RMariaDB)
 
-pass = readLines('~/git/hbef/RMySQL.config')
-driver = MariaDB()
+# pass = readLines('~/git/hbef/RMySQL.config')
+pass  = readLines('/home/hbef/RMySQL.config')
 
+driver = MariaDB()
 con = dbConnect(driver, user='root', password=pass, host='localhost',
     dbname='hbef')
 
-x = read.csv('~/Downloads/CR1000_HBF_WQual_W3.csv', stringsAsFactors=FALSE)
+x = read.csv('/home/hbef/shiny/restricted_QAQC/data/sensor_data/CR1000_HBF_WQual_W3.csv',
+    stringsAsFactors=FALSE)
+# x = read.csv('~/Downloads/CR1000_HBF_WQual_W3.csv', stringsAsFactors=FALSE)
 x = select(x, -Site, -RECORD, -Year, -Month, -DOM, -Hour, -Minute, -Second,
         -UNH.ID..) %>%
     rename('datetime'='Date')
