@@ -176,6 +176,9 @@ tables = dbListTables(con)
 dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor2")
+sensorvars = dbListFields(con, "sensor3")
+sensorvars = sub('S3__', '', sensorvars)
+sensorvars = sensorvars[-which(sensorvars %in% c('datetime', 'id', 'watershedID'))]
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
 dbDisconnect(con)
 
