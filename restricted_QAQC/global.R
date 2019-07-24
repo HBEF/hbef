@@ -3,11 +3,11 @@
 # -Import all data from hbef (mysql) database upon startup
 # -Create variables and functions that can be accessed by ui.R and server.R
 
-options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
+# options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
 
 library(dplyr)
 library(RMariaDB)
-library(reactlog)
+# library(reactlog)
 library(stringr)
 
 message("hello, I'm in global.R")
