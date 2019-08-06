@@ -6,7 +6,7 @@ library(shiny)
 shinyUI(
   dashboardPage(skin = "black",
                 #Creates title that links back to the main page
-                dashboardHeader(title = tags$a(href="http://hbef.streampulse.org/","HB-WER Viz"), titleWidth = 200),
+                dashboardHeader(title = tags$a(href="http://hbwater.org/","HB-WER Viz"), titleWidth = 200),
                 
                 #Creates dashboard sidebard with data story tabs and links to 
                 #pages on the website
@@ -22,10 +22,10 @@ shinyUI(
                     menuItem("Streamflow Graphs", tabName = "streamflow", icon = icon("search-plus")),
                     menuItem("Soil Carbon Graphs", tabName = "carbon", icon = icon("search-plus")),
                     tags$div(class = "footer",tags$ul(
-                      tags$li(tags$a(href="http://hbef.streampulse.org/#menu", "HOME")),
-                      tags$li(tags$a(href="http://hbef.streampulse.org/#datastories","DATA STORIES")),
-                      tags$li(tags$a(href="http://hbef.streampulse.org/#exploratory","EXPLORATORY TOOLS")),
-                      tags$li(tags$a(href="http://hbef.streampulse.org/#aboutus","ABOUT US")))
+                      tags$li(tags$a(href="http://hbwater.org/#menu", "HOME")),
+                      tags$li(tags$a(href="http://hbwater.org/#datastories","DATA STORIES")),
+                      tags$li(tags$a(href="http://hbwater.org/#exploratory","EXPLORATORY TOOLS")),
+                      tags$li(tags$a(href="http://hbwater.org/#aboutus","ABOUT US")))
                     ))
                 ),
  dashboardBody(

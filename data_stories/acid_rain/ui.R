@@ -74,7 +74,7 @@ units <- list("ueq/L","umol/L", "mg/L", "flux")
 
 shinyUI(
   dashboardPage(skin = "black",
-                dashboardHeader(title = tags$a(href="http://hbef.streampulse.org/","HB-WER Viz"), titleWidth = 200),
+                dashboardHeader(title = tags$a(href="http://hbwater.org/","HB-WER Viz"), titleWidth = 200),
                 dashboardSidebar(
                   width = 215,
                   sidebarMenu(
@@ -84,10 +84,10 @@ shinyUI(
                     menuItem("Policy", tabName = "policy", icon = icon("book")),
                     # footer here
                     tags$div(class = "footer",tags$ul(
-                      tags$li(tags$a(href="http://hbef.streampulse.org/", "HOME")),
-                      tags$li(tags$a(href="http://hbef.streampulse.org/#datastories","DATA STORIES")),
-                      tags$li(tags$a(href="http://hbef.streampulse.org/#exploratory","EXPLORATORY TOOLS")),
-                      tags$li(tags$a(href="http://hbef.streampulse.org/#aboutus","ABOUT US")))
+                      tags$li(tags$a(href="http://hbwater.org/", "HOME")),
+                      tags$li(tags$a(href="http://hbwater.org/#datastories","DATA STORIES")),
+                      tags$li(tags$a(href="http://hbwater.org/#exploratory","EXPLORATORY TOOLS")),
+                      tags$li(tags$a(href="http://hbwater.org/#aboutus","ABOUT US")))
                     ))
 
                 ),
@@ -165,7 +165,7 @@ shinyUI(
                                                  and lakes. It will take many decades for rock weathering to replenish the supply of these
                                                  critical elements for forest growth and aquatic food webs. You can see what happens when
                                                  these acid rain impacted forests were experimentally fertilized with calcium by going to the",
-                                                 a(href = "http://hbef.streampulse.org:3838/data_stories/calcium_exp/", "Calcium Experiment data story"),
+                                                 a(href = "http://hbwater.org:3838/data_stories/calcium_exp/", "Calcium Experiment data story"),
                                                  "on our webpage. There is encouraging news from a recent study by Lawrence et al.",
                                                  p(div(p(class = "thick", "What to look for in this data story"), style = "text-align: left;")),
                                                  p(div("You can see the change over time in the pH and sulfur content of rain and the corresponding changes

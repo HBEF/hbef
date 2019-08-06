@@ -65,7 +65,7 @@ units <- list("uEquivalent/L" = "concentration_ueq","uMole/L" = "concentration_u
 shinyUI(
   dashboardPage(
     skin = "black",
-    dashboardHeader(title = tags$a(href="http://hbef.streampulse.org/","HB-WER Viz"), titleWidth = 200),
+    dashboardHeader(title = tags$a(href="http://hbwater.org/","HB-WER Viz"), titleWidth = 200),
     dashboardSidebar(
       width = 200,
       sidebarMenu(
@@ -73,10 +73,10 @@ shinyUI(
         menuItem("Bubble Plot", tabName = "exploratory", icon = icon("search-plus")),
         # footer here
         tags$div(class = "footer",tags$ul(
-          tags$li(tags$a(href="http://hbef.streampulse.org/#menu", "HOME")),
-          tags$li(tags$a(href="http://hbef.streampulse.org/#datastories","DATA STORIES")),
-          tags$li(tags$a(href="http://hbef.streampulse.org/#exploratory","EXPLORATORY TOOLS")),
-          tags$li(tags$a(href="http://hbef.streampulse.org/#aboutus","ABOUT US")))
+          tags$li(tags$a(href="http://hbwater.org/#menu", "HOME")),
+          tags$li(tags$a(href="http://hbwater.org/#datastories","DATA STORIES")),
+          tags$li(tags$a(href="http://hbwater.org/#exploratory","EXPLORATORY TOOLS")),
+          tags$li(tags$a(href="http://hbwater.org/#aboutus","ABOUT US")))
         ))
       
     ),

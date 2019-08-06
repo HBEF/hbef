@@ -56,7 +56,7 @@ units <- list("ueq/L" = "ueq/L","umol/L" ="umol/L", "mg/L" = "mg/L")
 ########################################################################################
 
 shinyUI(dashboardPage(skin = "black", #creates a dashboard page
-                      dashboardHeader(title = tags$a(href="http://hbef.streampulse.org/",
+                      dashboardHeader(title = tags$a(href="http://hbwater.org/",
                                                      "HB-WER Viz"), titleWidth = 200),
                       #creates a header for the page that links back to the main site
                       dashboardSidebar(
@@ -70,10 +70,10 @@ shinyUI(dashboardPage(skin = "black", #creates a dashboard page
                         # footer here
                           tags$div(class = "footer",tags$ul(
                             #creates a footer with links back to other pages
-                            tags$li(tags$a(href="http://hbef.streampulse.org/#menu", "HOME")),
-                            tags$li(tags$a(href="http://hbef.streampulse.org/#datastories","DATA STORIES")),
-                            tags$li(tags$a(href="http://hbef.streampulse.org/#exploratory","EXPLORATORY TOOLS")),
-                            tags$li(tags$a(href="http://hbef.streampulse.org/#aboutus","ABOUT US")))
+                            tags$li(tags$a(href="http://hbwater.org/#menu", "HOME")),
+                            tags$li(tags$a(href="http://hbwater.org/#datastories","DATA STORIES")),
+                            tags$li(tags$a(href="http://hbwater.org/#exploratory","EXPLORATORY TOOLS")),
+                            tags$li(tags$a(href="http://hbwater.org/#aboutus","ABOUT US")))
                         ))
                       ),
   
