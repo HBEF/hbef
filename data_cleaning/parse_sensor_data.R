@@ -36,4 +36,4 @@ names(fieldtypes) = fieldnames
 dbCreateTable(con, 'sensor3', fieldtypes)
 dbWriteTable(con, 'sensor3', x, append=TRUE)
 
-dbDisconnect()
+dbDisconnect(con)
