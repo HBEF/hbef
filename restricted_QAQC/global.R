@@ -15,7 +15,7 @@ message("hello, I'm in global.R")
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
 pass  = readLines('/home/mike/RMySQL.config')    # for remote server
-# pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
+#pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
 # pass = readLines('SQL.txt')                     # for CSR's local computer
 
 # **********************************************************************

@@ -33,7 +33,7 @@ message("hello, I'm at the top of server.R")
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
 pass  = readLines('/home/mike/RMySQL.config')   # for remote server
-# pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
+#pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
 #pass = readLines('SQL.txt')              # for CSR's local computer
 
 # ***********************************************************************
@@ -290,6 +290,15 @@ shinyServer(function(input, output, session) {
 
     current_selection = input$Flow_or_Precip1
     ws_site_selected = grepl("^W[0-9]+$", input$SITES1)
+
+    #>>>>temp fix for prototype sensor data plotting; once it's universal, can delete this?
+    if(input$SITES1 == 'W3'){
+        updateCheckboxInput(session, inputId='HYDROLOGY1', value=FALSE)
+    }
+    if(input$SITES1 != 'W3'){
+        updateSelectInput(session, inputId='SENSORVAR1', selected='None')
+    }
+
     if(! ws_site_selected && current_selection == 'flowSens'){
       current_selection = 'flowGageHt'
     }
