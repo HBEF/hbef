@@ -14,8 +14,8 @@ message("hello, I'm in global.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/mike/RMySQL.config')    # for remote server
-#pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
+# pass  = readLines('/home/mike/RMySQL.config')    # for remote server
+pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
 # pass = readLines('SQL.txt')                     # for CSR's local computer
 
 # **********************************************************************
@@ -226,3 +226,10 @@ maxDate <- maxDate_historical # default value if dataCurrent or dataSensor are e
 if (maxDate_sensor > maxDate_current) maxDate <- maxDate_sensor
 if (maxDate_sensor < maxDate_current) maxDate <- maxDate_current
 
+fnfiles = list.files('field_notes')
+field_note_dates = unique(na.omit(as.Date(substr(fnfiles, 1, 8),
+    format='%Y%m%d')))
+field_note_daterange = range(field_note_dates, na.rm=TRUE)
+field_note_daterange_filled = seq(field_note_daterange[1],
+    field_note_daterange[2], by='day')
+no_note_days = as.Date(setdiff(field_note_daterange_filled, field_note_dates))

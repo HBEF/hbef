@@ -15,6 +15,7 @@ library(dygraphs)      # makes dynamic graphs used in QA/QC tab
 library(lubridate)
 library(rhandsontable)   # essential for "Excel-like Entry" tab
 library(shiny)        # basis of entire app, allows us to create reactive dashboard
+library(shinyWidgets) #for airDatepicker
 
 message("hello, I'm in ui.R")
 
@@ -59,55 +60,79 @@ shinyUI(
       # ***UPLOAD tab *** ----
       #*********************************************************
       # Code initially copied from: https://github.com/rstudio/shiny-examples/blob/master/009-upload/app.R
-      tabPanel("Upload",
-          # Sidebar layout with input and output definitions
-          sidebarLayout(
-           # Sidebar panel for inputs
-           sidebarPanel(
-            # Input: Select a file
-            fileInput("FILE_UPLOAD", "Choose CSV File",
-                    multiple = FALSE,
-                    accept = c("text/csv",
-                           "text/comma-separated-values,text/plain",
-                           ".csv")
-            ),
-            # Input: Checkbox to indicate whether file has header
-            checkboxInput("HEADER", "Data includes header (column names)", TRUE),
-            # Input: Select number of rows to display in output chart
-            p("Note: The above must be checked for upload to work." ,
-              style = "color:#666666; font-size:85%;"
-            ),
-            tags$hr(), # horizontal line
-            radioButtons("UPLOAD_DISPLAY", "Display",
-                     choices = c("First few rows" = "head",
-                             "All rows" = "all"),
-                     selected = "head"
-            ),
-            tags$hr(), # horizontal line
-            actionButton("SUBMIT", label = "Submit to Database")
-            # Input: Select separator to indicate how data is separated
-            # radioButtons("sep", "Separator",
-            #          choices = c(Comma = ",",
-            #                  Semicolon = ";",
-            #                  Tab = "\t"
-            #          ),
-            #          selected = ","
-            # ),
-            # # Input: Select quotes
-            # radioButtons("quote", "Quote",
-            #          choices = c(None = "",
-            #                  "Double Quote" = '"',
-            #                  "Single Quote" = "'"),
-            #          selected = '"'),
-            ), # end of sidebarPanel
-            mainPanel(
-              #tags$head(tags$script(src="www/dygraphs-1.1.1/dygraph-combined.js")),
-              # Shows data file as a table
-              dataTableOutput("FILE_PREVIEW")
-            ) # end of mainPanel
-          ) # end of Sidebar Layout
-      ), # END of "Upload" tabPanel
-
+        navbarMenu("Upload",
+          tabPanel("CSV file upload",
+              # Sidebar layout with input and output definitions
+              sidebarLayout(
+               # Sidebar panel for inputs
+               sidebarPanel(
+                # Input: Select a file
+                fileInput("FILE_UPLOAD", "Choose CSV File",
+                        multiple = FALSE,
+                        accept = c("text/csv",
+                               "text/comma-separated-values,text/plain",
+                               ".csv")
+                ),
+                # Input: Checkbox to indicate whether file has header
+                checkboxInput("HEADER", "Data includes header (column names)", TRUE),
+                # Input: Select number of rows to display in output chart
+                p("Note: The above must be checked for upload to work." ,
+                  style = "color:#666666; font-size:85%;"
+                ),
+                tags$hr(), # horizontal line
+                radioButtons("UPLOAD_DISPLAY", "Display",
+                         choices = c("First few rows" = "head",
+                                 "All rows" = "all"),
+                         selected = "head"
+                ),
+                tags$hr(), # horizontal line
+                actionButton("SUBMIT", label = "Submit to Database")
+                # Input: Select separator to indicate how data is separated
+                # radioButtons("sep", "Separator",
+                #          choices = c(Comma = ",",
+                #                  Semicolon = ";",
+                #                  Tab = "\t"
+                #          ),
+                #          selected = ","
+                # ),
+                # # Input: Select quotes
+                # radioButtons("quote", "Quote",
+                #          choices = c(None = "",
+                #                  "Double Quote" = '"',
+                #                  "Single Quote" = "'"),
+                #          selected = '"'),
+                ), # end of sidebarPanel
+                mainPanel(
+                  #tags$head(tags$script(src="www/dygraphs-1.1.1/dygraph-combined.js")),
+                  # Shows data file as a table
+                  dataTableOutput("FILE_PREVIEW")
+                ) # end of mainPanel
+              ) # end of Sidebar Layout
+          ), # END of "Upload" tabPanel
+          tabPanel('Field notes upload',
+              fluidRow(
+                  column(12,
+                      h2('Instructions'),
+                      p(paste('Field notes should be compiled by date',
+                          'and uploaded as PDF files. File names must begin',
+                          'with the date, formatted as "YYYYMMDD", and end',
+                          'with ".pdf".')),
+                      p(paste('For standard weekly notes, the filename',
+                          'should be e.g. "20190101 Notes.pdf". For event notes,',
+                          'it might be something like "20190101 W9 rain on ',
+                          'snow event.pdf".')),
+                      p(paste('If the submission is successful, you will see a blue',
+                          'notification in the lower right. Otherwise, you will',
+                          'see a red error message.')),
+                      br(),
+                      fileInput('NOTE_UPLOAD', 'Choose PDF File(s)',
+                          multiple=TRUE, accept='application/pdf'),
+                      hr(),
+                      actionButton('SUBMIT_NOTE', label='Submit')
+                  )
+              )
+          )
+      ),
       #*********************************************************
       # ***QA/QC tab ***----
       #*********************************************************
@@ -703,25 +728,40 @@ shinyUI(
       #*********************************************************
       # ***DOWNLOAD tab***----
       #*********************************************************
-      tabPanel("Download",
-        sidebarLayout(
-          sidebarPanel(
-            selectInput("DOWNLOAD_DATASET", "Choose a dataset:",
-                    choices = c("Current",
-                            # "Initial",
-                            # "Chemistry",
-                            "Historical",
-                            "All")),
-            radioButtons("DOWNLOAD_FILETYPE", "File type:",
-                     choices = c("csv",
-                             "tsv")),
-            downloadButton('DOWNLOAD_DATA', 'Download')
-          ),
-          mainPanel(
-            # tableOutput("table")
-          )
-        ) # end of sidebarLayout
-      ) # end of tabPanel for Data Download
+      navbarMenu("Download",
+        tabPanel("Numeric data download",
+          sidebarLayout(
+            sidebarPanel(
+              selectInput("DOWNLOAD_DATASET", "Choose a dataset:",
+                      choices = c("Current",
+                              # "Initial",
+                              # "Chemistry",
+                              "Historical",
+                              "All")),
+              radioButtons("DOWNLOAD_FILETYPE", "File type:",
+                       choices = c("csv",
+                               "tsv")),
+              downloadButton('DOWNLOAD_DATA', 'Download')
+            ),
+            mainPanel(
+              # tableOutput("table")
+            )
+          ) # end of sidebarLayout
+        ), # end of tabPanel for Data Download
+        tabPanel('Field notes download',
+            fluidRow(
+                column(12,
+                    airDatepickerInput('NOTES_DOWNLOAD', 'Choose dates',
+                        multiple=TRUE, range=TRUE,
+                        minDate=field_note_daterange[1],
+                        maxDate=field_note_daterange[2],
+                        disabledDates=no_note_days, addon='none',
+                        clearButton=TRUE, update_on='close',
+                        placeholder='No dates selected')
+                )
+            )
+        )
+      )
       #*********************************************************
       # ***DATA ARCHIVE? tab*** ----
       #*********************************************************

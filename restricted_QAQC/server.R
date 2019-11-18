@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/mike/RMySQL.config')   # for remote server
-#pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
+# pass  = readLines('/home/mike/RMySQL.config')   # for remote server
+pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
 #pass = readLines('SQL.txt')              # for CSR's local computer
 
 # ***********************************************************************
@@ -274,8 +274,25 @@ shinyServer(function(input, output, session) {
     # so that dataCurrent & dataAll are recalculated
     changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
 
-    showNotification("Submit Complete.")
+    showNotification("Submit Complete.", type='message')
 
+  })
+
+  observeEvent(input$SUBMIT_NOTE, {
+
+      ff = input$NOTE_UPLOAD
+      if (is.null(ff)) return()
+
+      if(any(! grepl('^[0-9]{8}.*?.pdf', fn))){
+          showNotification(paste('Filename(s) must begin with the date as',
+              'YYYYMMDD and end with ".pdf".'), type='error', duration=NULL,
+              closeButton=TRUE)
+          return()
+      }
+
+      file.copy(ff$datapath, file.path("field_notes", ff$name) )
+      showNotification(paste(length(ff$name), "file(s) submitted."),
+          type='message')
   })
 
   # *QA/QC Tab* ####
@@ -496,7 +513,7 @@ shinyServer(function(input, output, session) {
   # combines site, solute data from recent water year data with historical data
   dataAllHist1 <- reactive ({
     dataAllHist1 <- full_join(dataAll1(), dataHistorical1(), by = "date")
-    return(dataCurHist1)
+    return(dataAllHist1)
   }) #END of dataAllHist1
 
   # combines site, solute, and discharge data from recent water year dataset with historical data
