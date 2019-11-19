@@ -7,7 +7,7 @@
 # Some code borrowed and updated from https://github.com/akl21/hbef/blob/dev/data_stories/acid_rain/server.R
 
 Sys.setenv(TZ='America/New_York')
-options(shiny.maxRequestSize = 30*1024^2) # allows max file upload size to be 30 MB
+options(shiny.maxRequestSize = 1024*1024^2) # allows max file upload size to be 1GB
 options(show.error.locations=TRUE) # show error locations
 
 library(colorspace)
@@ -33,7 +33,7 @@ message("hello, I'm at the top of server.R")
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
 pass  = readLines('/home/mike/RMySQL.config')   # for remote server
-#pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
+# pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
 #pass = readLines('SQL.txt')              # for CSR's local computer
 
 # ***********************************************************************
@@ -282,16 +282,17 @@ shinyServer(function(input, output, session) {
 
       ff = input$NOTE_UPLOAD
       if (is.null(ff)) return()
+      fn = ff$name
 
-      if(any(! grepl('^[0-9]{8}.*?.pdf', fn))){
+      if(any(! grepl('^[0-9]{8}.*?\\.pdf', fn))){
           showNotification(paste('Filename(s) must begin with the date as',
               'YYYYMMDD and end with ".pdf".'), type='error', duration=NULL,
               closeButton=TRUE)
           return()
       }
 
-      file.copy(ff$datapath, file.path("field_notes", ff$name) )
-      showNotification(paste(length(ff$name), "file(s) submitted."),
+      file.copy(ff$datapath, file.path("field_notes", fn) )
+      showNotification(paste(length(fn), "file(s) submitted."),
           type='message')
   })
 
