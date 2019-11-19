@@ -654,19 +654,15 @@ shinyUI(
                     column(6,
                         span(h4("Delete by Date(s) & Site(s)"), style="color: white;"),
                         # Date input panels, depending on selected date option
-                        conditionalPanel(
-                          condition = "input.DELETE_DATEOPTION5 == 'Date'",
-                          dateInput(
-                           "DELETE_DATE5",
-                           label = "Date:"
-                          )
+                        conditionalPanel("input.DELETE_DATEOPTION5 == 'Date'",
+                            airDatepickerInput('DELETE_DATE5', 'Date:',
+                                addon='none', clearButton=TRUE, update_on='close',
+                                placeholder='No dates selected')
                         ),
-                        conditionalPanel(
-                          condition = "input.DELETE_DATEOPTION5 == 'Date Range'",
-                          dateRangeInput(
-                           "DELETE_DATERANGE5",
-                           label = "Date(s):"
-                          ),
+                        conditionalPanel("input.DELETE_DATEOPTION5 == 'Date Range'",
+                          airDatepickerInput('DELETE_DATERANGE5', 'Date(s):',
+                              addon='none', clearButton=TRUE, update_on='close',
+                              placeholder='No dates selected', range=TRUE),
                           p("Dates listed above will also be deleted." ,
                            style = "color: white; font-size:80%;"
                           )
@@ -751,13 +747,20 @@ shinyUI(
         tabPanel('Field notes download',
             fluidRow(
                 column(12,
-                    airDatepickerInput('NOTES_DOWNLOAD', 'Choose dates',
-                        multiple=TRUE, range=TRUE,
+                    h3('Download field note PDFs'),
+                    p(paste('Dates for which field notes are available appear',
+                        'in black. All note sets collected on a single day',
+                        'will be downloaded together.')),
+                    br(),
+                    airDatepickerInput('NOTE_DATES', 'Choose date(s)',
+                        multiple=TRUE, range=FALSE, separator=', ',
                         minDate=field_note_daterange[1],
                         maxDate=field_note_daterange[2],
                         disabledDates=no_note_days, addon='none',
                         clearButton=TRUE, update_on='close',
-                        placeholder='No dates selected')
+                        placeholder='No dates selected'),
+                    br(),
+                    downloadButton('DOWNLOAD_NOTES', 'Download')
                 )
             )
         )

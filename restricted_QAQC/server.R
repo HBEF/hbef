@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-# pass  = readLines('/home/mike/RMySQL.config')   # for remote server
-pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
+pass  = readLines('/home/mike/RMySQL.config')   # for remote server
+# pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
 #pass = readLines('SQL.txt')              # for CSR's local computer
 
 # ***********************************************************************
@@ -1633,8 +1633,6 @@ shinyServer(function(input, output, session) {
         dateQuery <- paste0("date = '", input$DELETE_DATE5, "'")
       }
       if (input$DELETE_DATEOPTION5 == "Date Range") {
-        date1 <- input$DELETE_DATERANGE5[1]
-        date2 <- input$DELETE_DATERANGE5[2]
         dateQuery <- paste0("date >= '", input$DELETE_DATERANGE5[1], "' AND
                       date <= '", input$DELETE_DATERANGE5[2], "'")
       }
@@ -1705,6 +1703,31 @@ shinyServer(function(input, output, session) {
       write.table(datasetInput(), file, sep = sep,
               row.names = FALSE)
     }
+  )
+
+  output$DOWNLOAD_NOTES = downloadHandler(
+
+      filename=function(dd=input$NOTE_DATES){
+
+          dd = format.Date(sort(dd), '%Y%m%d')
+
+          if(length(dd) == 1){
+              fnpt1 = dd
+          } else {
+              fnpt1 = paste0(dd[1], '-', dd[length(dd)])
+          }
+
+          return(paste0(fnpt1, '_fieldnotes.zip'))
+      },
+
+      content=function(file){
+          regex1 = paste(format.Date(input$NOTE_DATES, '%Y%m%d'), collapse='|')
+          fns = list.files('field_notes', pattern=paste0('(', regex1, ')'),
+              full.names=TRUE)
+          zip(file, fns)
+      },
+
+      contentType='application/zip'
   )
 
   #**** END of Output ****
