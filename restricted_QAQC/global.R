@@ -232,4 +232,5 @@ field_note_dates = unique(na.omit(as.Date(substr(fnfiles, 1, 8),
 field_note_daterange = range(field_note_dates, na.rm=TRUE)
 field_note_daterange_filled = seq(field_note_daterange[1],
     field_note_daterange[2], by='day')
-no_note_days = as.Date(setdiff(field_note_daterange_filled, field_note_dates))
+no_note_days = as.Date(setdiff(field_note_daterange_filled, field_note_dates),
+    origin='1970-01-01')
