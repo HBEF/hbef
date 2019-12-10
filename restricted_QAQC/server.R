@@ -383,7 +383,11 @@ shinyServer(function(input, output, session) {
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
     dataAll1 <- dataAll %>%
      filter(waterYr %in% input$WATERYEAR1) %>%    # Filter data to selected water year
-     filter(site %in% input$SITES1) %>%         # Filter data to selected site
+     filter(site %in% input$SITES1)         # Filter data to selected site
+    if(input$OMIT_STORMS1 == TRUE){
+        dataAll1 <- filter(dataAll1, is.na(fieldCode) | fieldCode != '911')
+    }
+    dataAll1 <- dataAll1 %>%
      select(one_of("date", input$SOLUTES1))      # Select desired columns of data
     dataAll1 <- removeCodes(dataAll1)
     dataAll1
@@ -601,6 +605,9 @@ shinyServer(function(input, output, session) {
       dataAll2 = filter(dataAll, date > input$DATE2[1] & date < input$DATE2[2])
     }
     # remaining filtering
+    if(input$OMIT_STORMS2 == TRUE){
+        dataAll2 <- filter(dataAll2, is.na(fieldCode) | fieldCode != '911')
+    }
     dataAll2 = filter(dataAll2, site %in% input$SITES2) %>% # Filter data to selected sites
       select(one_of("date", input$SOLUTES2))      # Keep date and selected input data
     dataAll2
@@ -747,7 +754,11 @@ shinyServer(function(input, output, session) {
         date < input$DATE3[2])
     }
     dataAll3 <- dataAll3 %>%
-     filter(site %in% input$SITES3) %>%            # Filter data to selected sites
+     filter(site %in% input$SITES3)            # Filter data to selected sites
+    if(input$OMIT_STORMS3 == TRUE){
+        dataAll3 <- filter(dataAll3, is.na(fieldCode) | fieldCode != '911')
+    }
+    dataAll3 <- dataAll3 %>%
      select(one_of("date", "site", input$SOLUTES3)) %>% # Keep date, site, and solute data
      mutate(i = row_number()) %>%                # Create new columns of data of just row numbers. Necessary to prevent error message of duplicate values after next line of code, but inefficient because doesn't combine rows with duplicate columns.)
      spread_(key_col = "site", value_col = input$SOLUTES3, fill=NA) %>%  # Reshape data so that each place in "sites" is made into a unique column, with corresponding solute value as data
@@ -1480,6 +1491,9 @@ shinyServer(function(input, output, session) {
   }, height = 100) # end of output$GRAPH_PRECIP4
   output$GRAPH_MAIN4 <- renderPlot({
     data <- dataMain4()
+    if(input$OMIT_STORMS4 == TRUE){
+        data <- filter(data, is.na(fieldCode) | fieldCode != '911')
+    }
     x <- data$date
     y <- data$solute_value
     # build ggplot function

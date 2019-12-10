@@ -235,7 +235,11 @@ shinyUI(
                   precipitation sites when a rain gage site is selected."),
                 style = "color:#666666; font-size:85%;"
               ),
-              width = 3
+              checkboxInput("OMIT_STORMS1",
+                  label = "Omit Storm Data (Code 911)",
+                  value = FALSE
+              ),
+              width = 3,
             ), #closes sidebarPanel
 
             mainPanel(
@@ -318,6 +322,10 @@ shinyUI(
               p("Hydrology shows discharge for watershed sites,
                 and precipitation for rain gage sites." ,
                 style = "color:#666666; font-size:85%;"
+              ),
+              checkboxInput("OMIT_STORMS2",
+                  label = "Omit Storm Data (Code 911)",
+                  value = FALSE
               ),
               checkboxGroupInput("SOLUTES2",
                           label = "Solutes",
@@ -411,6 +419,10 @@ shinyUI(
               p("Precipitation shows daily median of all rain gage sites." ,
                 style = "color:#666666; font-size:85%;"
               ),
+              checkboxInput("OMIT_STORMS3",
+                  label = "Omit Storm Data (Code 911)",
+                  value = FALSE
+              ),
               checkboxGroupInput("SITES3",
                           label = "Sites",
                           choices = c(sites_streams, sites_precip),
@@ -486,6 +498,10 @@ shinyUI(
                     checkboxInput("FIELDCODE4",
                               label = "Show field codes",
                               value = FALSE
+                    ),
+                    checkboxInput("OMIT_STORMS4",
+                        label = "Omit Storm Data (Code 911)",
+                        value = FALSE
                     ),
                     selectInput("SOLUTES4_COLOR",
                             label = "Colors apply to:",
