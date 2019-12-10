@@ -239,7 +239,7 @@ shinyUI(
                   label = "Omit Storm Data (Code 911)",
                   value = FALSE
               ),
-              width = 3,
+              width = 3
             ), #closes sidebarPanel
 
             mainPanel(
