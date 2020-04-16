@@ -32,8 +32,8 @@ message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/mike/RMySQL.config')   # for remote server
-# pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
+# pass  = readLines('/home/mike/RMySQL.config')   # for remote server
+pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
 #pass = readLines('SQL.txt')              # for CSR's local computer
 
 # ***********************************************************************
@@ -160,7 +160,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef')
+               dbname = 'hbef20200415')
 
     # Read current data and disconnect from table
     dataCurrentR <- dbReadTable(con, "current")
@@ -259,7 +259,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef')
+               dbname = 'hbef20200415')
 
     # make needed data type changes to data before uploading
     dataNew <- standardizeClasses(dataNew())
@@ -452,7 +452,7 @@ shinyServer(function(input, output, session) {
 
         y = RMariaDB::MariaDB()
         con = dbConnect(y, user='root', password=pass, host='localhost',
-            dbname='hbef')
+            dbname='hbef20200415')
 
         res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR1_S3,
             " from sensor3 WHERE watershedID = '",
@@ -1590,7 +1590,7 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                dbname = 'hbef')
+                dbname = 'hbef20200415')
 
       # make handsontable data object into R data frame
       dataChanged <- hot_to_r(input$HOT)
@@ -1634,7 +1634,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef')
+               dbname = 'hbef20200415')
     # check that rows exist; if so, delete, if not, send notification
     # !!! could make cleaner with validate()
 
@@ -1670,7 +1670,7 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                dbname = 'hbef')
+                dbname = 'hbef20200415')
       # check that row exists; if so, delete, if not, send notification
       # !!! could make cleaner with validate()
       if (input$DELETE_UNIQUEID5 %in% dataCurrent$uniqueID) {
