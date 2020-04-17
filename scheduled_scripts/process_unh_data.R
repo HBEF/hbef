@@ -1,18 +1,23 @@
 library(dplyr)
 library(RMariaDB)
+library(logging)
 
-setwd('/home/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
-# setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
+# setwd('/home/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
+setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
 
-# pass = readLines('~/git/hbef/RMySQL.config')
-pass  = readLines('/home/hbef/RMySQL.config')
+logging::basicConfig()
+logging::addHandler(logging::writeToFile, logger='hbef',
+    file='../../../logs/hbef_flowdata_retrieval.log')
+
+pass = readLines('~/git/hbef/RMySQL.config')
+# pass  = readLines('/home/hbef/RMySQL.config')
 
 driver = MariaDB()
 con = dbConnect(driver, user='root', password=pass, host='localhost',
-    dbname='hbef')
-    # dbname='hbef20200415')
+    # dbname='hbef')
+    dbname='hbef20200415')
 
-#read and process w9 ####
+#read and process w9 wqual data ####
 
 header = readr::read_csv('CR1000_HBF_W9_WQual.dat',
     skip=1, col_names=FALSE, n_max=1)
@@ -52,7 +57,7 @@ dbWriteTable(con, 'sensor4', wqual9, append=TRUE)
 rm(wqual9)
 gc()
 
-#read and process w3 ####
+#read and process w3 wqual data ####
 
 header = readr::read_csv('CR1000_HBF_WQual.dat',
     skip=1, col_names=FALSE, n_max=1)
@@ -71,5 +76,91 @@ colnames(wqual3) = paste('S4', colnames(wqual3), sep='__')
 wqual3 = rename(wqual3, datetime='S4__datetime', watershedID='S4__watershedID')
 
 dbWriteTable(con, 'sensor4', wqual3, append=TRUE)
+
+rm(wqual3)
+gc()
+
+# read and process static raw files of flow data for w1-9 (from Nina) ####
+#(this assumes there's already a table called 'sensorQraw' and appropriately conf'd
+
+# tables = RMariaDB::dbListTables(con)
+
+# if(! 'sensorQraw' %in% tables){
+#     dbCreateTable(con, 'sensorQraw', fieldtypes)
+# }
+
+out = dbGetQuery(con, 'select count(*) from sensorQraw;')
+zz = out[1, 1, drop=TRUE]
+out[[1]]
+class(zz)
+
+weirfiles = list.files('static_raw_weirdata/', 'Weir*')
+
+s2 = dbReadTable(con, 'sensor2')
+
+for(w in weirfiles){
+
+    header = readr::read_csv(w, skip=1, col_names=FALSE, n_max=1)
+    flowd = readr::read_csv(w, skip=4, col_names=FALSE)
+    colnames(flowd) = header
+
+    if(! 'Q' in colnames(flowd)){
+        logging::logerror('missing Q in weir file', logger='hbef.module')
+        stop()
+    }
+
+    range(flowd$TIMESTAMP)
+}
+
+# read and process updating flow data for w1-9 ####
+#(this assumes there's already a table called 'sensorQraw' and appropriately conf'd
+weirfiles = list.files('.', '^weir[0-9]_Ws_[0-9]b.dat$')
+
+if(length(weirfiles) != 9){
+    logging::logerror('weir filenames have changed', logger='hbef.module')
+    stop()
+}
+
+s2 = dbReadTable(con, 'sensor2')
+
+for(w in weirfiles){
+
+    header = readr::read_csv(w, skip=1, col_names=FALSE, n_max=1)
+    flowd = readr::read_csv(w, skip=4, col_names=FALSE)
+    colnames(flowd) = header
+
+    if(! 'Q' in colnames(flowd)){
+        logging::logerror('missing Q in weir file', logger='hbef.module')
+        stop()
+    }
+
+    range(flowd$TIMESTAMP)
+}
+
+#make config vector for new db table
+colnames(wqual9) = paste('S4', colnames(wqual9), sep='__')
+wqual9 = rename(wqual9, datetime='S4__datetime',
+    id='S4__id', watershedID='S4__watershedID')
+
+tables = RMariaDB::dbListTables(con)
+if(! 'sensor4' %in% tables){
+
+    #create sensor4 table
+    fieldnames = colnames(wqual9)
+    fieldtypes = rep('FLOAT', length(fieldnames))
+    fieldtypes[1] = 'DATETIME'
+    fieldtypes[length(fieldtypes) - 1] = 'INT(3)'
+    fieldtypes[length(fieldtypes)] = 'INT(11) primary key auto_increment'
+    names(fieldtypes) = fieldnames
+
+    dbCreateTable(con, 'sensor4', fieldtypes)
+} else {
+    wqual9 = select(wqual9, -id)
+}
+
+dbWriteTable(con, 'sensor4', wqual9, append=TRUE)
+
+rm(wqual9)
+gc()
 
 dbDisconnect(con)
