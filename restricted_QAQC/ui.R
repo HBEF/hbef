@@ -186,15 +186,15 @@ shinyUI(
               hr(),
               p(strong("Additional Options:")),
 
-              conditionalPanel(condition="input.SITES1 == 'W3'",
-                p(paste('Prototype sensor data display below. Currently only',
-                  'available for watershed 3 and water year 2016.'),
-                  style='color:red'),
-                selectInput("SENSORVAR1", label="Sensor variable overlay",
-                  choices=c('None', sensorvars)),
-                hr()
-              ),
-              conditionalPanel(condition="input.SITES1 != 'W3'",
+              # conditionalPanel(condition="input.SITES1 == 'W3'",
+              #   p(paste('Prototype sensor data display below. Currently only',
+              #     'available for watershed 3 and water year 2016.'),
+              #     style='color:red'),
+              #   selectInput("SENSORVAR1", label="Sensor variable overlay",
+              #     choices=c('None', sensorvars)),
+              #   hr()
+              # ),
+              # conditionalPanel(condition="input.SITES1 != 'W3'",
 
                 checkboxInput(
                   "HYDROLOGY1",
@@ -218,8 +218,8 @@ shinyUI(
                 p("Hydrology shows discharge for watershed sites,
                   and precipitation for rain gage sites." ,
                   style = "color:#666666; font-size:85%;"
-                )
-              ),
+                ),
+              # ),
               checkboxInput("SOLUTES_HIST1",
                         label = "Historical Data",
                         value = FALSE
@@ -327,6 +327,19 @@ shinyUI(
                   label = "Omit Storm Data (Code 911)",
                   value = FALSE
               ),
+
+               checkboxInput("SHOWSENS2",
+                  label = HTML(paste0("Overlay continuous water quality data.<br>",
+                     "(Available for watersheds 3 and 9)")),
+                  value = FALSE
+               ),
+               conditionalPanel(condition="input.SHOWSENS2 == true",
+                  p(paste('Provisional sensor data. Not available for download.'),
+                     style='color:red'),
+                  selectInput("SENSORVAR2", label="Select variable",
+                     choices=c('None', sensorvars)),
+               ),
+
               checkboxGroupInput("SOLUTES2",
                           label = "Solutes",
                           choices = c(solutes_cations, solutes_anions, solutes_other),
@@ -340,6 +353,10 @@ shinyUI(
               tags$h4(textOutput("TITLE2")),
               hr(),
               dygraphOutput("GRAPH2"),
+
+              conditionalPanel(condition="input.SHOWSENS2 == true && input.SENSORVAR2 != 'None'",
+                 dygraphOutput("GRAPH2sens"),
+              ),
               #plotOutput("GRAPH")
               hr(),
               h4("Table of Selected Data"),
@@ -508,7 +525,17 @@ shinyUI(
                             choices = c("Solutes", "Sites"),
                             width = "80%"),
                     style = "color:#919191; font-size:0.9em;"
-                  ), # end
+                  ),
+                  # checkboxInput("SHOWSENS4",
+                  #     label = "Overlay continuous water quality data",
+                  #     value = FALSE
+                  # ),
+                  # conditionalPanel(condition="input.SHOWSENS4 == true",
+                  #   p(paste('Provisional sensor data. Not available for download.'),
+                  #     style='color:red'),
+                  #   selectInput("SENSORVAR4", label="Select variable",
+                  #     choices=c('None', sensorvars)),
+                  # ),
 
                   hr(),
 
