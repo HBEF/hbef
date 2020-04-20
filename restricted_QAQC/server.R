@@ -27,6 +27,7 @@ library(shiny)
 library(stringr)        # needed for str_extract function
 library(tidyr)
 library(xts)
+library(glue)
 
 message("hello, I'm at the top of server.R")
 
@@ -545,7 +546,8 @@ shinyServer(function(input, output, session) {
               "Q from Gage Height (L/s)" = "flowGageHt")
     if(ws_site_selected){
       flow_opts = append(flow_opts,
-                   c("Q from Sensor (L/s)" = "flowSens"))
+                   c("Q from Sensor (L/s)" = "flowSens",
+                       "Provisional Sensor Q (L/s; W3 & W9)" = "flowSensProv"))
     }
 
     updateRadioButtons(session, 'Flow_or_Precip2', "Select data source:",
@@ -660,6 +662,46 @@ shinyServer(function(input, output, session) {
           select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%    # Selected desired columns of data
           rename(Flow_or_Precip = flowGageHt)                  # Rename Q to standard name, so that don't have
         #  to create alternative graphs
+      }
+      if (input$Flow_or_Precip2 == 'flowSensProv'){
+        if(input$wateryearOrRange2 == 'wateryr'){
+          yrstart = as.POSIXct(paste0(input$WATERYEAR2, '-06-01'))
+          yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR2) + 1, '-05-31'))
+        } else {
+          yrstart = as.POSIXct(input$DATE2[1])
+          yrend = as.POSIXct(input$DATE2[2])
+        }
+
+        # Open database connection
+        y = RMariaDB::MariaDB()
+        con = dbConnect(y,
+            user = 'root',
+            password = pass,
+            host = 'localhost',
+            dbname = 'hbef20200415')
+
+        wsID = substr(input$SITES2, 2, 3)
+        dataSensRaw = dbGetQuery(con,
+            glue('select * from sensorQraw where watershedID= "{ws}" ',
+            'and datetime >= "{dt1}" and datetime <="{dt2}";', ws=wsID,
+            dt1=yrstart, dt2=yrend))
+        dataSensRaw = mutate(dataSensRaw, watershedID=paste0('W', watershedID))
+
+        dataAllQ2 <- dataAllQ2 %>%
+          filter(site %in% input$SITES2) %>%             # Filter data to selected site
+          select(-flowGageHt) %>%
+          mutate(datetime=as.POSIXct(paste(as.character(date),
+            as.character(timeEST)))) %>%
+          full_join(dataSensRaw[,c('datetime', 'Q_Ls', 'watershedID')],
+            by=c('site'='watershedID', 'datetime'='datetime')) %>%
+          select(-date) %>%
+          filter(site %in% input$SITES2) %>%
+          rename(flowGageHt = Q_Ls, date = datetime) %>%
+          select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%    # Selected desired columns of data
+          rename(Flow_or_Precip = flowGageHt)                  # Rename Q to standard name, so that don't have
+        #  to create alternative graphs
+
+        dbDisconnect(con)
       }
     }
     if (input$SITES2 %in% sites_precip) {
@@ -1640,6 +1682,7 @@ shinyServer(function(input, output, session) {
         if (input$FLOW_SOURCE4 == "gageHt") y.hl <- data.hl$gageHt
         if (input$FLOW_SOURCE4 == "flowGageHt") y.hl <- data.hl$flowGageHt
         if (input$FLOW_SOURCE4 == "flowSens") y.hl <- data.hl$flowSensor
+        if (input$FLOW_SOURCE4 == "flowSensRaw") y.hl <- data.hl$flowSensRaw
         f <- f + geom_text(data = data.hl,
                      aes(x = date,
                         y = y.hl,

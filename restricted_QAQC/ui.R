@@ -38,7 +38,10 @@ shinyUI(
     #HMTL(<script type="text/javascript" src="/www/dygraph-combined.js"></script>),
     navbarPage(title = p(strong("HBEF Dashboard")),
       tabPanel("Main",
-        h3("Welcome!"),
+        h3("New!", style="color:green"),
+        p(HTML("Visit the <strong>Multiple Solutes</strong> tab to view raw, continuous water quality and sensor data."),
+            style="color:green"),
+        br(),
         p("Please send any issues or comments to Mike Vlah at",
           a(href="mailto:vlahm13@gmail.com?subject=[HBEF%20Dashboard]", "vlahm13@gmail.com"),
           style="font-size:85%;"
