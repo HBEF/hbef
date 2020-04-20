@@ -161,7 +161,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef20200415')
+               dbname = 'hbef')
 
     # Read current data and disconnect from table
     dataCurrentR <- dbReadTable(con, "current")
@@ -260,7 +260,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef20200415')
+               dbname = 'hbef')
 
     # make needed data type changes to data before uploading
     dataNew <- standardizeClasses(dataNew())
@@ -309,14 +309,6 @@ shinyServer(function(input, output, session) {
 
     current_selection = input$Flow_or_Precip1
     ws_site_selected = grepl("^W[0-9]+$", input$SITES1)
-
-    #>>>>temp fix for prototype sensor data plotting; once it's universal, can delete this?
-    # if(input$SITES1 == 'W3'){
-    #     updateCheckboxInput(session, inputId='HYDROLOGY1', value=FALSE)
-    # }
-    # if(input$SITES1 != 'W3'){
-    #     updateSelectInput(session, inputId='SENSORVAR1', selected='None')
-    # }
 
     if(! ws_site_selected && current_selection == 'flowSens'){
       current_selection = 'flowGageHt'
@@ -444,38 +436,6 @@ shinyServer(function(input, output, session) {
         rename(Flow_or_Precip = precipCatch)                  # Rename Q to standard name, so that don't have
                                                   #  to create alternative graphs
     }
-    # if (input$SITES1 %in% 'W3') {
-    #
-    #     # input = list(SENSORVAR1='Nitrate_mg', SITES1='W3', WATERYEAR1='2016', SOLUTES1='Ca')
-    #     SENSORVAR1_S4 = paste('S4', input$SENSORVAR1, sep='__')
-    #     yrstart = as.POSIXct(paste0(input$WATERYEAR1, '-06-01'))
-    #     yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR1) + 1, '-05-31'))
-    #
-    #     y = RMariaDB::MariaDB()
-    #     con = dbConnect(y, user='root', password=pass, host='localhost',
-    #         dbname='hbef20200415')
-    #
-    #     res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR1_S4,
-    #         " from sensor4 WHERE watershedID = '",
-    #         substr(input$SITES1, 2, nchar(input$SITES1)), "' and datetime > '",
-    #         yrstart, "' and datetime < '", yrend, "';"))
-    #     datasensor4 = dbFetch(res)
-    #
-    #     dbDisconnect(con)
-    #
-    #     dataAllQ1 <- dataAll %>%
-    #         filter(waterYr %in% input$WATERYEAR1) %>%
-    #         filter(site %in% input$SITES1) %>%
-    #         select(-flowGageHt) %>%
-    #         mutate(datetime=as.POSIXct(paste(as.character(date),
-    #             as.character(timeEST)))) %>%
-    #         full_join(datasensor4, by=c('datetime'='datetime')) %>%
-    #         select(-date) %>%
-    #         rename(date=datetime) %>%
-    #         select(one_of("date", input$SOLUTES1, SENSORVAR1_S4))
-    #     colnames(dataAllQ1)[which(colnames(dataAllQ1) == SENSORVAR1_S4)] = input$SENSORVAR1
-    #         # rename(quo(input$SENSORVAR1) = quo(SENSORVAR1_S4))
-    # }
 
     dataAllQ1
   }) # END of dataCurrentQ1
@@ -678,7 +638,7 @@ shinyServer(function(input, output, session) {
             user = 'root',
             password = pass,
             host = 'localhost',
-            dbname = 'hbef20200415')
+            dbname = 'hbef')
 
         wsID = substr(input$SITES2, 2, 3)
         dataSensRaw = dbGetQuery(con,
@@ -1632,38 +1592,6 @@ shinyServer(function(input, output, session) {
                    nudge_y = (max(data$solute_value, na.rm = TRUE) - min(data$solute_value, na.rm = TRUE))/15,
                    check_overlap = TRUE)
     }
-    # if (input$SENSORVAR4) {
-    #
-    #    # input = list(SENSORVAR1='Nitrate_mg', SITES1='W3', WATERYEAR1='2016', SOLUTES1='Ca')
-    #    SENSORVAR1_S4 = paste('S4', input$SENSORVAR4, sep='__')
-    #    # yrstart = as.POSIXct(paste0(input$WATERYEAR, '-06-01'))
-    #    # yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR1) + 1, '-05-31'))
-    #
-    #    y = RMariaDB::MariaDB()
-    #    con = dbConnect(y, user='root', password=pass, host='localhost',
-    #       dbname='hbef20200415')
-    #
-    #    res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR1_S4,
-    #       " from sensor4 WHERE watershedID = '",
-    #       substr(input$SITES4, 2, nchar(input$SITES4)), "' and datetime > '",
-    #       input$DATE4[1], "' and datetime < '", input$DATE4[2], "';"))
-    #    datasensor4 = dbFetch(res)
-    #
-    #    dbDisconnect(con)
-    #
-    #    dataAllQ1 <- dataAll %>%
-    #       filter(waterYr %in% input$WATERYEAR1) %>%
-    #       filter(site %in% input$SITES1) %>%
-    #       select(-flowGageHt) %>%
-    #       mutate(datetime=as.POSIXct(paste(as.character(date),
-    #          as.character(timeEST)))) %>%
-    #       full_join(datasensor4, by=c('datetime'='datetime')) %>%
-    #       select(-date) %>%
-    #       rename(date=datetime) %>%
-    #       select(one_of("date", input$SOLUTES1, SENSORVAR1_S4))
-    #    colnames(dataAllQ1)[which(colnames(dataAllQ1) == SENSORVAR1_S4)] = input$SENSORVAR1
-    #    # rename(quo(input$SENSORVAR1) = quo(SENSORVAR1_S4))
-    # }
 
     # plot
     m
@@ -1726,7 +1654,7 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                dbname = 'hbef20200415')
+                dbname = 'hbef')
 
       # make handsontable data object into R data frame
       dataChanged <- hot_to_r(input$HOT)
@@ -1770,7 +1698,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef20200415')
+               dbname = 'hbef')
     # check that rows exist; if so, delete, if not, send notification
     # !!! could make cleaner with validate()
 
@@ -1806,7 +1734,7 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                dbname = 'hbef20200415')
+                dbname = 'hbef')
       # check that row exists; if so, delete, if not, send notification
       # !!! could make cleaner with validate()
       if (input$DELETE_UNIQUEID5 %in% dataCurrent$uniqueID) {

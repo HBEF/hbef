@@ -168,7 +168,7 @@ con = dbConnect(y,
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                dbname = 'hbef20200415')
+                dbname = 'hbef')
 tables = dbListTables(con)
 
 # # Code for one-time use: to load data into mysql
