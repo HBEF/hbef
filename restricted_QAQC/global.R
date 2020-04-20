@@ -5,6 +5,13 @@
 
 # options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
 
+#NOTES:
+#tables sensor and sensor3 are not in use.
+#sensor2 contains qa/qc'd discharge data
+#sensor4 contains raw water qual and chemistry data
+#sensorQraw constains raw discharge data
+#sensor could contain qa/qc'd water qual and chem data
+
 library(dplyr)
 library(RMariaDB)
 # library(reactlog)

@@ -1,6 +1,13 @@
-library(dplyr)
+library(tidyverse)
+library(lubridate)
 library(RMariaDB)
 library(logging)
+library(glue)
+
+#config ####
+import_static_q_data = TRUE
+
+#setup ####
 
 # setwd('/home/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
 setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
@@ -81,39 +88,38 @@ rm(wqual3)
 gc()
 
 # read and process static raw files of flow data for w1-9 (from Nina) ####
-#(this assumes there's already a table called 'sensorQraw' and appropriately conf'd
 
-# tables = RMariaDB::dbListTables(con)
 
-# if(! 'sensorQraw' %in% tables){
-#     dbCreateTable(con, 'sensorQraw', fieldtypes)
-# }
+#(this assumes there's already a table called 'sensorQraw' that is
+#appropriately configured.)
+if(import_static_q_data){
 
-out = dbGetQuery(con, 'select count(*) from sensorQraw;')
-zz = out[1, 1, drop=TRUE]
-out[[1]]
-class(zz)
+    # tables = RMariaDB::dbListTables(con)
 
-weirfiles = list.files('static_raw_weirdata/', 'Weir*')
+    # if(! 'sensorQraw' %in% tables){
+    #     dbCreateTable(con, 'sensorQraw', fieldtypes)
+    # }
 
-s2 = dbReadTable(con, 'sensor2')
+    weirfiles = list.files('static_raw_weirdata/', 'Weir*', full.names=TRUE)
 
-for(w in weirfiles){
+    for(w in weirfiles){
 
-    header = readr::read_csv(w, skip=1, col_names=FALSE, n_max=1)
-    flowd = readr::read_csv(w, skip=4, col_names=FALSE)
-    colnames(flowd) = header
+        flowd = readr::read_csv(w,
+                col_types=readr::cols_only(TIMESTAMP='T', Q='d')) %>%
+            rename(datetime=TIMESTAMP, Q_Ls=Q)
 
-    if(! 'Q' in colnames(flowd)){
-        logging::logerror('missing Q in weir file', logger='hbef.module')
-        stop()
+        weirno = stringr::str_match(w, '^static_raw_weirdata//Weir_(.)\\.csv$')[,2]
+        flowd$watershedID = weirno
+
+        dbWriteTable(con, 'sensorQraw', flowd, append=TRUE)
     }
-
-    range(flowd$TIMESTAMP)
 }
 
 # read and process updating flow data for w1-9 ####
-#(this assumes there's already a table called 'sensorQraw' and appropriately conf'd
+#(this assumes there's already a table called 'sensorQraw'
+#that is appropriately configured and populated with static data from Nina
+#(unless qa/qc'd data have surpassed those static files, which extend to 20200316)
+
 weirfiles = list.files('.', '^weir[0-9]_Ws_[0-9]b.dat$')
 
 if(length(weirfiles) != 9){
@@ -121,46 +127,38 @@ if(length(weirfiles) != 9){
     stop()
 }
 
-s2 = dbReadTable(con, 'sensor2')
-
 for(w in weirfiles){
 
-    header = readr::read_csv(w, skip=1, col_names=FALSE, n_max=1)
-    flowd = readr::read_csv(w, skip=4, col_names=FALSE)
-    colnames(flowd) = header
+    err = FALSE
+    tryCatch({
+        header = readr::read_csv(w, skip=1, col_names=FALSE, n_max=1)
+        flowd = readr::read_csv(w, skip=4, col_names=FALSE)
+        colnames(flowd) = header
 
-    if(! 'Q' in colnames(flowd)){
+        id = stringr::str_match(w, '^weir(.)_Ws_.b\\.dat$')[,2]
+
+        flowd = flowd %>%
+            select(datetime=TIMESTAMP, Q_Ls=Q) %>%
+            mutate(watershedID=id)
+    }, error=function(e){
         logging::logerror('missing Q in weir file', logger='hbef.module')
+        err <<- TRUE
+    })
+
+    if(err){
+        dbDisconnect(con)
         stop()
     }
 
-    range(flowd$TIMESTAMP)
+    # held_data = dbReadTable(con, 'sensorQraw')
+    held_datemax = dbGetQuery(con,
+        glue('select max(datetime) from sensorQraw where watershedID={id};',
+            id=id))[[1]] %>%
+        lubridate::with_tz('UTC')
+
+    flowd = filter(flowd, datetime > held_datemax)
+
+    dbWriteTable(con, 'sensorQraw', flowd, append=TRUE)
 }
-
-#make config vector for new db table
-colnames(wqual9) = paste('S4', colnames(wqual9), sep='__')
-wqual9 = rename(wqual9, datetime='S4__datetime',
-    id='S4__id', watershedID='S4__watershedID')
-
-tables = RMariaDB::dbListTables(con)
-if(! 'sensor4' %in% tables){
-
-    #create sensor4 table
-    fieldnames = colnames(wqual9)
-    fieldtypes = rep('FLOAT', length(fieldnames))
-    fieldtypes[1] = 'DATETIME'
-    fieldtypes[length(fieldtypes) - 1] = 'INT(3)'
-    fieldtypes[length(fieldtypes)] = 'INT(11) primary key auto_increment'
-    names(fieldtypes) = fieldnames
-
-    dbCreateTable(con, 'sensor4', fieldtypes)
-} else {
-    wqual9 = select(wqual9, -id)
-}
-
-dbWriteTable(con, 'sensor4', wqual9, append=TRUE)
-
-rm(wqual9)
-gc()
 
 dbDisconnect(con)
