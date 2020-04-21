@@ -9,7 +9,7 @@ import_static_q_data = TRUE
 
 #setup ####
 
-setwd('/home/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
+setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
 # setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
 
 logging::basicConfig()
@@ -17,7 +17,7 @@ logging::addHandler(logging::writeToFile, logger='hbef',
     file='../../../logs/hbef_flowdata_retrieval.log')
 
 # pass = readLines('~/git/hbef/RMySQL.config')
-pass  = readLines('/home/hbef/RMySQL.config')
+pass  = readLines('/home/mike/RMySQL.config')
 
 driver = MariaDB()
 con = dbConnect(driver, user='root', password=pass, host='localhost',
@@ -154,7 +154,7 @@ for(w in weirfiles){
     held_datemax = dbGetQuery(con,
         glue('select max(datetime) from sensorQraw where watershedID={id};',
             id=id))[[1]] %>%
-        lubridate::with_tz('UTC')
+        lubridate::with_tz('EST')
 
     flowd = filter(flowd, datetime > held_datemax)
 
