@@ -5,11 +5,11 @@ library(logging)
 library(glue)
 
 #config ####
-import_static_q_data = TRUE
+import_static_q_data = FALSE #also commented this section to be safe
 
 #setup ####
 
-setwd('/home/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
+setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
 # setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
 
 logging::basicConfig()
@@ -17,7 +17,7 @@ logging::addHandler(logging::writeToFile, logger='hbef',
     file='../../../logs/hbef_flowdata_retrieval.log')
 
 # pass = readLines('~/git/hbef/RMySQL.config')
-pass  = readLines('/home/hbef/RMySQL.config')
+pass  = readLines('/home/mike/RMySQL.config')
 
 driver = MariaDB()
 con = dbConnect(driver, user='root', password=pass, host='localhost',
@@ -92,28 +92,28 @@ gc()
 
 #(this assumes there's already a table called 'sensorQraw' that is
 #appropriately configured.)
-if(import_static_q_data){
-
-    # tables = RMariaDB::dbListTables(con)
-
-    # if(! 'sensorQraw' %in% tables){
-    #     dbCreateTable(con, 'sensorQraw', fieldtypes)
-    # }
-
-    weirfiles = list.files('static_raw_weirdata/', 'Weir*', full.names=TRUE)
-
-    for(w in weirfiles){
-
-        flowd = readr::read_csv(w,
-                col_types=readr::cols_only(TIMESTAMP='T', Q='d')) %>%
-            rename(datetime=TIMESTAMP, Q_Ls=Q)
-
-        weirno = stringr::str_match(w, '^static_raw_weirdata//Weir_(.)\\.csv$')[,2]
-        flowd$watershedID = weirno
-
-        dbWriteTable(con, 'sensorQraw', flowd, append=TRUE)
-    }
-}
+#if(import_static_q_data){
+#
+#    # tables = RMariaDB::dbListTables(con)
+#
+#    # if(! 'sensorQraw' %in% tables){
+#    #     dbCreateTable(con, 'sensorQraw', fieldtypes)
+#    # }
+#
+#    weirfiles = list.files('static_raw_weirdata/', 'Weir*', full.names=TRUE)
+#
+#    for(w in weirfiles){
+#
+#        flowd = readr::read_csv(w,
+#                col_types=readr::cols_only(TIMESTAMP='T', Q='d')) %>%
+#            rename(datetime=TIMESTAMP, Q_Ls=Q)
+#
+#        weirno = stringr::str_match(w, '^static_raw_weirdata//Weir_(.)\\.csv$')[,2]
+#        flowd$watershedID = weirno
+#
+#        dbWriteTable(con, 'sensorQraw', flowd, append=TRUE)
+#    }
+#}
 
 # read and process updating flow data for w1-9 ####
 #(this assumes there's already a table called 'sensorQraw'
