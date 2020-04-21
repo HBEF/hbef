@@ -27,12 +27,13 @@ library(shiny)
 library(stringr)        # needed for str_extract function
 library(tidyr)
 library(xts)
+library(glue)
 
 message("hello, I'm at the top of server.R")
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/mike/RMySQL.config')   # for remote server
+# pass  = readLines('/home/mike/RMySQL.config')   # for remote server
 # pass = readLines('~/git/hbef/RMySQL.config')   # for MV's local computer
 #pass = readLines('SQL.txt')              # for CSR's local computer
 
@@ -309,14 +310,6 @@ shinyServer(function(input, output, session) {
     current_selection = input$Flow_or_Precip1
     ws_site_selected = grepl("^W[0-9]+$", input$SITES1)
 
-    #>>>>temp fix for prototype sensor data plotting; once it's universal, can delete this?
-    if(input$SITES1 == 'W3'){
-        updateCheckboxInput(session, inputId='HYDROLOGY1', value=FALSE)
-    }
-    if(input$SITES1 != 'W3'){
-        updateSelectInput(session, inputId='SENSORVAR1', selected='None')
-    }
-
     if(! ws_site_selected && current_selection == 'flowSens'){
       current_selection = 'flowGageHt'
     }
@@ -443,38 +436,6 @@ shinyServer(function(input, output, session) {
         rename(Flow_or_Precip = precipCatch)                  # Rename Q to standard name, so that don't have
                                                   #  to create alternative graphs
     }
-    if (input$SITES1 %in% 'W3') {
-
-        # input = list(SENSORVAR1='Nitrate_mg', SITES1='W3', WATERYEAR1='2016', SOLUTES1='Ca')
-        SENSORVAR1_S3 = paste('S3', input$SENSORVAR1, sep='__')
-        yrstart = as.POSIXct(paste0(input$WATERYEAR1, '-06-01'))
-        yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR1) + 1, '-05-31'))
-
-        y = RMariaDB::MariaDB()
-        con = dbConnect(y, user='root', password=pass, host='localhost',
-            dbname='hbef')
-
-        res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR1_S3,
-            " from sensor3 WHERE watershedID = '",
-            substr(input$SITES1, 2, nchar(input$SITES1)), "' and datetime > '",
-            yrstart, "' and datetime < '", yrend, "';"))
-        dataSensor3 = dbFetch(res)
-
-        dbDisconnect(con)
-
-        dataAllQ1 <- dataAll %>%
-            filter(waterYr %in% input$WATERYEAR1) %>%
-            filter(site %in% input$SITES1) %>%
-            select(-flowGageHt) %>%
-            mutate(datetime=as.POSIXct(paste(as.character(date),
-                as.character(timeEST)))) %>%
-            full_join(dataSensor3, by=c('datetime'='datetime')) %>%
-            select(-date) %>%
-            rename(date=datetime) %>%
-            select(one_of("date", input$SOLUTES1, SENSORVAR1_S3))
-        colnames(dataAllQ1)[which(colnames(dataAllQ1) == SENSORVAR1_S3)] = input$SENSORVAR1
-            # rename(quo(input$SENSORVAR1) = quo(SENSORVAR1_S3))
-    }
 
     dataAllQ1
   }) # END of dataCurrentQ1
@@ -545,7 +506,8 @@ shinyServer(function(input, output, session) {
               "Q from Gage Height (L/s)" = "flowGageHt")
     if(ws_site_selected){
       flow_opts = append(flow_opts,
-                   c("Q from Sensor (L/s)" = "flowSens"))
+                   c("Q from Sensor (L/s)" = "flowSens",
+                       "Provisional Sensor Q (L/s; W3 & W9)" = "flowSensProv"))
     }
 
     updateRadioButtons(session, 'Flow_or_Precip2', "Select data source:",
@@ -660,6 +622,46 @@ shinyServer(function(input, output, session) {
           select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%    # Selected desired columns of data
           rename(Flow_or_Precip = flowGageHt)                  # Rename Q to standard name, so that don't have
         #  to create alternative graphs
+      }
+      if (input$Flow_or_Precip2 == 'flowSensProv'){
+        if(input$wateryearOrRange2 == 'wateryr'){
+          yrstart = as.POSIXct(paste0(input$WATERYEAR2, '-06-01'))
+          yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR2) + 1, '-05-31'))
+        } else {
+          yrstart = as.POSIXct(input$DATE2[1])
+          yrend = as.POSIXct(input$DATE2[2])
+        }
+
+        # Open database connection
+        y = RMariaDB::MariaDB()
+        con = dbConnect(y,
+            user = 'root',
+            password = pass,
+            host = 'localhost',
+            dbname = 'hbef')
+
+        wsID = substr(input$SITES2, 2, 3)
+        dataSensRaw = dbGetQuery(con,
+            glue('select * from sensorQraw where watershedID= "{ws}" ',
+            'and datetime >= "{dt1}" and datetime <="{dt2}";', ws=wsID,
+            dt1=yrstart, dt2=yrend))
+        dataSensRaw = mutate(dataSensRaw, watershedID=paste0('W', watershedID))
+
+        dataAllQ2 <- dataAllQ2 %>%
+          filter(site %in% input$SITES2) %>%             # Filter data to selected site
+          select(-flowGageHt) %>%
+          mutate(datetime=as.POSIXct(paste(as.character(date),
+            as.character(timeEST)))) %>%
+          full_join(dataSensRaw[,c('datetime', 'Q_Ls', 'watershedID')],
+            by=c('site'='watershedID', 'datetime'='datetime')) %>%
+          select(-date) %>%
+          filter(site %in% input$SITES2) %>%
+          rename(flowGageHt = Q_Ls, date = datetime) %>%
+          select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%    # Selected desired columns of data
+          rename(Flow_or_Precip = flowGageHt)                  # Rename Q to standard name, so that don't have
+        #  to create alternative graphs
+
+        dbDisconnect(con)
       }
     }
     if (input$SITES2 %in% sites_precip) {
@@ -886,6 +888,7 @@ shinyServer(function(input, output, session) {
       filter(date <= input$DATE4[2])
     data4 <- removeCodes(data4)
   })
+
   ## Extract data for Precip plot
   dataPrecip4 <- reactive ({
     dataPrecip4 <- data4() %>%
@@ -911,6 +914,9 @@ shinyServer(function(input, output, session) {
       select(one_of("date", "site", input$SOLUTES4, "fieldCode")) %>%  # Keep date, site, solute & fieldcode data
       group_by(date, site) %>%
       gather(key = solute, value = solute_value, -site, -date, -fieldCode)  # Reshape data for ggplot2 plotting
+
+    return(dataMain4)
+
   })
   ## Extract data for Discharge (Flow) plot
   dataFlow4 <- reactive ({
@@ -1175,39 +1181,39 @@ shinyServer(function(input, output, session) {
 
         dygraph1
 
-      } else {
-
-        if(input$SENSORVAR1 != 'None'){
-          #plots default + sensor data
-
-            data1 <- dataAllQ1()
-            data1 <- removeCodes(data1)
-            data1.xts <- xts(data1[,-1], order.by = data1$date)
-
-            dygraph1 <- dygraph(data1.xts) %>%
-                dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-                dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-                dyAxis('y2',label = input$SENSORVAR1, independentTicks=TRUE,
-                    axisLabelWidth = 70,
-                    axisLabelColor = "#3182bd",
-                    axisLineColor = "#3182bd") %>% # color is light blue
-                dySeries(name = input$SOLUTES1,
-                    color = "#black") %>%
-                dySeries(name = input$SENSORVAR1,
-                    drawPoints = FALSE,
-                    fillGraph=T,
-                    color = "#3182bd",
-                    axis='y2') %>%
-                dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-                dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-                dyOptions(drawGrid = FALSE,
-                    drawPoints = TRUE,
-                    strokeWidth = 1,
-                    pointSize = 3,
-                    fillAlpha = 0.5,
-                    connectSeparatedPoints=TRUE,
-                    includeZero = TRUE)
-            dygraph1
+      # } else {
+      #
+      #   if(input$SENSORVAR1 != 'None'){
+      #     #plots default + sensor data
+      #
+      #       data1 <- dataAllQ1()
+      #       data1 <- removeCodes(data1)
+      #       data1.xts <- xts(data1[,-1], order.by = data1$date)
+      #
+      #       dygraph1 <- dygraph(data1.xts) %>%
+      #           dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
+      #           dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
+      #           dyAxis('y2',label = input$SENSORVAR1, independentTicks=TRUE,
+      #               axisLabelWidth = 70,
+      #               axisLabelColor = "#3182bd",
+      #               axisLineColor = "#3182bd") %>% # color is light blue
+      #           dySeries(name = input$SOLUTES1,
+      #               color = "#black") %>%
+      #           dySeries(name = input$SENSORVAR1,
+      #               drawPoints = FALSE,
+      #               fillGraph=T,
+      #               color = "#3182bd",
+      #               axis='y2') %>%
+      #           dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+      #           dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
+      #           dyOptions(drawGrid = FALSE,
+      #               drawPoints = TRUE,
+      #               strokeWidth = 1,
+      #               pointSize = 3,
+      #               fillAlpha = 0.5,
+      #               connectSeparatedPoints=TRUE,
+      #               includeZero = TRUE)
+      #       dygraph1
 
         } else {
 
@@ -1243,7 +1249,7 @@ shinyServer(function(input, output, session) {
 
           dygraph1
         }
-      }
+      # }
     }
 
   }) # END of output$GRAPH1
@@ -1280,10 +1286,14 @@ shinyServer(function(input, output, session) {
 
         # Plots Default + Discharge data
         data2 <- dataAllQ2()
+        # if (input$SHOWSENS2 && input$SENSORVAR2 != 'None') {
+        #    data2 = merge_sensor_data(data2, input$SENSORVAR2, input$SITES2,
+        #       input$DATE2)
+        # }
         data2 <- removeCodes(data2)
         data2.xts <- xts(data2[,-1], order.by = data2$date)
 
-        dygraph(data2.xts) %>%
+        dygraph(data2.xts) %>%#, group='group2') %>%
           dyAxis("x", label=xlabel) %>%
           dyAxis("y", label = "(various units, dependent on input)", independentTicks=TRUE) %>%
           dyAxis('y2',label=ylabel2, independentTicks=TRUE,
@@ -1311,12 +1321,20 @@ shinyServer(function(input, output, session) {
 
         data2 <- dataAll2()
         data2 <- removeCodes(data2)
+        # dd <<- data2
+        # svar <<- input$SENSORVAR2
+        # ssite <<- input$SITES2
+        # sdate <<- input$DATE2
+        # if (input$SHOWSENS2 && input$SENSORVAR2 != 'None') {
+        #    data2 = merge_sensor_data(data2, input$SENSORVAR2, input$SITES2,
+        #       input$DATE2)
+        # }
         data2.xts <- xts(data2, order.by = data2$date)
 
         # padrange <- c(min(data2.xts$input$SOLUTES2, na.rm=TRUE) - 1, max(data2.xts$input$SOLUTES2, na.rm=TRUE) + 1) # !!! attempt at resolving negative values issue
         # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
 
-        dygraph(data2.xts) %>%
+        dygraph(data2.xts) %>%#, group='group2') %>%
           dyAxis("x", label = xlabel) %>%
           dyAxis("y", label = "(various units, dependent on input)", independentTicks=TRUE) %>%
           # dySeries(name = input$SOLUTES2,
@@ -1332,6 +1350,50 @@ shinyServer(function(input, output, session) {
       }
 
   }) # END of output$GRAPH2
+
+  output$GRAPH2sens <- renderDygraph({
+
+     # determine x-axis label
+     if(input$wateryearOrRange2 == 'wateryr'){
+        yrstart = as.POSIXct(paste0(input$WATERYEAR2, '-06-01'))
+        yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR2) + 1, '-05-31'))
+        dates2 = c(yrstart, yrend)
+        xlabel <- paste("Water Year ", input$WATERYEAR2)
+     } else {
+        dates2 = input$DATE2
+        xlabel = paste("Dates ", input$DATE2[1], " to ", input$DATE2[2])
+     }
+
+     if (input$SHOWSENS2 && input$SENSORVAR2 != 'None') {
+
+        # data2 <- dataAllQ2()
+        dsens2 = get_sensor_data(input$SENSORVAR2, input$SITES2, dates2)
+        dsens2 = pad_ts(dsens2, dates2)
+           # input$DATE2, input$WATERYEAR2)
+        # dd <<- dsens2
+        # data2 <- removeCodes(data2)
+        if(nrow(dsens2)){
+           data2.xts <- xts(dsens2[,-1], order.by = dsens2$date)
+
+           dg = dygraph(data2.xts) %>%#, group='group2') %>%
+              dyAxis("x", label=xlabel) %>%
+              dyAxis("y", label = input$SENSORVAR2, independentTicks=TRUE) %>%
+              dyOptions(drawGrid = FALSE,
+                 drawPoints = FALSE,
+                 strokeWidth = 1,
+                 connectSeparatedPoints=FALSE,
+                 includeZero = TRUE,
+                 colors = 'black')
+        } else {
+           dg = plot_empty_dygraph(input$DATE2, 'group2', '')
+        }
+       } else {
+           dg = plot_empty_dygraph(input$DATE2, 'group2', '')
+       }
+
+     return(dg)
+
+  }) # END of output$GRAPH2sens
 
   # For testing purposes (of data sorting):
   # ***************************************
@@ -1530,6 +1592,7 @@ shinyServer(function(input, output, session) {
                    nudge_y = (max(data$solute_value, na.rm = TRUE) - min(data$solute_value, na.rm = TRUE))/15,
                    check_overlap = TRUE)
     }
+
     # plot
     m
   }, height = 350) # end of output$GRAPH_MAIN4
@@ -1547,6 +1610,7 @@ shinyServer(function(input, output, session) {
         if (input$FLOW_SOURCE4 == "gageHt") y.hl <- data.hl$gageHt
         if (input$FLOW_SOURCE4 == "flowGageHt") y.hl <- data.hl$flowGageHt
         if (input$FLOW_SOURCE4 == "flowSens") y.hl <- data.hl$flowSensor
+        if (input$FLOW_SOURCE4 == "flowSensRaw") y.hl <- data.hl$flowSensRaw
         f <- f + geom_text(data = data.hl,
                      aes(x = date,
                         y = y.hl,

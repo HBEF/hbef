@@ -5,6 +5,13 @@
 
 # options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
 
+#NOTES:
+#tables sensor and sensor3 are not in use.
+#sensor2 contains qa/qc'd discharge data
+#sensor4 contains raw water qual and chemistry data
+#sensorQraw constains raw discharge data
+#sensor could contain qa/qc'd water qual and chem data
+
 library(dplyr)
 library(RMariaDB)
 # library(reactlog)
@@ -12,9 +19,12 @@ library(stringr)
 
 message("hello, I'm in global.R")
 
+source('helpers.R')
+pass=readLines('../../RMySQL.config')
+
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
-pass  = readLines('/home/mike/RMySQL.config')    # for remote server
+# pass  = readLines('/home/mike/RMySQL.config')    # for remote server
 # pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
 # pass = readLines('SQL.txt')                     # for CSR's local computer
 
@@ -176,8 +186,8 @@ tables = dbListTables(con)
 dataCurrent <- dbReadTable(con, "current")
 dataHistorical <- dbReadTable(con, "historical")
 dataSensor <- dbReadTable(con, "sensor2")
-sensorvars = dbListFields(con, "sensor3")
-sensorvars = sub('S3__', '', sensorvars)
+sensorvars = dbListFields(con, "sensor4")
+sensorvars = sub('S4__', '', sensorvars)
 sensorvars = sensorvars[-which(sensorvars %in% c('datetime', 'id', 'watershedID'))]
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
 dbDisconnect(con)
