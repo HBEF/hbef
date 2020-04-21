@@ -9,20 +9,20 @@ import_static_q_data = TRUE
 
 #setup ####
 
-# setwd('/home/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
-setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
+setwd('/home/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
+# setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
 
 logging::basicConfig()
 logging::addHandler(logging::writeToFile, logger='hbef',
     file='../../../logs/hbef_flowdata_retrieval.log')
 
-pass = readLines('~/git/hbef/RMySQL.config')
-# pass  = readLines('/home/hbef/RMySQL.config')
+# pass = readLines('~/git/hbef/RMySQL.config')
+pass  = readLines('/home/hbef/RMySQL.config')
 
 driver = MariaDB()
 con = dbConnect(driver, user='root', password=pass, host='localhost',
-    # dbname='hbef')
-    dbname='hbef20200415')
+    dbname='hbef')
+    # dbname='hbef20200415')
 
 #read and process w9 wqual data ####
 
