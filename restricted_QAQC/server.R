@@ -547,7 +547,7 @@ shinyServer(function(input, output, session) {
     if(ws_site_selected){
       flow_opts = append(flow_opts,
                    c("Q from Sensor (L/s)" = "flowSens",
-                       "Raw Sensor Q" = "flowSensProv"))
+                       "Raw Sensor Q (L/s)" = "flowSensProv"))
     }
 
     updateRadioButtons(session, 'Flow_or_Precip2', "Select data source:",
