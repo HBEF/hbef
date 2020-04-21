@@ -547,7 +547,7 @@ shinyServer(function(input, output, session) {
     if(ws_site_selected){
       flow_opts = append(flow_opts,
                    c("Q from Sensor (L/s)" = "flowSens",
-                       "Provisional Sensor Q (L/s; W3 & W9)" = "flowSensProv"))
+                       "Raw Sensor Q" = "flowSensProv"))
     }
 
     updateRadioButtons(session, 'Flow_or_Precip2', "Select data source:",
@@ -685,7 +685,9 @@ shinyServer(function(input, output, session) {
             glue('select * from sensorQraw where watershedID= "{ws}" ',
             'and datetime >= "{dt1}" and datetime <="{dt2}";', ws=wsID,
             dt1=yrstart, dt2=yrend))
-        dataSensRaw = mutate(dataSensRaw, watershedID=paste0('W', watershedID))
+        dataSensRaw = mutate(dataSensRaw,
+            watershedID=paste0('W', watershedID),
+            Q_Ls=Q_Ls * 28.316846592)
 
         dataAllQ2 <- dataAllQ2 %>%
           filter(site %in% input$SITES2) %>%             # Filter data to selected site
