@@ -154,7 +154,7 @@ for(w in weirfiles){
     held_datemax = dbGetQuery(con,
         glue('select max(datetime) from sensorQraw where watershedID={id};',
             id=id))[[1]] %>%
-        lubridate::with_tz('UTC')
+        lubridate::with_tz('EST')
 
     flowd = filter(flowd, datetime > held_datemax)
 
