@@ -64,6 +64,47 @@ dbWriteTable(con, 'sensor4', wqual9, append=TRUE)
 rm(wqual9)
 gc()
 
+#read and process w6 wqual data ####
+
+header = readr::read_csv('CR1000_HBF_W6_WQual.dat',
+    skip=1, col_names=FALSE, n_max=1)
+wqual6 = readr::read_csv('CR1000_HBF_W6_WQual.dat', skip=4, col_names=FALSE)
+colnames(wqual6) = header
+
+wqual6 = wqual6 %>%
+    select(datetime=TIMESTAMP, TempC, Conductivity, SpConductivity,
+        pH, DepthMeter, ODOPerCent, ODOMGL, TurbidityFNU,
+        FDOMRFU, FDOMQSU) %>%
+    mutate(Nitrate_mg=NA, Chl_RFU=NA, BGA_PC_RFU=NA, BGA_PE_RFU=NA,
+        AqCO2_ppm_avg=NA, AtmCO2_ppm_avg=NA, TurbidityRaw=NA,
+        LowEOSCO2_ppm_avg=NA, HighEOSCO2_ppm_avg=NA, EOSTempC=NA,
+        watershedID=6, id=1:nrow(wqual6))
+#make config vector for new db table
+colnames(wqual6) = paste('S4', colnames(wqual6), sep='__')
+wqual6 = rename(wqual6, datetime='S4__datetime',
+    id='S4__id', watershedID='S4__watershedID')
+
+tables = RMariaDB::dbListTables(con)
+if(! 'sensor4' %in% tables){
+
+    #create sensor4 table
+    fieldnames = colnames(wqual6)
+    fieldtypes = rep('FLOAT', length(fieldnames))
+    fieldtypes[1] = 'DATETIME'
+    fieldtypes[length(fieldtypes) - 1] = 'INT(3)'
+    fieldtypes[length(fieldtypes)] = 'INT(11) primary key auto_increment'
+    names(fieldtypes) = fieldnames
+
+    dbCreateTable(con, 'sensor4', fieldtypes)
+} else {
+    wqual6 = select(wqual6, -id)
+}
+
+dbWriteTable(con, 'sensor4', wqual6, append=TRUE)
+
+rm(wqual6)
+gc()
+
 #read and process w3 wqual data ####
 
 header = readr::read_csv('CR1000_HBF_WQual.dat',

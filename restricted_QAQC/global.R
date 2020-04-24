@@ -169,10 +169,7 @@ con = dbConnect(y,
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-<<<<<<< Updated upstream
-=======
                 # dbname = 'hbef')
->>>>>>> Stashed changes
                 dbname = 'hbef20200415')
 tables = dbListTables(con)
 

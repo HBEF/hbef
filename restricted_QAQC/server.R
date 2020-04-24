@@ -161,10 +161,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-<<<<<<< Updated upstream
-=======
                # dbname = 'hbef')
->>>>>>> Stashed changes
                dbname = 'hbef20200415')
 
     # Read current data and disconnect from table
@@ -268,10 +265,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-<<<<<<< Updated upstream
-=======
                # dbname = 'hbef')
->>>>>>> Stashed changes
                dbname = 'hbef20200415')
 
     # make needed data type changes to data before uploading
@@ -690,10 +684,7 @@ shinyServer(function(input, output, session) {
             user = 'root',
             password = pass,
             host = 'localhost',
-<<<<<<< Updated upstream
-=======
             # dbname = 'hbef')
->>>>>>> Stashed changes
             dbname = 'hbef20200415')
 
         wsID = substr(input$SITES2, 2, 3)
@@ -1744,10 +1735,7 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-<<<<<<< Updated upstream
-=======
                 # dbname = 'hbef')
->>>>>>> Stashed changes
                 dbname = 'hbef20200415')
 
       # make handsontable data object into R data frame
@@ -1792,10 +1780,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-<<<<<<< Updated upstream
-=======
                # dbname = 'hbef')
->>>>>>> Stashed changes
                dbname = 'hbef20200415')
     # check that rows exist; if so, delete, if not, send notification
     # !!! could make cleaner with validate()
@@ -1832,10 +1817,7 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-<<<<<<< Updated upstream
-=======
                 # dbname = 'hbef')
->>>>>>> Stashed changes
                 dbname = 'hbef20200415')
       # check that row exists; if so, delete, if not, send notification
       # !!! could make cleaner with validate()
