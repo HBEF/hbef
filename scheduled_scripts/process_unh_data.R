@@ -9,25 +9,15 @@ import_static_q_data = FALSE #also commented this section to be safe
 
 #setup ####
 
-<<<<<<< HEAD
-setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
-#setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
-=======
-setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
 # setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
->>>>>>> master
+setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
 
 logging::basicConfig()
 logging::addHandler(logging::writeToFile, logger='hbef',
     file='../../../logs/hbef_flowdata_retrieval.log')
 
-<<<<<<< HEAD
-pass = readLines('~/git/hbef/RMySQL.config')
-#pass  = readLines('/home/mike/RMySQL.config')
-=======
 # pass = readLines('~/git/hbef/RMySQL.config')
 pass  = readLines('/home/mike/RMySQL.config')
->>>>>>> master
 
 driver = MariaDB()
 con = dbConnect(driver, user='root', password=pass, host='localhost',
@@ -69,7 +59,7 @@ if(! 'sensor4' %in% tables){
     wqual9 = select(wqual9, -id)
 }
 
-dbWriteTable(con, 'sensor4', wqual9, append=TRUE)
+dbWriteTable(con, 'sensor4', wqual9, append=FALSE)
 
 rm(wqual9)
 gc()
@@ -88,7 +78,10 @@ wqual6 = wqual6 %>%
     mutate(Nitrate_mg=NA, Chl_RFU=NA, BGA_PC_RFU=NA, BGA_PE_RFU=NA,
         AqCO2_ppm_avg=NA, AtmCO2_ppm_avg=NA, TurbidityRaw=NA,
         LowEOSCO2_ppm_avg=NA, HighEOSCO2_ppm_avg=NA, EOSTempC=NA,
-        watershedID=6, id=1:nrow(wqual6))
+        watershedID=6, id=1:nrow(wqual6),
+        datetime=with_tz(datetime, 'EST')) %>%
+    filter(datetime > as.POSIXct('2020-04-23 14:00:00')) #some test records
+
 #make config vector for new db table
 colnames(wqual6) = paste('S4', colnames(wqual6), sep='__')
 wqual6 = rename(wqual6, datetime='S4__datetime',
@@ -110,7 +103,7 @@ if(! 'sensor4' %in% tables){
     wqual6 = select(wqual6, -id)
 }
 
-dbWriteTable(con, 'sensor4', wqual6, append=TRUE)
+dbWriteTable(con, 'sensor4', wqual6, append=FALSE)
 
 rm(wqual6)
 gc()
@@ -133,7 +126,7 @@ wqual3 = wqual3 %>%
 colnames(wqual3) = paste('S4', colnames(wqual3), sep='__')
 wqual3 = rename(wqual3, datetime='S4__datetime', watershedID='S4__watershedID')
 
-dbWriteTable(con, 'sensor4', wqual3, append=TRUE)
+dbWriteTable(con, 'sensor4', wqual3, append=FALSE)
 
 rm(wqual3)
 gc()

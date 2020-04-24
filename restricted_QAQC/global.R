@@ -197,8 +197,8 @@ dataHistorical <- dbReadTable(con, "historical") %>%
     select(-NO3, -NH4)
 dataSensor <- dbReadTable(con, "sensor2")
 sensorvars = dbListFields(con, "sensor4")
-sensorvars[sensorvars == 'Nitrate_mg'] = 'NO3_N_mg'
 sensorvars = sub('S4__', '', sensorvars)
+sensorvars[sensorvars == 'Nitrate_mg'] = 'NO3_N_mg'
 sensorvars = sensorvars[-which(sensorvars %in% c('datetime', 'id', 'watershedID'))]
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
 dbDisconnect(con)

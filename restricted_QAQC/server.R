@@ -1302,9 +1302,10 @@ shinyServer(function(input, output, session) {
         data2 <- removeCodes(data2)
         data2.xts <- xts(data2[,-1], order.by = data2$date)
 
-        dygraph(data2.xts) %>%#, group='group2') %>%
+        dygraph(data2.xts, group='group2') %>%
           dyAxis("x", label=xlabel) %>%
-          dyAxis("y", label = "(various units, dependent on input)", independentTicks=TRUE) %>%
+          dyAxis("y", label = "(various units, dependent on input)",
+              independentTicks=TRUE, valueRange=c(input$YLIMlo2, input$YLIMhi2)) %>%
           dyAxis('y2',label=ylabel2, independentTicks=TRUE,
               axisLabelWidth = 70,
               axisLabelColor = "#3182bd",
@@ -1343,9 +1344,10 @@ shinyServer(function(input, output, session) {
         # padrange <- c(min(data2.xts$input$SOLUTES2, na.rm=TRUE) - 1, max(data2.xts$input$SOLUTES2, na.rm=TRUE) + 1) # !!! attempt at resolving negative values issue
         # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
 
-        dygraph(data2.xts) %>%#, group='group2') %>%
+        dygraph(data2.xts, group='group2') %>%
           dyAxis("x", label = xlabel) %>%
-          dyAxis("y", label = "(various units, dependent on input)", independentTicks=TRUE) %>%
+          dyAxis("y", label = "(various units, dependent on input)",
+              independentTicks=TRUE, valueRange=c(input$YLIMlo2, input$YLIMhi2)) %>%
           # dySeries(name = input$SOLUTES2,
           #       drawPoints = TRUE,
           #       strokeWidth = 1,
@@ -1375,18 +1377,15 @@ shinyServer(function(input, output, session) {
 
      if (input$SHOWSENS2 && input$SENSORVAR2 != 'None') {
 
-        # data2 <- dataAllQ2()
         dsens2 = get_sensor_data(input$SENSORVAR2, input$SITES2, dates2)
         dsens2 = pad_ts(dsens2, dates2)
-           # input$DATE2, input$WATERYEAR2)
-        # dd <<- dsens2
-        # data2 <- removeCodes(data2)
         if(nrow(dsens2)){
            data2.xts <- xts(dsens2[,-1], order.by = dsens2$date)
 
-           dg = dygraph(data2.xts) %>%#, group='group2') %>%
+           dg = dygraph(data2.xts, group='group2') %>%
               dyAxis("x", label=xlabel) %>%
-              dyAxis("y", label = input$SENSORVAR2, independentTicks=TRUE) %>%
+              dyAxis("y", label = input$SENSORVAR2, independentTicks=TRUE,
+                  valueRange=c(input$YLIMlo2, input$YLIMhi2)) %>%
               dyOptions(drawGrid = FALSE,
                  drawPoints = FALSE,
                  strokeWidth = 1,

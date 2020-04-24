@@ -333,7 +333,7 @@ shinyUI(
 
                checkboxInput("SHOWSENS2",
                   label = HTML(paste0("Overlay continuous water quality data.<br>",
-                     "(Available for watersheds 3 and 9)")),
+                     "(Available for watersheds 3, 6, and 9)")),
                   value = FALSE
                ),
                conditionalPanel(condition="input.SHOWSENS2 == true",
@@ -341,6 +341,13 @@ shinyUI(
                      style='color:red'),
                   selectInput("SENSORVAR2", label="Select variable",
                      choices=c('None', sensorvars)),
+                  p(HTML('<strong>Adjust y-axis limits</strong>')),
+                  column(width=6,
+                      numericInput('YLIMlo2', label='', value=NULL)
+                  ),
+                  column(width=6,
+                      numericInput('YLIMhi2', label='', value=NULL)
+                  )
                ),
 
               checkboxGroupInput("SOLUTES2",

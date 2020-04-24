@@ -38,9 +38,10 @@ merge_sensor_data = function(d, svar, ssite, sdate){
    return(d)
 }
 
+# svar=sv; ssite=ss; sdate=dd
 get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
 
-   if(svar == 'NH3_N_mg') svar = 'Nitrate_mg'
+   if(svar == 'NO3_N_mg') svar = 'Nitrate_mg'
 
    SENSORVAR_S4 = paste('S4', svar, sep='__')
 
@@ -58,7 +59,8 @@ get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
    colnames(dsens) = gsub('S4__', '', colnames(dsens))
 
    if(svar == 'Nitrate_mg'){
-       dsens = mutate(dsens, NO3_N_mg=NO3_to_NO3N(Nitrate_mg))
+       dsens = mutate(dsens, NO3_N_mg=NO3_to_NO3N(Nitrate_mg)) %>%
+           select(-Nitrate_mg)
    }
 
    dbClearResult(res)
