@@ -16,6 +16,7 @@ library(dplyr)
 library(RMariaDB)
 # library(reactlog)
 library(stringr)
+library(DT) #shiny's DataTable functions broke. loading them from here fixed it.
 
 message("hello, I'm in global.R")
 
@@ -41,14 +42,14 @@ solutes_cations <- list("TOTAL Cation Charge" = "cationCharge",
                         "TM Aluminum (Al)" = "TMAl",
                         "OM Aluminum (Al)" = "OMAl",
                         "Aluminum (Al) ICP" = "Al_ICP",
-                        "Ammonium (NH4)" = "NH4",
+                        "Ammonium-N (NH4-N)" = "NH4_N",
                         "Manganese (Mn)" = "Mn",
                         "Iron (Fe)" = "Fe")
 
 # If you add to this list, must update colors_anions list as well
 solutes_anions <- list("TOTAL Anion Charge" = "anionCharge",
                        "Sulfate (SO4)" = "SO4",
-                       "Nitrate (NO3)" = "NO3",
+                       "Nitrate-N (NO3-N)" = "NO3_N",
                        "Chloride (Cl)" = "Cl",
                        "Phosphate (PO4)" = "PO4",
                        "Fluorine (F)" = "F")
@@ -168,6 +169,10 @@ con = dbConnect(y,
                 user = 'root',
                 password = pass,
                 host = 'localhost',
+<<<<<<< Updated upstream
+=======
+                # dbname = 'hbef')
+>>>>>>> Stashed changes
                 dbname = 'hbef20200415')
 tables = dbListTables(con)
 
@@ -183,10 +188,19 @@ tables = dbListTables(con)
 #  dbWriteTable(con, "historical", dataHistorical, append = TRUE, row.names = FALSE)
 
 # Get data from mysql
-dataCurrent <- dbReadTable(con, "current")
-dataHistorical <- dbReadTable(con, "historical")
+dataCurrent <- dbReadTable(con, "current") %>%
+    mutate(
+        NO3_N=NO3_to_NO3N(NO3),
+        NH4_N=NH4_to_NH4N(NH4)) %>%
+    select(-NO3, -NH4)
+dataHistorical <- dbReadTable(con, "historical") %>%
+    mutate(
+        NO3_N=NO3_to_NO3N(NO3),
+        NH4_N=NH4_to_NH4N(NH4)) %>%
+    select(-NO3, -NH4)
 dataSensor <- dbReadTable(con, "sensor2")
 sensorvars = dbListFields(con, "sensor4")
+sensorvars[sensorvars == 'Nitrate_mg'] = 'NO3_N_mg'
 sensorvars = sub('S4__', '', sensorvars)
 sensorvars = sensorvars[-which(sensorvars %in% c('datetime', 'id', 'watershedID'))]
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))

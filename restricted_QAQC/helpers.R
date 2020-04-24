@@ -8,6 +8,10 @@ merge_sensor_data = function(d, svar, ssite, sdate){
 
    y = RMariaDB::MariaDB()
    con = dbConnect(y, user='root', password=pass, host='localhost',
+<<<<<<< Updated upstream
+=======
+      # dbname='hbef')
+>>>>>>> Stashed changes
       dbname='hbef20200415')
 
    res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR4_S4,
@@ -39,19 +43,29 @@ merge_sensor_data = function(d, svar, ssite, sdate){
 
 get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
 
-   SENSORVAR4_S4 = paste('S4', svar, sep='__')
+   if(svar == 'NH3_N_mg') svar = 'Nitrate_mg'
+
+   SENSORVAR_S4 = paste('S4', svar, sep='__')
 
    y = RMariaDB::MariaDB()
    con = dbConnect(y, user='root', password=pass, host='localhost',
+<<<<<<< Updated upstream
+=======
+      # dbname='hbef')
+>>>>>>> Stashed changes
       dbname='hbef20200415')
 
-   res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR4_S4,
+   res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR_S4,
       " from sensor4 WHERE watershedID = '",
       substr(ssite, 2, nchar(ssite)), "' and datetime >= '",
       sdate[1], "' and datetime <= '", sdate[2], "';"))
    dsens = dbFetch(res)
 
    colnames(dsens) = gsub('S4__', '', colnames(dsens))
+
+   if(svar == 'Nitrate_mg'){
+       dsens = mutate(dsens, NO3_N_mg=NO3_to_NO3N(Nitrate_mg))
+   }
 
    dbClearResult(res)
    dbDisconnect(con)
@@ -83,6 +97,51 @@ pad_ts = function(tsdf, datebounds){
    df_padded = bind_rows(row1, tsdf, rown)
 
    return(df_padded)
+}
+
+parse_molecular_formulae = function(formulae){
+
+    #`formulae` is a vector
+
+    # formulae = c('C', 'C4', 'Cl', 'Cl2', 'CCl', 'C2Cl', 'C2Cl2', 'C2Cl2B2')
+    # formulae = 'BCH10He10PLi2'
+    # formulae='Mn'
+
+    conc_vars = str_match(formulae, '^(?:OM|TM|DO|TD|UT|UTK|TK)?([A-Za-z0-9]+)_?')[,2]
+    two_let_symb_num = str_extract_all(conc_vars, '([A-Z][a-z][0-9]+)')
+    conc_vars = str_remove_all(conc_vars, '([A-Z][a-z][0-9]+)')
+    one_let_symb_num = str_extract_all(conc_vars, '([A-Z][0-9]+)')
+    conc_vars = str_remove_all(conc_vars, '([A-Z][0-9]+)')
+    two_let_symb = str_extract_all(conc_vars, '([A-Z][a-z])')
+    conc_vars = str_remove_all(conc_vars, '([A-Z][a-z])')
+    one_let_symb = str_extract_all(conc_vars, '([A-Z])')
+
+    constituents = mapply(c, SIMPLIFY=FALSE,
+        two_let_symb_num, one_let_symb_num, two_let_symb, one_let_symb)
+
+    return(constituents) # a list of vectors
+}
+
+combine_atomic_masses = function(molecular_constituents){
+
+    #`molecular_constituents` is a vector
+
+    xmat = str_match(molecular_constituents,
+        '([A-Z][a-z]?)([0-9]+)?')[, -1, drop=FALSE]
+    elems = xmat[,1]
+    mults = as.numeric(xmat[,2])
+    mults[is.na(mults)] = 1
+    molecular_mass = sum(PeriodicTable::mass(elems) * mults)
+
+    return(molecular_mass) #a scalar
+}
+
+NO3_to_NO3N = function(no3_mg){
+    no3_mg * 14.0067 / 62.0049
+}
+
+NH4_to_NH4N = function(nh4_mg){
+    nh4_mg * 14.0067 / 18.03846
 }
 
 # abs.Date = function(x){x}

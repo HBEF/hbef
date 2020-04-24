@@ -161,10 +161,18 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
+<<<<<<< Updated upstream
+=======
+               # dbname = 'hbef')
+>>>>>>> Stashed changes
                dbname = 'hbef20200415')
 
     # Read current data and disconnect from table
-    dataCurrentR <- dbReadTable(con, "current")
+    dataCurrentR <- dbReadTable(con, "current") %>%
+        mutate(
+            NO3_N=NO3_to_NO3N(NO3),
+            NH4_N=NH4_to_NH4N(NH4)) %>%
+        select(-NO3, -NH4)
     message(print(class(dataCurrentR)))
     message(head(dataCurrentR))
     dataCurrentR <- as.data.frame(dataCurrentR)
@@ -260,6 +268,10 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
+<<<<<<< Updated upstream
+=======
+               # dbname = 'hbef')
+>>>>>>> Stashed changes
                dbname = 'hbef20200415')
 
     # make needed data type changes to data before uploading
@@ -678,6 +690,10 @@ shinyServer(function(input, output, session) {
             user = 'root',
             password = pass,
             host = 'localhost',
+<<<<<<< Updated upstream
+=======
+            # dbname = 'hbef')
+>>>>>>> Stashed changes
             dbname = 'hbef20200415')
 
         wsID = substr(input$SITES2, 2, 3)
@@ -1062,7 +1078,7 @@ shinyServer(function(input, output, session) {
 
   # *Upload Tab* #########################################
 
-  output$FILE_PREVIEW <- renderDataTable({
+  output$FILE_PREVIEW <- DT::renderDataTable({
 
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, head of that data file by default,
@@ -1296,7 +1312,7 @@ shinyServer(function(input, output, session) {
 
   }) # END of output$GRAPH1
 
-  output$TABLE1 <- renderDataTable(dataAll1()) # for testing purposes
+  output$TABLE1 <- DT::renderDataTable(dataAll1()) # for testing purposes
 
 
   # Panel 2 Output ####
@@ -1439,7 +1455,7 @@ shinyServer(function(input, output, session) {
 
   # For testing purposes (of data sorting):
   # ***************************************
-  output$TABLE2 <- renderDataTable({
+  output$TABLE2 <- DT::renderDataTable({
     if (input$HYDROLOGY2 == FALSE) dataAll2()
     else dataAllQ2()
   }) # END of output$TABLE2
@@ -1567,7 +1583,7 @@ shinyServer(function(input, output, session) {
 
   # For testing purposes (of data sorting):
   # ***************************************
-  output$TABLE3 <- renderDataTable({
+  output$TABLE3 <- DT::renderDataTable({
     if (input$HYDROLOGY3 == "None") dataAll3()
     else dataAllQ3()
   }) # end of output$TABLE3
@@ -1696,7 +1712,7 @@ shinyServer(function(input, output, session) {
     }
   }, height = 100) # end of output$GRAPH_FLOW4
 
-  output$TABLE4 <- renderDataTable({
+  output$TABLE4 <- DT::renderDataTable({
     dataFlowHydroGraph4()
     #head(dataCurrentR())
   }) # end of output$TABLE4
@@ -1728,6 +1744,10 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
+<<<<<<< Updated upstream
+=======
+                # dbname = 'hbef')
+>>>>>>> Stashed changes
                 dbname = 'hbef20200415')
 
       # make handsontable data object into R data frame
@@ -1772,6 +1792,10 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
+<<<<<<< Updated upstream
+=======
+               # dbname = 'hbef')
+>>>>>>> Stashed changes
                dbname = 'hbef20200415')
     # check that rows exist; if so, delete, if not, send notification
     # !!! could make cleaner with validate()
@@ -1808,6 +1832,10 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
+<<<<<<< Updated upstream
+=======
+                # dbname = 'hbef')
+>>>>>>> Stashed changes
                 dbname = 'hbef20200415')
       # check that row exists; if so, delete, if not, send notification
       # !!! could make cleaner with validate()

@@ -108,7 +108,7 @@ shinyUI(
                 mainPanel(
                   #tags$head(tags$script(src="www/dygraphs-1.1.1/dygraph-combined.js")),
                   # Shows data file as a table
-                  dataTableOutput("FILE_PREVIEW")
+                  DT::dataTableOutput("FILE_PREVIEW")
                 ) # end of mainPanel
               ) # end of Sidebar Layout
           ), # END of "Upload" tabPanel
@@ -260,7 +260,7 @@ shinyUI(
               # hr(),
               # h4("Table of Selected Data"),
               # HTML("<p>Search bar finds specific values within selected data (e.g. '2014-06', '5.'). <br> Arrows (to the right of column names) sort data in ascending or descending order.</p>"),
-              # dataTableOutput("TABLE1")
+              # DT::dataTableOutput("TABLE1")
             ) # closes mainPanel
 
           ) #closes sidebarLayout
@@ -369,7 +369,7 @@ shinyUI(
                   order.</p>"
               ),
               # used when testing data sorting, but requested to keep
-              dataTableOutput("TABLE2")
+              DT::dataTableOutput("TABLE2")
             ) # closes mainPanel
           ) # closes sidebarLayout
         ),# END of Panel 2 tabPanel
@@ -464,7 +464,7 @@ shinyUI(
                    sort data in ascending or descending order.</p>"
                 ),
                 # used when testing data sorting
-                dataTableOutput("TABLE3")
+                DT::dataTableOutput("TABLE3")
                 #textOutput("TEST3.TEXT")
 
             ) # closes mainPanel
@@ -648,7 +648,7 @@ shinyUI(
               #    order.</p>"
               # ),
               # used when testing data sorting
-              # dataTableOutput("TABLE4")
+              # DT::dataTableOutput("TABLE4")
             ) # closes mainPanel
           ) # closes sidebarLayout
         ), # Closes Panel 4 tabPanel
