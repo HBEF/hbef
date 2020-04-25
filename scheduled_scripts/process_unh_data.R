@@ -59,7 +59,7 @@ if(! 'sensor4' %in% tables){
     wqual9 = select(wqual9, -id)
 }
 
-dbWriteTable(con, 'sensor4', wqual9, append=FALSE)
+dbWriteTable(con, 'sensor4', wqual9, append=FALSE, overwrite=TRUE)
 
 rm(wqual9)
 gc()
@@ -103,7 +103,7 @@ if(! 'sensor4' %in% tables){
     wqual6 = select(wqual6, -id)
 }
 
-dbWriteTable(con, 'sensor4', wqual6, append=FALSE)
+dbWriteTable(con, 'sensor4', wqual6, append=TRUE)
 
 rm(wqual6)
 gc()
@@ -126,7 +126,7 @@ wqual3 = wqual3 %>%
 colnames(wqual3) = paste('S4', colnames(wqual3), sep='__')
 wqual3 = rename(wqual3, datetime='S4__datetime', watershedID='S4__watershedID')
 
-dbWriteTable(con, 'sensor4', wqual3, append=FALSE)
+dbWriteTable(con, 'sensor4', wqual3, append=TRUE)
 
 rm(wqual3)
 gc()
