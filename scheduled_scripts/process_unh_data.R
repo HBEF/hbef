@@ -83,8 +83,7 @@ wqual6 = wqual6 %>%
 
 #make config vector for new db table
 colnames(wqual6) = paste('S4', colnames(wqual6), sep='__')
-wqual6 = rename(wqual6, datetime='S4__datetime',
-    id='S4__id', watershedID='S4__watershedID')
+wqual6 = rename(wqual6, datetime='S4__datetime', watershedID='S4__watershedID')
 
 dbWriteTable(con, 'sensor4', wqual6, append=TRUE)
 
