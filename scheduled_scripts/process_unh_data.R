@@ -59,7 +59,7 @@ names(fieldtypes) = fieldnames
 dbCreateTable(con, 'sensor4', fieldtypes)
 # }
 
-dbWriteTable(con, 'sensor4', wqual9, append=FALSE, overwrite=TRUE)
+dbWriteTable(con, 'sensor4', wqual9, append=TRUE)
 
 rm(wqual9)
 gc()
