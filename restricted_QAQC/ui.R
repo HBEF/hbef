@@ -342,12 +342,13 @@ shinyUI(
                   selectInput("SENSORVAR2", label="Select variable",
                      choices=c('None', sensorvars)),
                   p(HTML('<strong>Adjust y-axis limits</strong>')),
-                  column(width=6,
-                      numericInput('YLIMlo2', label='', value=NULL)
-                  ),
-                  column(width=6,
-                      numericInput('YLIMhi2', label='', value=NULL)
-                  )
+                  # column(width=6,
+                  #     numericInput('YLIMlo2', label='', value=NULL)
+                  # ),
+                  # column(width=6,
+                  #     numericInput('YLIMhi2', label='', value=NULL)
+                  # )
+                  sliderInput('YLIMhi2', label='', value=NULL)
                ),
 
               checkboxGroupInput("SOLUTES2",
