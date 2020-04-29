@@ -342,6 +342,7 @@ shinyUI(
                   selectInput("SENSORVAR2", label="Select variable",
                      choices=c('None', sensorvars)),
                   p(HTML('<strong>Adjust y-axis limits</strong>')),
+                  p('(Accepts typed input)'),
                   column(width=6,
                       numericInput('YLIMlo2', label='', value=NULL)
                   ),
