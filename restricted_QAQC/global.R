@@ -191,6 +191,7 @@ dataCurrent <- dbReadTable(con, "current") %>%
         NH4_N=NH4_to_NH4N(NH4)) %>%
     select(-NO3, -NH4)
 dataHistorical <- dbReadTable(con, "historical") %>%
+    filter(! (site == 'W6' & date == as.Date('2007-08-06'))) %>%
     mutate(
         NO3_N=NO3_to_NO3N(NO3),
         NH4_N=NH4_to_NH4N(NH4)) %>%
