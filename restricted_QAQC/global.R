@@ -14,7 +14,7 @@
 
 library(dplyr)
 library(RMariaDB)
-# library(reactlog)
+#library(reactlog)
 library(stringr)
 library(DT) #shiny's DataTable functions broke. loading them from here fixed it.
 
