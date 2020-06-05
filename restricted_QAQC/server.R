@@ -190,7 +190,10 @@ shinyServer(function(input, output, session) {
       wy1_current <- c(wy1_current, wy_current[i])
     }
     #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
-    wateryears_current <<- as.list(wy1_current) #assign it globally
+    #don't let this include years before 2013. those are "historical"
+    wy1_current = as.list(wy1_current)
+    wy1_current = wy1_current[sapply(wy1_current, function(x) as.numeric(x) > 2012)]
+    wateryears_current <<- wy1_current
 
     # Update Panel 5 user interface
     updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears_current)
