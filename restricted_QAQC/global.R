@@ -11,6 +11,8 @@
 #sensor4 contains raw water qual and chemistry data
 #sensorQraw constains raw discharge data
 #sensor could contain qa/qc'd water qual and chem data
+#NH4 gets converted to NH4-N ON READ, so it's still just NH4 in the database.
+#same with NO3
 
 library(dplyr)
 library(RMariaDB)
@@ -123,6 +125,9 @@ standardizeClasses <- function(d) {
    message(paste("In standardizeClasses for", deparse(substitute(d))))
    r <- nrow(d)
    c <- ncol(d)
+
+   # d = rename_all(d, recode, NH4='NH4_N', NO3='NO3_N')
+
    for (i in 1:c) {
       # 1. Insert an additional row with a sample value for each column
          ## Find index in defClassesSample that corresponds to column in d, save that index

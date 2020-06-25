@@ -273,8 +273,14 @@ shinyServer(function(input, output, session) {
 
     # make needed data type changes to data before uploading
     dataNew <- standardizeClasses(dataNew())
+    dataNew = dataNew %>%
+        group_by(uniqueID) %>%
+        summarize_each(list(~if(is.numeric(.)) mean(., na.rm=TRUE) else first(.))) %>%
+        ungroup()
 
     # upload data
+    # uid = unname(unlist(dbGetQuery(con, 'select uniqueID from current;')))
+    # dataNew = dataNew[! dataNew$uniqueID %in% uid, ]
     dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
 
     # close connection to database
