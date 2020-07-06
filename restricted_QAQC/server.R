@@ -279,8 +279,10 @@ shinyServer(function(input, output, session) {
         ungroup()
 
     # upload data
-    # uid = unname(unlist(dbGetQuery(con, 'select uniqueID from current;')))
-    # dataNew = dataNew[! dataNew$uniqueID %in% uid, ]
+    uid = unname(unlist(dbGetQuery(con, 'select uniqueID from current;')))
+    nrecords_submit = nrow(dataNew)
+    dataNew = dataNew[! dataNew$uniqueID %in% uid, ]
+    nomits = nrecords_submit - nrow(dataNew)
     dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
 
     # close connection to database
@@ -290,7 +292,12 @@ shinyServer(function(input, output, session) {
     # so that dataCurrent & dataAll are recalculated
     changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
 
-    showNotification("Submit Complete.", type='message')
+    if(nomits > 0){
+        msg = paste("Submit Complete. Omitted", nomits, "already held uniqueIDs.")
+    } else {
+        msg = paste("Submit Complete.")
+    }
+    showNotification(msg, type='message')
 
   })
 
@@ -653,8 +660,8 @@ shinyServer(function(input, output, session) {
             user = 'root',
             password = pass,
             host = 'localhost',
-            dbname = 'hbef')
-            # dbname = 'hbef20200415')
+            # dbname = 'hbef')
+            dbname = 'hbef20200415')
 
         wsID = substr(input$SITES2, 2, 3)
         dataSensRaw = dbGetQuery(con,
