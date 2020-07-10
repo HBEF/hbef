@@ -97,7 +97,8 @@ sites_streams <- list("Watershed 1" = "W1",
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
-sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP")
+sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP", "RG19",
+                     "W7-Precip")
 
 # wateryears ----> see list after data import
 
