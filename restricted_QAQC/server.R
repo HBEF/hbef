@@ -67,9 +67,12 @@ removeCodes <- function(dataSet) {
     current_col_ofData <- codes123[i]
     if (current_col_ofData %in% names(dataSet)) {
       ind_col <- which(current_col_ofData == colnames(dataSet), arr.ind = TRUE)
-      dataSet[ind_col][dataSet[ind_col] == -1] <- NA
-      dataSet[ind_col][dataSet[ind_col] == -2] <- NA
-      dataSet[ind_col][dataSet[ind_col] == -3] <- NA
+      tryCatch({dataSet[ind_col][dataSet[ind_col] == -1] <- NA},
+               error = function(e) return())
+      tryCatch({dataSet[ind_col][dataSet[ind_col] == -2] <- NA},
+               error = function(e) return())
+      tryCatch({dataSet[ind_col][dataSet[ind_col] == -3] <- NA},
+               error = function(e) return())
     }
   }
 
@@ -660,8 +663,8 @@ shinyServer(function(input, output, session) {
             user = 'root',
             password = pass,
             host = 'localhost',
-            # dbname = 'hbef')
-            dbname = 'hbef20200415')
+            dbname = 'hbef')
+            # dbname = 'hbef20200415')
 
         wsID = substr(input$SITES2, 2, 3)
         dataSensRaw = dbGetQuery(con,
