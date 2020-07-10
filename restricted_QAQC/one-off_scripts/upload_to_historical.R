@@ -1,4 +1,14 @@
+library(RMariaDB)
+library(DBI)
+library(tidyverse)
+
 setwd('~/shiny/restricted_QAQC/data/manual_upload')
+pass=readLines('/home/mike/RMySQL.config')
+
+defClasses <- read.csv("../Rclasses.csv", header = TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+defClassesSample <- read.csv("../RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
+defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
+
 fs = list.files('.')
 
 con = dbConnect(MariaDB(),
