@@ -317,7 +317,7 @@ shinyServer(function(input, output, session) {
           return()
       }
 
-      file.copy(ff$datapath, file.path("field_notes", fn) )
+      file.copy(ff$datapath, file.path("field_notes", fn), overwrite=TRUE)
       showNotification(paste(length(fn), "file(s) submitted."),
           type='message')
   })
