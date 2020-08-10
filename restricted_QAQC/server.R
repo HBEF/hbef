@@ -256,7 +256,11 @@ shinyServer(function(input, output, session) {
                     na.strings=c(""," ","NA"))
       dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
       if ("date" %in% names(dataNew)) {
-        dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
+          if(grepl('[0-9]+/[0-9]+/[0-9]{4}', dataNew$date)){
+            dataNew$date <- as.Date(dataNew$date, "%m/%d/%Y")
+          } else if(grepl('[0-9]+/[0-9]+/[0-9]{2}', dataNew$date)){
+            dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
+          }
       }
       # message(paste("Head of dataNew:",print(head(dataNew))))
       return(dataNew)
