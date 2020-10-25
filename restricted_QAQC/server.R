@@ -164,8 +164,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef')
-               # dbname = 'hbef20200415')
+               dbname = dbname)
 
     # Read current data and disconnect from table
     dataCurrentR <- dbReadTable(con, "current") %>%
@@ -275,8 +274,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef')
-               # dbname = 'hbef20200415')
+               dbname = dbname)
 
     # make needed data type changes to data before uploading
     dataNew <- standardizeClasses(dataNew())
@@ -667,8 +665,7 @@ shinyServer(function(input, output, session) {
             user = 'root',
             password = pass,
             host = 'localhost',
-            dbname = 'hbef')
-            # dbname = 'hbef20200415')
+            dbname = dbname)
 
         wsID = substr(input$SITES2, 2, 3)
         dataSensRaw = dbGetQuery(con,
@@ -1685,8 +1682,7 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                dbname = 'hbef')
-                # dbname = 'hbef20200415')
+                dbname = dbname)
 
       # make handsontable data object into R data frame
       dataChanged <- hot_to_r(input$HOT)
@@ -1730,8 +1726,7 @@ shinyServer(function(input, output, session) {
                user = 'root',
                password = pass,
                host = 'localhost',
-               dbname = 'hbef')
-               # dbname = 'hbef20200415')
+               dbname = dbname)
     # check that rows exist; if so, delete, if not, send notification
     # !!! could make cleaner with validate()
 
@@ -1767,8 +1762,7 @@ shinyServer(function(input, output, session) {
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                dbname = 'hbef')
-                # dbname = 'hbef20200415')
+                dbname = dbname)
       # check that row exists; if so, delete, if not, send notification
       # !!! could make cleaner with validate()
       if (input$DELETE_UNIQUEID5 %in% dataCurrent$uniqueID) {

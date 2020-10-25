@@ -8,8 +8,7 @@ merge_sensor_data = function(d, svar, ssite, sdate){
 
    y = RMariaDB::MariaDB()
    con = dbConnect(y, user='root', password=pass, host='localhost',
-      dbname='hbef')
-      # dbname='hbef20200415')
+      dbname=dbname)
 
    res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR4_S4,
       " from sensor4 WHERE watershedID = '",
@@ -47,8 +46,7 @@ get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
 
    y = RMariaDB::MariaDB()
    con = dbConnect(y, user='root', password=pass, host='localhost',
-      dbname='hbef')
-      # dbname='hbef20200415')
+      dbname=dbname)
 
    res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR_S4,
       " from sensor4 WHERE watershedID = '",

@@ -11,8 +11,12 @@
 #sensor4 contains raw water qual and chemistry data
 #sensorQraw constains raw discharge data
 #sensor could contain qa/qc'd water qual and chem data
-#NH4 gets converted to NH4-N ON READ, so it's still just NH4 in the database.
-#same with NO3
+#grab NH4 gets converted to NH4-N ON READ, so it's still just NH4 in the database.
+#   same with NO3
+#sensor NH4 and NO3 are already in N equivalents
+
+dbname = 'hbef' #for reals
+# dbname = 'hbef20200415' #for local testing
 
 library(dplyr)
 library(RMariaDB)
@@ -175,8 +179,7 @@ con = dbConnect(y,
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                dbname = 'hbef')
-                # dbname = 'hbef20200415')
+                dbname = dbname)
 tables = dbListTables(con)
 
 # # Code for one-time use: to load data into mysql
