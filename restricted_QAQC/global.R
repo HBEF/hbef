@@ -15,8 +15,8 @@
 #   same with NO3
 #sensor NH4 and NO3 are already in N equivalents
 
-dbname = 'hbef' #for reals
 # dbname = 'hbef20200415' #for local testing
+dbname = 'hbef' #for reals
 
 library(dplyr)
 library(RMariaDB)
@@ -254,10 +254,10 @@ wateryears_current <- as.list(wy1_current)
 maxDate_current <- max(dataCurrent$date, na.rm=TRUE)
 maxDate_historical <- max(dataHistorical$date, na.rm=TRUE)
 maxDate_sensor <- max(as.Date(dataSensor$date), na.rm=TRUE)
-
-maxDate <- maxDate_historical # default value if dataCurrent or dataSensor are empty
-if (maxDate_sensor > maxDate_current) maxDate <- maxDate_sensor
-if (maxDate_sensor < maxDate_current) maxDate <- maxDate_current
+# maxDate <- maxDate_historical # default value if dataCurrent or dataSensor are empty
+# if (maxDate_sensor > maxDate_current) maxDate <- maxDate_sensor
+# if (maxDate_sensor < maxDate_current) maxDate <- maxDate_current
+maxDate = Sys.Date()
 
 fnfiles = list.files('field_notes')
 field_note_dates = unique(na.omit(as.Date(substr(fnfiles, 1, 8),
