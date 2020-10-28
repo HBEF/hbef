@@ -55,7 +55,9 @@ wqual9[is.na(wqual9)] = NA
 #make config vector for new db table
 colnames(wqual9) = paste('S4', colnames(wqual9), sep='__')
 wqual9 = rename(wqual9, datetime='S4__datetime',
-    id='S4__id', watershedID='S4__watershedID')
+    id='S4__id', watershedID='S4__watershedID') %>%
+    select(datetime, everything()) %>%
+    relocate(watershedID, id, .after = last_col())
 
 # tables = RMariaDB::dbListTables(con)
 # if(! 'sensor4' %in% tables){
@@ -65,9 +67,9 @@ RMariaDB::dbRemoveTable(con, 'sensor4')
 
 fieldnames = colnames(wqual9)
 fieldtypes = rep('FLOAT', length(fieldnames))
-fieldtypes[1] = 'DATETIME'
-fieldtypes[length(fieldtypes) - 1] = 'INT(3)'
-fieldtypes[length(fieldtypes)] = 'INT(11) primary key auto_increment'
+fieldtypes[fieldnames == 'datetime'] = 'DATETIME'
+fieldtypes[fieldnames == 'watershedID'] = 'INT(3)'
+fieldtypes[fieldnames == 'id'] = 'INT(11) primary key auto_increment'
 names(fieldtypes) = fieldnames
 
 dbCreateTable(con, 'sensor4', fieldtypes)
@@ -89,7 +91,7 @@ w6_colnames = c('TempC', 'Conductivity', 'SpConductivity', 'pH', 'DepthMeter',
                 'ODOPerCent', 'ODOMGL', 'TurbidityFNU', 'FDOMRFU', 'FDOMQSU',
                 'Nitrate_mg', 'Chl_RFU', 'BGA_PC_RFU', 'BGA_PE_RFU',
                 'AqCO2_ppm_avg', 'AtmCO2_ppm_avg', 'TurbidityRaw',
-                'LowEOSCO2_ppm_avg', 'HighEOSCO2_ppm_avg', 'EOSTempC') %>%
+                'LowEOSCO2_ppm_avg', 'HighEOSCO2_ppm_avg', 'EOSTempC')
 
 wqual6 = wqual6 %>%
     select(datetime=TIMESTAMP, one_of(w6_colnames)) %>%
