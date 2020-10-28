@@ -30,13 +30,22 @@ header = readr::read_csv('CR1000_HBF_W9_WQual.dat',
     skip=1, col_names=FALSE, n_max=1)
 wqual9 = readr::read_csv('CR1000_HBF_W9_WQual.dat', skip=4, col_names=FALSE)
 colnames(wqual9) = header
+w9_colnames = c('Nitrate_mg', 'TempC', 'Conductivity',
+                'SpConductivity', 'pH', 'DepthMeter', 'ODOPerCent', 'ODOMGL',
+                'TurbidityFNU', 'TurbidityRaw', 'FDOMRFU', 'FDOMQSU',
+                'LowEOSCO2_ppm_avg', 'HighEOSCO2_ppm_avg', 'EOSTempC',
+                'Chl_RFU', 'BGA_PC_RFU', 'BGA_PE_RFU', 'AqCO2_ppm_avg',
+                'AtmCO2_ppm_avg')
 
 wqual9 = wqual9 %>%
-    select(datetime=TIMESTAMP, Nitrate_mg, TempC, Conductivity, SpConductivity,
-        pH, DepthMeter, ODOPerCent, ODOMGL, TurbidityFNU, TurbidityRaw,
-        FDOMRFU, FDOMQSU, LowEOSCO2_ppm_avg, HighEOSCO2_ppm_avg, EOSTempC) %>%
-    mutate(Chl_RFU=NA, BGA_PC_RFU=NA, BGA_PE_RFU=NA,
-        AqCO2_ppm_avg=NA, AtmCO2_ppm_avg=NA, watershedID=9, id=1:nrow(wqual9))
+    select(datetime=TIMESTAMP, one_of(w9_colnames)) %>%
+    mutate(watershedID=9, id=1:nrow(wqual9))
+
+for(cn in w9_colnames){
+    if(! cn %in% colnames(wqual9)){
+        wqual9[[cn]] = NA
+    }
+}
 
 #make config vector for new db table
 colnames(wqual9) = paste('S4', colnames(wqual9), sep='__')
@@ -71,15 +80,22 @@ header = readr::read_csv('CR1000_HBF_W6_WQual.dat',
 wqual6 = readr::read_csv('CR1000_HBF_W6_WQual.dat', skip=4, col_names=FALSE)
 colnames(wqual6) = header
 
+w6_colnames = c('TempC', 'Conductivity', 'SpConductivity', 'pH', 'DepthMeter',
+                'ODOPerCent', 'ODOMGL', 'TurbidityFNU', 'FDOMRFU', 'FDOMQSU',
+                'Nitrate_mg', 'Chl_RFU', 'BGA_PC_RFU', 'BGA_PE_RFU',
+                'AqCO2_ppm_avg', 'AtmCO2_ppm_avg', 'TurbidityRaw',
+                'LowEOSCO2_ppm_avg', 'HighEOSCO2_ppm_avg', 'EOSTempC') %>%
+
 wqual6 = wqual6 %>%
-    select(datetime=TIMESTAMP, TempC, Conductivity, SpConductivity,
-        pH, DepthMeter, ODOPerCent, ODOMGL, TurbidityFNU,
-        FDOMRFU, FDOMQSU) %>%
-    mutate(Nitrate_mg=NA, Chl_RFU=NA, BGA_PC_RFU=NA, BGA_PE_RFU=NA,
-        AqCO2_ppm_avg=NA, AtmCO2_ppm_avg=NA, TurbidityRaw=NA,
-        LowEOSCO2_ppm_avg=NA, HighEOSCO2_ppm_avg=NA, EOSTempC=NA,
-        watershedID=6, datetime=with_tz(datetime, 'EST')) %>%
+    select(datetime=TIMESTAMP, one_of(w6_colnames)) %>%
+    mutate(watershedID=6, datetime=with_tz(datetime, 'EST')) %>%
     filter(datetime > as.POSIXct('2020-04-23 14:00:00')) #some test records
+
+for(cn in w6_colnames){
+    if(! cn %in% colnames(wqual6)){
+        wqual6[[cn]] = NA
+    }
+}
 
 #make config vector for new db table
 colnames(wqual6) = paste('S4', colnames(wqual6), sep='__')
@@ -97,12 +113,20 @@ header = readr::read_csv('CR1000_HBF_WQual.dat',
 wqual3 = readr::read_csv('CR1000_HBF_WQual.dat', skip=4, col_names=FALSE)
 colnames(wqual3) = header
 
+w3_colnames = c('Nitrate_mg', 'TempC', 'Conductivity', 'SpConductivity',
+                'pH', 'DepthMeter', 'ODOPerCent', 'ODOMGL', 'TurbidityFNU',
+                'TurbidityRaw', 'FDOMRFU', 'FDOMQSU', 'Chl_RFU', 'BGA_PC_RFU',
+                'BGA_PE_RFU', 'AqCO2_ppm_avg', 'AtmCO2_ppm_avg')
+
 wqual3 = wqual3 %>%
-    select(datetime=TIMESTAMP, Nitrate_mg, TempC, Conductivity, SpConductivity,
-        pH, DepthMeter, ODOPerCent, ODOMGL, TurbidityFNU, TurbidityRaw,
-        FDOMRFU, FDOMQSU, Chl_RFU, BGA_PC_RFU, BGA_PE_RFU, AqCO2_ppm_avg,
-        AtmCO2_ppm_avg) %>%
+    select(datetime=TIMESTAMP, one_of(w3_colnames)) %>%
     mutate(watershedID=3)
+
+for(cn in w3_colnames){
+    if(! cn %in% colnames(wqual3)){
+        wqual3[[cn]] = NA
+    }
+}
 
 #make config vector for new db table
 colnames(wqual3) = paste('S4', colnames(wqual3), sep='__')
