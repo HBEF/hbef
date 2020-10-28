@@ -10,7 +10,7 @@ import_static_q_data = FALSE #also commented this section to be safe
 #setup ####
 
 #NOTE: this script sources another (process_S.CAN_data.R) at bottom, using
-#an absolute path. 
+#an absolute path.
 
 # setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
 setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
@@ -49,6 +49,8 @@ for(cn in w9_colnames){
         wqual9[[cn]] = NA
     }
 }
+
+wqual9[is.na(wqual9)] = NA
 
 #make config vector for new db table
 colnames(wqual9) = paste('S4', colnames(wqual9), sep='__')
@@ -100,6 +102,8 @@ for(cn in w6_colnames){
     }
 }
 
+wqual6[is.na(wqual6)] = NA
+
 #make config vector for new db table
 colnames(wqual6) = paste('S4', colnames(wqual6), sep='__')
 wqual6 = rename(wqual6, datetime='S4__datetime', watershedID='S4__watershedID')
@@ -130,6 +134,8 @@ for(cn in w3_colnames){
         wqual3[[cn]] = NA
     }
 }
+
+wqual3[is.na(wqual3)] = NA
 
 #make config vector for new db table
 colnames(wqual3) = paste('S4', colnames(wqual3), sep='__')
