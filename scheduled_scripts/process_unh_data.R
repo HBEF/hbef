@@ -9,6 +9,9 @@ import_static_q_data = FALSE #also commented this section to be safe
 
 #setup ####
 
+#NOTE: this script sources another (process_S.CAN_data.R) at bottom, using
+#an absolute path. 
+
 # setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
 setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
 
@@ -188,3 +191,5 @@ for(w in weirfiles){
 }
 
 dbDisconnect(con)
+
+#source('/home/mike/shiny/scheduled_scripts/process_S.CAN_data.R')
