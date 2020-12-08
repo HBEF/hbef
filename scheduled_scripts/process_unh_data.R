@@ -224,4 +224,4 @@ for(w in weirfiles){
 
 dbDisconnect(con)
 
-#source('/home/mike/shiny/scheduled_scripts/process_S.CAN_data.R')
+source('/home/mike/shiny/scheduled_scripts/process_S.CAN_data.R')
