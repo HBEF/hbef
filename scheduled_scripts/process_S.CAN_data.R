@@ -11,7 +11,7 @@ library(lubridate)
 # runmode = 'test'
 runmode = 'live'
 
-#setup ####
+# 0. setup ####
 
 if(runmode == 'test'){
 
@@ -30,11 +30,11 @@ driver = MariaDB()
 con = dbConnect(driver, user='root', password=pass, host='localhost',
                 dbname=dbname)
 
-#read raw sensor data table ####
+# 1. read raw sensor data table ####
 s4 = dbReadTable(con, 'sensor4') %>%
     as_tibble()
 
-#read "loaner" S:CAN dataset from Lisle ####
+# 2. read "loaner" S:CAN dataset from Lisle ####
 dloan = read.csv('Reprocessed_SCAN_Data.csv',
               stringsAsFactors = FALSE,
               skip = 1) %>%
@@ -69,36 +69,76 @@ dloan = select(dloan,
 
 dloan[is.na(dloan)] = NA
 
-#read the first "for reals" S:CAN dataset from Tammy ####
-d1 = read.csv('spec 20150210 192.168.42.10_par.csv',
+# OBSOLETE. read the first "for reals" S:CAN dataset from Tammy ####
+
+#this one is supplanted by the one Tammy sent on 2020-12-04
+
+# d1 = read.csv('spec 20150210 192.168.42.10_par.csv',
+#               stringsAsFactors = FALSE,
+#               skip = 4) %>%
+#     as_tibble() %>%
+#     rename(datetime = 1, Nitrate_mg = 2, Nitrate_mg_status = 3, TurbidityRaw = 4,
+#            TurbidityRaw_status = 5) %>%
+#     mutate(datetime = as.POSIXct(datetime,
+#                                  tz = 'EST')) %>%
+#     arrange(datetime)
+#
+# #turbidity flags are wonky (and so is an unflagged point. ditch em)
+# ggplot(d1, aes(x = datetime,
+#                y = TurbidityRaw)) +
+#     geom_point() +
+#     geom_point(color = factor(d1$TurbidityRaw_status,
+#                               labels = c('transparent', 'green')))
+#
+# #NO3-N flags are chill. leave em? naw. ditch em.
+# ggplot(d1, aes(x = datetime,
+#                y = Nitrate_mg)) +
+#     geom_line() +
+#     geom_point(color = factor(d1$Nitrate_mg_status,
+#                               labels = c('transparent', 'green')))
+#
+# #filter bollockery from dataset
+# d1 = d1 %>%
+#     filter(TurbidityRaw_status == '',
+#            Nitrate_mg_status == '',
+#            TurbidityRaw < 100) %>%
+#     select(datetime, Nitrate_mg, TurbidityRaw) %>%
+#     arrange(datetime)
+
+# 3. read the first and second "for reals" S:CAN datasets from Tammy ####
+
+d1 = read.csv('batches_1_and_2.csv',
               stringsAsFactors = FALSE,
               skip = 4) %>%
     as_tibble() %>%
+    select(-(4:5)) %>% #ignore temperature data
     rename(datetime = 1, Nitrate_mg = 2, Nitrate_mg_status = 3, TurbidityRaw = 4,
            TurbidityRaw_status = 5) %>%
     mutate(datetime = as.POSIXct(datetime,
                                  tz = 'EST')) %>%
-    arrange(datetime)
+    arrange(datetime) %>%
+    filter(datetime > as.POSIXct('2020-08-06 09:45:07', #last record in dloan
+                                 tz = 'EST'))
 
-#turbidity flags are wonky (and so is an unflagged point. ditch em)
+#visualize flagged turbitidy points
 ggplot(d1, aes(x = datetime,
                y = TurbidityRaw)) +
     geom_point() +
     geom_point(color = factor(d1$TurbidityRaw_status,
-                              labels = c('transparent', 'green')))
+                              labels = c('transparent', 'green', 'red')))
 
-#NO3-N flags are chill. leave em? naw. ditch em.
+#same for nitrate
 ggplot(d1, aes(x = datetime,
                y = Nitrate_mg)) +
     geom_line() +
     geom_point(color = factor(d1$Nitrate_mg_status,
-                              labels = c('transparent', 'green')))
+                              labels = c('transparent', 'green', 'orange')))
 
 #filter bollockery from dataset
 d1 = d1 %>%
     filter(TurbidityRaw_status == '',
            Nitrate_mg_status == '',
-           TurbidityRaw < 100) %>%
+           TurbidityRaw < 100) %>% #notfy someone?
     select(datetime, Nitrate_mg, TurbidityRaw) %>%
     arrange(datetime)
 
