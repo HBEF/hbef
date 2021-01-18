@@ -3,3 +3,10 @@ parse_sensor_data.R is sorta derelict. at some point in prehistory, we received 
 get_usfs_weirfiles.sh runs periodically as a cron job. the rest of the updating weir files arrive as part of an rsync (also a cron job on this machine)
 
 process_unh_data.R and process_S.CAN_data.R must run as cron tasks. process_unh_data.R must run first, because it begins by dropping the sensor4 table that they both use. the easiest way to ensure this is to source the latter from the former. so, that's what you'll find is happening. if you are rebuilding this server, you may have to update the path being sourced
+
+to incorporate a new S.CAN file from Tammy:
+    update process_S.CAN_data.R
+    push changes; pull them to the server
+    sftp the new file to the server
+    execute Rscript process_unh_data.R on the server (or wait for it to run as a cron job)
+    probably safest to: sudo systemctl restart shiny-server
