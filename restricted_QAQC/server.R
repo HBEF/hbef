@@ -1307,6 +1307,7 @@ shinyServer(function(input, output, session) {
       xlabel = paste("Dates ", input$DATE2[1], " to ", input$DATE2[2])
     }
 
+    if (input$SITES2 == 'W0') return(stop('Only continuous temperature available for Mainstem'))
     if (input$HYDROLOGY2 == TRUE)  {
 
       #determine y2-axis labels

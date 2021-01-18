@@ -1,6 +1,7 @@
 merge_sensor_data = function(d, svar, ssite, sdate){
    # input = list(SENSORVAR1='Nitrate_mg', SITES1='W3', WATERYEAR1='2016', SOLUTES1='Ca')
    # print(input$SENSORVAR4)
+
    SENSORVAR4_S4 = paste('S4', svar, sep='__')
    # print(SENSORVAR4_S4)
    # yrstart = as.POSIXct(paste0(input$WATERYEAR, '-06-01'))

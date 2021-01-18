@@ -86,7 +86,8 @@ codes123 <- c("pH", "pHmetrohm", "spCond", "au254", "au275",
 
 # Lists of Sites
 #***************
-sites_streams <- list("Watershed 1" = "W1",
+sites_streams <- list("Mainstem" = "W0",
+                      "Watershed 1" = "W1",
                       "Watershed 2" = "W2",
                       "Watershed 3" = "W3",
                       "Watershed 4" = "W4",

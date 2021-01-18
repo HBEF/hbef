@@ -4,10 +4,10 @@ library(RMariaDB)
 library(logging)
 library(glue)
 
-#config ####
+# config ####
 import_static_q_data = FALSE #also commented this section to be safe
 
-#setup ####
+# setup ####
 
 #NOTE: this script sources another (process_S.CAN_data.R) at bottom, using
 #an absolute path.
@@ -27,7 +27,7 @@ con = dbConnect(driver, user='root', password=pass, host='localhost',
     dbname='hbef')
     # dbname='hbef20200415')
 
-#read and process w9 wqual data ####
+# read and process w9 wqual data ####
 
 header = readr::read_csv('CR1000_HBF_W9_WQual.dat',
     skip=1, col_names=FALSE, n_max=1)
@@ -80,7 +80,7 @@ dbWriteTable(con, 'sensor4', wqual9, append=TRUE)
 rm(wqual9)
 gc()
 
-#read and process w6 wqual data ####
+# read and process w6 wqual data ####
 
 header = readr::read_csv('CR1000_HBF_W6_WQual.dat',
     skip=1, col_names=FALSE, n_max=1)
@@ -115,7 +115,7 @@ dbWriteTable(con, 'sensor4', wqual6, append=TRUE)
 rm(wqual6)
 gc()
 
-#read and process w3 wqual data ####
+# read and process w3 wqual data ####
 
 header = readr::read_csv('CR1000_HBF_WQual.dat',
     skip=1, col_names=FALSE, n_max=1)
@@ -225,3 +225,26 @@ for(w in weirfiles){
 dbDisconnect(con)
 
 source('/home/mike/shiny/scheduled_scripts/process_S.CAN_data.R')
+
+# read and process mainstem temperature data ####
+
+header = readr::read_csv('HB%20Mainstem_HB_mainstem.dat',
+                         skip=1, col_names=FALSE, n_max=1)
+mainstem = readr::read_csv('HB%20Mainstem_HB_mainstem.dat', skip=4,
+                           col_names=FALSE)
+colnames(mainstem) = header
+
+mainstem = mainstem %>%
+    select(datetime=TIMESTAMP, TempC=sensor2tempC) %>%
+    mutate(watershedID=0, datetime=with_tz(datetime, 'EST'))
+
+mainstem[is.na(mainstem)] = NA
+
+#make config vector for new db table
+colnames(mainstem) = paste('S4', colnames(mainstem), sep='__')
+mainstem = rename(mainstem, datetime='S4__datetime', watershedID='S4__watershedID')
+
+dbWriteTable(con, 'sensor4', mainstem, append=TRUE)
+
+rm(mainstem)
+gc()
