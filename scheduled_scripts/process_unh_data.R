@@ -157,7 +157,7 @@ mainstem = readr::read_csv('HB%20Mainstem_HB_mainstem.dat', skip=4,
 colnames(mainstem) = header
 
 mainstem = mainstem %>%
-    select(datetime=TIMESTAMP, TempC=sensor1tempC) %>%
+    select(datetime=TIMESTAMP, TempC=Sensor1tempC) %>%
     mutate(watershedID=0, datetime=with_tz(datetime, 'EST'))
 
 mainstem[is.na(mainstem)] = NA
