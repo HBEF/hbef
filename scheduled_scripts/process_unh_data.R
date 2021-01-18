@@ -148,6 +148,29 @@ dbWriteTable(con, 'sensor4', wqual3, append=TRUE)
 rm(wqual3)
 gc()
 
+# read and process mainstem temperature data ####
+
+header = readr::read_csv('HB%20Mainstem_HB_mainstem.dat',
+                         skip=1, col_names=FALSE, n_max=1)
+mainstem = readr::read_csv('HB%20Mainstem_HB_mainstem.dat', skip=4,
+                           col_names=FALSE)
+colnames(mainstem) = header
+
+mainstem = mainstem %>%
+    select(datetime=TIMESTAMP, TempC=sensor2tempC) %>%
+    mutate(watershedID=0, datetime=with_tz(datetime, 'EST'))
+
+mainstem[is.na(mainstem)] = NA
+
+#make config vector for new db table
+colnames(mainstem) = paste('S4', colnames(mainstem), sep='__')
+mainstem = rename(mainstem, datetime='S4__datetime', watershedID='S4__watershedID')
+
+dbWriteTable(con, 'sensor4', mainstem, append=TRUE)
+
+rm(mainstem)
+gc()
+
 # read and process static raw files of flow data for w1-9 (from Nina) ####
 
 
@@ -225,26 +248,3 @@ for(w in weirfiles){
 dbDisconnect(con)
 
 source('/home/mike/shiny/scheduled_scripts/process_S.CAN_data.R')
-
-# read and process mainstem temperature data ####
-
-header = readr::read_csv('HB%20Mainstem_HB_mainstem.dat',
-                         skip=1, col_names=FALSE, n_max=1)
-mainstem = readr::read_csv('HB%20Mainstem_HB_mainstem.dat', skip=4,
-                           col_names=FALSE)
-colnames(mainstem) = header
-
-mainstem = mainstem %>%
-    select(datetime=TIMESTAMP, TempC=sensor2tempC) %>%
-    mutate(watershedID=0, datetime=with_tz(datetime, 'EST'))
-
-mainstem[is.na(mainstem)] = NA
-
-#make config vector for new db table
-colnames(mainstem) = paste('S4', colnames(mainstem), sep='__')
-mainstem = rename(mainstem, datetime='S4__datetime', watershedID='S4__watershedID')
-
-dbWriteTable(con, 'sensor4', mainstem, append=TRUE)
-
-rm(mainstem)
-gc()
