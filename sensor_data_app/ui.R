@@ -15,28 +15,16 @@ shinyUI(
         titlePanel("Sensor Data Viewer"),
               tabPanel("Sensor Data",
                        sidebarPanel(
-                           radioButtons("wateryearOrRange2",
-                                        'Choose date selection method',
-                                        choices=c('Water Year'='wateryr', 'Date Range'='daterng')),
-                           conditionalPanel(
-                               condition = "input.wateryearOrRange2 == 'wateryr'",
-                               selectInput(
-                                   "WATERYEAR2",
-                                   label = "Water Year",
-                                   choices = wateryears,
-                                   selected = "2020")),
-                           conditionalPanel(
-                               condition = "input.wateryearOrRange2 == 'daterng'",
-                               sliderInput(
-                                   "DATE2",
-                                   label = "Date Range",
-                                   min =as.Date("2019-01-01"),
-                                   max = maxDate,
-                                   value = c(maxDate-365, maxDate),
-                                   width = "100%",
-                                   timeFormat = "%b %Y",
-                                   step = 30,
-                                   dragRange = TRUE)),
+                           sliderInput(
+                               "DATE2",
+                               label = "Select Date Range",
+                               min =as.Date("2019-01-01"),
+                               max = maxDate,
+                               value = c(maxDate-365, maxDate),
+                               width = "100%",
+                               timeFormat = "%b %Y",
+                               step = 30,
+                               dragRange = TRUE),
                            selectInput("SITES2",
                                        label = "Site",
                                        choices = sites_streams,
@@ -70,7 +58,7 @@ shinyUI(
                            # p(paste('Provisional sensor data. Not available for download.'),
                            #   style='color:red'),
                            selectInput("SENSORVAR2", label="Select sensor variable",
-                                       choices = names(sensor_name_map)),
+                                       choices = sensor_name_map),
                            p(HTML('<strong>Adjust y-axis limits</strong>')),
                            p('(Accepts typed input)'),
                            column(width=6,
@@ -91,7 +79,7 @@ shinyUI(
                            conditionalPanel("input.GRAB_ADD2 == 'Overlay grab samples'",
                                             selectInput("SOLUTES2",
                                        label = "Solute Grab Samples",
-                                       choices = c(solutes_cations, solutes_anions, solutes_other))),
+                                       choices = solutes_other)),
                            # conditionalPanel("input.ADD_GRAB2 == 'Add Hydrology'",
                            #                  radioButtons("HYDROLOGY2",
                            #                               "Hydrology options:",
@@ -104,10 +92,9 @@ shinyUI(
                        # Plot
                        mainPanel(
                            tags$h4(textOutput("TITLE4")),
+                           tags$h6("LIVE STREAMED PROVISIONAL DATA - NOT FOR PUBLICATION"),
                            hr(),
                            dygraphOutput("GRAPGH4"),
-                           conditionalPanel("input.ADD_GRAB2 == 'Add Hydrology'",
-                                            dygraphOutput("GRAPGH4_HYDRO")),
                            hr()
                    )
         ) # END of tabPanel()
