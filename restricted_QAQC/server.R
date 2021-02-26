@@ -1021,6 +1021,8 @@ shinyServer(function(input, output, session) {
                     "Historical" = dataHistorical,
                     "Sensor" = dataSensor,
                     "All" = dataAll)
+
+    datasetInput <- arrange(datasetInput, site, date, timeEST)
   })
 
 
