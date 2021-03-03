@@ -1,4 +1,5 @@
 library(RMariaDB)
+#library(RMySQL)
 library(DBI)
 library(tidyverse)
 
@@ -11,6 +12,7 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 
 fs = list.files('.')
 
+#con = dbConnect(MySQL(),
 con = dbConnect(MariaDB(),
                 user = 'root',
                 password = pass,

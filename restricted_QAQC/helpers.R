@@ -7,6 +7,7 @@ merge_sensor_data = function(d, svar, ssite, sdate){
    # yrstart = as.POSIXct(paste0(input$WATERYEAR, '-06-01'))
    # yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR1) + 1, '-05-31'))
 
+   #y = RMySQL::MySQL()
    y = RMariaDB::MariaDB()
    con = dbConnect(y, user='root', password=pass, host='localhost',
       dbname=dbname)
@@ -45,6 +46,7 @@ get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
 
    SENSORVAR_S4 = paste('S4', svar, sep='__')
 
+   #y = RMySQL::MySQL()
    y = RMariaDB::MariaDB()
    con = dbConnect(y, user='root', password=pass, host='localhost',
       dbname=dbname)

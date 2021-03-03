@@ -20,7 +20,7 @@ library(plotly)
 library(lubridate)      # Does not work with shinyapps.io: https://stackoverflow.com/questions/28656683/r-script-working-locally-not-working-on-shinyapp-io
 library(RColorBrewer)
 library(RMariaDB)
-library(RMySQL)
+#library(RMySQL)
 library(rhandsontable)
 library(reshape2)
 library(shiny)
@@ -160,6 +160,7 @@ shinyServer(function(input, output, session) {
 
     # Open database connection
     y = RMariaDB::MariaDB()
+    #y = RMySQL::MySQL()
     con = dbConnect(y,
                user = 'root',
                password = pass,
@@ -271,6 +272,7 @@ shinyServer(function(input, output, session) {
     message("in submit")
     # opening connection to database
     con = dbConnect(MariaDB(),
+    #con = dbConnect(MySQL(),
                user = 'root',
                password = pass,
                host = 'localhost',
@@ -660,6 +662,7 @@ shinyServer(function(input, output, session) {
         }
 
         # Open database connection
+        #y = RMySQL::MySQL()
         y = RMariaDB::MariaDB()
         con = dbConnect(y,
             user = 'root',
@@ -1682,6 +1685,7 @@ shinyServer(function(input, output, session) {
      message("inside SAVECHANGES5")
      # openning connection to database
      con = dbConnect(MariaDB(),
+     #con = dbConnect(MySQL(),
                 user = 'root',
                 password = pass,
                 host = 'localhost',
@@ -1726,6 +1730,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$BUTTON_DELETE5,{
     message("inside BUTTON_DELETE5")
     con = dbConnect(MariaDB(),
+    #con = dbConnect(MySQL(),
                user = 'root',
                password = pass,
                host = 'localhost',
@@ -1762,6 +1767,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$BUTTON_DELETEROW5,{
      message("inside BUTTON_DELETEROW5")
      con = dbConnect(MariaDB(),
+     #con = dbConnect(MySQL(),
                 user = 'root',
                 password = pass,
                 host = 'localhost',

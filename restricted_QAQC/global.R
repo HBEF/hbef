@@ -20,9 +20,12 @@ dbname = 'hbef' #for reals
 
 library(dplyr)
 library(RMariaDB)
+#library(RMySQL)
 #library(reactlog)
 library(stringr)
 library(DT) #shiny's DataTable functions broke. loading them from here fixed it.
+
+#options(shiny.fullstacktrace=TRUE)
 
 message("hello, I'm in global.R")
 
@@ -174,6 +177,7 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 # Grabbing Data from MySQL database ----
 # USE WHEN LIVE ON REMOTE SITE
 #**********************************************
+#y = RMySQL::MySQL()
 y = RMariaDB::MariaDB()
 
 con = dbConnect(y,

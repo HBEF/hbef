@@ -19,7 +19,7 @@ suppressPackageStartupMessages({
     library(tidyverse)
     library(glue)
     library(shinyjs)
-    library(googlesheets4)
+    # library(googlesheets4)
     library(DT)
     # library(rhandsontable)
     # library(shiny.router)
