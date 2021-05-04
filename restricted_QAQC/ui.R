@@ -820,12 +820,32 @@ shinyUI(
         )
       )
       #*********************************************************
-      # ***DATA ARCHIVE? tab*** ----
+      # ***DATA ARCHIVE tab*** ----
       #*********************************************************
       # tabPanel("Approve & Archive Data")
 
       # *REMEMBER* that when data is archived, the data in 'initial' and
       # 'current' tables should be cleared in MySQL hbef database
+      #MJV addendum: not sure if this still applies? as of 2021-05-04 we just
+      # want to be able to filter samples by arbitrary criteria and find their
+      # barcodes
+      #addentum 2: ended up doing this in javascript because DT is too slow
+      #and rhandsontable doesn't allow filtering
+
+      # tabPanel('Explore archive',
+      #    fluidPage(
+      #        p(paste('Use this tool to look up barcode and bin numbers in the',
+      #                'HBEF archives. You can filter rows using the boxes below',
+      #                'each column name. For date and numeric data, a range slider',
+      #                'will appear. For string data (including time and "bin"), typing into the box will',
+      #                'match text. You',
+      #                'can also sort columns by clicking the arrows beside their names.')),
+      #        p(paste('NOTE: the first few filter operations will be very slow,',
+      #                'but subsequent operations will be faster.')),
+      #        DT::dataTableOutput('ARCHIVE_TABLE')
+      #        # rHandsontableOutput('ARCHIVE_TABLE')
+      #    )
+      # )
 
     ) # END of navbarPage()
   ) # closes fluidPage()

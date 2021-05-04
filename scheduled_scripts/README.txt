@@ -13,4 +13,5 @@ to incorporate a new S.CAN file from Tammy:
 
 archive_merger.R is not actually scheduled (yet). Amey will just send a new version of "HB physical archives stream samples.csv" periodically, and then you can run:
     Rscript /home/mike/git/hbef/shiny/scheduled_scripts/archive_merger.R
-    That will overwrite the archive table in MariaDB with the new version. Then you can run sudo systemctl restart shiny-server.
+    That will overwrite the archive table in MariaDB with the new version. Note that this table isn't even used. The archive data get merged with the field sample data in R and then get written as raw text into archive_explore.html.
+After running archive_merger.R, run sudo systemctl restart shiny-server.

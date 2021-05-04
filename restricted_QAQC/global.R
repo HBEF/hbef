@@ -200,19 +200,22 @@ dataCurrent <- dbReadTable(con, "current") %>%
         NH4_N=NH4_to_NH4N(NH4)) %>%
     select(-NO3, -NH4) %>%
     filter(date >= as.Date('2013-06-01')) %>%
-    arrange(site, date, timeEST)
+    arrange(site, date, timeEST) %>%
+    mutate(timeEST = as.character(timeEST))
 dataHistorical <- dbReadTable(con, "historical") %>%
     filter(! (site == 'W6' & date == as.Date('2007-08-06'))) %>%
     mutate(
         NO3_N=NO3_to_NO3N(NO3),
         NH4_N=NH4_to_NH4N(NH4)) %>%
-    select(-NO3, -NH4)
+    select(-NO3, -NH4) %>%
+    mutate(timeEST = as.character(timeEST))
 dataSensor <- dbReadTable(con, "sensor2")
 sensorvars = dbListFields(con, "sensor4")
 sensorvars = sub('S4__', '', sensorvars)
 sensorvars[sensorvars == 'Nitrate_mg'] = 'NO3_N_mg'
 sensorvars = sensorvars[-which(sensorvars %in% c('datetime', 'id', 'watershedID'))]
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
+dataArchive = tibble(dbReadTable(con, 'archive'))
 dbDisconnect(con)
 
 dataCurrent <- standardizeClasses(dataCurrent)
@@ -267,3 +270,14 @@ field_note_daterange_filled = seq(field_note_daterange[1],
     field_note_daterange[2], by='day')
 no_note_days = as.Date(setdiff(field_note_daterange_filled, field_note_dates),
     origin='1970-01-01')
+
+# merge archive and sample data for new archive perusal tab ####
+
+#find out what "refNo" is. a lot of refNos are identical to barcode numbers, but
+#there appears to be no relationship between matches.
+# zz = select(dataAll, refNo, site, date, timeEST, fieldCode, notes, archived, uniqueID, waterYr, datetime)
+# qq = dataArchive %>%
+#     select(-id, -bin, -weight_g, -bottle_type) %>%
+#     left_join(zz, by=c('barcode' = 'refNo'))
+# range(tibble(dataAll[!is.na(dataAll$archived) & dataAll$archived == 'TRUE',])$refNo)
+

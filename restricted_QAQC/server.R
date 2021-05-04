@@ -1848,4 +1848,35 @@ shinyServer(function(input, output, session) {
 
   #**** END of Output ****
 
+  # *Archive Tab* ########################################
+
+  # output$ARCHIVE_TABLE <- DT::renderDataTable({
+  # # output$ARCHIVE_TABLE <- renderRHandsontable({
+  #
+  #     DT::datatable(data = dataArchive,
+  #                   options = list(autoWidth = TRUE,
+  #                                  paging = FALSE,
+  #                                  deferRender = TRUE,
+  #                                  ordering = TRUE,
+  #                                  dom='firt',
+  #                                  searching = FALSE),
+  #                   filter = 'top')
+  #
+  # #     rhandsontable::rhandsontable(data = dataArchive,
+  # #                                  rowHeaders = NULL,
+  # #                                  search = TRUE,
+  # #                                  height = 800,
+  # #                                  readOnly = TRUE) %>%
+  # #         rhandsontable::hot_cols(colWidths = 100,
+  # #                                 columnSorting = TRUE,
+  # #                                 manualColumnMove = TRUE,
+  # #                                 manualColumnResize = TRUE,
+  # #                                 fixedColumnsLeft = 3) %>%
+  # #         rhandsontable::hot_rows(rowHeights = 50) %>%
+  # #         rhandsontable::hot_table(contextMenu = FALSE,
+  # #                                  # stretchH = 'all',
+  # #                                  overflow = 'visible',
+  # #                                  filters = TRUE)
+  # })
+
 }) # closes shinyServer
