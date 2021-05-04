@@ -2,9 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-restricted
 HTML/restricted/*
 !HTML/restricted/archive_explore
+restricted/*
 streampulse_link_please_dont_modify
 restricted_QAQC/data
 restricted_QAQC/test.R
