@@ -130,7 +130,7 @@ arch = arch %>%
            NO3_N = round(NO3_N, 2),
            NH4_N = round(NH4_N, 2))
 
-htmlf = read_lines('restricted/archive_explore/archive_explore.html')
+htmlf = read_lines('HTML/restricted/archive_explore/archive_explore.html')
 # insert_ind = grep("<div id='archive_hot'></div>", htmlf)
 insert_ind_start = grep("<script id='archive_script'>", htmlf)
 insert_ind_end = grep("\\s?var container =", htmlf, perl=TRUE)
@@ -161,5 +161,5 @@ htmlf = c(htmlf[1:insert_ind_start],
           '',
           htmlf[(insert_ind_end):length(htmlf)])
 
-readr::write_lines(htmlf, 'restricted/archive_explore/archive_explore.html')
+readr::write_lines(htmlf, 'HTML/restricted/archive_explore/archive_explore.html')
 # readr::write_csv(arch, 'restricted_QAQC/data/archive_data/archive_merged.csv')
