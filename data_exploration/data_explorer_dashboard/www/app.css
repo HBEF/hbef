@@ -232,22 +232,22 @@ p{
 }
 
 .irs-single, .irs-bar-edge, .irs-bar, .irs-from,  .irs-to {
-	background: #6C7A89;
+	background-color: #6C7A89;
 	border-radius: 0;
 }
 
 
-.irs-slider.from, .irs-slider.to {
+.irs-handle.from, .irs-handle.to {
 	border: 2px solid #6C7A89;
 	width: 2px;
 	height: 20px;
-	border-radius: 0;
+	border-radius: 3px;
 
 }
 
 .irs-grid-pol{
     height: 3px;
-	background:#6C7A89;}
+	background-color:#6C7A89;}
 .irs-grid-pol.small {
     height: 0px;}
       

@@ -10,3 +10,7 @@ to incorporate a new S.CAN file from Tammy:
     sftp the new file to the server
     execute Rscript process_unh_data.R on the server (or wait for it to run as a cron job)
     probably safest to: sudo systemctl restart shiny-server
+
+archive_merger.R is not actually scheduled (yet). Amey will just send a new version of "HB physical archives stream samples.csv" periodically, and then you can run:
+    Rscript /home/mike/git/hbef/shiny/scheduled_scripts/archive_merger.R
+    That will overwrite the archive table in MariaDB with the new version. Then you can run sudo systemctl restart shiny-server.
