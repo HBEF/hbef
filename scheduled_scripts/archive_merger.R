@@ -60,19 +60,19 @@ wonky_timeEST_ind = which(sapply(strsplit(arch$timeEST, ':'),
                                  function(x) any(x == 'NA')))
 arch$timeEST[wonky_timeEST_ind] = NA
 
-# (over)write archive table in hbef database ####
+# (over)write archive table in hbef database OBSOLETE ####
 
-try(RMariaDB::dbRemoveTable(con, 'archive'),
-    silent = TRUE)
-
-fieldnames = colnames(arch)
-fieldtypes = c('INT(11) primary key auto_increment', 'VARCHAR(10)', 'VARCHAR(10)',
-               'INT(5)', 'FLOAT', 'DATE', 'TIME', 'DATE', 'TIME',
-               'VARCHAR(15)', 'TINYTEXT')
-names(fieldtypes) = fieldnames
-
-dbCreateTable(con, 'archive', fieldtypes)
-dbWriteTable(con, 'archive', arch, append=TRUE)
+# try(RMariaDB::dbRemoveTable(con, 'archive'),
+#     silent = TRUE)
+#
+# fieldnames = colnames(arch)
+# fieldtypes = c('INT(11) primary key auto_increment', 'VARCHAR(10)', 'VARCHAR(10)',
+#                'INT(5)', 'FLOAT', 'DATE', 'TIME', 'DATE', 'TIME',
+#                'VARCHAR(15)', 'TINYTEXT')
+# names(fieldtypes) = fieldnames
+#
+# dbCreateTable(con, 'archive', fieldtypes)
+# dbWriteTable(con, 'archive', arch, append=TRUE)
 # dbDisconnect(con)
 
 # more munging (merge with field data) ####
