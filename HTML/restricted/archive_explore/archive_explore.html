@@ -28,9 +28,14 @@
 	 	 </div>
   	</nav>
 
-    <p style='color: lightgreen; font-size: 0.8em'>
-    Use this tool to look up barcode and bin numbers in the HBEF archives. You can filter rows using the buttons beside each column name. You can sort by clicking column names.
-    </p>
+    <br><br>
+    <div style='text-align:center'>
+        <p style='color: lightgreen; font-size: 0.8em'>
+        Use this tool to look up barcode and bin numbers in the HBEF archives. You can filter rows using the buttons beside each column name. You can sort by clicking column names.
+        </p>
+        <button id="export" class="intext-btn">Download CSV</button>
+    </div>
+    <br>
 
     <div id='archive_hot'></div>
 
@@ -13557,8 +13562,8 @@ var hot_data = [
 ['W9','2017-05-30','09:35:00',47358,2.0816,'2019-09-12','16:19:17',287.09,'Nalgene250',null,0.01,0,4.73,null,31,13.6,6.7,-27.8,13.3028,0.4654,0.1511,0.1224,0.6007,0.4406,2.0734,0.3352,0.0015,9.5319,0.1461,0.1428,4.3821,0.0146,0.2238,0.0325,116.1724,-74.7366,17.2925],
 ];
 
-      var container = document.getElementById('archive_hot');
-      var hot = new Handsontable(container, {
+      const container = document.getElementById('archive_hot');
+      const hot = new Handsontable(container, {
         data: hot_data,
         columns: [
           {}, //site
@@ -13591,10 +13596,17 @@ var hot_data = [
         licenseKey: 'non-commercial-and-evaluation'
       });
 
-      // $('#export').click(function(){
-      //   const exportPlugin = hot.getPlugin('exportFile');
-      //   exportPlugin.downloadFile('csv', {filename: 'streampulse_sitedata'});
-      // })
+
+      const dl_button = document.getElementById('export');
+      const exportPlugin = hot.getPlugin('exportFile');
+
+      dl_button.addEventListener('click', function() {
+        exportPlugin.downloadFile('csv', {
+          fileExtension: 'csv',
+          filename: 'hbef_archive_data.csv',
+          mimeType: 'text/csv'
+        });
+      });
 
     </script>
 
