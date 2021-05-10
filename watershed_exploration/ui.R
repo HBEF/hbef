@@ -1,14 +1,8 @@
 
 source("helpers.R")
-#source('ui/oneSiteNVar_ui.R')
 source('ui/nSiteNVar_ui.R')
-# source('ui/site_comparison_ui.R')
-# source('ui/about_ui.R')
-# source('ui/participants_ui.R')
-# source('ui/summary_biplot_ui.R')
+source('ui/report_ui.R')
 source('ui/map_ui.R')
-# source('ui/now_hiring_ui.R')
-# source('ui/catalog_tab_ui.R')
 
 
 ui = fluidPage(
@@ -29,11 +23,8 @@ ui = fluidPage(
             div(class='sidebar-sub',
                 # HTML('<input type="text" id="MAPDATA" style="display: none">'),
                 tabsetPanel(id='left_tabs',
-                    # now_hiring_tab,
-                    # about_tab,
-                    # participants_tab,
-                    map_tab
-                    # catalog_tab
+                    map_tab,
+                    report_tab
                 )
             ),
             div(style='width: 36px; display: inline-block; float: right',
