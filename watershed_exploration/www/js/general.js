@@ -62,51 +62,111 @@ shinyjs.init = function() {
     });
 
     //tooltips and some styling
-    $('input[name^="CONC_FLUX"][value="Flux"]').parent()
-        .attr('title', 'Interpolated flux: mean concentration times mean discharge over the aggregation period (below), linearly interpolated. NOTE: only available when "Show precip chemistry" is off.')
-    $('input[name^="CONC_FLUX"][value="VWC"]').parent()
-        .attr('title', 'Volume-weighted concentration: summation of instantaneous concentration and Q (or precipitation) volume divided by total volume over the aggregation period (below). NOTE: only available when aggregation > daily.')
-    //    .css('color', 'blue')
-    $('#SHOW_PCHEM3').parent().parent().attr('title', 'Enabled only when unit is concentration or VWC and aggregation > daily.');
+    //$('input[name^="CONC_FLUX"][value="Flux"]').parent()
+    //    .attr('title', 'Interpolated flux: mean concentration times mean discharge over the aggregation period (below), linearly interpolated. NOTE: only available when "Show precip chemistry" is off.')
+    //$('input[name^="CONC_FLUX"][value="VWC"]').parent()
+    //    .attr('title', 'Mean flux rate divided by mean discharge rate, over the aggregation period. NOTE: only available when aggregation > daily.');
+    //    .attr('title', 'Volume-weighted concentration: summation of instantaneous concentration and Q (or precipitation) volume divided by total volume over the aggregation period (below). NOTE: only available when aggregation > daily.')
+    //$('#flags3-tooltip').attr('title', 'Points flagged as erroneous (bad data) have been removed from the dataset. Points flagged as questionable can be toggled here.');
+    //$('#interp3-tooltip').attr('title', 'We linearly interpolate data gaps of up to 3 days for discharge and precip, and up to 15 days for chemistry.');
+    //$('#SHOW_PCHEM3').parent().parent().attr('title', 'Enabled only when unit is concentration or VWC and aggregation > daily.');
+    $('input[name="CONC_FLUX3"][value="VWC"]').parent('label').replaceWith(
+        '<div style = "white-space: nowrap">' +
+        '<label style = "display: inline-block; vertical-align: middle; white-space: normal">' +
+        '<input type="radio" name="CONC_FLUX3" value="VWC">' +
+        '<span>Volume-Weighted Concentration</span>' +
+        '</label>' +
+        '<div id = "vwc-tooltip" style = "display: inline-block; vertical-align: middle"' +
+        'title = "Total flux divided by total discharge (or precip), over the aggregation period. Only available when aggregation > daily. See Notes/Caveats tab for more.">&#x2753;</div>' +
+        '</div>'
+    );
+    
+    //if somebody clicks a question mark, tell them to hover on it instead
+    $(document).ready(function(){
+        $('#flags3-tooltip').click(function(){
+            $(this).addClass('instruct-hover').delay(800).queue(function(){
+                $(this).removeClass('instruct-hover').dequeue();
+            });
+        });
+        $('#interp3-tooltip').click(function(){
+            $(this).addClass('instruct-hover').delay(800).queue(function(){
+                $(this).removeClass('instruct-hover').dequeue();
+            });
+        });
+        $('#vwc-tooltip').click(function(){
+            $(this).addClass('instruct-hover').delay(800).queue(function(){
+                $(this).removeClass('instruct-hover').dequeue();
+            });
+        });
+        $('#agg3-tooltip').click(function(){
+            $(this).addClass('instruct-hover').delay(800).queue(function(){
+                $(this).removeClass('instruct-hover').dequeue();
+            });
+        });
+        $('#qc3-tooltip').click(function(){
+            $(this).addClass('instruct-hover').delay(800).queue(function(){
+                $(this).removeClass('instruct-hover').dequeue();
+            });
+        });
+    });
 
-    //disable input conc checkbox unless monthly or annual conc or VWC selected; manage aggregation options too
-    function govern_showpchem3(){
 
-        var datatype = $('input[name=CONC_FLUX3]:checked').val()
+   // //disable input conc checkbox unless monthly or annual conc or VWC selected; manage aggregation options too (REPLACED BY govern_agg3)
+   // function govern_showpchem3(){
 
-        if( ['Concentration', 'VWC'].includes(datatype) &&
-                ['Monthly', 'Yearly'].includes($('input[name=AGG3]:checked').val()) ){
-            $('#SHOW_PCHEM3').removeAttr('disabled').siblings().css('color', '#485580');
+   //     var datatype = $('input[name=CONC_FLUX3]:checked').val()
 
-            if(datatype == 'VWC'){
-                $('input[name=AGG3][value=Daily]').attr('disabled','disabled').siblings().css('color', 'gray');
-                $('input[name=AGG3][value=Instantaneous]').attr('disabled','disabled').siblings().css('color', 'gray');
-            }
+   //     if( ['Concentration', 'VWC'].includes(datatype) &&
+   //             ['Monthly', 'Yearly'].includes($('input[name=AGG3]:checked').val()) ){
+   //         $('#SHOW_PCHEM3').removeAttr('disabled').siblings().css('color', '#485580');
 
+   //         if(datatype == 'VWC'){
+   //             $('input[name=AGG3][value=Daily]').attr('disabled','disabled').siblings().css('color', 'gray');
+   //             $('input[name=AGG3][value=Instantaneous]').attr('disabled','disabled').siblings().css('color', 'gray');
+   //         }
+
+   //     } else {
+
+   //         $('#SHOW_PCHEM3').attr('disabled','disabled').siblings().css('color', 'gray');
+
+   //         if(datatype == 'VWC'){
+   //             $('input[name=AGG3][value=Daily]').removeAttr('disabled').siblings().css('color', '#485580');
+   //             $('input[name=AGG3][value=Instantaneous]').removeAttr('disabled').siblings().css('color', '#485580');
+   //         }
+   //     }
+
+
+   //     if( datatype !== 'VWC' && ! $('#SHOW_PCHEM3').is(':checked') ){
+   //         $('input[name=AGG3][value=Daily]').removeAttr('disabled').siblings().css('color', '#485580');
+   //         $('input[name=AGG3][value=Instantaneous]').removeAttr('disabled').siblings().css('color', '#485580');
+   //     }
+
+   // };
+
+   // $('body').ready(function(){
+   //     $('#CONC_FLUX3').change(govern_showpchem3);
+   // });
+
+   // $('body').ready(function(){
+   //     $('#AGG3').change(govern_showpchem3);
+   // });
+
+    //disable instantaneous and daily agg if VWC selected
+    function govern_agg3(){
+
+        var datatype = $('input[name=CONC_FLUX3]:checked').val();
+
+        if(datatype == 'VWC'){
+            $('input[name=AGG3][value=Daily]').attr('disabled','disabled').siblings().css('color', 'gray');
+            $('input[name=AGG3][value=Instantaneous]').attr('disabled','disabled').siblings().css('color', 'gray');
         } else {
-
-            $('#SHOW_PCHEM3').attr('disabled','disabled').siblings().css('color', 'gray');
-
-            if(datatype == 'VWC'){
-                $('input[name=AGG3][value=Daily]').removeAttr('disabled').siblings().css('color', '#485580');
-                $('input[name=AGG3][value=Instantaneous]').removeAttr('disabled').siblings().css('color', '#485580');
-            }
-        }
-
-
-        if( datatype !== 'VWC' && ! $('#SHOW_PCHEM3').is(':checked') ){
             $('input[name=AGG3][value=Daily]').removeAttr('disabled').siblings().css('color', '#485580');
             $('input[name=AGG3][value=Instantaneous]').removeAttr('disabled').siblings().css('color', '#485580');
-        }
-
+        };
     };
 
     $('body').ready(function(){
-        $('#CONC_FLUX3').change(govern_showpchem3);
-    });
-
-    $('body').ready(function(){
-        $('#AGG3').change(govern_showpchem3);
+        $('#CONC_FLUX3').change(govern_agg3);
     });
 
     //disable VWC unless monthly or annual aggregation selected
@@ -122,25 +182,25 @@ shinyjs.init = function() {
         $('input[name=AGG3]').change(govern_VWC3);
     });
 
-    //disable interp flux if precip viz selected
-    function govern_flux3(){
-        if( $('#SHOW_PCHEM3').is(':checked') ){
-            $('input[name=CONC_FLUX3][value=Flux]').attr('disabled', 'disabled').siblings().css('color', 'gray');
-            $('input[name=AGG3][value=Instantaneous]').attr('disabled', 'disabled').siblings().css('color', 'gray');
-            $('input[name=AGG3][value=Daily]').attr('disabled', 'disabled').siblings().css('color', 'gray');
-        } else {
-            $('input[name=CONC_FLUX3][value=Flux]').removeAttr('disabled').siblings().css('color', '#485580');
+   // //disable flux if precip viz selected (why??)
+   // function govern_flux3(){
+   //     if( $('#SHOW_PCHEM3').is(':checked') ){
+   //         $('input[name=CONC_FLUX3][value=Flux]').attr('disabled', 'disabled').siblings().css('color', 'gray');
+   //         $('input[name=AGG3][value=Instantaneous]').attr('disabled', 'disabled').siblings().css('color', 'gray');
+   //         $('input[name=AGG3][value=Daily]').attr('disabled', 'disabled').siblings().css('color', 'gray');
+   //     } else {
+   //         $('input[name=CONC_FLUX3][value=Flux]').removeAttr('disabled').siblings().css('color', '#485580');
 
-            if( $('input[name=CONC_FLUX3]:checked').val() !== 'VWC' ){
-                $('input[name=AGG3][value=Instantaneous]').removeAttr('disabled').siblings().css('color', '#485580');
-                $('input[name=AGG3][value=Daily]').removeAttr('disabled').siblings().css('color', '#485580');
-            }
-        }
-    };
+   //         if( $('input[name=CONC_FLUX3]:checked').val() !== 'VWC' ){
+   //             $('input[name=AGG3][value=Instantaneous]').removeAttr('disabled').siblings().css('color', '#485580');
+   //             $('input[name=AGG3][value=Daily]').removeAttr('disabled').siblings().css('color', '#485580');
+   //         }
+   //     }
+   // };
 
-    $('body').ready(function(){
-        $('#SHOW_PCHEM3').click(govern_flux3);
-    });
+   // $('body').ready(function(){
+   //     $('#SHOW_PCHEM3').click(govern_flux3);
+   // });
 
     //only show QC plots when their box is checked
     function govern_qc3(){
@@ -166,7 +226,6 @@ shinyjs.init = function() {
             //$('#inlineMAIN3a').css('width', 'auto');
         }
 
-        console.log('qc click refresh')
         $('#REFRESH').trigger('click');
         //$('#inlineQC3a').offsetHeight
         //$('#inlineMAIN3a').offsetHeight
@@ -194,7 +253,6 @@ shinyjs.init = function() {
             $('input[name="INSTALLED_V_GRAB3"][value="G"]').removeAttr('disabled').siblings().css('color', '#333');
         }
 
-        console.log('gi click refresh')
         $('#REFRESH').trigger('click');
     };
 
@@ -217,7 +275,6 @@ shinyjs.init = function() {
             $('input[name="SENSOR_V_NONSENSOR3"][value="S"]').removeAttr('disabled').siblings().css('color', '#333');
         }
 
-        console.log('sn click refresh')
         $('#REFRESH').trigger('click');
     };
 
@@ -227,19 +284,14 @@ shinyjs.init = function() {
 
 
     $('body').ready(function(){
-        //$('.dataTable tbody tr').on('overflow', 'td', function(index){
         $('#dataTable').on('focus', function(i){
-        //$('#SITE_CATALOG_BUTTON').on('click', function(i){
-            console.log('gg');
-        $('#site_catalog td').each(function(i){
-        //$('.dataTable tbody tr td').each(function(i){
-            console.log('a');
-            $this = $(this);
-            var titleVal = $this.text();
-            if(typeof titleVal === "string" && titleVal !== ''){
-                $this.attr('title', titleVal);
-            }
-        });
+            $('#site_catalog td').each(function(i){
+                var $this = $(this);
+                var titleVal = $this.text();
+                if(typeof titleVal === "string" && titleVal !== ''){
+                    $this.attr('title', titleVal);
+                }
+            });
         });
     });
 
@@ -292,13 +344,28 @@ shinyjs.init = function() {
         var shinymodal = tgt.children('#shiny-modal-wrapper');
         if(shinymodal.length > 0){
 
-            //make modal fullscreen
-            shinymodal.children('.modal').css({'width': '100%', 'height': '100%', 'margin': '0px'})
-                .children('.modal-dialog').css({'width': '100%', 'height': '100%', 'margin': '0px'})
-                .children('.modal-content').css({'width': '100%', 'height': '100%'});
-
             var modal_id = shinymodal.find('.modal-body').attr('id');
-            if(modal_id === 'landing'){
+            if(modal_id != 'landing'){
+
+                //make modal fullscreen
+                shinymodal.children('.modal').css({'width': '100%', 'height': '100%', 'margin': '0px'})
+                    .children('.modal-dialog').css({'width': '100%', 'height': '100%', 'margin': '0px'})
+                    .children('.modal-content').css({'width': '100%', 'height': '100%'});
+            } else {
+
+                window.setTimeout(function(){
+                    $('.loading-container').hide();
+                    $('#landing #DISMISS_MODAL').show();
+                }, 1000);
+                window.setTimeout(function(){
+                    $('.loading-container').hide();
+                    $('#landing #DISMISS_MODAL').show();
+                }, 3000);
+                window.setTimeout(function(){
+                    $('.loading-container').hide();
+                    $('#landing #DISMISS_MODAL').show();
+                }, 8000);
+
                 return;
             }
 
@@ -345,18 +412,18 @@ shinyjs.init = function() {
         }, 200);
     });
 
-   // //all this crap (and associated CSS) is necessary just to make "macrosheds.org"
-   // //appear (and STAY appeared) in the bottom of each dygraph as an annotation
-   // 
-   // window.enable_attribution = false 
+    //all this crap (and associated CSS) is necessary just to make "hbwater.org"
+    //appear (and STAY appeared) in the bottom of each dygraph as an annotation
+    
+    window.enable_attribution = false 
 
    // $('body').on('change', '#DATES3', debounce(function(){
    //     if(enable_attribution){
    //         window.setTimeout(function(){
    //             $('[class^="ms-attribution"]').remove()
-   //             $('#GRAPH_PRECIP3').css('position', 'relative').append($('<p class="ms-attribution-low">macrosheds.org</p>'));
-   //             $('[id^="GRAPH_MAIN3"]').css('position', 'relative').append($('<p class="ms-attribution-low">macrosheds.org</p>'));
-   //             $('#GRAPH_Q3').css('position', 'relative').append($('<p class="ms-attribution-high">macrosheds.org</p>'));
+   //             $('#GRAPH_PRECIP3').css('position', 'relative').append($('<p class="ms-attribution-low">hbwater.org</p>'));
+   //             $('[id^="GRAPH_MAIN3"]').css('position', 'relative').append($('<p class="ms-attribution-low">hbwater.org</p>'));
+   //             $('#GRAPH_Q3').css('position', 'relative').append($('<p class="ms-attribution-high">hbwater.org</p>'));
    //         }, 2000);
    //     };
 
@@ -367,20 +434,40 @@ shinyjs.init = function() {
    // $('body').on('change', '#VARS3, #SITES3', function(){
    //     if(enable_attribution){
    //         $('[class^="ms-attribution"]').remove()
-   //         $('#GRAPH_PRECIP3').css('position', 'relative').append($('<p class="ms-attribution-low">macrosheds.org</p>'));
-   //         $('[id^="GRAPH_MAIN3"]').css('position', 'relative').append($('<p class="ms-attribution-low">macrosheds.org</p>'));
-   //         $('#GRAPH_Q3').css('position', 'relative').append($('<p class="ms-attribution-high">macrosheds.org</p>'));
+   //         $('#GRAPH_PRECIP3').css('position', 'relative').append($('<p class="ms-attribution-low">hbwater.org</p>'));
+   //         $('[id^="GRAPH_MAIN3"]').css('position', 'relative').append($('<p class="ms-attribution-low">hbwater.org</p>'));
+   //         $('#GRAPH_Q3').css('position', 'relative').append($('<p class="ms-attribution-high">hbwater.org</p>'));
    //     };
    // });
 
    // $('body').on('click', 'a[data-value="multisite_exploration"]', function(){
    //     window.setTimeout(function(){
    //         $('[class^="ms-attribution"]').remove()
-   //         $('#GRAPH_PRECIP3').css('position', 'relative').append($('<p class="ms-attribution-low">macrosheds.org</p>'));
-   //         $('[id^="GRAPH_MAIN3"]').css('position', 'relative').append($('<p class="ms-attribution-low">macrosheds.org</p>'));
-   //         $('#GRAPH_Q3').css('position', 'relative').append($('<p class="ms-attribution-high">macrosheds.org</p>'));
+   //         $('#GRAPH_PRECIP3').css('position', 'relative').append($('<p class="ms-attribution-low">hbwater.org</p>'));
+   //         $('[id^="GRAPH_MAIN3"]').css('position', 'relative').append($('<p class="ms-attribution-low">hbwater.org</p>'));
+   //         $('#GRAPH_Q3').css('position', 'relative').append($('<p class="ms-attribution-high">hbwater.org</p>'));
    //     }, 3000);
    // });
+    
+    $(document).on('shiny:idle', function(event){
+        enable_attribution = true
+    });
+
+    $('div[id^="GRAPH_"]').on('shiny:value', function(event){
+        if(enable_attribution){
+            let $this = $(this)
+            window.setTimeout(function(){
+                $this.children('[class^="ms-attribution"]').remove()
+                if($this.attr('id') === 'GRAPH_Q3'){
+                    $this.css('position', 'relative').append($('<p class="ms-attribution-high">hbwater.org</p>'));
+                } else if(/GRAPH_QC3./.test( $this.attr('id') )){
+                    console.log($this.attr('id'));
+                } else {
+                    $this.css('position', 'relative').append($('<p class="ms-attribution-low">hbwater.org</p>'));
+                };
+            }, 500);
+        };
+    });
 
 }
 

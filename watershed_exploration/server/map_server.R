@@ -3,7 +3,7 @@
 sheds <- sf::st_read('data/general/shed_boundary') %>%
     sf::st_transform(4326)
 
-sg = filter(site_data, site_type == 'stream_gauge')
+sg = filter(site_data, site_type != 'rain_gauge')
 
 sheds <- sheds %>%
     filter(site_name %in% sg$site_name)
