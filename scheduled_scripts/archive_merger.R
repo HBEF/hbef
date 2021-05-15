@@ -3,6 +3,12 @@ library(lubridate)
 library(RMariaDB)
 library(DBI)
 
+#TODO: update archive page with new file from Amey that includes w6 (saved in Downloads)
+
+#if you get more raw xlsx files from Amey, you might have to:
+#1. convert to csv
+#2. remove the four hidden columns
+
 # setup ####
 
 # setwd('~/git/hbef/shiny/')
