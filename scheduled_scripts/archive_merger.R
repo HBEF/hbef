@@ -187,7 +187,7 @@ arch = arch %>%
 htmlf = read_lines('HTML/restricted/archive_explore/archive_explore.html')
 # insert_ind = grep("<div id='archive_hot'></div>", htmlf)
 insert_ind_start = grep("<script id='archive_script'>", htmlf)
-insert_ind_end = grep("\\s?var container =", htmlf, perl=TRUE)
+insert_ind_end = grep("\\s?const container =", htmlf, perl=TRUE)
 arch2 = mutate(arch, across(everything(), as.character))
 classvec = unname(sapply(arch, class))
 enquote = rep(TRUE, length(classvec))
