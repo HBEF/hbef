@@ -3,6 +3,9 @@ library(lubridate)
 library(RMariaDB)
 library(DBI)
 
+#WARNING: run this for reals on server, not local. local test is fine, but
+#you'll need to set up a copy of the MySQL database
+
 #TODO: update archive page with new file from Amey that includes w6 (saved in Downloads)
 
 #if you get more raw xlsx files from Amey, you might have to:
