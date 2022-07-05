@@ -809,7 +809,7 @@ shinyUI(
                     airDatepickerInput('NOTE_DATES', 'Choose date(s)',
                         multiple=TRUE, range=FALSE, separator=', ',
                         minDate=field_note_daterange[1],
-                        maxDate=field_note_daterange[2],
+                        maxDate=field_note_daterange[2] + 1,
                         disabledDates=no_note_days, addon='none',
                         clearButton=TRUE, update_on='close',
                         placeholder='No dates selected'),
