@@ -249,21 +249,33 @@ shinyServer(function(input, output, session) {
 
       #for testing
       #dataNew <-read.csv("data/tests/test_current.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-      message("in dataNew() because of FILE_UPLOAD.")
+      message("in dataNew()")
       dataNew <- read.csv(input$FILE_UPLOAD$datapath,
                     header = input$HEADER,
                     stringsAsFactors = FALSE,
                     na.strings=c(""," ","NA"))
       dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
       if ("date" %in% names(dataNew)) {
-          if(grepl('[0-9]+/[0-9]+/[0-9]{4}', dataNew$date)){
+          if(grepl('[0-9]+/[0-9]+/[0-9]{4}', dataNew$date[1])){
             dataNew$date <- as.Date(dataNew$date, "%m/%d/%Y")
-          } else if(grepl('[0-9]+/[0-9]+/[0-9]{2}', dataNew$date)){
+          } else if(grepl('[0-9]+/[0-9]+/[0-9]{2}', dataNew$date[1])){
             dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
           }
       }
       # message(paste("Head of dataNew:",print(head(dataNew))))
       return(dataNew)
+   })
+  
+  stickytrap_up <- eventReactive(input$BUG_UPLOAD,{
+
+      # bug <- read.csv("data/tests/sticky_trap_orig.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) %>% as_tibble()
+      # bug <- read.csv("data/tests/sticky_trap_upload_new.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) %>% as_tibble()
+      bug <- read.csv(input$BUG_UPLOAD$datapath,
+                    header = input$HEADER,
+                    stringsAsFactors = FALSE,
+                    na.strings=c(""," ","NA")) %>% as_tibble()
+      
+      return(bug)
    })
 
   # Upon pressing submit, transfer uploaded file content to 'current' table in database
@@ -306,6 +318,179 @@ shinyServer(function(input, output, session) {
     }
     showNotification(msg, type='message')
 
+  })
+  
+  observeEvent(input$BUG_SUBMIT, {
+      
+    removeNotification(id = 'stickytraperr')
+    disable('BUG_SUBMIT')
+      
+    con = dbConnect(MariaDB(),
+               user = 'root',
+               password = pass,
+               host = 'localhost',
+               dbname = dbname)
+    
+    bug <- stickytrap_up()
+    
+    needed_colnames = c('Sample.ID', 'Side..Trap..', 'Watershed', 'Date', 'Dipteran_Large', 'Terrestrial_Large', 'Caddisfly_Large', 'Mayfly_Large', 'Stonefly_Large', 'Other_Large', 'Dipteran_Small', 'Terrestrial_Small', 'Caddisfly_Small', 'Other_Small')
+    if(! identical(colnames(bug), intersect(colnames(bug), needed_colnames))){
+        showNotification(paste('Upload CSV must have these exact columns:',
+                               'Sample ID, Side/ Trap #, Watershed, Date, Dipteran_Large, Terrestrial_Large, Caddisfly_Large, Mayfly_Large, Stonefly_Large, Other_Large, Dipteran_Small, Terrestrial_Small, Caddisfly_Small, Other_Small'),
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    colnames(bug) = tolower(colnames(bug))
+    colnames(bug) = sub('sample.id', 'sample_id', colnames(bug))
+    colnames(bug) = sub('side..trap..', 'side_or_trapnum', colnames(bug))
+    
+    bug$sample_id = as.character(bug$sample_id)
+    bug$side_or_trapnum = as.character(bug$side_or_trapnum)
+    
+    
+    if(any(! grepl('[0-9]+/[0-9]+/[0-9]{4}', bug$date))){
+        showNotification(paste('Upload CSV must have these exact columns:',
+                               'Sample ID, Side/ Trap #, Watershed, Date, Dipteran_Large, Terrestrial_Large, Caddisfly_Large, Mayfly_Large, Stonefly_Large, Other_Large, Dipteran_Small, Terrestrial_Small, Caddisfly_Small, Other_Small'),
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(is.na(bug$sample_id))){
+        showNotification('At least one missing Sample ID detected. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(is.na(bug$side_or_trapnum))){
+        showNotification('At least one missing "Side/ Trap #" detected. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(is.na(bug$watershed))){
+        showNotification('At least one missing Watershed value detected. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(is.na(bug$date))){
+        showNotification('At least one missing Date value detected. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(nchar(bug$sample_id) != 8)){
+        showNotification('All Sample ID values must be exactly 8 characters long. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(! bug$side_or_trapnum %in% c('A', 'B'))){
+        showNotification('All "Side/ Trap #" values must be either "A" or "B". Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(! bug$watershed %in% c(1:6, 9))){
+        showNotification('All Watershed values must be in [1, 2, 3, 4, 5, 6, 9]. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    bug$date = as.Date(bug$date, format = '%m/%d/%Y')
+
+    dataNew = bug %>% 
+    # dataNew <- stickytrap_up() %>% 
+        distinct() %>% 
+        filter(if_any(-all_of(c('sample_id', 'side_or_trapnum', 'watershed', 'date')),
+                      ~(! is.na(.))))
+    
+    dbd = DBI::dbReadTable(con, 'stickytrap') %>% as_tibble()
+    
+    repeat_keys = dataNew %>% 
+        semi_join(dbd, by = c('sample_id', 'side_or_trapnum'))
+                  
+    exact_repeats = semi_join(repeat_keys, dbd) %>% nrow()
+    inexact_repeat_ids = anti_join(repeat_keys, dbd) %>%
+        mutate(id_and_side = paste0(sample_id, ' (side/trap ', side_or_trapnum, ')')) %>% 
+        pull(id_and_side)
+    
+    if(exact_repeats != 0){
+        showNotification(paste(exact_repeats, 'of these records have already been submitted. This is fine! Just letting you know they\'ll be omitted.'),
+                         type = 'message')
+    }
+    
+    if(length(inexact_repeat_ids)){
+        showNotification(HTML(paste('It looks like you\'ve re-counted the following traps:<br><br>',
+                               paste(inexact_repeat_ids, collapse = '<br>'),
+                               '<br><br>Please resolve and reupload!')),
+                         type = 'error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    new_recs = anti_join(dataNew, repeat_keys, by = c('sample_id', 'side_or_trapnum'))
+    
+    max_counts_hist = apply(select(dbd, ends_with('_large'), ends_with('_small')), 2, max, na.rm = TRUE)
+    max_counts_new = apply(select(new_recs, ends_with('_large'), ends_with('_small')), 2, max, na.rm = TRUE)
+    new_max_counts = max_counts_new - max_counts_hist > 0
+    if(any(new_max_counts)){
+        count_warn = paste('Count of', max_counts_new[new_max_counts], 'for',
+                           names(new_max_counts)[new_max_counts], 'exceeds the former max count of',
+                           max_counts_hist[new_max_counts])
+        #MODAL stuff
+        print(count_warn)
+    }
+    
+    nrecords_submit = nrow(new_recs)
+    dbWriteTable(con, "stickytrap", new_recs, append=TRUE, row.names=FALSE)
+
+    dbDisconnect(con)
+
+    # changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
+    
+    showNotification(paste('Submitted', nrecords_submit, 'new records.'), type='message')
+    enable('BUG_SUBMIT')
   })
 
   observeEvent(input$SUBMIT_NOTE, {
@@ -1070,6 +1255,10 @@ shinyServer(function(input, output, session) {
     # !!! Need to add in code to warn users if uniqueID will be duplicate with what's in MySQL
     # !!! Need to allow users to delete lines
 
+  })
+  
+  output$BUG_FILE_PREVIEW <- DT::renderDataTable({
+      stickytrap_up()
   })
 
   # *QA/QC Tab* #########################################
@@ -1844,6 +2033,28 @@ shinyServer(function(input, output, session) {
       },
 
       contentType='application/zip'
+  )
+  
+  output$DOWNLOAD_BUGS = downloadHandler(
+
+      filename='sticky_trap_counts.csv',
+      content=function(file){
+          
+          con = dbConnect(MariaDB(),
+                          user = 'root',
+                          password = pass,
+                          host = 'localhost',
+                          dbname = dbname)
+          
+          bug_data = DBI::dbReadTable(con, 'stickytrap') %>% as_tibble()
+          bug_data$id = NULL
+          bug_data = arrange(bug_data, watershed, date, side_or_trapnum)
+          dbDisconnect(con)
+          
+          write.csv(bug_data, file, row.names = FALSE)
+      },
+
+      contentType='text/csv'
   )
 
   #**** END of Output ****

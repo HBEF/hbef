@@ -28,6 +28,8 @@ message("hello, I'm in ui.R")
 
 shinyUI(
   fluidPage(
+    useShinyjs(),
+    theme = "app.css",
     titlePanel("", windowTitle = "HBEF Dashboard"),
     # useShinyjs(),
     #tags$head(
@@ -64,7 +66,7 @@ shinyUI(
       #*********************************************************
       # Code initially copied from: https://github.com/rstudio/shiny-examples/blob/master/009-upload/app.R
         navbarMenu("Upload",
-          tabPanel("CSV file upload",
+          tabPanel("Chemistry CSV upload",
               # Sidebar layout with input and output definitions
               sidebarLayout(
                # Sidebar panel for inputs
@@ -134,7 +136,34 @@ shinyUI(
                       actionButton('SUBMIT_NOTE', label='Submit')
                   )
               )
-          )
+          ),
+          tabPanel("Sticky trap CSV upload",
+               sidebarLayout(
+                   sidebarPanel(
+                       fileInput("BUG_UPLOAD", "Choose CSV File",
+                                 multiple = FALSE,
+                                 accept = c("text/csv",
+                                            "text/comma-separated-values,text/plain",
+                                            ".csv")
+                       ),
+                       # checkboxInput("HEADER", "Data includes header (column names)", TRUE),
+                       # p("Note: The above must be checked for upload to work." ,
+                       #   style = "color:#666666; font-size:85%;"
+                       # ),
+                       # tags$hr(),
+                       # radioButtons("UPLOAD_DISPLAY", "Display",
+                       #              choices = c("First few rows" = "head",
+                       #                          "All rows" = "all"),
+                       #              selected = "head"
+                       # ),
+                       # tags$hr(),
+                       actionButton("BUG_SUBMIT", label = "Submit to Database")
+                   ),
+                   mainPanel(
+                       DT::dataTableOutput("BUG_FILE_PREVIEW")
+                   )
+               )
+          ),
       ),
       #*********************************************************
       # ***QA/QC tab ***----
@@ -815,6 +844,15 @@ shinyUI(
                         placeholder='No dates selected'),
                     br(),
                     downloadButton('DOWNLOAD_NOTES', 'Download')
+                )
+            )
+        ),
+        tabPanel('Sticky trap counts download',
+            fluidRow(
+                column(12,
+                    h3('Download all sticky trap count data'),
+                    br(),
+                    downloadButton('DOWNLOAD_BUGS', 'Download')
                 )
             )
         )

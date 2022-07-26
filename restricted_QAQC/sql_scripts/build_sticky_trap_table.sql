@@ -1,0 +1,1 @@
+create table stickytrap (id int(8) auto_increment, sample_id varchar(11), side_or_trapnum varchar(3), watershed int(1), date date, dipteran_large float, terrestrial_large float, caddisfly_large float, mayfly_large float, stonefly_large float, other_large float, dipteran_small float, terrestrial_small float, caddisfly_small float, other_small float, primary key (id));
