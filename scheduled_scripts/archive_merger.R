@@ -3,6 +3,9 @@ library(lubridate)
 library(RMariaDB)
 library(DBI)
 
+#WARNING: run this for reals on server, not local. local test is fine, but
+#you'll need to set up a copy of the MySQL database
+
 #TODO: update archive page with new file from Amey that includes w6 (saved in Downloads)
 
 #if you get more raw xlsx files from Amey, you might have to:
@@ -11,8 +14,8 @@ library(DBI)
 
 # setup ####
 
-# setwd('~/git/hbef/shiny/')
-setwd('/home/mike/shiny/')
+# setwd('~/git/hbef/shiny/'); misc_dir = 'hbef_misc'
+setwd('/home/mike/shiny/'); misc_dir = 'misc'
 
 source('restricted_QAQC/helpers.R')
 
@@ -107,6 +110,12 @@ arch2$time_weighed = lubridate::parse_date_time(x = paste(arch2$date_weighed,
 wonky_timeEST_ind = which(sapply(strsplit(arch2$timeEST, ':'),
                                  function(x) any(x == 'NA')))
 arch2$timeEST[wonky_timeEST_ind] = NA
+
+stop('have we decided how to deal with duplicates')
+if(misc_dir == 'hbef_misc') stop('on local machine? make sure you are using the most recent version of the database and archive dataset')
+#this file is used by edi_upload_prep.R
+write_csv(bind_rows(arch, arch2),
+          file.path('..', misc_dir, 'edi_upload/archive_samples.csv'))
 
 # (over)write archive table in hbef database OBSOLETE ####
 
