@@ -153,6 +153,8 @@ shinyServer(function(input, output, session) {
   changesInData <- reactiveValues()
   changesInData$change_dataCurrent <- 0
   changesInData$change_dataAll <- 0
+  changesInData$stickytrap_upload_confirm <- TRUE
+  changesInData$bugsubmitgo2 <- 0
 
   # Make a reactive dataAll2 data frame, to be called whenever data is updated
   # (R in dataCurrentR stands for reactive)
@@ -320,8 +322,10 @@ shinyServer(function(input, output, session) {
 
   })
   
-  observeEvent(input$BUG_SUBMIT, {
+  new_bug_records = eventReactive(input$BUG_SUBMIT, {
       
+    changesInData$stickytrap_upload_confirm = TRUE 
+     
     removeNotification(id = 'stickytraperr')
     disable('BUG_SUBMIT')
       
@@ -474,24 +478,70 @@ shinyServer(function(input, output, session) {
     max_counts_hist = apply(select(dbd, ends_with('_large'), ends_with('_small')), 2, max, na.rm = TRUE)
     max_counts_new = apply(select(new_recs, ends_with('_large'), ends_with('_small')), 2, max, na.rm = TRUE)
     new_max_counts = max_counts_new - max_counts_hist > 0
+    
     if(any(new_max_counts)){
         count_warn = paste('Count of', max_counts_new[new_max_counts], 'for',
                            names(new_max_counts)[new_max_counts], 'exceeds the former max count of',
                            max_counts_hist[new_max_counts])
-        #MODAL stuff
-        print(count_warn)
+        
+        changesInData$stickytrap_upload_confirm = count_warn
     }
-    
-    nrecords_submit = nrow(new_recs)
-    dbWriteTable(con, "stickytrap", new_recs, append=TRUE, row.names=FALSE)
 
     dbDisconnect(con)
-
-    # changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
     
-    showNotification(paste('Submitted', nrecords_submit, 'new records.'), type='message')
     enable('BUG_SUBMIT')
+    return(new_recs)
   })
+  
+  bugmodal = function(){
+      modalDialog(
+          title = 'That\'s a lot of bugs!',
+          paste0(changesInData$stickytrap_upload_confirm,
+                 '. Are you sure these IDs are correct?'),
+          easyClose = FALSE,
+          footer = tagList(
+              modalButton('No. I\'ll go back and check.'),
+              actionButton('bugsubmitgo', 'Yes. Submit records.')
+          )
+      )
+  }
+  
+  observeEvent(new_bug_records(), {
+      
+      if(! is.logical(changesInData$stickytrap_upload_confirm)){
+          showModal(bugmodal())
+      } else {
+          changesInData$bugsubmitgo2 = changesInData$bugsubmitgo2 + 1
+      }
+      
+  })
+  
+  observeEvent(input$bugsubmitgo, {
+               changesInData$bugsubmitgo2 = changesInData$bugsubmitgo2 + 1})
+  
+  # observeEvent(c(input$bugsubmitgo, changesInData$bugsubmitgo2), {
+  observeEvent(changesInData$bugsubmitgo2, {
+      
+      removeModal()
+      
+      changesInData$stickytrap_upload_confirm = TRUE
+      
+      new_recs = new_bug_records()
+      
+      con = dbConnect(MariaDB(),
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = dbname)
+      
+      nrecords_submit = nrow(new_recs)
+      
+      dbWriteTable(con, "stickytrap", new_recs, append=TRUE, row.names=FALSE)
+      dbDisconnect(con)
+      
+      showNotification(paste('Submitted', nrecords_submit, 'new records.'), type='message')
+  }, ignoreInit = TRUE)
+               
 
   observeEvent(input$SUBMIT_NOTE, {
 
