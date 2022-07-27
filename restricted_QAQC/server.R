@@ -338,7 +338,8 @@ shinyServer(function(input, output, session) {
     bug <- stickytrap_up()
     
     needed_colnames = c('Sample.ID', 'Side..Trap..', 'Watershed', 'Date', 'Dipteran_Large', 'Terrestrial_Large', 'Caddisfly_Large', 'Mayfly_Large', 'Stonefly_Large', 'Other_Large', 'Dipteran_Small', 'Terrestrial_Small', 'Caddisfly_Small', 'Other_Small')
-    if(! identical(colnames(bug), intersect(colnames(bug), needed_colnames))){
+    intsxn = intersect(colnames(bug), needed_colnames)
+    if(! (length(intsxn) == length(needed_colnames) && length(colnames(bug)) == length(needed_colnames))){
         showNotification(paste('Upload CSV must have these exact columns:',
                                'Sample ID, Side/ Trap #, Watershed, Date, Dipteran_Large, Terrestrial_Large, Caddisfly_Large, Mayfly_Large, Stonefly_Large, Other_Large, Dipteran_Small, Terrestrial_Small, Caddisfly_Small, Other_Small'),
                          type='error',
@@ -358,8 +359,7 @@ shinyServer(function(input, output, session) {
     
     
     if(any(! grepl('[0-9]+/[0-9]+/[0-9]{4}', bug$date))){
-        showNotification(paste('Upload CSV must have these exact columns:',
-                               'Sample ID, Side/ Trap #, Watershed, Date, Dipteran_Large, Terrestrial_Large, Caddisfly_Large, Mayfly_Large, Stonefly_Large, Other_Large, Dipteran_Small, Terrestrial_Small, Caddisfly_Small, Other_Small'),
+        showNotification('All dates must be in MM/DD/YYYY format.',                               
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
