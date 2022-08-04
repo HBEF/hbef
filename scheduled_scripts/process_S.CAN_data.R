@@ -15,7 +15,8 @@ runmode = 'live'
 
 if(runmode == 'test'){
 
-    dbname = 'hbef20200415'
+    # dbname = 'hbef20200415' #on E550
+    dbname = 'hbef' #on BM1
     setwd('~/git/hbef/shiny/restricted_QAQC/data/S.CAN_data/')
     pass = readLines('~/git/hbef/RMySQL.config')
 
@@ -140,6 +141,53 @@ d1 = d1 %>%
            Nitrate_mg_status == '',
            TurbidityRaw < 100) %>% #notfy someone?
     select(datetime, Nitrate_mg, TurbidityRaw) %>%
+    arrange(datetime)
+
+#4. and the third (RESOLVE NTU vs FTU disparity from first two batches) ####
+
+d2 = read.csv('SCAN 4-22 thru 7-28-2022.csv',
+              stringsAsFactors = FALSE,
+              skip = 4) %>%
+    as_tibble() %>%
+    select(-(4:5)) %>% #ignore temperature data
+    rename(datetime = 1, Nitrate_N_mg = 2, Nitrate_N_mg_status = 3, TurbidityRawNTU = 4,
+           TurbidityRawNTU_status = 5) %>%
+    mutate(datetime = as.POSIXct(datetime,
+                                 tz = 'EST')) %>%
+    arrange(datetime) %>%
+    filter(datetime > as.POSIXct('2020-08-06 09:45:07', #last record in dloan
+                                 tz = 'EST'))
+
+#visualize flagged turbitidy points
+ggplot(d2, aes(x = datetime,
+               y = TurbidityRawNTU)) +
+    geom_point() +
+    geom_point(color = factor(d2$TurbidityRawNTU_status,
+                              labels = c('transparent', 'green', 'red')))
+
+#same for nitrate
+ggplot(d2, aes(x = datetime,
+               y = Nitrate_N_mg)) +
+    geom_line() +
+    geom_point(color = factor(d2$Nitrate_N_mg_status,
+                              labels = c('transparent', 'green', 'orange')))
+
+#clean stuff
+# unique(d1$TurbidityRaw_status)
+d2b = d2 %>%
+    filter(TurbidityRawNTU_status == '',
+           Nitrate_N_mg_status == '') %>%
+    filter(Nitrate_N_mg < 10)
+ggplot(d2b, aes(x = datetime,
+               y = Nitrate_N_mg)) +
+    geom_line()
+
+#filter bollockery from dataset NOT UPDATED
+#NEED CLARITY ON NO3-N, FNU, AND 2021 DATA
+d2 = d2 %>%
+    filter(TurbidityRawNTU_status == '',
+           Nitrate_N_mg_status == '') %>%
+    select(datetime, Nitrate_N_mg, TurbidityRaw = TurbidityRawNTU) %>%
     arrange(datetime)
 
 #bind dsets; get them ready for db; insert them into db ####
