@@ -337,11 +337,11 @@ shinyServer(function(input, output, session) {
     
     bug <- stickytrap_up()
     
-    needed_colnames = c('Sample.ID', 'Side..Trap..', 'Watershed', 'Date', 'Dipteran_Large', 'Terrestrial_Large', 'Caddisfly_Large', 'Mayfly_Large', 'Stonefly_Large', 'Other_Large', 'Dipteran_Small', 'Terrestrial_Small', 'Caddisfly_Small', 'Other_Small')
+    needed_colnames = c('sample_id', 'side_or_trapnum', 'watershed', 'date', 'dipteran_large', 'terrestrial_large', 'caddisfly_large', 'mayfly_large', 'stonefly_large', 'other_large', 'dipteran_small', 'terrestrial_small', 'caddisfly_small', 'other_small')
     intsxn = intersect(colnames(bug), needed_colnames)
     if(! (length(intsxn) == length(needed_colnames) && length(colnames(bug)) == length(needed_colnames))){
         showNotification(paste('Upload CSV must have these exact columns:',
-                               'Sample ID, Side/ Trap #, Watershed, Date, Dipteran_Large, Terrestrial_Large, Caddisfly_Large, Mayfly_Large, Stonefly_Large, Other_Large, Dipteran_Small, Terrestrial_Small, Caddisfly_Small, Other_Small'),
+                               'sample_id, side_or_trapnum, watershed, date, dipteran_large, terrestrial_large, caddisfly_large, mayfly_large, stonefly_large, other_large, dipteran_small, terrestrial_small, caddisfly_small, other_small'),
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
@@ -350,9 +350,9 @@ shinyServer(function(input, output, session) {
         return()
     }
     
-    colnames(bug) = tolower(colnames(bug))
-    colnames(bug) = sub('sample.id', 'sample_id', colnames(bug))
-    colnames(bug) = sub('side..trap..', 'side_or_trapnum', colnames(bug))
+    #colnames(bug) = tolower(colnames(bug))
+    #colnames(bug) = sub('sample.id', 'sample_id', colnames(bug))
+    #colnames(bug) = sub('side..trap..', 'side_or_trapnum', colnames(bug))
     
     bug$sample_id = as.character(bug$sample_id)
     bug$side_or_trapnum = as.character(bug$side_or_trapnum)
@@ -369,7 +369,7 @@ shinyServer(function(input, output, session) {
     }
     
     if(any(is.na(bug$sample_id))){
-        showNotification('At least one missing Sample ID detected. Resolve and reupload.',
+        showNotification('At least one missing sample_id detected. Resolve and reupload.',
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
@@ -379,7 +379,7 @@ shinyServer(function(input, output, session) {
     }
     
     if(any(is.na(bug$side_or_trapnum))){
-        showNotification('At least one missing "Side/ Trap #" detected. Resolve and reupload.',
+        showNotification('At least one missing side_or_trapnum detected. Resolve and reupload.',
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
@@ -389,7 +389,7 @@ shinyServer(function(input, output, session) {
     }
     
     if(any(is.na(bug$watershed))){
-        showNotification('At least one missing Watershed value detected. Resolve and reupload.',
+        showNotification('At least one missing watershed value detected. Resolve and reupload.',
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
@@ -399,7 +399,7 @@ shinyServer(function(input, output, session) {
     }
     
     if(any(is.na(bug$date))){
-        showNotification('At least one missing Date value detected. Resolve and reupload.',
+        showNotification('At least one missing date value detected. Resolve and reupload.',
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
@@ -409,7 +409,7 @@ shinyServer(function(input, output, session) {
     }
     
     if(any(nchar(bug$sample_id) != 8)){
-        showNotification('All Sample ID values must be exactly 8 characters long. Resolve and reupload.',
+        showNotification('All sample_id values must be exactly 8 characters long. Resolve and reupload.',
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
@@ -419,7 +419,7 @@ shinyServer(function(input, output, session) {
     }
     
     if(any(! bug$side_or_trapnum %in% c('A', 'B'))){
-        showNotification('All "Side/ Trap #" values must be either "A" or "B". Resolve and reupload.',
+        showNotification('All side_or_trapnum values must be either "A" or "B". Resolve and reupload.',
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
@@ -429,7 +429,7 @@ shinyServer(function(input, output, session) {
     }
     
     if(any(! bug$watershed %in% c(1:6, 9))){
-        showNotification('All Watershed values must be in [1, 2, 3, 4, 5, 6, 9]. Resolve and reupload.',
+        showNotification('All watershed values must be in [1, 2, 3, 4, 5, 6, 9]. Resolve and reupload.',
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
