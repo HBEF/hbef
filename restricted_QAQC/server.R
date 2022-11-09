@@ -358,8 +358,8 @@ shinyServer(function(input, output, session) {
     bug$side_or_trapnum = as.character(bug$side_or_trapnum)
     
     
-    if(any(! grepl('[0-9]+/[0-9]+/[0-9]{4}', bug$date))){
-        showNotification('All dates must be in MM/DD/YYYY format.',                               
+    if(any(! grepl('[0-9]{4}-[0-9]{2}-[0-9]{2}', bug$date))){
+        showNotification('All dates must be in YYYY-MM-DD format.',                               
                          type='error',
                          duration = NULL,
                          id = 'stickytraperr')
@@ -438,7 +438,7 @@ shinyServer(function(input, output, session) {
         return()
     }
     
-    bug$date = as.Date(bug$date, format = '%m/%d/%Y')
+    bug$date = as.Date(bug$date, format = '%Y-%m-%d')
 
     dataNew = bug %>% 
     # dataNew <- stickytrap_up() %>% 
