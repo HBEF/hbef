@@ -40,7 +40,6 @@ shinyUI(
     #HMTL(<script type="text/javascript" src="/www/dygraph-combined.js"></script>),
     navbarPage(title = p(strong("HBEF Dashboard")),
       tabPanel("Main",
-        h3("New!", style="color:green"),
         p(HTML("Visit the <strong>Multiple Solutes</strong> tab to view raw, continuous water quality and sensor data."),
             style="color:green"),
         br(),
@@ -163,6 +162,31 @@ shinyUI(
                        DT::dataTableOutput("BUG_FILE_PREVIEW")
                    )
                )
+          ),
+          tabPanel('Field-and-lab notes upload (two-phase)',
+                   fluidRow(
+                       column(12,
+                              h2('Instructions'),
+                              p(HTML('<strong>Part 1</strong>:')),
+                              p(HTML('<ol>',
+                                     '<li>Copy <code>Hubbard Brook Ecosystem Study worksheets v2.xlsx</code> to a new file named with only the sample collection date in YYYYMMDD format, e.g. <code>20230101.xlsx</code>".</li>',
+                                     '<li>Fill out all four sheets in the new file.</li>',
+                                     '<li>Upload the filled out file (or multiple files). Jeff will be notified automatically.</li>',
+                                     '<li>Click submit and wait a moment. If the submission is successful, you will see a blue notification. Otherwise, you will see a red error message.</li>',
+                                     '</ol>')),
+                              br(),
+                              p(HTML('<strong>Part 2</strong>:')),
+                              p(HTML('<ol>',
+                                     '<li>Upload an Excel file or files, each with a single sheet of DIC data. The files must be named with the sample collection date in YYYYMMDD format and "_DIC", e.g. <code>20230101_DIC.xlsx</code>.</li>',
+                                     '<li>Click submit and wait a moment. If the submission is successful, you will see a blue notification. Otherwise, you will see a red error message.</li>',
+                                     '</ol>')),
+                              br(),
+                              fileInput('FIELD_AND_LAB_UPLOAD', 'Choose XLSX File(s)',
+                                        multiple=TRUE, accept=c('.xlsx')),
+                              hr(),
+                              actionButton('SUBMIT_FL', label='Submit')
+                       )
+                   )
           )
       ),
       #*********************************************************
@@ -855,6 +879,24 @@ shinyUI(
                     downloadButton('DOWNLOAD_BUGS', 'Download')
                 )
             )
+        ),
+        tabPanel('Field-and-lab notes download',
+                 fluidRow(
+                     column(12,
+                            h3('Download collections of field and lab notes as XLSX files.'),
+                            p(paste('Dates for which files are available appear in black.')),
+                            br(),
+                            airDatepickerInput('NOTE_DATES2', 'Choose date(s)',
+                                               multiple=TRUE, range=FALSE, separator=', ',
+                                               minDate=field_note_daterange2[1],
+                                               maxDate=field_note_daterange2[2] + 1,
+                                               disabledDates=no_note_days2, addon='none',
+                                               clearButton=TRUE, update_on='close',
+                                               placeholder='No dates selected'),
+                            br(),
+                            downloadButton('DOWNLOAD_NOTES2', 'Download')
+                     )
+                 )
         )
       )
       #*********************************************************

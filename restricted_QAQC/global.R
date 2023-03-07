@@ -26,6 +26,7 @@ library(RMariaDB)
 library(stringr)
 library(DT) #shiny's DataTable functions broke. loading them from here fixed it.
 library(shinyjs)
+# library(readr)
 
 # options(shiny.fullstacktrace=TRUE)
 
@@ -33,6 +34,8 @@ message("hello, I'm in global.R")
 
 source('helpers.R')
 pass=readLines('../../RMySQL.config')
+gm_pass=readLines('config.txt')[1]
+gm_addr=readLines('config.txt')[2]
 
 # **********************************************************************
 #                      ---- LISTS ----
@@ -263,6 +266,7 @@ maxDate_sensor <- max(as.Date(dataSensor$date), na.rm=TRUE)
 # if (maxDate_sensor < maxDate_current) maxDate <- maxDate_current
 maxDate = Sys.Date()
 
+#data for the daterange picker in field note download
 fnfiles = list.files('field_notes')
 field_note_dates = unique(na.omit(as.Date(substr(fnfiles, 1, 8),
     format='%Y%m%d')))
@@ -271,7 +275,24 @@ field_note_daterange_filled = seq(field_note_daterange[1],
     field_note_daterange[2], by='day')
 no_note_days = as.Date(setdiff(field_note_daterange_filled, field_note_dates),
     origin='1970-01-01')
-message(paste(field_note_daterange, collapse = ', '))
+# message(paste(field_note_daterange, collapse = ', '))
+
+#data for the daterange picker in field-and-lab note download
+dir.create('field_and_lab_note_collections', showWarnings = FALSE)
+dir.create('field_and_lab_note_collections/part1', showWarnings = FALSE)
+dir.create('field_and_lab_note_collections/complete', showWarnings = FALSE)
+
+fnfiles = list.files('field_and_lab_note_collections/complete')
+field_note_dates2 = unique(na.omit(as.Date(substr(fnfiles, 1, 8),
+    format='%Y%m%d')))
+field_note_daterange2 = range(field_note_dates2, na.rm=TRUE)
+field_note_daterange_filled2 = seq(field_note_daterange2[1],
+    field_note_daterange2[2], by='day')
+no_note_days2 = as.Date(setdiff(field_note_daterange_filled2, field_note_dates2),
+    origin='1970-01-01')
+no_note_days2 <- c(field_note_daterange2[1] - 1, no_note_days2)
+
+file.create('../logs/email_jeff.log', showWarnings = FALSE)
 
 # merge archive and sample data for new archive perusal tab ####
 

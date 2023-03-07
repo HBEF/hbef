@@ -142,3 +142,34 @@ NH4_to_NH4N = function(nh4_mg){
 }
 
 # abs.Date = function(x){x}
+
+email_msg <- function(subject, text_body, addr, pw){
+    
+    mailout = tryCatch({
+            
+        email = emayili::envelope() %>%
+            emayili::from('grdouser@gmail.com') %>%
+            emayili::to(addr) %>%
+            emayili::subject(subject) %>%
+            emayili::text(text_body)
+        
+        smtp = emayili::server(host='smtp.gmail.com',
+                               port=587, #or 465 for SMTPS
+                               username='grdouser@gmail.com',
+                               password=pw)
+        
+        smtp(email, verbose=FALSE)
+        
+    }, error=function(e){
+        
+        #not sure if class "error" is always returned by tryCatch,
+        #so creating custom class
+        errout = 'err'
+        class(errout) = 'err'
+        return(errout)
+    })
+    
+    if('err' %in% class(mailout)){
+        writeLines(paste('failed to email', addr, 'on', Sys.time()), '../logs/email_jeff.log')
+    }
+}
