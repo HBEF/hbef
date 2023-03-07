@@ -19,3 +19,5 @@ restricted_QAQC/field_notes
 logs
 restricted_QAQC/field_notes_bak20200720
 RMySQL.config
+restricted_QAQC/config.txt
+restricted_QAQC/field_and_lab_note_collections

@@ -285,7 +285,8 @@ dir.create('field_and_lab_note_collections/complete', showWarnings = FALSE)
 fnfiles = list.files('field_and_lab_note_collections/complete')
 field_note_dates2 = unique(na.omit(as.Date(substr(fnfiles, 1, 8),
     format='%Y%m%d')))
-field_note_daterange2 = range(field_note_dates2, na.rm=TRUE)
+field_note_daterange2 <- range(field_note_dates2, na.rm=TRUE)
+if(any(is.infinite(field_note_daterange2))) field_note_daterange2 <- rep(Sys.Date(), 2)
 field_note_daterange_filled2 = seq(field_note_daterange2[1],
     field_note_daterange2[2], by='day')
 no_note_days2 = as.Date(setdiff(field_note_daterange_filled2, field_note_dates2),
