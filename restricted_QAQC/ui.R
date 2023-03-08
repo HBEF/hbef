@@ -55,9 +55,11 @@ shinyUI(
                   Analytical Procedures.</a></strong> USDA Forest Service, Northeastern Research
                   Station, General Technical Report NE-275.</li>')),
         tags$br(),
-        downloadLink("DOWNLOAD_TEMPLATE", label = "Template for Data Uploads"),
+        downloadLink("DOWNLOAD_TEMPLATE", label = "Template for data uploads"),
         tags$br(),
-        downloadLink("DOWNLOAD_TEMPLATE_EXAMPLE", label = "Template Example for Data Uploads")
+        downloadLink("DOWNLOAD_TEMPLATE_EXAMPLE", label = "Template dxample for data uploads"),
+        tags$br(),
+        downloadLink("DOWNLOAD_TEMPLATE_FIELDLAB", label = "Template for field and lab notes (XLSX)")
       ), #end of Main tabPanel
 
       #*********************************************************

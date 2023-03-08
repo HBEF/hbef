@@ -1395,6 +1395,14 @@ shinyServer(function(input, output, session) {
     },
     contentType = "text/csv"
   )
+  
+  output$DOWNLOAD_TEMPLATE_FIELDLAB <- downloadHandler(
+    filename = 'hubbard_brook_ecosystem_study_worksheets_v3.xlsx',
+    content = function(file) {
+      file.copy("documentation/hubbard_brook_ecosystem_study_worksheets_v3.xlsx", file)
+    },
+    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  )
 
   # *Upload Tab* #########################################
 
