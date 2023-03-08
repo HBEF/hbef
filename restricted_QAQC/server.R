@@ -28,7 +28,7 @@ library(stringr)        # needed for str_extract function
 library(tidyr)
 library(xts)
 library(glue)
-library(openxlsx)
+#library(openxlsx)
 # library(glue)
 
 message("hello, I'm at the top of server.R")
@@ -569,96 +569,102 @@ shinyServer(function(input, output, session) {
       if (is.null(ff)) return()
       fn = ff$name
       
-      pt1 <- any(grepl('^[0-9]{8}\\.xlsx$', fn))
-      pt2 <- any(grepl('^[0-9]{8}_DIC\\.xlsx$', fn))
+      pt1 <- all(grepl('^[0-9]{8}\\.xlsx$', fn))
+      # pt2 <- any(grepl('^[0-9]{8}_DIC\\.xlsx$', fn))
 
-      if(! pt1 && ! pt2){
-          showNotification(paste('Filename(s) must match either',
-              'YYYYMMDD.xlsx for Part 1 or YYYYMMDD_DIC.xlsx for Part 2.'), type='error', duration=NULL,
-              closeButton=TRUE)
+      if(! pt1){
+          showNotification(paste('Filename(s) must match YYYYMMDD.xlsx.'),
+                           type='error', duration=NULL, closeButton=TRUE)
           return()
       }
+      # if(! pt1 && ! pt2){
+      #     showNotification(paste('Filename(s) must match either',
+      #         'YYYYMMDD.xlsx for Part 1 or YYYYMMDD_DIC.xlsx for Part 2.'), type='error', duration=NULL,
+      #         closeButton=TRUE)
+      #     return()
+      # }
       
-      if(pt1 && pt2){
-          stop('YYYYMMDD.xlsx and YYYYMMDD_DIC.xslx files must be uploaded separately')
-      }
+      # if(pt1 && pt2){
+      #     stop('YYYYMMDD.xlsx and YYYYMMDD_DIC.xslx files must be uploaded separately')
+      # }
       
       if(pt1){
           
-          file.copy(ff$datapath, file.path("field_and_lab_note_collections", 'part1', fn), overwrite=TRUE)
+          file.copy(ff$datapath, file.path("field_and_lab_note_collections", fn), overwrite=TRUE)
+          # file.copy(ff$datapath, file.path("field_and_lab_note_collections", 'part1', fn), overwrite=TRUE)
         
-          dates <- sub('.xlsx', '', fn)
-          email_msg(subject = 'HBWatER data upload part 2 is ready',
-                    text_body = paste0('Hi Jeff,\n\nThis is an automated message letting you ',
-                                     'know that new lab and field notes have ',
-                                     'been uploaded to http://hbwater.org:3838/restricted_QAQC ',
-                                     'for sample collection dates:\n\n',
-                                     paste(dates, collapse = '\n'),
-                                     '\n\nDIC lab sheets can now be uploaded for those collection dates.'),
-                    addr = gm_addr,
-                    pw = gm_pass)
+          # dates <- sub('.xlsx', '', fn)
+          # email_msg(subject = 'HBWatER data upload part 2 is ready',
+          #           text_body = paste0('Hi Jeff,\n\nThis is an automated message letting you ',
+          #                            'know that new lab and field notes have ',
+          #                            'been uploaded to http://hbwater.org:3838/restricted_QAQC ',
+          #                            'for sample collection dates:\n\n',
+          #                            paste(dates, collapse = '\n'),
+          #                            '\n\nDIC lab sheets can now be uploaded for those collection dates.'),
+          #           addr = gm_addr,
+          #           pw = gm_pass)
       }
       
-      if(pt2){
-          
-          orig <- sub('_DIC', '', fn)
-          ex <- sapply(file.path('field_and_lab_note_collections', 'part1', orig), file.exists)
-          
-          if(! all(ex)){
-              showNotification(paste('These Part-1 files have not been uploaded yet:',
-                                     paste(orig[! ex], collapse = ', ')),
-                               type='error', duration=NULL, closeButton=TRUE)
-              return()
-          }
-        
-          fails <- list()
-          for(i in seq_along(orig)){
-              
-              fails[i] <- tryCatch({
-                  wb <- loadWorkbook(file.path('field_and_lab_note_collections/part1', orig[i]))
-                  addWorksheet(wb, 'DIC')
-                  s5 <- read.xlsx(ff$datapath[i])
-                  writeData(wb, 5, s5)
-                  saveWorkbook(wb, file.path('field_and_lab_note_collections/complete', orig[i]), overwrite = TRUE)
-                  FALSE
-                  
-                  # wb$sheet_names %>%
-                  #     lapply(function(x) read.xlsx(wb,sheet=x)) |>
-                  #     # combine the sheets into a single dataframe
-                  #     do.call(what=rbind)|>
-                  #     # Write into excel file and match formatting
-                  #     write.xlsx("combinedSheets.xlsx",
-                  #                colWidths="auto",
-                  #                borders = "all",
-                  #                headerStyle= createStyle(textDecoration = "Bold",
-                  #                                         border=c("top", 
-                  #                                                  "bottom", 
-                  #                                                  "left", 
-                  #                                                  "right")))
-              }, error = function(e) return(TRUE))
-          }
-          
-          fails <- unlist(fails)
-          
-          if(any(fails)){
-              
-              success_files <- paste(orig[! fails], collapse = ', ')
-              fail_files <- paste(orig[fails], collapse = ', ')
-              
-              if(nchar(success_files)){
-                  msg <- paste('These files uploaded successfully:', success_files,
-                               '\nBut these failed:', fail_files,
-                               '\nPlease send Mike the files that failed.')
-                  showNotification(msg, type='error', duration=NULL, closeButton=TRUE)
-              } else {
-                  showNotification('Something went wrong. Please email Mike the files you tried to upload.',
-                                   type='error', duration=NULL, closeButton=TRUE)
-              }
-              
-              return()
-              
-          }
-      }
+      # if(pt2){
+      #     
+      #     orig <- sub('_DIC', '', fn)
+      #     ex <- sapply(file.path('field_and_lab_note_collections', 'part1', orig), file.exists)
+      #     
+      #     if(! all(ex)){
+      #         showNotification(paste('These Part-1 files have not been uploaded yet:',
+      #                                paste(orig[! ex], collapse = ', ')),
+      #                          type='error', duration=NULL, closeButton=TRUE)
+      #         return()
+      #     }
+      #   
+      #     fails <- list()
+      #     for(i in seq_along(orig)){
+      #         
+      #         fails[i] <- tryCatch({
+      #             wb <- loadWorkbook(file.path('field_and_lab_note_collections/part1', orig[i]))
+      #             addWorksheet(wb, 'DIC')
+      #             s5 <- read.xlsx(ff$datapath[i])
+      #             writeData(wb, 5, s5)
+      #             saveWorkbook(wb, file.path('field_and_lab_note_collections/complete', orig[i]), overwrite = TRUE)
+      #             FALSE
+      #             
+      #             # wb$sheet_names %>%
+      #             #     lapply(function(x) read.xlsx(wb,sheet=x)) |>
+      #             #     # combine the sheets into a single dataframe
+      #             #     do.call(what=rbind)|>
+      #             #     # Write into excel file and match formatting
+      #             #     write.xlsx("combinedSheets.xlsx",
+      #             #                colWidths="auto",
+      #             #                borders = "all",
+      #             #                headerStyle= createStyle(textDecoration = "Bold",
+      #             #                                         border=c("top", 
+      #             #                                                  "bottom", 
+      #             #                                                  "left", 
+      #             #                                                  "right")))
+      #         }, error = function(e) return(TRUE))
+      #     }
+      #     
+      #     fails <- unlist(fails)
+      #     
+      #     if(any(fails)){
+      #         
+      #         success_files <- paste(orig[! fails], collapse = ', ')
+      #         fail_files <- paste(orig[fails], collapse = ', ')
+      #         
+      #         if(nchar(success_files)){
+      #             msg <- paste('These files uploaded successfully:', success_files,
+      #                          '\nBut these failed:', fail_files,
+      #                          '\nPlease send Mike the files that failed.')
+      #             showNotification(msg, type='error', duration=NULL, closeButton=TRUE)
+      #         } else {
+      #             showNotification('Something went wrong. Please email Mike the files you tried to upload.',
+      #                              type='error', duration=NULL, closeButton=TRUE)
+      #         }
+      #         
+      #         return()
+      #         
+      #     }
+      # }
       
       showNotification(paste(length(fn), "file(s) submitted."),
           type='message')
@@ -2180,7 +2186,8 @@ shinyServer(function(input, output, session) {
 
       content=function(file){
           regex1 = paste(format.Date(input$NOTE_DATES2, '%Y%m%d'), collapse='|')
-          fns = list.files('field_and_lab_note_collections/complete', pattern=paste0('(', regex1, ')'),
+          fns = list.files('field_and_lab_note_collections', pattern=paste0('(', regex1, ')'),
+          # fns = list.files('field_and_lab_note_collections/complete', pattern=paste0('(', regex1, ')'),
               full.names=TRUE)
           zip(file, fns)
       },
