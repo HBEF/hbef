@@ -277,7 +277,7 @@ shinyServer(function(input, output, session) {
       bug <- read.csv(input$BUG_UPLOAD$datapath,
                     header = input$HEADER,
                     stringsAsFactors = FALSE,
-                    na.strings=c(""," ","NA")) %>% as_tibble()
+                    na.strings=c(""," ","NA", "N/A")) %>% as_tibble()
       
       return(bug)
    })
@@ -496,10 +496,11 @@ shinyServer(function(input, output, session) {
   })
   
   bugmodal = function(){
+      
       modalDialog(
           title = 'That\'s a lot of bugs!',
-          paste0(changesInData$stickytrap_upload_confirm,
-                 '. Are you sure these IDs are correct?'),
+          HTML(paste0(paste(changesInData$stickytrap_upload_confirm, collapse = '.<br>'),
+                 '.<br><br>Are you sure these IDs are correct?')),
           easyClose = FALSE,
           footer = tagList(
               modalButton('No. I\'ll go back and check.'),
