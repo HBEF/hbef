@@ -2178,6 +2178,31 @@ shinyServer(function(input, output, session) {
     }
   )
 
+  output$DOWNLOAD_NOTES = downloadHandler(
+
+      filename=function(dd=input$NOTE_DATES){
+
+          dd = format.Date(sort(dd), '%Y%m%d')
+
+          if(length(dd) == 1){
+              fnpt1 = dd
+          } else {
+              fnpt1 = paste0(dd[1], '-', dd[length(dd)])
+          }
+
+          return(paste0(fnpt1, '_fieldnotes.zip'))
+      },
+
+      content=function(file){
+          regex1 = paste(format.Date(input$NOTE_DATES, '%Y%m%d'), collapse='|')
+          fns = list.files('field_notes', pattern=paste0('(', regex1, ')'),
+              full.names=TRUE)
+          zip(file, fns)
+      },
+
+      contentType='application/zip'
+  )
+
   output$DOWNLOAD_NOTES2 = downloadHandler(
 
       filename=function(dd=input$NOTE_DATES2){
