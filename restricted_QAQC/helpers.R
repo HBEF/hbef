@@ -44,17 +44,24 @@ get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
 
    if(svar == 'NO3_N_mg') svar = 'Nitrate_mg'
 
-   SENSORVAR_S4 = paste('S4', svar, sep='__')
-
    #y = RMySQL::MySQL()
    y = RMariaDB::MariaDB()
    con = dbConnect(y, user='root', password=pass, host='localhost',
       dbname=dbname)
 
-   res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR_S4,
-      " from sensor4 WHERE watershedID = '",
-      substr(ssite, 2, nchar(ssite)), "' and datetime >= '",
-      sdate[1], "' and datetime <= '", sdate[2], "';"))
+   if(svar == 'Light_lux'){
+       res = dbSendQuery(con, paste0("select datetime, lux",
+          " from sensor5_light WHERE site = '",
+          ssite, "' and location = 'WEIR' and datetime >= '",
+          sdate[1], "' and datetime <= '", sdate[2], "';"))
+   } else {
+       SENSORVAR_S4 = paste('S4', svar, sep='__')
+       res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR_S4,
+          " from sensor4 WHERE watershedID = '",
+          substr(ssite, 2, nchar(ssite)), "' and datetime >= '",
+          sdate[1], "' and datetime <= '", sdate[2], "';"))
+   }
+   
    dsens = dbFetch(res)
 
    colnames(dsens) = gsub('S4__', '', colnames(dsens))

@@ -387,13 +387,13 @@ shinyUI(
               ),
 
                checkboxInput("SHOWSENS2",
-                  label = HTML(paste0("Overlay continuous water quality data.<br>",
-                     "(Available for watersheds 3, 6, and 9)")),
+                  label = HTML(paste0("Overlay sensor data.<br>",
+                     "(Sensor chem available only for watersheds 3, 6, and 9)")),
                   value = FALSE
                ),
                conditionalPanel(condition="input.SHOWSENS2 == true",
                   p(paste('Provisional sensor data. Not available for download.'),
-                     style='color:red'),
+                     style='color:purple'),
                   selectInput("SENSORVAR2", label="Select variable",
                      choices=c('None', sensorvars)),
                   p(HTML('<strong>Adjust y-axis limits</strong>')),
