@@ -40,7 +40,7 @@ shinyUI(
     #HMTL(<script type="text/javascript" src="/www/dygraph-combined.js"></script>),
     navbarPage(title = p(strong("HBEF Dashboard")),
       tabPanel("Main",
-        p(HTML("Visit the <strong>Multiple Solutes</strong> tab to view raw, continuous water quality and sensor data."),
+        p(HTML("Visit the <strong>Multiple Factors</strong> tab to view raw, continuous water quality and sensor data."),
             style="color:green"),
         br(),
         p("Please send any issues or comments to Mike Vlah at",
@@ -198,10 +198,10 @@ shinyUI(
       # panel it's in, e.g. WATERYEAR1 (datatype+PanelNumber)
       # These names are what's used in the server.R file.
       navbarMenu("QA/QC",
-        # Panel 1 - 1 Solute/1 Site ###############
-        tabPanel("1 Solute/1 Site",
+        # Panel 1 - 1 Factor/1 Site ###############
+        tabPanel("1 Factor/1 Site",
           sidebarLayout(
-            # Sidebar with tabs for Solute, Sites, Options
+            # Sidebar with tabs for Factor, Sites, Options
             sidebarPanel(
               # radioButtons('wateryearOrRange1',
               #   'Choose date selection method',
@@ -227,7 +227,7 @@ shinyUI(
               hr(),
               selectInput(
                 "SOLUTES1",
-                label = "Solute",
+                label = "Factor",
                 choices = c(solutes_cations, solutes_anions, solutes_other),
                 selected = "Ca"
               ),
@@ -322,10 +322,10 @@ shinyUI(
 
         ), # END of Panel 1 tabPanel
 
-        # Panel 2 - Multiple Solutes ###############
-        tabPanel("Multiple Solutes",
+        # Panel 2 - Multiple Factors ###############
+        tabPanel("Multiple Factors",
           sidebarLayout(
-            # Sidebar with tabs for Solute, Sites, Options
+            # Sidebar with tabs for Factor, Sites, Options
             sidebarPanel(
               radioButtons("wateryearOrRange2",
                 'Choose date selection method',
@@ -407,7 +407,7 @@ shinyUI(
                ),
 
               checkboxGroupInput("SOLUTES2",
-                          label = "Solutes",
+                          label = "Factors",
                           choices = c(solutes_cations, solutes_anions, solutes_other),
                           selected = "Ca"
               ),
@@ -440,7 +440,7 @@ shinyUI(
         # Panel 3 - Multiple Sites ###############
         tabPanel("Multiple Sites",
           sidebarLayout(
-            # Sidebar with tabs for Solute, Sites, Options
+            # Sidebar with tabs for Factor, Sites, Options
             sidebarPanel(
               radioButtons('wateryearOrRange3',
                 'Choose date selection method',
@@ -475,7 +475,7 @@ shinyUI(
               #  selected = wateryears[1]
               # ),
               selectInput("SOLUTES3",
-                      label = "Solute",
+                      label = "Factor",
                       choices = c(solutes_cations, solutes_anions, solutes_other),
                       selected = "Ca"
               ),
@@ -537,7 +537,7 @@ shinyUI(
         # Panel 4 - Free-for-all ###############
         tabPanel("Free-for-all",
           sidebarLayout(
-            # Sidebar with tabs for Solute, Sites, Options
+            # Sidebar with tabs for Factor, Sites, Options
             sidebarPanel(
               tabsetPanel(
                 #********************
@@ -569,9 +569,9 @@ shinyUI(
 
                   hr(),
 
-                  # Options for "Solutes" Graph
+                  # Options for "Factors" Graph
                   #****************************
-                  p("Solutes", style = "font-weight:bold; font-size:1.1em;"),
+                  p("Factors", style = "font-weight:bold; font-size:1.1em;"),
                   checkboxInput("SOLUTE4_OPTION",
                             label = p("Show graph", style = "font-size:0.9em; color:#919191;"),
                             value = TRUE
@@ -588,7 +588,7 @@ shinyUI(
                     ),
                     selectInput("SOLUTES4_COLOR",
                             label = "Colors apply to:",
-                            choices = c("Solutes", "Sites"),
+                            choices = c("Factors", "Sites"),
                             width = "80%"),
                     style = "color:#919191; font-size:0.9em;"
                   ),
@@ -640,9 +640,9 @@ shinyUI(
                   ) #end of conditional panel
                 ),
                 #********************
-                # Solutes tab
+                # Factors tab
                 #********************
-                tabPanel("Solutes",
+                tabPanel("Factors",
                   checkboxGroupInput("SOLUTES4",
                                 label = "",
                                 choices = c(solutes_cations, solutes_anions, solutes_other),

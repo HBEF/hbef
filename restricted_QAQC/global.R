@@ -75,7 +75,8 @@ solutes_other <- list("pH (3 Star)" = "pH",
                       "Specific Conductivity" = "spCond",
                       "Theoretical Conductivity" = "theoryCond",
                       "Water Temperature" = "temp",
-                      "Ion Balance" = "ionBalance")
+                      "Ion Balance" = "ionBalance",
+                      "Chlorophyll-a" = "chla")
 
 codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet",
                 "ionError", "ionBalance")
