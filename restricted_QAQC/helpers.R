@@ -50,10 +50,15 @@ get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
       dbname=dbname)
 
    if(svar == 'Light_lux'){
-       res = dbSendQuery(con, paste0("select datetime, lux",
+       res = dbSendQuery(con, paste0("select datetime, light_lux",
           " from sensor5_light WHERE site = '",
           ssite, "' and location = 'WEIR' and datetime >= '",
           sdate[1], "' and datetime <= '", sdate[2], "';"))
+   # } else if(svar == 'Temp_C'){
+   #     res = dbSendQuery(con, paste0("select datetime, temp_C",
+   #        " from sensor6_temp WHERE site = '",
+   #        ssite, "' and datetime >= '",
+   #        sdate[1], "' and datetime <= '", sdate[2], "';"))
    } else {
        SENSORVAR_S4 = paste('S4', svar, sep='__')
        res = dbSendQuery(con, paste0("select datetime, ", SENSORVAR_S4,
