@@ -76,7 +76,8 @@ solutes_other <- list("pH (3 Star)" = "pH",
                       "Theoretical Conductivity" = "theoryCond",
                       "Water Temperature" = "temp",
                       "Ion Balance" = "ionBalance",
-                      "Chlorophyll-a" = "chla")
+                      "Chlorophyll-a (moss)" = "chla_M",
+                      "Chlorophyll-a (tile)" = "chla_T")
 
 codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet",
                 "ionError", "ionBalance")
@@ -120,7 +121,8 @@ other_units <- c("pH",
                  "spCond",
                  "theoryCond",
                  "temp",
-                 "ionBalance")
+                 "ionBalance",
+                 "chla_M", "chla_T", "chla_MT", "chla_WM")
 
 # Functions ----
 # ***********************************
@@ -219,7 +221,7 @@ sensorvars = dbListFields(con, "sensor4")
 sensorvars = sub('S4__', '', sensorvars)
 sensorvars[sensorvars == 'Nitrate_mg'] = 'NO3_N_mg'
 sensorvars = sensorvars[-which(sensorvars %in% c('datetime', 'id', 'watershedID'))]
-sensorvars = c(sensorvars, 'Light_lux', 'Temp_C')
+sensorvars = c(sensorvars, 'Light_lux')
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
 # dataArchive = tibble(dbReadTable(con, 'archive'))
 dbDisconnect(con)
