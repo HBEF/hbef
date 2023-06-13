@@ -203,10 +203,17 @@ prep_stickytrap_data = function(input, graphnum){
   stky = stky %>%
     rename(site = watershed) %>%
     mutate(waterYr = if_else(month(date) %in% 1:5, year(date) + 1, year(date)),
-           site = paste0('W', site)) %>%
-    filter(waterYr %in% iwyr) %>%
+           site = paste0('W', site))
+  
+  if(paste0('WATERYEAR', graphnum) %in% names(input)){
+    stky = filter(stky, waterYr %in% iwyr)
+  }
+  
+  maybe_site = ifelse(graphnum == 4, 'site', 'not gonna match')
+  
+  stky = stky %>% 
     filter(site %in% isite) %>%
-    select(date, starts_with(ibug)) %>% 
+    select(date, starts_with(ibug), any_of(maybe_site)) %>% 
     rowwise()
   
   for(b in ibug){
@@ -214,7 +221,7 @@ prep_stickytrap_data = function(input, graphnum){
   }
   
   stky = ungroup(stky) %>% 
-    select(date, !!ibug)
+    select(date, !!ibug, any_of(maybe_site))
   
   return(stky)
 }

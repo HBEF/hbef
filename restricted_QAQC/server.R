@@ -242,7 +242,6 @@ shinyServer(function(input, output, session) {
                 step = 30)
 
     dataAllR
-
   })
 
   # *Upload Tab* ####
@@ -1930,6 +1929,7 @@ shinyServer(function(input, output, session) {
              includeZero = TRUE, drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
     }
     dg3
+    }
   }) # END of output$GRAPH3
 
   # For testing purposes (of data sorting):
@@ -1963,21 +1963,20 @@ shinyServer(function(input, output, session) {
       p
     }
   }, height = 100) # end of output$GRAPH_PRECIP4
+  
   output$GRAPH_MAIN4 <- renderPlot({
     data <- dataMain4()
+    if(any(input$SOLUTES4 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 4) %>% 
+        pivot_longer(-c(date, site), names_to = 'solute', values_to = 'solute_value')
+      data = bind_rows(data, stky)
+    }
     if(input$OMIT_STORMS4 == TRUE){
         data <- filter(data, is.na(fieldCode) | fieldCode != '911')
     }
     x <- data$date
     y <- data$solute_value
-    # build ggplot function
-    # design <- my_theme +
-    #   geom_point(size = 2.5) +
-    #   geom_line(alpha = 0.5) +
-    #   scale_x_date(date_labels = "%Y-%b")+
-    #   coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
-    #   scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
-    #   labs(x = "", y = "Solutes")
+
     if(input$SOLUTES4_COLOR == "Factors") {
       m <- ggplot(data, aes(x, y, shape=data$site, color=data$solute)) +
         my_theme +
