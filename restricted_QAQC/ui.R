@@ -57,7 +57,7 @@ shinyUI(
         tags$br(),
         downloadLink("DOWNLOAD_TEMPLATE", label = "Template for data uploads"),
         tags$br(),
-        downloadLink("DOWNLOAD_TEMPLATE_EXAMPLE", label = "Template dxample for data uploads"),
+        downloadLink("DOWNLOAD_TEMPLATE_EXAMPLE", label = "Template example for data uploads"),
         tags$br(),
         downloadLink("DOWNLOAD_TEMPLATE_FIELDLAB", label = "Template for field and lab notes (XLSX)")
       ), #end of Main tabPanel

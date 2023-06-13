@@ -77,7 +77,12 @@ solutes_other <- list("pH (3 Star)" = "pH",
                       "Water Temperature" = "temp",
                       "Ion Balance" = "ionBalance",
                       "Chlorophyll-a (moss)" = "chla_M",
-                      "Chlorophyll-a (tile)" = "chla_T")
+                      "Chlorophyll-a (tile)" = "chla_T",
+                      "Emergence (caddisfly)" = "caddisfly",
+                      "Emergence (dipteran)" = "dipteran",
+                      "Emergence (mayfly)" = "mayfly",
+                      "Emergence (stonefly)" = "stonefly",
+                      "Emergence (other)" = "other")
 
 codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet",
                 "ionError", "ionBalance")
@@ -87,6 +92,7 @@ codes123 <- c("pH", "pHmetrohm", "spCond", "au254", "au275",
               "SO4", "NO3", "Cl", "PO4", "DOC", "TDN", "DIC",
               "DON", "SiO2", "Mn", "Fe", "F")
 
+emergence = c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')
 
 # Lists of Sites
 #***************
@@ -122,7 +128,8 @@ other_units <- c("pH",
                  "theoryCond",
                  "temp",
                  "ionBalance",
-                 "chla_M", "chla_T", "chla_MT", "chla_WM")
+                 "chla_M", "chla_T", "chla_MT", "chla_WM",
+                 'caddisfly', 'mayfly', 'dipteran', 'stonefly', 'other')
 
 # Functions ----
 # ***********************************

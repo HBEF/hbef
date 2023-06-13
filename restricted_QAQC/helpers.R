@@ -185,3 +185,36 @@ email_msg <- function(subject, text_body, addr, pw){
         writeLines(paste('failed to email', addr, 'on', Sys.time()), '../logs/email_jeff.log')
     }
 }
+
+prep_stickytrap_data = function(input, graphnum){
+  
+  iwyr = input[[paste0('WATERYEAR', graphnum)]]
+  isite = input[[paste0('SITES', graphnum)]]
+  ibug = intersect(input[[paste0('SOLUTES', graphnum)]], emergence)
+  
+  con = dbConnect(MariaDB(),
+                  user = 'root',
+                  password = pass,
+                  host = 'localhost',
+                  dbname = dbname)
+  stky = as_tibble(dbReadTable(con, 'stickytrap'))
+  dbDisconnect(con)
+  
+  stky = stky %>%
+    rename(site = watershed) %>%
+    mutate(waterYr = if_else(month(date) %in% 1:5, year(date) + 1, year(date)),
+           site = paste0('W', site)) %>%
+    filter(waterYr %in% iwyr) %>%
+    filter(site %in% isite) %>%
+    select(date, starts_with(ibug)) %>% 
+    rowwise()
+  
+  for(b in ibug){
+    stky = mutate(stky, !!b := sum(c_across(starts_with(b)), na.rm = TRUE))
+  }
+  
+  stky = ungroup(stky) %>% 
+    select(date, !!ibug)
+  
+  return(stky)
+}

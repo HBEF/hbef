@@ -723,12 +723,9 @@ shinyServer(function(input, output, session) {
       if (input$SOLUTES1 == "spCond") ylabel1 <- paste(mu, "S/cm")
       if (input$SOLUTES1 == "temp")   ylabel1 <- "Degrees Celsius"
       if (grepl('^chla_', input$SOLUTES1)) ylabel1 <- "mg/m^2"
-      if (input$SOLUTES1 %in% c("pH",
-                        "pHmetrohm",
-                        "cationCharge",
-                        "cnionCharge",
-                        "theoryCond",
-                        "ionBalance")) { ylabel1 <- "(No Units)" }
+      if (input$SOLUTES1 %in% c("pH", "pHmetrohm", "cationCharge", "cnionCharge",
+          "theoryCond", "ionBalance")) { ylabel1 <- "(No Units)" }
+      if(input$SOLUTES1 %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel1 = 'Count'
 
       ylabel1 <- gsub(" ", "", ylabel1, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
       ylabel1
@@ -910,6 +907,7 @@ shinyServer(function(input, output, session) {
                         "anionCharge",
                         "theoryCond",
                         "ionBalance")) { ylabel2[i] <- "(No Units)" }
+      if(input$SOLUTES2[i] %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel2[i] = 'Count'
       test <- gsub(" ", "", ylabel2[i], fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
      }
      # Otherwise, label as 'default' mg/L
@@ -1108,6 +1106,7 @@ shinyServer(function(input, output, session) {
                       "anionCharge",
                       "theoryCond",
                       "ionBalance")) { ylabel3 <- "(No Units)" }
+     if(input$SOLUTES3 %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel3 = 'Count'
      ylabel3 <- gsub(" ", "", ylabel3, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
      return(ylabel3)
     }
@@ -1126,6 +1125,7 @@ shinyServer(function(input, output, session) {
 
   # filters data to only include data selected by inputs
   dataAll3 <- reactive({
+    
     # update data variable if underlying data was updated
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
     # do initial filter of data depending on whether water year or date range was chosen
@@ -1141,11 +1141,17 @@ shinyServer(function(input, output, session) {
         dataAll3 <- filter(dataAll3, is.na(fieldCode) | fieldCode != '911')
     }
     dataAll3 <- dataAll3 %>%
-     select(one_of("date", "site", input$SOLUTES3)) %>% # Keep date, site, and solute data
+     select(one_of("date", "site", input$SOLUTES3))
+    if(any(input$SOLUTES3 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 3)
+      dataAll3 = full_join(dataAll3, stky, by = 'date', relationship = 'many-to-many')
+    }
+    dataAll3 = dataAll3 %>% 
+     filter(! is.na(site)) %>% 
      mutate(i = row_number()) %>%                # Create new columns of data of just row numbers. Necessary to prevent error message of duplicate values after next line of code, but inefficient because doesn't combine rows with duplicate columns.)
      spread_(key_col = "site", value_col = input$SOLUTES3, fill=NA) %>%  # Reshape data so that each place in "sites" is made into a unique column, with corresponding solute value as data
      select(-i)                            # Remove row name variable
-
+    return(dataAll3)
      }) # END of dataCurrent3()
 
 
@@ -1217,6 +1223,9 @@ shinyServer(function(input, output, session) {
 
   # filters Original (recent water year) data to include data selected by inputs AND discharge/precip
   dataAllQ3 <- reactive({
+    if(any(input$SOLUTES3 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 3)
+    }
     dataAll3 = dataAll3()
     dataQ3 = Q3()
     if(class(dataQ3$date) != 'Date') dataAll3$date = as.POSIXct(dataAll3$date)
@@ -1451,7 +1460,11 @@ shinyServer(function(input, output, session) {
   # from input panel. Done in this manner because dygraph() cannot overlay plots, each
   # plot must be started from scratch because it graphs ALL the data within xts data.
   output$GRAPH1 <- renderDygraph({
-
+  
+    if(input$SOLUTES1 %in% emergence){
+      stky = prep_stickytrap_data(input = input, graphnum = 1)
+    }
+    
     ylabel <- ylabel1()
     if (input$HYDROLOGY1 == TRUE)  {
       if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (ft or L/s)'
@@ -1470,6 +1483,9 @@ shinyServer(function(input, output, session) {
           # Plots Default + Discharge + Historical data
           data1 <- dataAllQHist1()
           data1 <- removeCodes(data1)
+        # if(input$SOLUTES1 %in% emergence){
+        #   data1 = full_join(data1, stky, by = 'date')
+        # }
           data1.xts <- xts(data1[,-1], order.by = data1$date)
           #paste(c("XTS:", class(dataCur1$FieldCode)))
 
@@ -1516,6 +1532,9 @@ shinyServer(function(input, output, session) {
         # Plots Default + Discharge data
         data1 <- dataAllQ1()
         data1 <- removeCodes(data1)
+        if(input$SOLUTES1 %in% emergence){
+          data1 = full_join(data1, stky, by = 'date', relationship = 'many-to-many')
+        }
         data1.xts <- xts(data1[,-1], order.by = data1$date)
 
         dygraph1 <- dygraph(data1.xts) %>%
@@ -1524,14 +1543,15 @@ shinyServer(function(input, output, session) {
           dyAxis('y2',label=ylabel2, independentTicks=TRUE,
                axisLabelWidth = 70,
                axisLabelColor = "#3182bd",
-               axisLineColor = "#3182bd") %>% # color is light blue
-          dySeries(name = input$SOLUTES1,
-                color = "#black") %>%
-          dySeries(name = 'Flow_or_Precip',
-                drawPoints = FALSE,
-                fillGraph=T,
-                color = "#3182bd",
-                axis='y2') %>%
+               axisLineColor = "#3182bd")
+        if(input$SOLUTES1 %in% emergence){
+          dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
+                              drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+        } else {
+          dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black")
+        }
+          dygraph1 = dySeries(dygraph1, name = 'Flow_or_Precip',
+                drawPoints = FALSE, fillGraph=T, color = "#3182bd", axis='y2') %>%
           dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
           dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
           dyOptions(drawGrid = FALSE,
@@ -1615,27 +1635,24 @@ shinyServer(function(input, output, session) {
 
           data1 <- dataAll1()
           data1 <- removeCodes(data1)
+          if(input$SOLUTES1 %in% emergence){
+            data1 = full_join(data1, stky, by = 'date', relationship = 'many-to-many')
+          }
           data1.xts <- xts(data1, order.by = data1$date)
 
           #padrange <- c(min(data1.xts$input$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$input$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
 
           dygraph1 <- dygraph(data1.xts) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-            dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-            dySeries(name = input$SOLUTES1,
-                  color = "black",
-                  drawPoints = TRUE,
-                  strokeWidth = 1,
-                  pointSize = 3) %>%
-            # dySeries(name = "FieldCode",
-            #       color = "black",
-            #       drawPoints = TRUE,
-            #       strokeWidth = 0,
-            #       pointSize = 1) %>%
-            # for (i in 1:nrow(data1.xts)) {
-            #   dyAnnotation(index(i), data1.xts$FieldCode[i])
-            # } %>%
-            dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+            dyAxis("y", label = ylabel, independentTicks=TRUE)
+          if(input$SOLUTES1 %in% emergence){
+            dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
+                                drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          } else {
+            dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
+                  drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
+          }
+            dygraph1 = dyLimit(dygraph1, limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
             dyOptions(drawGrid = FALSE,
                    connectSeparatedPoints=TRUE,
@@ -1643,7 +1660,6 @@ shinyServer(function(input, output, session) {
 
           dygraph1
         }
-      # }
     }
 
   }) # END of output$GRAPH1
@@ -1665,6 +1681,10 @@ shinyServer(function(input, output, session) {
 
   output$GRAPH2 <- renderDygraph({
 
+    if(any(input$SOLUTES2 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 2)
+    }
+    
     # determine x-axis label
     if(input$wateryearOrRange2 == 'wateryr'){
       xlabel <- paste("Water Year ", input$WATERYEAR2)
@@ -1681,69 +1701,67 @@ shinyServer(function(input, output, session) {
 
         # Plots Default + Discharge data
         data2 <- dataAllQ2()
-        # if (input$SHOWSENS2 && input$SENSORVAR2 != 'None') {
-        #    data2 = merge_sensor_data(data2, input$SENSORVAR2, input$SITES2,
-        #       input$DATE2)
-        # }
         data2 <- removeCodes(data2)
+        if(any(input$SOLUTES2 %in% emergence)){
+          data2 = full_join(data2, stky, by = 'date', relationship = 'many-to-many')
+        }
         data2.xts <- xts(data2[,-1], order.by = data2$date)
 
-        dygraph(data2.xts, group='group2') %>%
+        dg2 = dygraph(data2.xts, group='group2') %>%
           dyAxis("x", label=xlabel) %>%
           dyAxis("y", label = "(various units, dependent on input)",
               independentTicks=TRUE, valueRange=c(input$YLIMlo2, input$YLIMhi2)) %>%
           dyAxis('y2',label=ylabel2, independentTicks=TRUE,
               axisLabelWidth = 70,
               axisLabelColor = "#3182bd",
-              axisLineColor = "#3182bd") %>% # color is light blue
-          #dySeries(name = input$SOLUTES2) %>%
-          dySeries(name = 'Flow_or_Precip',
-                label = "Discharge/Precip",
-                drawPoints = FALSE,
-                fillGraph=T,
-                #color = "#3182bd",
-                axis='y2') %>%
+              axisLineColor = "#3182bd")
+        if(any(input$SOLUTES2 %in% emergence)){
+          for(emerg in intersect(input$SOLUTES2, emergence)){
+            dg2 = dySeries(dg2, name = emerg,
+                           drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          }
+        }
+        dg2 = dySeries(dg2, name = 'Flow_or_Precip', label = "Discharge/Precip",
+              drawPoints = FALSE, fillGraph=T, axis='y2') %>% 
           dyOptions(drawGrid = FALSE,
-                drawPoints = TRUE,
-                strokeWidth = 1,
-                pointSize = 3,
-                fillAlpha = 0.3,
-                connectSeparatedPoints=TRUE,
-                includeZero = TRUE)
-
+              drawPoints = TRUE,
+              strokeWidth = 1,
+              pointSize = 3,
+              fillAlpha = 0.3,
+              connectSeparatedPoints=TRUE,
+              includeZero = TRUE)
+        dg2
       } else {
 
         # Plots Default data
 
         data2 <- dataAll2()
         data2 <- removeCodes(data2)
-        # dd <<- data2
-        # svar <<- input$SENSORVAR2
-        # ssite <<- input$SITES2
-        # sdate <<- input$DATE2
-        # if (input$SHOWSENS2 && input$SENSORVAR2 != 'None') {
-        #    data2 = merge_sensor_data(data2, input$SENSORVAR2, input$SITES2,
-        #       input$DATE2)
-        # }
+        if(any(input$SOLUTES2 %in% emergence)){
+          data2 = full_join(data2, stky, by = 'date', relationship = 'many-to-many')
+        }
         data2.xts <- xts(data2, order.by = data2$date)
 
         # padrange <- c(min(data2.xts$input$SOLUTES2, na.rm=TRUE) - 1, max(data2.xts$input$SOLUTES2, na.rm=TRUE) + 1) # !!! attempt at resolving negative values issue
         # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
 
-        dygraph(data2.xts, group='group2') %>%
+        dg2 = dygraph(data2.xts, group='group2') %>%
           dyAxis("x", label = xlabel) %>%
           dyAxis("y", label = "(various units, dependent on input)",
-              independentTicks=TRUE, valueRange=c(input$YLIMlo2, input$YLIMhi2)) %>%
-          # dySeries(name = input$SOLUTES2,
-          #       drawPoints = TRUE,
-          #       strokeWidth = 1,
-          #       pointSize = 3) %>%
-          dyOptions(drawGrid = FALSE,
-                connectSeparatedPoints=TRUE,
-                includeZero = TRUE,
-                drawPoints = TRUE,
-                strokeWidth = 1,
-                pointSize = 3)
+              independentTicks=TRUE, valueRange=c(input$YLIMlo2, input$YLIMhi2))
+        if(any(input$SOLUTES2 %in% emergence)){
+          for(emerg in intersect(input$SOLUTES2, emergence)){
+            dg2 = dySeries(dg2, name = emerg,
+                           drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          }
+        }
+        dg2 = dyOptions(dg2, drawGrid = FALSE,
+              connectSeparatedPoints=TRUE,
+              includeZero = TRUE,
+              drawPoints = TRUE,
+              strokeWidth = 1,
+              pointSize = 3)
+        dg2
       }
 
   }) # END of output$GRAPH2
@@ -1814,7 +1832,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$GRAPH3 <- renderDygraph({
-
+    
     # determine x-axis label
     if(input$wateryearOrRange3 == 'wateryr'){
       xlabel <- paste("Water Year ", input$WATERYEAR3)
@@ -1828,23 +1846,23 @@ shinyServer(function(input, output, session) {
       if (input$HYDROLOGY3 == "Discharge")  {
 
       data3 <- dataAllQ3()
-      #data3 <- removeCodes3(data3, input$SOLUTES3)
       data3.xts <- xts(data3[,-1], order.by = data3$date)
 
-      dygraph(data3.xts) %>%
+      dg3 = dygraph(data3.xts) %>%
         dyAxis("x", label = xlabel) %>%
         dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
         dyAxis('y2',label='Hydrology (ft or L/s)', independentTicks=TRUE,
            axisLabelWidth = 70,
            axisLabelColor = "#3182bd",
-           axisLineColor = "#3182bd") %>% # color is light blue
-        #dySeries(name = input$SOLUTES2) %>%
-        dySeries(name = 'Hydro.med',
-            label = "Discharge",
-            drawPoints = FALSE,
-            fillGraph=T,
-            #color = "#3182bd",
-            axis='y2') %>%
+           axisLineColor = "#3182bd")
+        if(any(input$SOLUTES3 %in% emergence)){
+          for(s in input$SITES3){
+            dg3 = dySeries(dg3, name = s,
+                           drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          }
+        }
+        dg3 = dySeries(dg3, name = 'Hydro.med', label = "Discharge",
+            drawPoints = FALSE, fillGraph=T, axis='y2') %>%
         dyLimit(limit = LOQ3(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
         dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
         dyOptions(drawGrid = FALSE,
@@ -1854,28 +1872,29 @@ shinyServer(function(input, output, session) {
              fillAlpha = 0.3,
              connectSeparatedPoints=TRUE,
              includeZero = TRUE)
+        dg3
       }
 
       else {
 
         data3 <- dataAllQ3()
-        #data3 <- removeCodes3(data3, input$SOLUTES3)
         data3.xts <- xts(data3[,-1], order.by = data3$date)
 
-        dygraph(data3.xts) %>%
+        dg3 = dygraph(data3.xts) %>%
          dyAxis("x", label = xlabel) %>%
          dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
          dyAxis('y2',label='Precipitation (mm)', independentTicks=TRUE,
               axisLabelWidth = 70,
               axisLabelColor = "#3182bd",
-              axisLineColor = "#3182bd") %>% # color is light blue
-         #dySeries(name = input$SOLUTES2) %>%
-         dySeries(name = 'Hydro.med',
-               label = "Precipitation",
-               drawPoints = FALSE,
-               fillGraph=T,
-               #color = "#3182bd",
-               axis='y2') %>%
+              axisLineColor = "#3182bd")
+        if(any(input$SOLUTES3 %in% emergence)){
+          for(s in input$SITES3){
+            dg3 = dySeries(dg3, name = s,
+                           drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          }
+        }
+         dg3 = dySeries(dg3, name = 'Hydro.med', label = "Precipitation",
+               drawPoints = FALSE, fillGraph=T, axis='y2') %>%
          dyLimit(limit = LOQ3(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
          dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
          dyOptions(drawGrid = FALSE,
@@ -1885,12 +1904,12 @@ shinyServer(function(input, output, session) {
                 fillAlpha = 0.3,
                 connectSeparatedPoints=TRUE,
                 includeZero = TRUE)
+         dg3
       }
 
     } else {
 
      # Plots Default data
-
      data3 <- dataAll3()
      data3 <- removeCodes3(data3, input$SOLUTES3)
      data3.xts <- xts(data3, order.by = data3$date)
@@ -1898,28 +1917,27 @@ shinyServer(function(input, output, session) {
      # padrange <- c(min(data3.xts$input$SOLUTES3, na.rm=TRUE) - 1, max(data3.xts$input$SOLUTES3, na.rm=TRUE) + 1) # !!! attempt at resolving negative values issue
      # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
 
-     dygraph(data3.xts) %>%
+     dg3 = dygraph(data3.xts) %>%
       dyAxis("x", label = xlabel) %>%
-      dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
-      # dySeries(name = input$SOLUTES3,
-      #       drawPoints = TRUE,
-      #       strokeWidth = 1,
-      #       pointSize = 3) %>%
+      dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>% 
       dyLimit(limit = LOQ3(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-      dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-      dyOptions(drawGrid = FALSE,
-             connectSeparatedPoints=TRUE,
-             includeZero = TRUE,
-             drawPoints = TRUE,
-             strokeWidth = 1,
-             pointSize = 3) # colors = RColorBrewer::brewer.pal(9, "Set1") [but yellow not good]
+      dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash")
+    if(any(input$SOLUTES3 %in% emergence)){
+      dg3 = dyOptions(dg3, drawGrid = FALSE, connectSeparatedPoints=FALSE,
+             includeZero = TRUE, drawPoints = TRUE, strokeWidth = 0, pointSize = 2)
+    } else {
+      dg3 = dyOptions(dg3, drawGrid = FALSE, connectSeparatedPoints=TRUE,
+             includeZero = TRUE, drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
     }
-
+    dg3
   }) # END of output$GRAPH3
 
   # For testing purposes (of data sorting):
   # ***************************************
   output$TABLE3 <- DT::renderDataTable({
+    if(any(input$SOLUTES3 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 3)
+    }
     if (input$HYDROLOGY3 == "None") dataAll3()
     else dataAllQ3()
   }) # end of output$TABLE3
