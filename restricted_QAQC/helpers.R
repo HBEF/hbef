@@ -189,6 +189,7 @@ email_msg <- function(subject, text_body, addr, pw){
 prep_stickytrap_data = function(input, graphnum){
   
   iwyr = input[[paste0('WATERYEAR', graphnum)]]
+  idate = input[[paste0('DATE', graphnum)]]
   isite = input[[paste0('SITES', graphnum)]]
   ibug = intersect(input[[paste0('SOLUTES', graphnum)]], emergence)
   
@@ -205,7 +206,13 @@ prep_stickytrap_data = function(input, graphnum){
     mutate(waterYr = if_else(month(date) %in% 1:5, year(date) + 1, year(date)),
            site = paste0('W', site))
   
-  if(paste0('WATERYEAR', graphnum) %in% names(input)){
+  date_unchanged = idate[2] == maxDate_current & idate[1] == maxDate_current-365
+  wyear_unchanged = iwyr == 1963
+  if(date_unchanged && wyear_unchanged){
+    stky = filter(stky, waterYr %in% iwyr)
+  } else if(wyear_unchanged) {
+    stky = filter(stky, date >= idate[1] & date <= idate[2])
+  } else {
     stky = filter(stky, waterYr %in% iwyr)
   }
   

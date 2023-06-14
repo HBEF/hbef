@@ -1832,6 +1832,7 @@ shinyServer(function(input, output, session) {
 
   output$GRAPH3 <- renderDygraph({
     
+    # if('caddisfly' %in% input$SOLUTES3) browser()
     # determine x-axis label
     if(input$wateryearOrRange3 == 'wateryr'){
       xlabel <- paste("Water Year ", input$WATERYEAR3)
