@@ -387,7 +387,7 @@ shinyUI(
               ),
 
                checkboxInput("SHOWSENS2",
-                  label = HTML(paste0("Overlay sensor data.<br>",
+                  label = HTML(paste0("View sensor data.<br>",
                      "(Sensor chem available only for watersheds 3, 6, and 9)")),
                   value = FALSE
                ),

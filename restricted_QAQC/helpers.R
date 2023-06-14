@@ -206,8 +206,8 @@ prep_stickytrap_data = function(input, graphnum){
     mutate(waterYr = if_else(month(date) %in% 1:5, year(date) + 1, year(date)),
            site = paste0('W', site))
   
-  date_unchanged = idate[2] == maxDate_current & idate[1] == maxDate_current-365
-  wyear_unchanged = iwyr == 1963
+  date_unchanged = is.null(idate) || (idate[2] == maxDate_current && idate[1] == maxDate_current-365)
+  wyear_unchanged = is.null(iwyr) || iwyr == 1963
   if(date_unchanged && wyear_unchanged){
     stky = filter(stky, waterYr %in% iwyr)
   } else if(wyear_unchanged) {
