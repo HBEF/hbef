@@ -438,7 +438,7 @@ shinyServer(function(input, output, session) {
         dbDisconnect(con)
         return()
     }
-    
+  
     bug$date = as.Date(bug$date, format = '%Y-%m-%d')
 
     dataNew = bug %>% 
@@ -450,7 +450,8 @@ shinyServer(function(input, output, session) {
     dbd = DBI::dbReadTable(con, 'stickytrap') %>% as_tibble()
     
     repeat_keys = dataNew %>% 
-        semi_join(dbd, by = c('sample_id', 'side_or_trapnum'))
+        semi_join(dbd, by = c('sample_id', 'side_or_trapnum')) %>% 
+        mutate(watershed = as.character(watershed))
                   
     exact_repeats = semi_join(repeat_keys, dbd) %>% nrow()
     inexact_repeat_ids = anti_join(repeat_keys, dbd) %>%
