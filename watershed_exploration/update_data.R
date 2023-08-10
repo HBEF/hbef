@@ -39,7 +39,7 @@ hbk_entry = tibble(
     network = 'lter',
     pretty_network = 'LTER',
     stream = 'Hubbard Brook',
-    site_name = 'HBK',
+    site_code = 'HBK',
     full_name = 'Hubbard Brook Mainstem',
     site_type = 'stream_gauge',
     latitude = 43.93974,
@@ -58,7 +58,7 @@ ws101_entry = tibble(
     network = 'lter',
     pretty_network = 'LTER',
     stream = 'Stream 101',
-    site_name = 'w101',
+    site_code = 'w101',
     full_name = 'Watershed 101',
     site_type = 'stream_sampling_point',
     latitude = 43.93593,
@@ -79,13 +79,14 @@ read_csv('data/general/site_data.csv') %>%
 
 tibble(network = c('lter', 'lter'),
        domain = c('hbef', 'hbef'),
-       site_name = c('HBK', 'w101')) %>%
+       site_code = c('HBK', 'w101')) %>%
     bind_rows(read_csv('data/general/sites_with_discharge.csv')) %>%
     distinct() %>%
     write_csv('data/general/sites_with_discharge.csv')
 
 #retrieve and munge raw mainstem Q; insert into filestructure ####
 
+#modify last line of shell script to run locally
 system('../scheduled_scripts/get_usfs_weirfiles.sh')
 
 header = read_csv('../restricted_QAQC/data/unh_sensor_data/HB%20Mainstem_HB_mainstem.dat',
@@ -104,12 +105,12 @@ mainstem %>%
     group_by(datetime = lubridate::floor_date(datetime, unit = 'day')) %>%
     summarize(val = mean(val, na.rm = TRUE),
               .groups = 'drop') %>%
-    mutate(site_name = 'HBK',
+    mutate(site_code = 'HBK',
            var = 'IS_discharge',
            ms_status = 0,
            ms_interp = 0,
            val_err = 0) %>%
-    select(datetime, site_name, var, val, ms_status, ms_interp, val_err) %>%
+    select(datetime, site_code, var, val, ms_status, ms_interp, val_err) %>%
     write_feather('data/hbef/discharge/HBK.feather')
 
 
@@ -117,7 +118,7 @@ mainstem %>%
 
 w101 = sf::st_read('../../../macrosheds/portal/data/general/shed_boundary/shed_boundary.shp') %>%
     as_tibble() %>%
-    filter(site_name == 'w101')
+    filter(site_code == 'w101')
 
 sf::st_read('data/general/hbk_shed/hbef_wsheds.shp') %>%
     sf::st_buffer(dist = 0.1) %>%
@@ -126,10 +127,10 @@ sf::st_read('data/general/hbk_shed/hbef_wsheds.shp') %>%
     sf::st_transform(4326) %>%
     as_tibble() %>%
     rename(geometry = x) %>%
-    mutate(site_name = 'HBK') %>%
+    mutate(site_code = 'HBK') %>%
     bind_rows(sf::st_read('data/general/shed_boundary/shed_boundary.shp')) %>%
     bind_rows(w101) %>%
-    distinct(site_name, .keep_all = TRUE) %>%
+    distinct(site_code, .keep_all = TRUE) %>%
     sf::st_as_sf() %>%
     sf::st_write('data/general/shed_boundary/shed_boundary.shp',
                  delete_layer = TRUE)
