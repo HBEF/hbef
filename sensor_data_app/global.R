@@ -195,7 +195,8 @@ tables = dbListTables(con)
 dataCurrent <- dbReadTable(con, "current") %>%
   mutate(
     NO3_N=NO3_to_NO3N(NO3),
-    NH4_N=NH4_to_NH4N(NH4)) %>%
+    NH4_N=NH4_to_NH4N(NH4),
+    timeEST = as.character(timeEST)) %>%
   select(-NO3, -NH4) %>%
   filter(date >= as.Date('2013-06-01')) %>%
   arrange(site, date, timeEST)
