@@ -72,8 +72,14 @@ get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
    colnames(dsens) = gsub('S4__', '', colnames(dsens))
 
    if(svar == 'Nitrate_mg'){
-       dsens = mutate(dsens, NO3_N_mg=NO3_to_NO3N(Nitrate_mg)) %>%
+       dsens = dsens %>% 
+           slice(seq(1, n(), 8)) %>% 
+           mutate(NO3_N_mg=NO3_to_NO3N(Nitrate_mg)) %>%
            select(-Nitrate_mg)
+   }
+   
+   if(svar == 'TurbidityRaw'){
+      dsens = slice(dsens, seq(1, n(), 8))
    }
 
    dbClearResult(res)

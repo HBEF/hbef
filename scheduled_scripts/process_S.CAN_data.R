@@ -217,7 +217,7 @@ d6 <- clean_SCAN_data('SCAN 2023 05-16 thru 07-24.xlsx')
 
 #make sure there's no overlap
 range(d6$datetime)
-range(d7$datetime)
+# range(d7$datetime)
 
 # bind dsets; get them ready for db; insert them into db ####
 
