@@ -7,6 +7,7 @@ library(glue)
 library(RMariaDB)
 library(ggplot2)
 library(lubridate)
+library(readxl)
 
 # runmode = 'test'
 runmode = 'live'
@@ -36,6 +37,7 @@ s4 = dbReadTable(con, 'sensor4') %>%
     as_tibble()
 
 # 2. read "loaner" S:CAN dataset from Lisle ####
+
 dloan = read.csv('Reprocessed_SCAN_Data.csv',
               stringsAsFactors = FALSE,
               skip = 1) %>%
@@ -143,57 +145,89 @@ d1 = d1 %>%
     select(datetime, Nitrate_mg, TurbidityRaw) %>%
     arrange(datetime)
 
-#4. and the third (RESOLVE NTU vs FTU disparity from first two batches) ####
+# OBSOLETE and the third (RESOLVE NTU vs FTU disparity from first two batches) ####
 
-d2 = read.csv('SCAN 4-22 thru 7-28-2022.csv',
-              stringsAsFactors = FALSE,
-              skip = 4) %>%
-    as_tibble() %>%
-    select(-(4:5)) %>% #ignore temperature data
-    rename(datetime = 1, Nitrate_N_mg = 2, Nitrate_N_mg_status = 3, TurbidityRawNTU = 4,
-           TurbidityRawNTU_status = 5) %>%
-    mutate(datetime = as.POSIXct(datetime,
-                                 tz = 'EST')) %>%
-    arrange(datetime) %>%
-    filter(datetime > as.POSIXct('2020-08-06 09:45:07', #last record in dloan
-                                 tz = 'EST'))
+# d2 = read.csv('SCAN 4-22 thru 7-28-2022.csv',
+#               stringsAsFactors = FALSE,
+#               skip = 4) %>%
+#     as_tibble() %>%
+#     select(-(4:5)) %>% #ignore temperature data
+#     rename(datetime = 1, Nitrate_N_mg = 2, Nitrate_N_mg_status = 3, TurbidityRawNTU = 4,
+#            TurbidityRawNTU_status = 5) %>%
+#     mutate(datetime = as.POSIXct(datetime,
+#                                  tz = 'EST')) %>%
+#     arrange(datetime) %>%
+#     filter(datetime > as.POSIXct('2020-08-06 09:45:07', #last record in dloan
+#                                  tz = 'EST'))
+# 
+# #visualize flagged turbidity points
+# ggplot(d2, aes(x = datetime,
+#                y = TurbidityRawNTU)) +
+#     geom_point() +
+#     geom_point(color = factor(d2$TurbidityRawNTU_status,
+#                               labels = c('transparent', 'green', 'red')))
+# 
+# #same for nitrate
+# ggplot(d2, aes(x = datetime,
+#                y = Nitrate_N_mg)) +
+#     geom_line() +
+#     geom_point(color = factor(d2$Nitrate_N_mg_status,
+#                               labels = c('transparent', 'green', 'orange')))
+# 
+# #clean stuff
+# # unique(d1$TurbidityRaw_status)
+# d2b = d2 %>%
+#     filter(TurbidityRawNTU_status == '',
+#            Nitrate_N_mg_status == '') %>%
+#     filter(Nitrate_N_mg < 10)
+# ggplot(d2b, aes(x = datetime,
+#                y = Nitrate_N_mg)) +
+#     geom_line()
+# 
+# #filter bollockery from dataset NOT UPDATED
+# #NEED CLARITY ON NO3-N, FNU, AND 2021 DATA
+# d2 = d2 %>%
+#     filter(TurbidityRawNTU_status == '',
+#            Nitrate_N_mg_status == '') %>%
+#     select(datetime, Nitrate_N_mg, TurbidityRaw = TurbidityRawNTU) %>%
+#     arrange(datetime)
 
-#visualize flagged turbitidy points
-ggplot(d2, aes(x = datetime,
-               y = TurbidityRawNTU)) +
-    geom_point() +
-    geom_point(color = factor(d2$TurbidityRawNTU_status,
-                              labels = c('transparent', 'green', 'red')))
+# 5. more sets ####
 
-#same for nitrate
-ggplot(d2, aes(x = datetime,
-               y = Nitrate_N_mg)) +
-    geom_line() +
-    geom_point(color = factor(d2$Nitrate_N_mg_status,
-                              labels = c('transparent', 'green', 'orange')))
+clean_SCAN_data <- function(fpath){
+    read_xlsx(fpath, skip = 4, guess_max = 10000, col_names = FALSE) %>%
+        select(-(4:5)) %>% #ignore temperature data
+        rename(datetime = 1, Nitrate_mg = 2, Nitrate_mg_status = 3, TurbidityRawFTU = 4,
+               TurbidityRawFTU_status = 5) %>%
+        mutate(datetime = as.POSIXct(datetime, tz = 'EST')) %>%
+        arrange(datetime) %>%
+        filter(is.na(TurbidityRawFTU_status),
+               is.na(Nitrate_mg_status)) %>%
+        select(datetime, Nitrate_mg, TurbidityRaw = TurbidityRawFTU) %>%
+        arrange(datetime)
+}
 
-#clean stuff
-# unique(d1$TurbidityRaw_status)
-d2b = d2 %>%
-    filter(TurbidityRawNTU_status == '',
-           Nitrate_N_mg_status == '') %>%
-    filter(Nitrate_N_mg < 10)
-ggplot(d2b, aes(x = datetime,
-               y = Nitrate_N_mg)) +
-    geom_line()
+d2 <- clean_SCAN_data('SCAN 2021-4-30 thru 2022-10-12.xlsx')
+d3 <- clean_SCAN_data('SCAN 2022-10-12 thru 2022-12-12.xlsx') %>% 
+  slice(-(1:10))
+d4 <- clean_SCAN_data('SCAN 2-12-2022 thru 2-27-2023.xlsx')
+d5 <- clean_SCAN_data('SCAN 2023-02-27 thru 2023-05-16.xlsx') %>% 
+  slice(-(1:14))
+d6 <- clean_SCAN_data('SCAN 2023 05-16 thru 07-24.xlsx')
 
-#filter bollockery from dataset NOT UPDATED
-#NEED CLARITY ON NO3-N, FNU, AND 2021 DATA
-d2 = d2 %>%
-    filter(TurbidityRawNTU_status == '',
-           Nitrate_N_mg_status == '') %>%
-    select(datetime, Nitrate_N_mg, TurbidityRaw = TurbidityRawNTU) %>%
-    arrange(datetime)
+#make sure there's no overlap
+range(d6$datetime)
+range(d7$datetime)
 
-#bind dsets; get them ready for db; insert them into db ####
+# bind dsets; get them ready for db; insert them into db ####
 
-insert_df = dloan %>%
-    bind_rows(d1) %>%
+insert_df = select(dloan, -ends_with('status')) %>%
+    bind_rows(select(d1, -ends_with('status'))) %>%
+    bind_rows(d2) %>% 
+    bind_rows(d3) %>% 
+    bind_rows(d4) %>% 
+    bind_rows(d5) %>% 
+    bind_rows(d6) %>% 
     arrange(datetime) %>%
     rename_with(.fn = ~ paste('S4', ., sep = '__'),
                 .cols = c('TurbidityRaw', 'Nitrate_mg')) %>%
