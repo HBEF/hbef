@@ -18,7 +18,7 @@ parse_note_collection <- function(notefile){
         sheets45_fmt = c('RG-22', 'RG-1', 'RG-4', 'RG-23',
                          'W-1', 'W-2', 'W-3', 'W-4', 'W-5', 'W-6', 'W-7',
                          'W-8', 'W-9', 'HBK', 'ML-70'),
-        desired_fmt = c('RG22', 'RG1', 'RG4', 'RG23', #what is RG4?
+        desired_fmt = c('RG22', 'RG1', 'RG4', 'RG23',
                         'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7',
                         'W8', 'W9', 'HBK', 'ML70')
     )
@@ -140,24 +140,49 @@ parse_note_collection <- function(notefile){
     addtl_comment = d[[23, 2]]
     addtl_comment = ifelse(is.na(addtl_comment), '', paste(' --', addtl_comment))
     
-    d_grab = d[7:15, 2:16] %>% 
-        as_tibble() %>%
-        select(site = 1, date = 2, timeEST = 3, pHmetrohm = 4, ANCMet = 5,
-               pH = 7, spCond = 8, DIC = 9, temp = 10, gageHt = 11, hydroGraph = 12,
-               fieldCode = 13, notes = 14, archived = 15) %>% 
-        filter(if_any(everything(), ~!is.na(.))) %>% 
-        mutate(timeEST = str_pad(timeEST, 4, 'left', '0'),
-               across(4:10, as.numeric),
-               site = toupper(site),
-               site = sitename_map$sheets123_fmt[match(site, sitename_map$sheets45_fmt)],
-               date = as.Date(as.numeric(date), origin = '1899-12-30'),
-               notes = paste0(notes, addtl_comment),
-               notes = sub('^NA -- ', '', notes),
-               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
-        relocate(date, .before = 'timeEST')
+    if(! is.na(d[7, 3])){
+        d_grab = d[7:15, 2:16] %>% 
+            as_tibble() %>%
+            select(site = 1, date = 2, timeEST = 3, pHmetrohm = 4, ANCMet = 5,
+                   pH = 7, spCond = 8, DIC = 9, temp = 10, gageHt = 11, hydroGraph = 12,
+                   fieldCode = 13, notes = 14, archived = 15) %>% 
+            filter(if_any(everything(), ~!is.na(.))) %>% 
+            mutate(timeEST = str_pad(timeEST, 4, 'left', '0'),
+                   across(4:10, as.numeric),
+                   site = toupper(site),
+                   site = sitename_map$sheets123_fmt[match(site, sitename_map$sheets45_fmt)],
+                   date = as.Date(as.numeric(date), origin = '1899-12-30'),
+                   notes = paste0(notes, addtl_comment),
+                   notes = sub('^NA -- ', '', notes),
+                   archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
+            relocate(date, .before = 'timeEST')
+    } else {
+        d_grab = tibble()
+        d_flow$gageHt = NA_real_
+    }
     
     
-    # combine ####
+    # resolve, combine ####
+    
+    #RG-4 data are only used if RG-1 is contaminated (code 923)
+    d_precip = split(d_precip, as.factor(d_precip$date)) %>% 
+        purrr::map(function(x){
+            rg1 = x[x$site == 'RG-1', ]
+            rg4 = x[x$site == 'RG-4', ]
+            if(! nrow(rg1) || ! nrow(rg4)) return(x)
+            if(grepl('923', rg1$fieldCode) | grepl('923', rg4$fieldCode)){
+                x = x[! x$site == 'RG-1', ]
+                x[x$site == 'RG-4', 'site'] = 'RG-1'
+                fcode = pull(x[x$site == 'RG-1', 'fieldCode'])
+                x[x$site == 'RG-1', 'fieldCode'] = '923'
+                return(x)
+            } else {
+                return(x)
+            }
+        }) %>% 
+        purrr::reduce(bind_rows)
+    
+    d_precip = filter(d_precip, site != 'RG-4')
     
     d = d_flow %>% 
         bind_rows(d_grab) %>% 
@@ -177,6 +202,8 @@ parse_note_collection <- function(notefile){
 
 for(f in ff){
     print(f)
-    parse_note_collection(f)
+    out = parse_note_collection(f)
+    
+    out
     readLines(n = 1)
 }

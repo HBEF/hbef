@@ -604,6 +604,20 @@ shinyServer(function(input, output, session) {
           #                            '\n\nDIC lab sheets can now be uploaded for those collection dates.'),
           #           addr = gm_addr,
           #           pw = gm_pass)
+          # browser()
+          
+          d_parsed <- parse_note_collection(file.path("field_and_lab_note_collections", fn))
+          
+          if(any(is.na(d_parsed$site))) stop("Missing or incorrect site names detected. Please try again or email Mike with the file you're trying to upload.")
+          stop("oi") use showwarning instead
+          
+          output$NOTE_PREUPLOAD <- renderRHandsontable({
+              
+              rhandsontable(d_parsed, height = 400) %>%
+                  hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
+                  hot_col("uniqueID", readOnly = TRUE) %>%
+                  hot_cols(fixedColumnsLeft = 1)
+          })
       }
       
       # if(pt2){
