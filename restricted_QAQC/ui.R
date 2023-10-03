@@ -185,8 +185,16 @@ shinyUI(
                               # br(),
                               fileInput('FIELD_AND_LAB_UPLOAD', 'Choose XLSX File(s)',
                                         multiple=TRUE, accept=c('.xlsx')),
+                              actionButton('SUBMIT_FL1', label='Upload'),
                               hr(),
-                              actionButton('SUBMIT_FL', label='Submit')
+                              conditionalPanel(condition = "input.SUBMIT_FL1 > 0",
+                                  span('If everything looks good in the table below, ',
+                                    actionButton('SUBMIT_FL2', label='Submit',
+                                                 style="color: #fff; background-color: #337ab7; border-color: #2e6da4")),
+                                  p(),
+                                  # DT::dataTableOutput("NOTE_PREUPLOAD")
+                                  rHandsontableOutput("NOTE_PREUPLOAD")
+                              )
                        )
                    )
           )

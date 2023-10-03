@@ -564,7 +564,7 @@ shinyServer(function(input, output, session) {
           type='message')
   })
   
-  observeEvent(input$SUBMIT_FL, {
+  notes_parsed <- eventReactive(input$SUBMIT_FL1, {
       
       ff = input$FIELD_AND_LAB_UPLOAD
       if (is.null(ff)) return()
@@ -589,36 +589,57 @@ shinyServer(function(input, output, session) {
       #     stop('YYYYMMDD.xlsx and YYYYMMDD_DIC.xslx files must be uploaded separately')
       # }
       
-      if(pt1){
+      # if(pt1){
           
-          file.copy(ff$datapath, file.path("field_and_lab_note_collections", fn), overwrite=TRUE)
-          # file.copy(ff$datapath, file.path("field_and_lab_note_collections", 'part1', fn), overwrite=TRUE)
-        
-          # dates <- sub('.xlsx', '', fn)
-          # email_msg(subject = 'HBWatER data upload part 2 is ready',
-          #           text_body = paste0('Hi Jeff,\n\nThis is an automated message letting you ',
-          #                            'know that new lab and field notes have ',
-          #                            'been uploaded to http://hbwater.org:3838/restricted_QAQC ',
-          #                            'for sample collection dates:\n\n',
-          #                            paste(dates, collapse = '\n'),
-          #                            '\n\nDIC lab sheets can now be uploaded for those collection dates.'),
-          #           addr = gm_addr,
-          #           pw = gm_pass)
-          # browser()
-          
-          d_parsed <- parse_note_collection(file.path("field_and_lab_note_collections", fn))
-          
-          if(any(is.na(d_parsed$site))) stop("Missing or incorrect site names detected. Please try again or email Mike with the file you're trying to upload.")
-          stop("oi") use showwarning instead
-          
-          output$NOTE_PREUPLOAD <- renderRHandsontable({
-              
-              rhandsontable(d_parsed, height = 400) %>%
-                  hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
-                  hot_col("uniqueID", readOnly = TRUE) %>%
-                  hot_cols(fixedColumnsLeft = 1)
-          })
+      file.copy(ff$datapath, file.path("field_and_lab_note_collections", fn), overwrite=TRUE)
+      # file.copy(ff$datapath, file.path("field_and_lab_note_collections", 'part1', fn), overwrite=TRUE)
+    
+      # dates <- sub('.xlsx', '', fn)
+      # email_msg(subject = 'HBWatER data upload part 2 is ready',
+      #           text_body = paste0('Hi Jeff,\n\nThis is an automated message letting you ',
+      #                            'know that new lab and field notes have ',
+      #                            'been uploaded to http://hbwater.org:3838/restricted_QAQC ',
+      #                            'for sample collection dates:\n\n',
+      #                            paste(dates, collapse = '\n'),
+      #                            '\n\nDIC lab sheets can now be uploaded for those collection dates.'),
+      #           addr = gm_addr,
+      #           pw = gm_pass)
+      # browser()
+      
+      d_parsed <- try(parse_note_collection(file.path("field_and_lab_note_collections", fn)),
+                      silent = TRUE)
+      
+      if(inherits(d_parsed, 'try-error') | is.null(d_parsed)){
+          showNotification("Something failed to parse. Please try again or email Mike with the file you're trying to upload.",
+                           type = 'warning')
+          return()
       }
+      if(nrow(d_parsed) == 0){
+          showNotification("No records detected. Either something failed to parse, or this is a blank template.",
+                           type = 'warning')
+          return()
+      }
+      if(any(is.na(d_parsed$site))){
+          showNotification("Missing or incorrect site name detected. Please try again or email Mike with the file you're trying to upload.",
+                           type = 'warning')
+          return()
+      }
+      if(any(is.na(d_parsed$date))){
+          showNotification("Missing or incorrect date detected. Please try again or email Mike with the file you're trying to upload.",
+                           type = 'warning')
+          return()
+      }
+      if(any(is.na(d_parsed$timeEST) | ! nchar(d_parsed$timeEST) == 4)){
+          showNotification("Missing or incorrect time detected. Please try again or email Mike with the file you're trying to upload.",
+                           type = 'warning')
+          return()
+      }
+      if(any(is.na(d_parsed$datetime))){
+          showNotification("Incorrect date or time detected. Please try again or email Mike with the file you're trying to upload.",
+                           type = 'warning')
+          return()
+      }
+      # }
       
       # if(pt2){
       #     
@@ -681,8 +702,62 @@ shinyServer(function(input, output, session) {
       #     }
       # }
       
-      showNotification(paste(length(fn), "file(s) submitted."),
-          type='message')
+      return(d_parsed)
+  })
+          
+  output$NOTE_PREUPLOAD <- renderRHandsontable({
+  # output$NOTE_PREUPLOAD <- DT::renderDataTable({
+      
+      d_parsed <- req(notes_parsed())
+      d_parsed <- d_parsed %>% 
+          relocate(notes, .after = 'datetime') %>% 
+          mutate(waterYr = as.integer(waterYr))
+      
+      getmax <- function(colname){
+          mx <- max(d_parsed[[colname]], na.rm = TRUE)
+          mx <- as.numeric(mx)
+          if(is.infinite(mx)){
+              return(0)
+          } else {
+              return(mx)
+          }
+      }
+      
+      rendo <- function(vv){
+          custrend <- htmlwidgets::JS(sprintf("
+          function(instance, td, row, col, prop, value, cellProperties) {
+            Handsontable.renderers.TextRenderer.apply(this, arguments);
+            if (value == %s) {
+              td.style.color = 'red';  // Change the text color for maximum values
+            }
+          }
+        ", vv))
+          
+          return(custrend)
+      }
+      
+      rhandsontable(d_parsed, height = 400, readOnly = TRUE) %>%
+          hot_col('pH', renderer = rendo(getmax('pH'))) %>%
+          hot_col('pHmetrohm', renderer = rendo(getmax('pHmetrohm'))) %>%
+          hot_col('DIC', renderer = rendo(getmax('DIC'))) %>%
+          hot_col('spCond', renderer = rendo(getmax('spCond'))) %>%
+          hot_col('temp', renderer = rendo(getmax('temp'))) %>%
+          hot_col('ANC960', renderer = rendo(getmax('ANC960'))) %>%
+          hot_col('ANCMet', renderer = rendo(getmax('ANCMet'))) %>%
+          hot_col('gageHt', renderer = rendo(getmax('gageHt'))) %>%
+          hot_col('flowGageHt', renderer = rendo(getmax('flowGageHt'))) %>%
+          hot_col('precipCatch', renderer = rendo(getmax('precipCatch'))) %>%
+          # hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
+          hot_cols(fixedColumnsLeft = 4)
+  })
+  
+  observeEvent(input$SUBMIT_FL2, {
+              
+      req(notes_parsed())
+      showNotification(paste(length(fn), "Just testing now; not fully connected"),
+                       type='message')
+      # showNotification(paste(length(fn), "file(s) submitted."),
+      #                  type='message')
   })
 
   # *QA/QC Tab* ####

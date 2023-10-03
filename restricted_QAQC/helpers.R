@@ -419,7 +419,7 @@ parse_note_collection <- function(notefile){
         bind_rows(d_precip) %>% 
         mutate(site = sub('-', '', site),
                refNo = NA_integer_,
-               uniqueID = paste(site, sub('-', '', date), timeEST, sep = '_'),
+               uniqueID = paste(site, gsub('-', '', date), timeEST, sep = '_'),
                waterYr = if_else(month(date) >= 7, year(date) + 1, year(date)),
                datetime = ymd_hm(paste(date, timeEST))) %>% 
         select(refNo, site, date, timeEST, pH, pHmetrohm, DIC, spCond, temp, ANC960,
