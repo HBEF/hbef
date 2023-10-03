@@ -171,7 +171,7 @@ shinyUI(
                               h2('Instructions'),
                               # p(HTML('<strong>Part 1</strong>:')),
                               p(HTML('<ol>',
-                                     '<li>Copy <code>hubbard_brook_ecosystem_study_worksheets_v3.xlsx</code> to a new file named with only the sample collection date in YYYYMMDD format, e.g. <code>20230101.xlsx</code>".</li>',
+                                     '<li>Copy <code>hubbard_brook_ecosystem_study_worksheets_v4.xlsx</code> to a new file named with only the sample collection date in YYYYMMDD format, e.g. <code>20230101.xlsx</code>".</li>',
                                      '<li>Fill out the first 4 sheets in the new file, and the 5th if applicable.</li>',
                                      '<li>Upload the filled out file (or multiple files at a time)</li>',
                                      '<li>Click submit and wait a moment. If the submission is successful, you will see a blue notification. Otherwise, you will see a red error message.</li>',
@@ -188,10 +188,11 @@ shinyUI(
                               actionButton('SUBMIT_FL1', label='Upload'),
                               hr(),
                               conditionalPanel(condition = "input.SUBMIT_FL1 > 0",
-                                  span('If everything looks good in the table below, ',
+                                  span('In the table below, max values for each numeric column are displayed in red. If everything looks good, ',
                                     actionButton('SUBMIT_FL2', label='Submit',
                                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4")),
                                   p(),
+                                  div(id = "loading-icon", class = "fa fa-spinner fa-spin fa-3x", style = "display:none;"),
                                   # DT::dataTableOutput("NOTE_PREUPLOAD")
                                   rHandsontableOutput("NOTE_PREUPLOAD")
                               )

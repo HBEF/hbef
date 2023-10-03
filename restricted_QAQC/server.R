@@ -566,6 +566,7 @@ shinyServer(function(input, output, session) {
   
   notes_parsed <- eventReactive(input$SUBMIT_FL1, {
       
+      shinyjs::show("loading-icon")
       ff = input$FIELD_AND_LAB_UPLOAD
       if (is.null(ff)) return()
       fn = ff$name
@@ -576,6 +577,7 @@ shinyServer(function(input, output, session) {
       if(! pt1){
           showNotification(paste('Filename(s) must match YYYYMMDD.xlsx.'),
                            type='error', duration=NULL, closeButton=TRUE)
+          shinyjs::hide("loading-icon")
           return()
       }
       # if(! pt1 && ! pt2){
@@ -606,38 +608,50 @@ shinyServer(function(input, output, session) {
       #           pw = gm_pass)
       # browser()
       
-      d_parsed <- try(parse_note_collection(file.path("field_and_lab_note_collections", fn)),
-                      silent = TRUE)
-      
-      if(inherits(d_parsed, 'try-error') | is.null(d_parsed)){
-          showNotification("Something failed to parse. Please try again or email Mike with the file you're trying to upload.",
-                           type = 'warning')
-          return()
-      }
-      if(nrow(d_parsed) == 0){
-          showNotification("No records detected. Either something failed to parse, or this is a blank template.",
-                           type = 'warning')
-          return()
-      }
-      if(any(is.na(d_parsed$site))){
-          showNotification("Missing or incorrect site name detected. Please try again or email Mike with the file you're trying to upload.",
-                           type = 'warning')
-          return()
-      }
-      if(any(is.na(d_parsed$date))){
-          showNotification("Missing or incorrect date detected. Please try again or email Mike with the file you're trying to upload.",
-                           type = 'warning')
-          return()
-      }
-      if(any(is.na(d_parsed$timeEST) | ! nchar(d_parsed$timeEST) == 4)){
-          showNotification("Missing or incorrect time detected. Please try again or email Mike with the file you're trying to upload.",
-                           type = 'warning')
-          return()
-      }
-      if(any(is.na(d_parsed$datetime))){
-          showNotification("Incorrect date or time detected. Please try again or email Mike with the file you're trying to upload.",
-                           type = 'warning')
-          return()
+      d_combined <- tibble()
+      for(f in ff$name){
+          
+          d_parsed <- try(parse_note_collection(file.path("field_and_lab_note_collections", f)),
+                          silent = TRUE)
+          
+          if(inherits(d_parsed, 'try-error') | is.null(d_parsed)){
+              showNotification(glue("{f} failed to parse. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(nrow(d_parsed) == 0){
+              showNotification(glue("No records detected in {f}. Either something failed to parse, or this is a blank template."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(any(is.na(d_parsed$site))){
+              showNotification(glue("Missing or incorrect site name detected in {f}. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(any(is.na(d_parsed$date))){
+              showNotification(glue("Missing or incorrect date detected in {f}. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(any(is.na(d_parsed$timeEST) | ! nchar(d_parsed$timeEST) == 4)){
+              showNotification(glue("Missing or incorrect time detected in {f}. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(any(is.na(d_parsed$datetime))){
+              showNotification(glue("Incorrect date or time detected in {f}. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          
+          d_combined <- bind_rows(d_combined, d_parsed)
       }
       # }
       
@@ -702,7 +716,8 @@ shinyServer(function(input, output, session) {
       #     }
       # }
       
-      return(d_parsed)
+      shinyjs::hide("loading-icon")
+      return(d_combined)
   })
           
   output$NOTE_PREUPLOAD <- renderRHandsontable({
@@ -711,7 +726,8 @@ shinyServer(function(input, output, session) {
       d_parsed <- req(notes_parsed())
       d_parsed <- d_parsed %>% 
           relocate(notes, .after = 'datetime') %>% 
-          mutate(waterYr = as.integer(waterYr))
+          mutate(waterYr = as.integer(waterYr)) %>% 
+          arrange(date, site, timeEST)
       
       getmax <- function(colname){
           mx <- max(d_parsed[[colname]], na.rm = TRUE)
@@ -754,7 +770,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$SUBMIT_FL2, {
               
       req(notes_parsed())
-      showNotification(paste(length(fn), "Just testing now; not fully connected"),
+      showNotification("Nothing submitted. Still in testing phase!",
                        type='message')
       # showNotification(paste(length(fn), "file(s) submitted."),
       #                  type='message')
@@ -1499,9 +1515,9 @@ shinyServer(function(input, output, session) {
   )
   
   output$DOWNLOAD_TEMPLATE_FIELDLAB <- downloadHandler(
-    filename = 'hubbard_brook_ecosystem_study_worksheets_v3.xlsx',
+    filename = 'hubbard_brook_ecosystem_study_worksheets_v4.xlsx',
     content = function(file) {
-      file.copy("documentation/hubbard_brook_ecosystem_study_worksheets_v3.xlsx", file)
+      file.copy("documentation/hubbard_brook_ecosystem_study_worksheets_v4.xlsx", file)
     },
     contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   )

@@ -37,6 +37,16 @@ pass=readLines('../../RMySQL.config')
 #gm_pass=readLines('config.txt')[1]
 #gm_addr=readLines('config.txt')[2]
 
+jsCode <- "
+$(document).on('shiny:busy', function() {
+  $('#loading-icon').show();
+});
+
+$(document).on('shiny:idle', function() {
+  $('#loading-icon').hide();
+});
+"
+
 # **********************************************************************
 #                      ---- LISTS ----
 # **********************************************************************
