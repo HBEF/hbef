@@ -294,6 +294,7 @@ parse_note_collection <- function(notefile){
         mutate(timeEST = str_pad(timeEST, 4, 'left', '0'),
                across(c(3, 4, 7), as.numeric),
                date = d_date,
+               fieldCode = as.character(fieldCode),
                notes = paste0(notes, addtl_comment),
                notes = sub('^NA -- ', '', notes)) %>% 
         relocate(date, .before = 'timeEST')
@@ -325,10 +326,10 @@ parse_note_collection <- function(notefile){
         select(-ends_with(c('.x', '.y'))) %>% 
         relocate(timeEST, .after = 'date')
     
-    d_flow = d[18:28, c(1:9)] %>% 
+    d_flow = d[18:28, c(1:4, 6:9)] %>%
         as_tibble() %>%
-        rename(site = 1, date = 2, pHmetrohm = 3, ANCMet = 4, ANC960 = 5, pH = 6,
-               spCond = 7, fieldCode = 8, archived = 9) %>% 
+        rename(site = 1, date = 2, pHmetrohm = 3, ANCMet = 4, pH = 5,
+               spCond = 6, fieldCode = 7, archived = 8) 
         mutate(date = as.Date(as.numeric(date), origin = '1899-12-30'),
                across(3:7, as.numeric),
                archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
@@ -422,10 +423,36 @@ parse_note_collection <- function(notefile){
                uniqueID = paste(site, gsub('-', '', date), timeEST, sep = '_'),
                waterYr = if_else(month(date) >= 7, year(date) + 1, year(date)),
                datetime = ymd_hm(paste(date, timeEST))) %>% 
-        select(refNo, site, date, timeEST, pH, pHmetrohm, DIC, spCond, temp, ANC960,
+        select(refNo, site, date, timeEST, pH, pHmetrohm, DIC, spCond, temp,
                ANCMet, gageHt, hydroGraph, flowGageHt, precipCatch, fieldCode,
                notes, archived, uniqueID, waterYr, datetime) %>% 
         arrange(site, date, timeEST)
+    
+    return(d)
+}
+
+field_code_handler <- function(d, sheet){
+    
+    #sheet is the number corresponding to the index of the data sheet in the note xlsx
+    
+    d$fieldCode <- sub('[/;,]', ' ', d$fieldCode)
+    d$fieldCode <- sub(' {2,}', ' ', d$fieldCode)
+    # d$fieldCode <- gsub('([0-9]{3}) \\1', '\\1', d$fieldCode)
+    
+    # allowed_fieldcodes <- as.character(c(319, 888, 905, 907, 920, 911, 912, 955, 960, 966, 969, 970))
+    # if(any(! is.na(d$fieldCode) & ! d$fieldCode %in% allowed_fieldcodes)){
+    #     warning('Unrecognized fieldCodes:\n',
+    #             paste(setdiff(na.omit(d$fieldCode), allowed_fieldcodes), collapse = '; '))
+    # }
+    # 
+    # cat('resulting codes:\n', paste(unique(d$fieldCode), collapse = '; '), '\n')
+    
+    qq <- is.na(d$fieldCode) |
+        grepl('^[0-9]{3}$', d$fieldCode) |
+        grepl('^[0-9]{3} [0-9]{3}$', d$fieldCode)
+    illegal_codes <- unique(d$fieldCode[! qq])
+    
+    if(any(! qq)) warning(glue('illegal code(s) in sheet {sheet}: ', paste(illegal_codes, collapse = '; ')))
     
     return(d)
 }

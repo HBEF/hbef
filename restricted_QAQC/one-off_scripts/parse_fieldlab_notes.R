@@ -3,6 +3,7 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 library(lubridate)
+library(glue)
 
 setwd('~/git/hbef/shiny/restricted_QAQC/field_and_lab_note_collections/')
 ff = list.files()
@@ -46,6 +47,8 @@ parse_note_collection <- function(notefile){
                notes = addtl_comment) %>% 
         relocate(date, .before = 'timeEST')
     
+    d_precip = field_code_handler(d_precip, 1) #see helpers.R
+    
     #flow ####
     
     d = readxl::read_xlsx(notefile,
@@ -68,6 +71,8 @@ parse_note_collection <- function(notefile){
                notes = sub('^NA -- ', '', notes)) %>% 
         relocate(date, .before = 'timeEST')
     
+    d_flow = field_code_handler(d_flow, 2)
+    
     #chem ####
     
     d = readxl::read_xlsx(notefile,
@@ -79,15 +84,19 @@ parse_note_collection <- function(notefile){
     addtl_comment = d[[33, 3]]
     addtl_comment = ifelse(is.na(addtl_comment), '', paste(' --', addtl_comment))
     
-    d_precip = d[12:15, c(1:3, 6:9)] %>% 
+    d_precip_ = d[12:15, c(1:3, 6:9)] %>% 
         as_tibble() %>%
         rename(site = 1, date = 2, pHmetrohm = 3, pH = 4, spCond = 5, fieldCode = 6,
                archived = 7) %>% 
         mutate(date = as.Date(as.numeric(date), origin = '1899-12-30'),
                across(3:5, as.numeric),
-               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
+               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE))
+    
+    d_precip_ = field_code_handler(d_precip_, 3)
+    
+    d_precip = d_precip_ %>% 
         left_join(d_precip, by = c('site', 'date')) %>% 
-        mutate(fieldCode = paste(fieldCode.x, fieldCode.y),
+        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y)),
                fieldCode = gsub('NA ?| ?NA', '', fieldCode),
                fieldCode = ifelse(! is.na(fieldCode) & fieldCode == '', NA_character_, fieldCode),
                notes = paste0(notes, addtl_comment),
@@ -95,15 +104,19 @@ parse_note_collection <- function(notefile){
         select(-ends_with(c('.x', '.y'))) %>% 
         relocate(timeEST, .after = 'date')
     
-    d_flow = d[18:28, c(1:9)] %>% 
+    d_flow_ = d[18:28, c(1:4, 6:9)] %>%
         as_tibble() %>%
-        rename(site = 1, date = 2, pHmetrohm = 3, ANCMet = 4, ANC960 = 5, pH = 6,
-               spCond = 7, fieldCode = 8, archived = 9) %>% 
+        rename(site = 1, date = 2, pHmetrohm = 3, ANCMet = 4, pH = 5,
+               spCond = 6, fieldCode = 7, archived = 8) %>% 
         mutate(date = as.Date(as.numeric(date), origin = '1899-12-30'),
                across(3:7, as.numeric),
-               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
+               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE))
+    
+    d_flow_ = field_code_handler(d_flow_, 3)
+    
+    d_flow = d_flow_ %>% 
         left_join(d_flow, by = c('site', 'date')) %>% 
-        mutate(fieldCode = paste(fieldCode.x, fieldCode.y),
+        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y)),
                fieldCode = gsub('NA ?| ?NA', '', fieldCode),
                fieldCode = ifelse(! is.na(fieldCode) & fieldCode == '', NA_character_, fieldCode),
                notes = paste0(notes, addtl_comment),
@@ -156,6 +169,8 @@ parse_note_collection <- function(notefile){
                    notes = sub('^NA -- ', '', notes),
                    archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
             relocate(date, .before = 'timeEST')
+        
+        d_grab = field_code_handler(d_grab, 5)
     } else {
         d_grab = tibble()
         d_flow$gageHt = NA_real_
@@ -192,7 +207,7 @@ parse_note_collection <- function(notefile){
                uniqueID = paste(site, sub('-', '', date), timeEST, sep = '_'),
                waterYr = if_else(month(date) >= 7, year(date) + 1, year(date)),
                datetime = ymd_hm(paste(date, timeEST))) %>% 
-        select(refNo, site, date, timeEST, pH, pHmetrohm, DIC, spCond, temp, ANC960,
+        select(refNo, site, date, timeEST, pH, pHmetrohm, DIC, spCond, temp,
                ANCMet, gageHt, hydroGraph, flowGageHt, precipCatch, fieldCode,
                notes, archived, uniqueID, waterYr, datetime) %>% 
         arrange(site, date, timeEST)
@@ -200,10 +215,15 @@ parse_note_collection <- function(notefile){
     return(d)
 }
 
+all = tibble()
 for(f in ff){
     print(f)
     out = parse_note_collection(f)
-    
-    out
-    readLines(n = 1)
+    all = bind_rows(all, out)
+    # print(out)
+    # readLines(n = 1)
 }
+
+
+
+all2 = field_code_handler(all)
