@@ -239,6 +239,19 @@ prep_stickytrap_data = function(input, graphnum){
   return(stky)
 }
 
+scan_for_typos = function(d, sheet, numcol_indices){
+    
+    if(! nrow(d)) return(d)
+    
+    errcol = sapply(d[, numcol_indices], function(x) any(! is.na(x) & is.na(as.numeric(x))))
+    if(any(errcol)){
+        clm = names(which(errcol))
+        stop(glue('Detected illegal character in numeric column "{clm}", sheet {sheet}'))
+    }
+    
+    return(d)
+}
+
 parse_note_collection <- function(notefile){
     
     sitename_map = tibble(
@@ -262,19 +275,24 @@ parse_note_collection <- function(notefile){
     d_date = as.Date(as.numeric(d[5, 4]), origin = '1899-12-30')
     initials_precip = d[[5, 6]]
     addtl_comment = d[[25, 3]]
+    addtl_comment = ifelse(is.na(addtl_comment), '', paste(' --', addtl_comment))
     
     d_precip = d[11:14, 1:4] %>% 
         as_tibble() %>%
-        bind_cols(d[20:23, 8]) %>% 
+        bind_cols(d[20:23, 8:9]) %>% 
         rename(site = 1, timeEST = 2, volume_ml = 3, precipCatch = 4,
-               fieldCode = 5) %>%
+               fieldCode = 5, notes = 6) %>%
+        scan_for_typos(1, c(3, 4)) %>% 
         mutate(timeEST = str_pad(timeEST, 4, 'left', '0'),
                volume_ml = as.numeric(volume_ml),
                precipCatch = as.numeric(precipCatch),
                date = d_date,
                fieldCode = as.character(fieldCode),
-               notes = addtl_comment) %>% 
+               notes = paste0(notes, addtl_comment),
+               notes = sub('^NA -- ', '', notes)) %>% 
         relocate(date, .before = 'timeEST')
+    
+    d_precip = field_code_handler(d_precip, 1)
     
     #flow ####
     
@@ -287,17 +305,20 @@ parse_note_collection <- function(notefile){
     addtl_comment = d[[20, 3]]
     addtl_comment = ifelse(is.na(addtl_comment), '', paste(' --', addtl_comment))
     
-    d_flow = d[8:18, 1:9] %>% 
+    d_flow = d[8:18, c(1:5, 8:9)] %>% 
         as_tibble() %>%
         rename(site = 1, timeEST = 2, temp = 3, flowGageHt = 4, hydroGraph = 5,
-               color = 6, sediment = 7, notes = 8, fieldCode = 9) %>% 
+               notes = 6, fieldCode = 7) %>% 
+        scan_for_typos(2, c(3, 4)) %>% 
         mutate(timeEST = str_pad(timeEST, 4, 'left', '0'),
-               across(c(3, 4, 7), as.numeric),
+               across(c(3, 4), as.numeric),
                date = d_date,
                fieldCode = as.character(fieldCode),
                notes = paste0(notes, addtl_comment),
                notes = sub('^NA -- ', '', notes)) %>% 
         relocate(date, .before = 'timeEST')
+    
+    d_flow = field_code_handler(d_flow, 2)
     
     #chem ####
     
@@ -310,38 +331,49 @@ parse_note_collection <- function(notefile){
     addtl_comment = d[[33, 3]]
     addtl_comment = ifelse(is.na(addtl_comment), '', paste(' --', addtl_comment))
     
-    d_precip = d[12:15, c(1:3, 6:9)] %>% 
+    d_precip_ = d[12:15, c(1:3, 6:10)] %>% 
         as_tibble() %>%
         rename(site = 1, date = 2, pHmetrohm = 3, pH = 4, spCond = 5, fieldCode = 6,
-               archived = 7) %>% 
+               notes = 7, archived = 8) %>% 
+        scan_for_typos(3, 3:5) %>% 
         mutate(date = as.Date(as.numeric(date), origin = '1899-12-30'),
                across(3:5, as.numeric),
-               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
+               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE))
+    
+    d_precip_ = field_code_handler(d_precip_, 3)
+    
+    d_precip = d_precip_ %>% 
         left_join(d_precip, by = c('site', 'date')) %>% 
-        mutate(fieldCode = paste(fieldCode.x, fieldCode.y),
+        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y), collapse = ' '),
                fieldCode = gsub('NA ?| ?NA', '', fieldCode),
                fieldCode = ifelse(! is.na(fieldCode) & fieldCode == '', NA_character_, fieldCode),
-               notes = paste0(notes, addtl_comment),
+               notes = paste0(paste(notes.x, notes.y, sep = ' -- '),
+                              addtl_comment),
                notes = sub('^NA -- ', '', notes)) %>% 
         select(-ends_with(c('.x', '.y'))) %>% 
         relocate(timeEST, .after = 'date')
     
-    d_flow = d[18:28, c(1:4, 6:9)] %>%
+    d_flow_ = d[18:28, c(1:4, 6:10)] %>%
         as_tibble() %>%
         rename(site = 1, date = 2, pHmetrohm = 3, ANCMet = 4, pH = 5,
-               spCond = 6, fieldCode = 7, archived = 8) 
+               spCond = 6, fieldCode = 7, notes = 8, archived = 9) %>% 
+        scan_for_typos(3, 3:6) %>% 
         mutate(date = as.Date(as.numeric(date), origin = '1899-12-30'),
-               across(3:7, as.numeric),
-               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
+               across(3:6, as.numeric),
+               archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE))
+    
+    d_flow_ = field_code_handler(d_flow_, 3)
+    
+    d_flow = d_flow_ %>% 
         left_join(d_flow, by = c('site', 'date')) %>% 
-        mutate(fieldCode = paste(fieldCode.x, fieldCode.y),
+        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y), collapse = ' '),
                fieldCode = gsub('NA ?| ?NA', '', fieldCode),
                fieldCode = ifelse(! is.na(fieldCode) & fieldCode == '', NA_character_, fieldCode),
-               notes = paste0(notes, addtl_comment),
+               notes = paste0(paste(notes.x, notes.y, sep = ' -- '),
+                              addtl_comment),
                notes = sub('^NA -- ', '', notes)) %>% 
         select(-ends_with(c('.x', '.y'))) %>% 
         relocate(timeEST, .after = 'date')
-    
     
     #DIC ####
     
@@ -354,7 +386,8 @@ parse_note_collection <- function(notefile){
     
     d_flow = d[4:14, 1:2] %>% 
         as_tibble() %>% 
-        rename(site = 1, DIC = 2) %>% 
+        rename(site = 1, DIC = 2) %>%
+        scan_for_typos(4, 2) %>% 
         mutate(date = d_date,
                DIC = as.numeric(DIC),
                site = toupper(site),
@@ -375,8 +408,9 @@ parse_note_collection <- function(notefile){
         d_grab = d[7:15, 2:16] %>% 
             as_tibble() %>%
             select(site = 1, date = 2, timeEST = 3, pHmetrohm = 4, ANCMet = 5,
-                   pH = 7, spCond = 8, DIC = 9, temp = 10, gageHt = 11, hydroGraph = 12,
-                   fieldCode = 13, notes = 14, archived = 15) %>% 
+                   pH = 6, spCond = 7, DIC = 8, temp = 9, gageHt = 10, hydroGraph = 11,
+                   fieldCode = 12, notes = 13, archived = 14) %>%
+            scan_for_typos(5, 4:10) %>% 
             filter(if_any(everything(), ~!is.na(.))) %>% 
             mutate(timeEST = str_pad(timeEST, 4, 'left', '0'),
                    across(4:10, as.numeric),
@@ -387,6 +421,8 @@ parse_note_collection <- function(notefile){
                    notes = sub('^NA -- ', '', notes),
                    archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE)) %>% 
             relocate(date, .before = 'timeEST')
+        
+        d_grab = field_code_handler(d_grab, 5)
     } else {
         d_grab = tibble()
         d_flow$gageHt = NA_real_
@@ -428,6 +464,16 @@ parse_note_collection <- function(notefile){
                notes, archived, uniqueID, waterYr, datetime) %>% 
         arrange(site, date, timeEST)
     
+    allowed_fieldcodes = as.character(c(319, 888, 905, 907, 920, 911, 912, 955, 960, 966, 969, 970))
+    fc_split = strsplit(d$fieldCode, ' ')
+    illegal_codes = lapply(fc_split, function(x){
+        x[! is.na(x) & ! x %in% allowed_fieldcodes]
+    }) %>% 
+        unlist()
+    if(length(illegal_codes)){
+        stop('Unrecognized fieldCodes:\n', paste(illegal_codes, collapse = '; '))
+    }
+    
     return(d)
 }
 
@@ -438,13 +484,7 @@ field_code_handler <- function(d, sheet){
     d$fieldCode <- sub('[/;,]', ' ', d$fieldCode)
     d$fieldCode <- sub(' {2,}', ' ', d$fieldCode)
     # d$fieldCode <- gsub('([0-9]{3}) \\1', '\\1', d$fieldCode)
-    
-    # allowed_fieldcodes <- as.character(c(319, 888, 905, 907, 920, 911, 912, 955, 960, 966, 969, 970))
-    # if(any(! is.na(d$fieldCode) & ! d$fieldCode %in% allowed_fieldcodes)){
-    #     warning('Unrecognized fieldCodes:\n',
-    #             paste(setdiff(na.omit(d$fieldCode), allowed_fieldcodes), collapse = '; '))
-    # }
-    # 
+
     # cat('resulting codes:\n', paste(unique(d$fieldCode), collapse = '; '), '\n')
     
     qq <- is.na(d$fieldCode) |
@@ -452,7 +492,7 @@ field_code_handler <- function(d, sheet){
         grepl('^[0-9]{3} [0-9]{3}$', d$fieldCode)
     illegal_codes <- unique(d$fieldCode[! qq])
     
-    if(any(! qq)) warning(glue('illegal code(s) in sheet {sheet}: ', paste(illegal_codes, collapse = '; ')))
+    if(any(! qq)) stop(glue('Unrecognized fieldCode(s) in sheet {sheet}: ', paste(illegal_codes, collapse = '; ')))
     
     return(d)
 }

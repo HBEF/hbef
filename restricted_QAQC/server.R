@@ -33,6 +33,9 @@ library(glue)
 
 message("hello, I'm at the top of server.R")
 
+options(readr.show_progress = FALSE,
+        readr.show_col_types = FALSE)
+
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
 # pass  = readLines('/home/mike/RMySQL.config')   # for remote server
@@ -609,14 +612,24 @@ shinyServer(function(input, output, session) {
       # browser()
       
       d_combined <- tibble()
-      for(f in ff$name){
+      for(f in rev(ff$name)){
           
           d_parsed <- try(parse_note_collection(file.path("field_and_lab_note_collections", f)),
                           silent = TRUE)
           
           if(inherits(d_parsed, 'try-error') | is.null(d_parsed)){
-              showNotification(glue("{f} failed to parse. Please try again or email Mike with the file(s) you're trying to upload."),
-                               type = 'warning', duration = NULL)
+              
+              err_msg = as.character(d_parsed)
+              if(grepl('Unrecognized fieldCode', err_msg)){
+                  showNotification(paste0(f, ': ', str_extract(err_msg, 'Unrecognized fieldCode.*')),
+                                   type = 'warning', duration = NULL)
+              } else if(grepl('Detected illegal character', err_msg)){
+                  showNotification(paste0(f, ': ', str_extract(err_msg, 'Detected illegal.*')),
+                                   type = 'warning', duration = NULL)
+              } else {
+                  showNotification(glue("{f} failed to parse. Please try again or email Mike with the file(s) you're trying to upload."),
+                                   type = 'warning', duration = NULL)
+              }
               shinyjs::hide("loading-icon")
               return()
           }
@@ -758,7 +771,6 @@ shinyServer(function(input, output, session) {
           hot_col('DIC', renderer = rendo(getmax('DIC'))) %>%
           hot_col('spCond', renderer = rendo(getmax('spCond'))) %>%
           hot_col('temp', renderer = rendo(getmax('temp'))) %>%
-          hot_col('ANC960', renderer = rendo(getmax('ANC960'))) %>%
           hot_col('ANCMet', renderer = rendo(getmax('ANCMet'))) %>%
           hot_col('gageHt', renderer = rendo(getmax('gageHt'))) %>%
           hot_col('flowGageHt', renderer = rendo(getmax('flowGageHt'))) %>%
@@ -770,7 +782,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$SUBMIT_FL2, {
               
       req(notes_parsed())
-      showNotification("Nothing submitted. Still in testing phase!",
+      showNotification("File(s) uploaded successfully",
                        type='message')
       # showNotification(paste(length(fn), "file(s) submitted."),
       #                  type='message')
@@ -1515,7 +1527,7 @@ shinyServer(function(input, output, session) {
   )
   
   output$DOWNLOAD_TEMPLATE_FIELDLAB <- downloadHandler(
-    filename = 'hubbard_brook_ecosystem_study_worksheets_v4.xlsx',
+    filename = 'hubbard_brook_ecosystem_study_worksheets_v5.xlsx',
     content = function(file) {
       file.copy("documentation/hubbard_brook_ecosystem_study_worksheets_v4.xlsx", file)
     },

@@ -96,7 +96,7 @@ parse_note_collection <- function(notefile){
     
     d_precip = d_precip_ %>% 
         left_join(d_precip, by = c('site', 'date')) %>% 
-        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y)),
+        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y), collapse = ' '),
                fieldCode = gsub('NA ?| ?NA', '', fieldCode),
                fieldCode = ifelse(! is.na(fieldCode) & fieldCode == '', NA_character_, fieldCode),
                notes = paste0(notes, addtl_comment),
@@ -116,7 +116,7 @@ parse_note_collection <- function(notefile){
     
     d_flow = d_flow_ %>% 
         left_join(d_flow, by = c('site', 'date')) %>% 
-        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y)),
+        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y), collapse = ' '),
                fieldCode = gsub('NA ?| ?NA', '', fieldCode),
                fieldCode = ifelse(! is.na(fieldCode) & fieldCode == '', NA_character_, fieldCode),
                notes = paste0(notes, addtl_comment),
@@ -204,7 +204,7 @@ parse_note_collection <- function(notefile){
         bind_rows(d_precip) %>% 
         mutate(site = sub('-', '', site),
                refNo = NA_integer_,
-               uniqueID = paste(site, sub('-', '', date), timeEST, sep = '_'),
+               uniqueID = paste(site, gsub('-', '', date), timeEST, sep = '_'),
                waterYr = if_else(month(date) >= 7, year(date) + 1, year(date)),
                datetime = ymd_hm(paste(date, timeEST))) %>% 
         select(refNo, site, date, timeEST, pH, pHmetrohm, DIC, spCond, temp,
