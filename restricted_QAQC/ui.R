@@ -171,7 +171,7 @@ shinyUI(
                               h2('Instructions'),
                               # p(HTML('<strong>Part 1</strong>:')),
                               p(HTML('<ol>',
-                                     '<li>Copy <code>hubbard_brook_ecosystem_study_worksheets_v4.xlsx</code> to a new file named with only the sample collection date in YYYYMMDD format, e.g. <code>20230101.xlsx</code>".</li>',
+                                     '<li>Copy <code>hubbard_brook_ecosystem_study_worksheets_v5.xlsx</code> to a new file named with only the sample collection date in YYYYMMDD format, e.g. <code>20230101.xlsx</code>".</li>',
                                      '<li>Fill out the first 4 sheets in the new file, and the 5th if applicable.</li>',
                                      '<li>Upload the filled out file (or multiple files at a time)</li>',
                                      '<li>Click submit and wait a moment. If the submission is successful, you will see a blue notification. Otherwise, you will see a red error message.</li>',

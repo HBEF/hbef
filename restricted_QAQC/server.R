@@ -160,6 +160,7 @@ shinyServer(function(input, output, session) {
   changesInData$change_dataAll <- 0
   changesInData$stickytrap_upload_confirm <- TRUE
   changesInData$bugsubmitgo2 <- 0
+  upl_filename = reactiveVal(NULL)
 
   # Make a reactive dataAll2 data frame, to be called whenever data is updated
   # (R in dataCurrentR stands for reactive)
@@ -573,6 +574,7 @@ shinyServer(function(input, output, session) {
       ff = input$FIELD_AND_LAB_UPLOAD
       if (is.null(ff)) return()
       fn = ff$name
+      upl_filename(fn)
       
       pt1 <- all(grepl('^[0-9]{8}\\.xlsx$', fn))
       # pt2 <- any(grepl('^[0-9]{8}_DIC\\.xlsx$', fn))
@@ -738,9 +740,11 @@ shinyServer(function(input, output, session) {
       
       d_parsed <- req(notes_parsed())
       d_parsed <- d_parsed %>% 
-          relocate(notes, .after = 'datetime') %>% 
-          mutate(waterYr = as.integer(waterYr)) %>% 
-          arrange(date, site, timeEST)
+          # relocate(notes, .after = 'datetime') %>% 
+          # mutate(waterYr = as.integer(waterYr)) %>% 
+          # arrange(date, site, timeEST)
+          arrange(SampleDate, Site, MilitaryTime) %>% 
+          relocate(Remarks, .after = 'FieldCode')
       
       getmax <- function(colname){
           mx <- max(d_parsed[[colname]], na.rm = TRUE)
@@ -766,26 +770,47 @@ shinyServer(function(input, output, session) {
       }
       
       rhandsontable(d_parsed, height = 400, readOnly = TRUE) %>%
-          hot_col('pH', renderer = rendo(getmax('pH'))) %>%
-          hot_col('pHmetrohm', renderer = rendo(getmax('pHmetrohm'))) %>%
-          hot_col('DIC', renderer = rendo(getmax('DIC'))) %>%
-          hot_col('spCond', renderer = rendo(getmax('spCond'))) %>%
-          hot_col('temp', renderer = rendo(getmax('temp'))) %>%
-          hot_col('ANCMet', renderer = rendo(getmax('ANCMet'))) %>%
-          hot_col('gageHt', renderer = rendo(getmax('gageHt'))) %>%
-          hot_col('flowGageHt', renderer = rendo(getmax('flowGageHt'))) %>%
+          hot_col('Temperature', renderer = rendo(getmax('Temperature'))) %>%
+          hot_col('GageHt', renderer = rendo(getmax('GageHt'))) %>%
           hot_col('precipCatch', renderer = rendo(getmax('precipCatch'))) %>%
-          # hot_table(highlightCol = TRUE, highlightRow = TRUE) %>%
-          hot_cols(fixedColumnsLeft = 4)
+          hot_col('phMet', renderer = rendo(getmax('phMet'))) %>%
+          hot_col('ANCMet', renderer = rendo(getmax('ANCMet'))) %>%
+          hot_col('3StarpH', renderer = rendo(getmax('3StarpH'))) %>%
+          hot_col('SpCond', renderer = rendo(getmax('SpCond'))) %>%
+          hot_col('DICRaw', renderer = rendo(getmax('DICRaw'))) %>%
+          hot_cols(fixedColumnsLeft = 3)
+          # hot_col('pH', renderer = rendo(getmax('pH'))) %>%
+          # hot_col('pHmetrohm', renderer = rendo(getmax('pHmetrohm'))) %>%
+          # hot_col('DIC', renderer = rendo(getmax('DIC'))) %>%
+          # hot_col('spCond', renderer = rendo(getmax('spCond'))) %>%
+          # hot_col('temp', renderer = rendo(getmax('temp'))) %>%
+          # hot_col('ANCMet', renderer = rendo(getmax('ANCMet'))) %>%
+          # hot_col('gageHt', renderer = rendo(getmax('gageHt'))) %>%
+          # hot_col('flowGageHt', renderer = rendo(getmax('flowGageHt'))) %>%
+          # hot_col('precipCatch', renderer = rendo(getmax('precipCatch'))) %>%
+          # hot_cols(fixedColumnsLeft = 4)
   })
   
   observeEvent(input$SUBMIT_FL2, {
               
-      req(notes_parsed())
-      showNotification("File(s) uploaded successfully",
-                       type='message')
-      # showNotification(paste(length(fn), "file(s) submitted."),
-      #                  type='message')
+      d_parsed <- req(notes_parsed())
+      fn <- upl_filename()
+      orig_file <- file.path("field_and_lab_note_collections", fn)
+      
+      email_body <- paste("A new batch of HBEF data has been submitted to the hbwater system.",
+                          "It has been formatted and attached to this email, along with the",
+                          "originally submitted XLSX file.")
+      
+      result <- try(email_data(d_parsed, orig_file, fn, email_body,
+                               note_dest_email, note_dest_pwd))
+      
+      if(inherits(result, 'try-error')){
+          showNotification("Problem with sending email to Jeff. Please notify Mike.",
+                           type='error')
+      } else {
+          showNotification("File(s) uploaded successfully. Jeff has been notified.",
+                           type='message')
+      }
   })
 
   # *QA/QC Tab* ####
@@ -1529,7 +1554,7 @@ shinyServer(function(input, output, session) {
   output$DOWNLOAD_TEMPLATE_FIELDLAB <- downloadHandler(
     filename = 'hubbard_brook_ecosystem_study_worksheets_v5.xlsx',
     content = function(file) {
-      file.copy("documentation/hubbard_brook_ecosystem_study_worksheets_v4.xlsx", file)
+      file.copy("documentation/hubbard_brook_ecosystem_study_worksheets_v5.xlsx", file)
     },
     contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   )
