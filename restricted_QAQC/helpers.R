@@ -307,7 +307,7 @@ parse_note_collection <- function(notefile){
     
     d_flow = d[8:18, c(1:5, 8:9)] %>% 
         as_tibble() %>%
-        rename(site = 1, timeEST = 2, temp = 3, flowGageHt = 4, hydroGraph = 5,
+        rename(site = 1, timeEST = 2, temp = 3, gageHt = 4, hydroGraph = 5,
                notes = 6, fieldCode = 7) %>% 
         scan_for_typos(2, c(3, 4)) %>% 
         mutate(timeEST = str_pad(timeEST, 4, 'left', '0'),
@@ -316,9 +316,11 @@ parse_note_collection <- function(notefile){
                fieldCode = as.character(fieldCode),
                notes = paste0(notes, addtl_comment),
                notes = sub('^NA -- ', '', notes)) %>% 
-        relocate(date, .before = 'timeEST')
+        relocate(date, .before = 'timeEST') %>% 
+        mutate(flowGageHt = NA_real_)
     
     d_flow = field_code_handler(d_flow, 2)
+    
     
     #chem ####
     
@@ -353,10 +355,17 @@ parse_note_collection <- function(notefile){
         select(-ends_with(c('.x', '.y'))) %>% 
         relocate(timeEST, .after = 'date')
     
-    d_flow_ = d[18:28, c(1:4, 6:10)] %>%
+    d_flow_ = d[18:32, c(1:4, 6:10)] %>%
         as_tibble() %>%
         rename(site = 1, date = 2, pHmetrohm = 3, ANCMet = 4, pH = 5,
                spCond = 6, fieldCode = 7, notes = 8, archived = 9) %>% 
+        filter(if_any(everything(), ~! is.na(.))) %>% 
+        mutate(site = case_when(grepl('sp', site, ignore.case = TRUE) ~ 'SP',
+                                grepl('sw', site, ignore.case = TRUE) ~ 'SW',
+                                TRUE ~ site),
+               date = if_else(is.na(date) & site %in% c('SP', 'SW'),
+                              unname(d[18, 2]),
+                              date)) %>% 
         scan_for_typos(3, 3:6) %>% 
         mutate(date = as.Date(as.numeric(date), origin = '1899-12-30'),
                across(3:6, as.numeric),
@@ -392,7 +401,7 @@ parse_note_collection <- function(notefile){
                DIC = as.numeric(DIC),
                site = toupper(site),
                site = sitename_map$sheets123_fmt[match(site, sitename_map$sheets45_fmt)]) %>%
-        left_join(d_flow, by = c('site', 'date')) %>% 
+        full_join(d_flow, by = c('site', 'date')) %>% 
         relocate(DIC, .before = 'notes')
     
     #grab ####
@@ -425,7 +434,7 @@ parse_note_collection <- function(notefile){
         d_grab = field_code_handler(d_grab, 5)
     } else {
         d_grab = tibble()
-        d_flow$gageHt = NA_real_
+        # d_flow$gageHt = NA_real_
     }
     
     
@@ -464,8 +473,23 @@ parse_note_collection <- function(notefile){
                notes, archived, uniqueID, waterYr, datetime) %>% 
         arrange(site, date, timeEST)
     
+    #nvm, actually it should be set up like this:
+    d = d %>% 
+        mutate(HBEFLabDataSource = basename(notefile)) %>% 
+        select(Site = site, SampleDate = date, MilitaryTime = timeEST,
+               Temperature = temp, GageHt = gageHt, HydroGraph = hydroGraph,
+               precipCatch, phMet = pHmetrohm, ANCMet, `3StarpH` = pH,
+               SpCond = spCond, DICRaw = DIC, Remarks = notes,
+               Archived = archived, FieldCode = fieldCode, HBEFLabDataSource) %>% 
+        mutate(Site = case_when(grepl('^WS[0-9]', Site) ~ sub('WS', 'W', Site),
+                                grepl('^RG22', Site) ~ 'STA/22',
+                                TRUE ~ Site),
+               Archived = if_else(Archived, 'yes', ''),
+               Remarks = if_else(Remarks == 'NA', NA_character_, Remarks),
+               SampleDate = format(SampleDate, '%m/%d/%Y'))
+               
     allowed_fieldcodes = as.character(c(319, 888, 905, 907, 920, 911, 912, 955, 960, 966, 969, 970))
-    fc_split = strsplit(d$fieldCode, ' ')
+    fc_split = strsplit(d$FieldCode, ' ')
     illegal_codes = lapply(fc_split, function(x){
         x[! is.na(x) & ! x %in% allowed_fieldcodes]
     }) %>% 
@@ -495,4 +519,36 @@ field_code_handler <- function(d, sheet){
     if(any(! qq)) stop(glue('Unrecognized fieldCode(s) in sheet {sheet}: ', paste(illegal_codes, collapse = '; ')))
     
     return(d)
+}
+
+email_data <- function(df, orig_file, orig_name, msgs, addrs, pw){
+    
+    tmpcsv = tempfile(fileext = ".csv")
+    write.csv(df, tmpcsv, row.names = FALSE, na = '')
+    new_name = sub('xlsx', 'csv', orig_name, ignore.case = TRUE)
+    
+    if(is.list(msgs)){
+        msgs = Reduce(function(x, y) paste(x, y, sep='\n---\n'), msgs)
+    }
+        
+    for(a in addrs){
+        
+        email = emayili::envelope() %>%
+            emayili::from('grdouser@gmail.com') %>%
+            emayili::to(a) %>%
+            emayili::subject('HBEF data from Tammy') %>%
+            emayili::text(msgs) %>% 
+            emayili::attachment(tmpcsv, name = new_name) %>% 
+            emayili::attachment(orig_file, name = orig_name,
+                                type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        
+        smtp = emayili::server(host='smtp.gmail.com',
+                               port=587, #or 465 for SMTPS
+                               username='grdouser@gmail.com',
+                               password=pw)
+        
+        smtp(email, verbose=FALSE)
+    }
+    
+    file.remove(tmpcsv)
 }

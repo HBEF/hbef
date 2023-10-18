@@ -34,6 +34,8 @@ message("hello, I'm in global.R")
 
 source('helpers.R')
 pass=readLines('../../RMySQL.config')
+note_dest_email = readLines('more_config/compiled_notes_target_email.txt', n = 1)
+note_dest_pwd = readLines('more_config/compiled_notes_target_email.txt', n = 2)[2]
 #gm_pass=readLines('config.txt')[1]
 #gm_addr=readLines('config.txt')[2]
 
