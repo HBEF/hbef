@@ -523,6 +523,10 @@ field_code_handler <- function(d, sheet){
 
 email_data <- function(df, orig_file, orig_name, msgs, addrs, pw){
     
+    #fails on server because emayili renders the smtp server address as
+    #smtp://smtp.gmail.com:587/ instead of just smtp.gmail.com, so
+    #the guts of emayili are reused in email_data2()
+    
     tmpcsv = tempfile(fileext = ".csv")
     write.csv(df, tmpcsv, row.names = FALSE, na = '')
     new_name = sub('xlsx', 'csv', orig_name, ignore.case = TRUE)
@@ -548,6 +552,75 @@ email_data <- function(df, orig_file, orig_name, msgs, addrs, pw){
                                password=pw)
         
         smtp(email, verbose=FALSE)
+    }
+    
+    file.remove(tmpcsv)
+}
+
+email_data2 <- function(df, orig_file, orig_name, msgs, addrs, pw){
+    
+    tmpcsv = tempfile(fileext = ".csv")
+    write.csv(df, tmpcsv, row.names = FALSE, na = '')
+    new_name = sub('xlsx', 'csv', orig_name, ignore.case = TRUE)
+    
+    if(is.list(msgs)){
+        msgs = Reduce(function(x, y) paste(x, y, sep='\n---\n'), msgs)
+    }
+        
+    for(a in addrs){
+        
+        email = emayili::envelope() %>%
+            emayili::from('grdouser@gmail.com') %>%
+            emayili::to(a) %>%
+            emayili::subject('HBEF data from Tammy') %>%
+            emayili::text(msgs) %>% 
+            emayili::attachment(tmpcsv, name = new_name) %>% 
+            emayili::attachment(orig_file, name = orig_name,
+                                type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        
+        host = 'smtp.gmail.com'
+        port = 587 #or 465 for SMTPS
+        username = 'grdouser@gmail.com'
+        password = pw
+        
+        insecure = FALSE
+        reuse = TRUE
+        helo = NA
+        protocol = NA
+        test = FALSE
+        pause_base = 1
+        max_times = 1
+        verbose = FALSE
+        
+        ssl_verifypeer = TRUE
+        
+        port <- as.integer(port)
+        if (port %in% c(465, 587)) {
+            use_ssl <- 1
+        } else {
+            use_ssl <- 0
+        }
+        
+        # smtp_server <- emayili:::smtp_url(host, port, protocol, helo)
+        smtp_server <- host
+        
+        debugfunction <- if (verbose) function(type, email) cat(readBin(email, character()), file = stderr()) # nocov
+        
+        recipients <- c(emayili::to(email), emayili::cc(email), emayili::bcc(email))
+        
+        curl::send_mail(
+            mail_from = emayili::raw(emayili::from(email)),
+            mail_rcpt = emayili::raw(recipients),
+            message = as.character(email, encode = TRUE),
+            smtp_server = smtp_server,
+            username = username,
+            password = password,
+            verbose = verbose,
+            debugfunction = debugfunction,
+            ssl_verifypeer = ssl_verifypeer,
+            use_ssl = use_ssl,
+            forbid_reuse = !reuse
+        )
     }
     
     file.remove(tmpcsv)

@@ -803,8 +803,8 @@ shinyServer(function(input, output, session) {
                           "It has been formatted and attached to this email, along with the",
                           "originally submitted XLSX file.")
       
-      result <- try(email_data(d_parsed, orig_file, fn, email_body,
-                               note_dest_email, note_dest_pwd))
+      result <- try(email_data2(d_parsed, orig_file, fn, email_body,
+                                note_dest_email, note_dest_pwd))
       
       if(inherits(result, 'try-error')){
           showNotification("Problem with sending email to Jeff. Please notify Mike.",
