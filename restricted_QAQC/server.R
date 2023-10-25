@@ -28,6 +28,7 @@ library(stringr)        # needed for str_extract function
 library(tidyr)
 library(xts)
 library(glue)
+library(purrr)
 #library(openxlsx)
 # library(glue)
 
@@ -793,6 +794,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$SUBMIT_FL2, {
               
+      shinyjs::show("loading-icon")
       d_parsed <- req(notes_parsed())
       fn <- upl_filename()
       orig_file <- file.path("field_and_lab_note_collections", fn)
@@ -811,6 +813,7 @@ shinyServer(function(input, output, session) {
           showNotification("File(s) uploaded successfully. Jeff has been notified.",
                            type='message')
       }
+      shinyjs::hide("loading-icon")
   })
 
   # *QA/QC Tab* ####

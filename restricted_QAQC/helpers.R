@@ -346,7 +346,7 @@ parse_note_collection <- function(notefile){
     
     d_precip = d_precip_ %>% 
         left_join(d_precip, by = c('site', 'date')) %>% 
-        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y), collapse = ' '),
+        mutate(fieldCode = pmap(list(fieldCode.x, fieldCode.y), ~paste(union(...), collapse = ' ')),
                fieldCode = gsub('NA ?| ?NA', '', fieldCode),
                fieldCode = ifelse(! is.na(fieldCode) & fieldCode == '', NA_character_, fieldCode),
                notes = paste0(paste(notes.x, notes.y, sep = ' -- '),
@@ -375,7 +375,7 @@ parse_note_collection <- function(notefile){
     
     d_flow = d_flow_ %>% 
         left_join(d_flow, by = c('site', 'date')) %>% 
-        mutate(fieldCode = paste(union(fieldCode.x, fieldCode.y), collapse = ' '),
+        mutate(fieldCode = pmap(list(fieldCode.x, fieldCode.y), ~paste(union(...), collapse = ' ')),
                fieldCode = gsub('NA ?| ?NA', '', fieldCode),
                fieldCode = ifelse(! is.na(fieldCode) & fieldCode == '', NA_character_, fieldCode),
                notes = paste0(paste(notes.x, notes.y, sep = ' -- '),
