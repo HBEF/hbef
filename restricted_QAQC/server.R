@@ -801,7 +801,7 @@ shinyServer(function(input, output, session) {
       
       email_body <- paste("A new batch of HBEF data has been submitted to the hbwater system.",
                           "It has been formatted and attached to this email, along with the",
-                          "originally submitted XLSX file.")
+                          "originally submitted XLSX file(s).")
       
       result <- try(email_data2(d_parsed, orig_file, fn, email_body,
                                 note_dest_email, note_dest_pwd))

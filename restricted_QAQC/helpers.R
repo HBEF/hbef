@@ -529,7 +529,14 @@ email_data <- function(df, orig_file, orig_name, msgs, addrs, pw){
     
     tmpcsv = tempfile(fileext = ".csv")
     write.csv(df, tmpcsv, row.names = FALSE, na = '')
+    
     new_name = sub('xlsx', 'csv', orig_name, ignore.case = TRUE)
+    if(length(new_name) > 1){
+        name_range = sort(new_name)
+        new_name = paste(sub('\\.csv', '', name_range[1]),
+                         new_name[length(new_name)],
+                         sep = '-')
+    }
     
     if(is.list(msgs)){
         msgs = Reduce(function(x, y) paste(x, y, sep='\n---\n'), msgs)
@@ -542,9 +549,13 @@ email_data <- function(df, orig_file, orig_name, msgs, addrs, pw){
             emayili::to(a) %>%
             emayili::subject('HBEF data from Tammy') %>%
             emayili::text(msgs) %>% 
-            emayili::attachment(tmpcsv, name = new_name) %>% 
-            emayili::attachment(orig_file, name = orig_name,
-                                type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            emayili::attachment(tmpcsv, name = new_name)
+        
+        for(att in orig_file){
+            email = email %>% 
+                emayili::attachment(att, name = att,
+                                    type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        }
         
         smtp = emayili::server(host='smtp.gmail.com',
                                port=587, #or 465 for SMTPS
@@ -561,7 +572,14 @@ email_data2 <- function(df, orig_file, orig_name, msgs, addrs, pw){
     
     tmpcsv = tempfile(fileext = ".csv")
     write.csv(df, tmpcsv, row.names = FALSE, na = '')
+    
     new_name = sub('xlsx', 'csv', orig_name, ignore.case = TRUE)
+    if(length(new_name) > 1){
+        name_range = sort(new_name)
+        new_name = paste(sub('\\.csv', '', name_range[1]),
+                         new_name[length(new_name)],
+                         sep = '-')
+    }
     
     if(is.list(msgs)){
         msgs = Reduce(function(x, y) paste(x, y, sep='\n---\n'), msgs)
@@ -574,9 +592,12 @@ email_data2 <- function(df, orig_file, orig_name, msgs, addrs, pw){
             emayili::to(a) %>%
             emayili::subject('HBEF data from Tammy') %>%
             emayili::text(msgs) %>% 
-            emayili::attachment(tmpcsv, name = new_name) %>% 
-            emayili::attachment(orig_file, name = orig_name,
-                                type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            emayili::attachment(tmpcsv, name = new_name)
+        
+        for(att in orig_file){
+            email = emayili::attachment(email, att, name = basename(att),
+                                        type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        }
         
         host = 'smtp.gmail.com'
         port = 587 #or 465 for SMTPS
