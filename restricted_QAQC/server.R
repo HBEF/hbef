@@ -2206,6 +2206,9 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(input$SAVECHANGES5,{
+      
+      browser()
+      
      message("inside SAVECHANGES5")
      # openning connection to database
      con = dbConnect(MariaDB(),
@@ -2229,16 +2232,25 @@ shinyServer(function(input, output, session) {
       wateryear5 <- input$WATERYEAR5
       site5 <- input$SITES5
 
-      queryDelete <- paste0('DELETE FROM current ',
-                         ' WHERE waterYr = ', wateryear5,
-                         ' AND site = "', site5,
-                         '" ORDER BY uniqueID;')
-
-      # delete old current data
-      dbExecute(con, queryDelete)
-
-      # add changed data
-      dbWriteTable(con, "current", dataChanged, append=TRUE, row.names=FALSE)
+      dbBegin(con)
+      
+      tryCatch({
+          queryDelete <- paste0('DELETE FROM current ',
+                             ' WHERE waterYr = ', wateryear5,
+                             ' AND site = "', site5,
+                             '" ORDER BY uniqueID;')
+    
+          # delete old current data
+          dbExecute(con, queryDelete)
+    
+          # add changed data
+          dbWriteTable(con, "current", dataChanged, append=TRUE, row.names=FALSE)
+          
+      }, error = function(e) {
+          # Rollback Transaction on Error
+          dbRollback(con)
+          message("Error: ", e$message)
+      })
 
       # update reactive value to signal core data has changed
       changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
