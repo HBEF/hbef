@@ -152,13 +152,15 @@ other_units <- c("pH",
 standardizeClasses <- function(d) {
    # d:              data.frame to be checked for columns with only NA's
    # ColClasses :    vector of desired class types for the data.frame
-   message(paste("In standardizeClasses for", deparse(substitute(d))))
+   # message(paste("In standardizeClasses for", deparse(substitute(d))))
    r <- nrow(d)
-   c <- ncol(d)
+   cc <- ncol(d)
+   
+   d$timeEST <- as.character(d$timeEST)
 
    # d = rename_all(d, recode, NH4='NH4_N', NO3='NO3_N')
 
-   for (i in 1:c) {
+   for (i in 1:cc) {
       # 1. Insert an additional row with a sample value for each column
          ## Find index in defClassesSample that corresponds to column in d, save that index
          current_col_ofData <- colnames(d[i])

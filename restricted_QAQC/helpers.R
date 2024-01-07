@@ -159,6 +159,14 @@ NH4_to_NH4N = function(nh4_mg){
     nh4_mg * 14.0067 / 18.03846
 }
 
+NO3N_to_NO3 = function(no3n_mg){
+    no3n_mg * 62.0049 / 14.0067
+}
+
+NH4N_to_NH4 = function(nh4n_mg){
+    nh4n_mg * 18.03846 / 14.0067
+}
+
 # abs.Date = function(x){x}
 
 email_msg <- function(subject, text_body, addr, pw){

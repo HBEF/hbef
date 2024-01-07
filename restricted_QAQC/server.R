@@ -182,11 +182,7 @@ shinyServer(function(input, output, session) {
             NO3_N=NO3_to_NO3N(NO3),
             NH4_N=NH4_to_NH4N(NH4)) %>%
         select(-NO3, -NH4)
-    message(print(class(dataCurrentR)))
-    message(head(dataCurrentR))
     dataCurrentR <- as.data.frame(dataCurrentR)
-    message(print(class(dataCurrentR)))
-    message(head(dataCurrentR))
     dbDisconnect(con)
 
     # Clean up data
@@ -305,11 +301,23 @@ shinyServer(function(input, output, session) {
         summarize_each(list(~if(is.numeric(.)) mean(., na.rm=TRUE) else first(.))) %>%
         ungroup()
 
-    # upload data
+    # upload data prep
     uid = unname(unlist(dbGetQuery(con, 'select uniqueID from current;')))
     nrecords_submit = nrow(dataNew)
     dataNew = dataNew[! dataNew$uniqueID %in% uid, ]
     nomits = nrecords_submit - nrow(dataNew)
+    
+    #convert element-specific forms to ionic forms (as they are in the database)
+    if('NO3_N' %in% colnames(dataNew)){
+        dataNew$NO3 <- NO3N_to_NO3(dataNew$NO3_N)
+        dataNew$NO3_N <- NULL
+    }
+    if('NH4_N' %in% colnames(dataNew)){
+        dataNew$NH4 <- NH4N_to_NH4(dataNew$NH4_N)
+        dataNew$NH4_N <- NULL
+    }
+    
+    #upload
     dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
 
     # close connection to database
@@ -2206,9 +2214,6 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(input$SAVECHANGES5,{
-      
-      browser()
-      
      message("inside SAVECHANGES5")
      # openning connection to database
      con = dbConnect(MariaDB(),
@@ -2224,9 +2229,16 @@ shinyServer(function(input, output, session) {
       # replace all commas with ";", as commas interfere with downloading csv's
       dataChanged$notes <- gsub(",", ";", dataChanged$notes)
       dataChanged$sampleType <- gsub(",", ";", dataChanged$sampleType)
-#      # split changed data table into dataInitial and dataChemistry
-#      dataInitialChanged <- dataChanged[, (names(dataChanged) %in% names(dataInitial))]
-#      dataChemistryChanged <- dataChanged[, (names(dataChanged) %in% c("uniqueID", names(dataChemistry)))]
+      
+      #convert element-specific forms to ionic forms (as they are in the database)
+      if('NO3_N' %in% colnames(dataChanged)){
+          dataChanged$NO3 <- NO3N_to_NO3(dataChanged$NO3_N)
+          dataChanged$NO3_N <- NULL
+      }
+      if('NH4_N' %in% colnames(dataChanged)){
+          dataChanged$NH4 <- NH4N_to_NH4(dataChanged$NH4_N)
+          dataChanged$NH4_N <- NULL
+      }
 
       # build MySQL queries, used to delete data that will be replaced
       wateryear5 <- input$WATERYEAR5
@@ -2245,11 +2257,13 @@ shinyServer(function(input, output, session) {
     
           # add changed data
           dbWriteTable(con, "current", dataChanged, append=TRUE, row.names=FALSE)
+          dbCommit(con)
           
       }, error = function(e) {
           # Rollback Transaction on Error
           dbRollback(con)
-          message("Error: ", e$message)
+          showNotification("Error writing to database. Please notify Mike.",
+                           type = 'error')
       })
 
       # update reactive value to signal core data has changed
@@ -2287,6 +2301,7 @@ shinyServer(function(input, output, session) {
         dateQuery <- paste0("date >= '", input$DELETE_DATERANGE5[1], "' AND
                       date <= '", input$DELETE_DATERANGE5[2], "'")
       }
+    
       query <- paste0("DELETE FROM current WHERE ", siteQuery, dateQuery, ";")
 
       #message(print(query))
