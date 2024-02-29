@@ -28,6 +28,8 @@ message("hello, I'm in ui.R")
 
 shinyUI(
   fluidPage(
+    useShinyjs(),
+    theme = "app.css",
     titlePanel("", windowTitle = "HBEF Dashboard"),
     # useShinyjs(),
     #tags$head(
@@ -38,8 +40,7 @@ shinyUI(
     #HMTL(<script type="text/javascript" src="/www/dygraph-combined.js"></script>),
     navbarPage(title = p(strong("HBEF Dashboard")),
       tabPanel("Main",
-        h3("New!", style="color:green"),
-        p(HTML("Visit the <strong>Multiple Solutes</strong> tab to view raw, continuous water quality and sensor data."),
+        p(HTML("Visit the <strong>Multiple Factors</strong> tab to view raw, continuous water quality and sensor data."),
             style="color:green"),
         br(),
         p("Please send any issues or comments to Mike Vlah at",
@@ -54,9 +55,11 @@ shinyUI(
                   Analytical Procedures.</a></strong> USDA Forest Service, Northeastern Research
                   Station, General Technical Report NE-275.</li>')),
         tags$br(),
-        downloadLink("DOWNLOAD_TEMPLATE", label = "Template for Data Uploads"),
+        downloadLink("DOWNLOAD_TEMPLATE", label = "Template for data uploads"),
         tags$br(),
-        downloadLink("DOWNLOAD_TEMPLATE_EXAMPLE", label = "Template Example for Data Uploads")
+        downloadLink("DOWNLOAD_TEMPLATE_EXAMPLE", label = "Template example for data uploads"),
+        tags$br(),
+        downloadLink("DOWNLOAD_TEMPLATE_FIELDLAB", label = "Template for field and lab notes (XLSX)")
       ), #end of Main tabPanel
 
       #*********************************************************
@@ -64,7 +67,7 @@ shinyUI(
       #*********************************************************
       # Code initially copied from: https://github.com/rstudio/shiny-examples/blob/master/009-upload/app.R
         navbarMenu("Upload",
-          tabPanel("CSV file upload",
+          tabPanel("Chemistry CSV upload",
               # Sidebar layout with input and output definitions
               sidebarLayout(
                # Sidebar panel for inputs
@@ -134,6 +137,67 @@ shinyUI(
                       actionButton('SUBMIT_NOTE', label='Submit')
                   )
               )
+          ),
+          tabPanel("Sticky trap CSV upload",
+               sidebarLayout(
+                   sidebarPanel(
+                       fileInput("BUG_UPLOAD", "Choose CSV File",
+                                 multiple = FALSE,
+                                 accept = c("text/csv",
+                                            "text/comma-separated-values,text/plain",
+                                            ".csv")
+                       ),
+                       # checkboxInput("HEADER", "Data includes header (column names)", TRUE),
+                       # p("Note: The above must be checked for upload to work." ,
+                       #   style = "color:#666666; font-size:85%;"
+                       # ),
+                       # tags$hr(),
+                       # radioButtons("UPLOAD_DISPLAY", "Display",
+                       #              choices = c("First few rows" = "head",
+                       #                          "All rows" = "all"),
+                       #              selected = "head"
+                       # ),
+                       # tags$hr(),
+                       actionButton("BUG_SUBMIT", label = "Submit to Database")
+                   ),
+                   mainPanel(
+                       DT::dataTableOutput("BUG_FILE_PREVIEW")
+                   )
+               )
+          ),
+          tabPanel('Field-and-lab notes upload (XLSX)',
+                   fluidRow(
+                       column(12,
+                              h2('Instructions'),
+                              # p(HTML('<strong>Part 1</strong>:')),
+                              p(HTML('<ol>',
+                                     '<li>Copy <code>hubbard_brook_ecosystem_study_worksheets_v5.xlsx</code> to a new file named with only the sample collection date in YYYYMMDD format, e.g. <code>20230101.xlsx</code>".</li>',
+                                     '<li>Fill out the first 4 sheets in the new file, and the 5th if applicable.</li>',
+                                     '<li>Upload the filled out file (or multiple files at a time)</li>',
+                                     '<li>Click submit and wait a moment. If the submission is successful, you will see a blue notification. Otherwise, you will see a red error message.</li>',
+                                     '</ol>')),
+                              br(),
+                              # p(HTML('<strong>Part 2</strong>:')),
+                              # p(HTML('<ol>',
+                              #        '<li>Upload an Excel file or files, each with a single sheet of DIC data. The files must be named with the sample collection date in YYYYMMDD format and "_DIC", e.g. <code>20230101_DIC.xlsx</code>.</li>',
+                              #        '<li>Click submit and wait a moment. If the submission is successful, you will see a blue notification. Otherwise, you will see a red error message.</li>',
+                              #        '</ol>')),
+                              # br(),
+                              fileInput('FIELD_AND_LAB_UPLOAD', 'Choose XLSX File(s)',
+                                        multiple=TRUE, accept=c('.xlsx')),
+                              actionButton('SUBMIT_FL1', label='Upload'),
+                              hr(),
+                              conditionalPanel(condition = "input.SUBMIT_FL1 > 0",
+                                  span('In the table below, max values for each numeric column are displayed in red. If everything looks good, ',
+                                    actionButton('SUBMIT_FL2', label='Submit',
+                                                 style="color: #fff; background-color: #337ab7; border-color: #2e6da4")),
+                                  p(),
+                                  div(id = "loading-icon", class = "fa fa-spinner fa-spin fa-3x", style = "display:none;"),
+                                  # DT::dataTableOutput("NOTE_PREUPLOAD")
+                                  rHandsontableOutput("NOTE_PREUPLOAD")
+                              )
+                       )
+                   )
           )
       ),
       #*********************************************************
@@ -143,10 +207,10 @@ shinyUI(
       # panel it's in, e.g. WATERYEAR1 (datatype+PanelNumber)
       # These names are what's used in the server.R file.
       navbarMenu("QA/QC",
-        # Panel 1 - 1 Solute/1 Site ###############
-        tabPanel("1 Solute/1 Site",
+        # Panel 1 - 1 Factor/1 Site ###############
+        tabPanel("1 Factor/1 Site",
           sidebarLayout(
-            # Sidebar with tabs for Solute, Sites, Options
+            # Sidebar with tabs for Factor, Sites, Options
             sidebarPanel(
               # radioButtons('wateryearOrRange1',
               #   'Choose date selection method',
@@ -172,7 +236,7 @@ shinyUI(
               hr(),
               selectInput(
                 "SOLUTES1",
-                label = "Solute",
+                label = "Factor",
                 choices = c(solutes_cations, solutes_anions, solutes_other),
                 selected = "Ca"
               ),
@@ -267,10 +331,10 @@ shinyUI(
 
         ), # END of Panel 1 tabPanel
 
-        # Panel 2 - Multiple Solutes ###############
-        tabPanel("Multiple Solutes",
+        # Panel 2 - Multiple Factors ###############
+        tabPanel("Multiple Factors",
           sidebarLayout(
-            # Sidebar with tabs for Solute, Sites, Options
+            # Sidebar with tabs for Factor, Sites, Options
             sidebarPanel(
               radioButtons("wateryearOrRange2",
                 'Choose date selection method',
@@ -288,8 +352,8 @@ shinyUI(
                   "DATE2",
                   label = "Date Range",
                   min =as.Date("1963-06-01"),
-                  max = maxDate_current,
-                  value = c(maxDate_current-365, maxDate_current),
+                  max = maxDate,
+                  value = c(maxDate-365, maxDate),
                   width = "100%",
                   timeFormat = "%b %Y",
                   step = 30,
@@ -332,17 +396,17 @@ shinyUI(
               ),
 
                checkboxInput("SHOWSENS2",
-                  label = HTML(paste0("Overlay continuous water quality data.<br>",
-                     "(Available for watersheds 3, 6, and 9)")),
+                  label = HTML(paste0("View sensor data.<br>",
+                     "(Sensor chem available only for watersheds 3, 6, and 9)")),
                   value = FALSE
                ),
                conditionalPanel(condition="input.SHOWSENS2 == true",
                   p(paste('Provisional sensor data. Not available for download.'),
-                     style='color:red'),
+                     style='color:purple'),
                   selectInput("SENSORVAR2", label="Select variable",
                      choices=c('None', sensorvars)),
                   p(HTML('<strong>Adjust y-axis limits</strong>')),
-                   p('(Accepts typed input)'),
+                  p('(Accepts typed input)'),
                   column(width=6,
                       numericInput('YLIMlo2', label='', value=NULL)
                   ),
@@ -353,7 +417,7 @@ shinyUI(
                ),
 
               checkboxGroupInput("SOLUTES2",
-                          label = "Solutes",
+                          label = "Factors",
                           choices = c(solutes_cations, solutes_anions, solutes_other),
                           selected = "Ca"
               ),
@@ -386,7 +450,7 @@ shinyUI(
         # Panel 3 - Multiple Sites ###############
         tabPanel("Multiple Sites",
           sidebarLayout(
-            # Sidebar with tabs for Solute, Sites, Options
+            # Sidebar with tabs for Factor, Sites, Options
             sidebarPanel(
               radioButtons('wateryearOrRange3',
                 'Choose date selection method',
@@ -421,7 +485,7 @@ shinyUI(
               #  selected = wateryears[1]
               # ),
               selectInput("SOLUTES3",
-                      label = "Solute",
+                      label = "Factor",
                       choices = c(solutes_cations, solutes_anions, solutes_other),
                       selected = "Ca"
               ),
@@ -483,7 +547,7 @@ shinyUI(
         # Panel 4 - Free-for-all ###############
         tabPanel("Free-for-all",
           sidebarLayout(
-            # Sidebar with tabs for Solute, Sites, Options
+            # Sidebar with tabs for Factor, Sites, Options
             sidebarPanel(
               tabsetPanel(
                 #********************
@@ -515,9 +579,9 @@ shinyUI(
 
                   hr(),
 
-                  # Options for "Solutes" Graph
+                  # Options for "Factors" Graph
                   #****************************
-                  p("Solutes", style = "font-weight:bold; font-size:1.1em;"),
+                  p("Factors", style = "font-weight:bold; font-size:1.1em;"),
                   checkboxInput("SOLUTE4_OPTION",
                             label = p("Show graph", style = "font-size:0.9em; color:#919191;"),
                             value = TRUE
@@ -534,7 +598,7 @@ shinyUI(
                     ),
                     selectInput("SOLUTES4_COLOR",
                             label = "Colors apply to:",
-                            choices = c("Solutes", "Sites"),
+                            choices = c("Factors", "Sites"),
                             width = "80%"),
                     style = "color:#919191; font-size:0.9em;"
                   ),
@@ -586,9 +650,9 @@ shinyUI(
                   ) #end of conditional panel
                 ),
                 #********************
-                # Solutes tab
+                # Factors tab
                 #********************
-                tabPanel("Solutes",
+                tabPanel("Factors",
                   checkboxGroupInput("SOLUTES4",
                                 label = "",
                                 choices = c(solutes_cations, solutes_anions, solutes_other),
@@ -810,7 +874,7 @@ shinyUI(
                     airDatepickerInput('NOTE_DATES', 'Choose date(s)',
                         multiple=TRUE, range=FALSE, separator=', ',
                         minDate=field_note_daterange[1],
-                        maxDate=field_note_daterange[2],
+                        maxDate=field_note_daterange[2] + 1,
                         disabledDates=no_note_days, addon='none',
                         clearButton=TRUE, update_on='close',
                         placeholder='No dates selected'),
@@ -818,15 +882,62 @@ shinyUI(
                     downloadButton('DOWNLOAD_NOTES', 'Download')
                 )
             )
+        ),
+        tabPanel('Sticky trap counts download',
+            fluidRow(
+                column(12,
+                    h3('Download all sticky trap count data'),
+                    br(),
+                    downloadButton('DOWNLOAD_BUGS', 'Download')
+                )
+            )
+        ),
+        tabPanel('Field-and-lab notes download',
+                 fluidRow(
+                     column(12,
+                            h3('Download collections of field and lab notes as XLSX files.'),
+                            p(paste('Dates for which files are available appear in black.')),
+                            br(),
+                            airDatepickerInput('NOTE_DATES2', 'Choose date(s)',
+                                               multiple=TRUE, range=FALSE, separator=', ',
+                                               minDate=field_note_daterange2[1],
+                                               maxDate=field_note_daterange2[2] + 1,
+                                               disabledDates=no_note_days2, addon='none',
+                                               clearButton=TRUE, update_on='close',
+                                               placeholder='No dates selected'),
+                            br(),
+                            downloadButton('DOWNLOAD_NOTES2', 'Download')
+                     )
+                 )
         )
       )
       #*********************************************************
-      # ***DATA ARCHIVE? tab*** ----
+      # ***DATA ARCHIVE tab*** ----
       #*********************************************************
       # tabPanel("Approve & Archive Data")
 
       # *REMEMBER* that when data is archived, the data in 'initial' and
       # 'current' tables should be cleared in MySQL hbef database
+      #MJV addendum: not sure if this still applies? as of 2021-05-04 we just
+      # want to be able to filter samples by arbitrary criteria and find their
+      # barcodes
+      #addentum 2: ended up doing this in javascript because DT is too slow
+      #and rhandsontable doesn't allow filtering
+
+      # tabPanel('Explore archive',
+      #    fluidPage(
+      #        p(paste('Use this tool to look up barcode and bin numbers in the',
+      #                'HBEF archives. You can filter rows using the boxes below',
+      #                'each column name. For date and numeric data, a range slider',
+      #                'will appear. For string data (including time and "bin"), typing into the box will',
+      #                'match text. You',
+      #                'can also sort columns by clicking the arrows beside their names.')),
+      #        p(paste('NOTE: the first few filter operations will be very slow,',
+      #                'but subsequent operations will be faster.')),
+      #        DT::dataTableOutput('ARCHIVE_TABLE')
+      #        # rHandsontableOutput('ARCHIVE_TABLE')
+      #    )
+      # )
 
     ) # END of navbarPage()
   ) # closes fluidPage()

@@ -11,23 +11,43 @@
 #sensor4 contains raw water qual and chemistry data
 #sensorQraw constains raw discharge data
 #sensor could contain qa/qc'd water qual and chem data
+#grab NH4 gets converted to NH4-N ON READ, so it's still just NH4 in the database.
+#   same with NO3
+#sensor NH4 and NO3 are already in N equivalents
+
+# dbname = 'hbef20200415' #for local testing
+dbname = 'hbef' #for reals
+# setwd('~/git/hbef/shiny/restricted_QAQC/') #only for testing
 
 library(dplyr)
 library(RMariaDB)
-# library(reactlog)
+#library(RMySQL)
+#library(reactlog)
 library(stringr)
 library(DT) #shiny's DataTable functions broke. loading them from here fixed it.
+library(shinyjs)
+# library(readr)
+
+# options(shiny.fullstacktrace=TRUE)
 
 message("hello, I'm in global.R")
 
 source('helpers.R')
 pass=readLines('../../RMySQL.config')
+note_dest_email = readLines('more_config/compiled_notes_target_email.txt', n = 1)
+note_dest_pwd = readLines('more_config/compiled_notes_target_email.txt', n = 2)[2]
+#gm_pass=readLines('config.txt')[1]
+#gm_addr=readLines('config.txt')[2]
 
-# **Database Password**
-# SWITCH DEPENDING ON LOCATION
-# pass  = readLines('/home/mike/RMySQL.config')    # for remote server
-# pass = readLines('~/git/hbef/RMySQL.config')    # for MV's local computer
-# pass = readLines('SQL.txt')                     # for CSR's local computer
+jsCode <- "
+$(document).on('shiny:busy', function() {
+  $('#loading-icon').show();
+});
+
+$(document).on('shiny:idle', function() {
+  $('#loading-icon').hide();
+});
+"
 
 # **********************************************************************
 #                      ---- LISTS ----
@@ -67,7 +87,14 @@ solutes_other <- list("pH (3 Star)" = "pH",
                       "Specific Conductivity" = "spCond",
                       "Theoretical Conductivity" = "theoryCond",
                       "Water Temperature" = "temp",
-                      "Ion Balance" = "ionBalance")
+                      "Ion Balance" = "ionBalance",
+                      "Chlorophyll-a (moss)" = "chla_M",
+                      "Chlorophyll-a (tile)" = "chla_T",
+                      "Emergence (caddisfly)" = "caddisfly",
+                      "Emergence (dipteran)" = "dipteran",
+                      "Emergence (mayfly)" = "mayfly",
+                      "Emergence (stonefly)" = "stonefly",
+                      "Emergence (other)" = "other")
 
 codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet",
                 "ionError", "ionBalance")
@@ -77,10 +104,12 @@ codes123 <- c("pH", "pHmetrohm", "spCond", "au254", "au275",
               "SO4", "NO3", "Cl", "PO4", "DOC", "TDN", "DIC",
               "DON", "SiO2", "Mn", "Fe", "F")
 
+emergence = c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')
 
 # Lists of Sites
 #***************
-sites_streams <- list("Watershed 1" = "W1",
+sites_streams <- list("Mainstem" = "W0",
+                      "Watershed 1" = "W1",
                       "Watershed 2" = "W2",
                       "Watershed 3" = "W3",
                       "Watershed 4" = "W4",
@@ -95,7 +124,8 @@ sites_streams <- list("Watershed 1" = "W1",
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
-sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP")
+sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP", "RG19",
+                     "W7-Precip")
 
 # wateryears ----> see list after data import
 
@@ -109,7 +139,9 @@ other_units <- c("pH",
                  "spCond",
                  "theoryCond",
                  "temp",
-                 "ionBalance")
+                 "ionBalance",
+                 "chla_M", "chla_T", "chla_MT", "chla_WM",
+                 'caddisfly', 'mayfly', 'dipteran', 'stonefly', 'other')
 
 # Functions ----
 # ***********************************
@@ -120,10 +152,15 @@ other_units <- c("pH",
 standardizeClasses <- function(d) {
    # d:              data.frame to be checked for columns with only NA's
    # ColClasses :    vector of desired class types for the data.frame
-   message(paste("In standardizeClasses for", deparse(substitute(d))))
+   # message(paste("In standardizeClasses for", deparse(substitute(d))))
    r <- nrow(d)
-   c <- ncol(d)
-   for (i in 1:c) {
+   cc <- ncol(d)
+   
+   d$timeEST <- as.character(d$timeEST)
+
+   # d = rename_all(d, recode, NH4='NH4_N', NO3='NO3_N')
+
+   for (i in 1:cc) {
       # 1. Insert an additional row with a sample value for each column
          ## Find index in defClassesSample that corresponds to column in d, save that index
          current_col_ofData <- colnames(d[i])
@@ -163,14 +200,14 @@ defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
 # Grabbing Data from MySQL database ----
 # USE WHEN LIVE ON REMOTE SITE
 #**********************************************
+#y = RMySQL::MySQL()
 y = RMariaDB::MariaDB()
 
 con = dbConnect(y,
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                # dbname = 'hbef')
-                dbname = 'hbef20200415')
+                dbname = dbname)
 tables = dbListTables(con)
 
 # # Code for one-time use: to load data into mysql
@@ -189,18 +226,25 @@ dataCurrent <- dbReadTable(con, "current") %>%
     mutate(
         NO3_N=NO3_to_NO3N(NO3),
         NH4_N=NH4_to_NH4N(NH4)) %>%
-    select(-NO3, -NH4)
+    select(-NO3, -NH4) %>%
+    filter(date >= as.Date('2013-06-01')) %>%
+    arrange(site, date, timeEST) %>%
+    mutate(timeEST = as.character(timeEST))
 dataHistorical <- dbReadTable(con, "historical") %>%
+    filter(! (site == 'W6' & date == as.Date('2007-08-06'))) %>%
     mutate(
         NO3_N=NO3_to_NO3N(NO3),
         NH4_N=NH4_to_NH4N(NH4)) %>%
-    select(-NO3, -NH4)
+    select(-NO3, -NH4) %>%
+    mutate(timeEST = as.character(timeEST))
 dataSensor <- dbReadTable(con, "sensor2")
 sensorvars = dbListFields(con, "sensor4")
 sensorvars = sub('S4__', '', sensorvars)
 sensorvars[sensorvars == 'Nitrate_mg'] = 'NO3_N_mg'
 sensorvars = sensorvars[-which(sensorvars %in% c('datetime', 'id', 'watershedID'))]
+sensorvars = c(sensorvars, 'Light_lux')
 dataSensor$watershedID = paste0('W', as.character(dataSensor$watershedID))
+# dataArchive = tibble(dbReadTable(con, 'archive'))
 dbDisconnect(con)
 
 dataCurrent <- standardizeClasses(dataCurrent)
@@ -242,11 +286,12 @@ wateryears_current <- as.list(wy1_current)
 maxDate_current <- max(dataCurrent$date, na.rm=TRUE)
 maxDate_historical <- max(dataHistorical$date, na.rm=TRUE)
 maxDate_sensor <- max(as.Date(dataSensor$date), na.rm=TRUE)
+# maxDate <- maxDate_historical # default value if dataCurrent or dataSensor are empty
+# if (maxDate_sensor > maxDate_current) maxDate <- maxDate_sensor
+# if (maxDate_sensor < maxDate_current) maxDate <- maxDate_current
+maxDate = Sys.Date()
 
-maxDate <- maxDate_historical # default value if dataCurrent or dataSensor are empty
-if (maxDate_sensor > maxDate_current) maxDate <- maxDate_sensor
-if (maxDate_sensor < maxDate_current) maxDate <- maxDate_current
-
+#data for the daterange picker in field note download
 fnfiles = list.files('field_notes')
 field_note_dates = unique(na.omit(as.Date(substr(fnfiles, 1, 8),
     format='%Y%m%d')))
@@ -255,3 +300,34 @@ field_note_daterange_filled = seq(field_note_daterange[1],
     field_note_daterange[2], by='day')
 no_note_days = as.Date(setdiff(field_note_daterange_filled, field_note_dates),
     origin='1970-01-01')
+# message(paste(field_note_daterange, collapse = ', '))
+
+#data for the daterange picker in field-and-lab note download
+dir.create('field_and_lab_note_collections', showWarnings = FALSE)
+# dir.create('field_and_lab_note_collections/part1', showWarnings = FALSE)
+# dir.create('field_and_lab_note_collections/complete', showWarnings = FALSE)
+
+fnfiles = list.files('field_and_lab_note_collections')
+# fnfiles = list.files('field_and_lab_note_collections/complete')
+field_note_dates2 = unique(na.omit(as.Date(substr(fnfiles, 1, 8),
+    format='%Y%m%d')))
+field_note_daterange2 <- range(field_note_dates2, na.rm=TRUE)
+if(any(is.infinite(field_note_daterange2))) field_note_daterange2 <- rep(Sys.Date(), 2)
+field_note_daterange_filled2 = seq(field_note_daterange2[1],
+    field_note_daterange2[2], by='day')
+no_note_days2 = as.Date(setdiff(field_note_daterange_filled2, field_note_dates2),
+    origin='1970-01-01')
+no_note_days2 <- c(field_note_daterange2[1] - 1, no_note_days2)
+
+# file.create('../logs/email_jeff.log', showWarnings = FALSE)
+
+# merge archive and sample data for new archive perusal tab ####
+
+#find out what "refNo" is. a lot of refNos are identical to barcode numbers, but
+#there appears to be no relationship between matches.
+# zz = select(dataAll, refNo, site, date, timeEST, fieldCode, notes, archived, uniqueID, waterYr, datetime)
+# qq = dataArchive %>%
+#     select(-id, -bin, -weight_g, -bottle_type) %>%
+#     left_join(zz, by=c('barcode' = 'refNo'))
+# range(tibble(dataAll[!is.na(dataAll$archived) & dataAll$archived == 'TRUE',])$refNo)
+

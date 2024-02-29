@@ -44,11 +44,12 @@
   		<div class="primary_header" id="menu">
 		  <ul>
 		  <div class="dark_background col">
-		  	<li><a href="#home">HOME</a></li>
-			<li><a href="#datastories">DATA STORIES</a></li>
-			<li><a href="#exploratory">EXPLORATORY TOOLS</a></li>
-            <li><a href="http://hbwater.org:3838/restricted_QAQC">HBEF Team Data Portal</a></li>
-            <li><a href="#aboutus">ABOUT US</a></li>
+			<li><a href="#datastories" style='color: white; font-weight: 900'>Data Stories</a></li>
+			<li><a href="https://hbwater.org/watershed_exploration/" style='color: white; font-weight: 900'>Public Portal</a></li>
+            <li><a href="https://hbwater.org/restricted_QAQC" style='color: white; font-weight: 900'>HBEF Team Data Portal</a></li>
+            <li><a href="archive_explore/archive_explore.html" style='color: white; font-weight: 900'>Sample Archive</a></li>
+			<li><a href="http://hbwater.org:3838/data_exploration/data_explorer_dashboard" style='color: white; font-weight: 900'>The Original Portal</a></li>
+            <li><a href="#aboutus" style='color: white; font-weight: 900'>About Us</a></li>
 			</div>
 		  </ul>
 	 	 </div>
@@ -59,7 +60,7 @@
 	<div class="dark_background col">
 	  <h1>Ecosystem Data Visualization<br>
 	    </h1>
-	  <h4> using long-term ecological research data to make the fascinating and complex ecosystem dynamics fun to understand.</h4>
+	  <h4> using long-term ecological research data to make fascinating and complex ecosystem dynamics fun to understand.</h4>
 	</div>  
 
   </div>
@@ -75,10 +76,8 @@
 	
 	<div class="dark_background col">
 	<h3><a href = "www.hubbardbrook.org">Hubbard Brook</a></h3>
-	<p>Alpha version: We are actively soliciting feedback on the project. Please email <a href="mailto:richard.marinos@duke.edu">Richard Marinos</a> with suggestions for improvement.</p>
-
-	<p>Welcome to Ecosystem Data Visualization - a data visualization platform for the <strong>Hubbard Brook Watershed Ecosystem Record </strong> (HB-WER). The HB-WER is a record of the amount and the chemical composition of precipitation and streamwater for a series of forested watersheds in central New Hampshire, USA that dates back to 1963. Ever since the mid-1960's researchers have been taking <strong>weekly samples of rain, snow and streamwater </strong> to study what comes in and what leaves these watersheds. By looking at the difference between inputs and outputs, scientists have learned a great deal about how these forested ecosystems work as well as how human impacts like acid rain, deforestation and climate change are affecting them.</p>
-	<p>All code for the project is open-source and is <a href="http://github.com/akl21/hbef">available on GitHub.</a></p> 
+	<p>Welcome to Ecosystem Data Visualization - a data visualization platform for the <strong>Hubbard Brook Watershed Ecosystem Record </strong> (HBWatER). HBWatER is a record of the amount and the chemical composition of precipitation and streamwater for a series of forested watersheds in central New Hampshire, USA that dates back to 1963. Ever since the mid-1960's researchers have been taking <strong>weekly samples of rain, snow and streamwater </strong> to study what comes in and what leaves these watersheds. By looking at the difference between inputs and outputs, scientists have learned a great deal about how these forested ecosystems work as well as how human impacts like acid rain, deforestation and climate change are affecting them.</p>
+	<p>All code for the project is open-source and is <a href="http://github.com/HBEF/hbef">available on GitHub.</a></p> 
 	<a href = "http://hubbardbrook.org"> <button> <p>HBRF</p></button></a>
 	 <a href = "https://lternet.edu/sites/hbr"> <button><p>HB LTER</button></p></a>
 	</div>  
@@ -132,13 +131,13 @@
 
 	   <a href="" class= "stories_menu_link">
 	   <div class = "blank stories_menu_image column">
-			<h3> more to come...</h3>
+           <!--<h3> more to come...</h3>-->
 			</div>
 	   </a>
 </div>	   
 
 </section>
-<section id="exploratory">
+<!--<section id="exploratory">
 
 <div class="container"> 
 <div class = "col_container_subtitle">
@@ -163,14 +162,14 @@
  <div class = "row">
   <div class = "column explorechemistry">
    <div class= "box_text">
-     <a href = "http://hbwater.org:3838/data_exploration/data_explorer_dashboard/"><div class="btn btn-three"><button><p>Explore the Dashboard</p></button></div></a>
+     <a href = "http://hbwater.org:3838/watershed_exploration"><div class="btn btn-three"><button><p>Explore the Dashboard</p></button></div></a><br>
   </div>
   </div>
   </div>
 </div>
  
   
-</section>
+</section>-->
 
 
 
@@ -179,7 +178,7 @@
 <div class="container"> 
 <div class = "col_container_subtitle">
   <h2>About Us</h2>
-  <p> This website has been developed by a team of Duke students and scientists through <a href="http://bigdata.duke.edu/projects/data-viz-long-term-ecological-research-and-curricula"> Duke University's Data+</a> program. Please direct any <a href="mailto:richard.marinos@duke.edu"> feedback here!</a> We hope you enjoy our prototype! </p>
+  <p> This website was created by a team of Duke students and scientists through <a href="http://bigdata.duke.edu/projects/data-viz-long-term-ecological-research-and-curricula"> Duke University's Data+</a> program. It has also been developed by <a href="https://github.com/carolinarr">Carolina Roe-Raymond</a>. All portals and pages associated with HBWatER are now managed by <a href="https://github.com/vlahm">Mike Vlah</a></p>
 </div>
 
 
@@ -234,6 +233,33 @@
     </div>  
   </li>  
 
+   <li class="list-item">  
+     <div class="list-content overlay green" style = "background-image: url(images/about_us/carolina4.png)">    
+      <h4>Carolina Roe-Raymond</h4>
+      <hr>
+      <p>Visualization Analyst <br>
+		Princeton University</p>
+    </div>  
+  </li>  
+
+   <li class="list-item">  
+     <div class="list-content overlay green" style = "background-image: url(images/about_us/mike.png)">    
+      <h4>Mike Vlah</h4>
+      <hr>
+      <p>Data Scientist <br>
+		Duke University</p>
+    </div>  
+  </li>  
+
+   <li class="list-item">  
+     <div class="list-content overlay green" style = "background-image: url(images/about_us/spencer.png)">    
+      <h4>Spencer Rhea</h4>
+      <hr>
+      <p>Data Scientist<br>
+		Duke University</p>
+    </div>  
+  </li>  
+
 </ul>
 
  
@@ -250,16 +276,15 @@
 	
 	  <div class = "footer_menu">
 			<ul>
-			  <li><a href="hubbard.html">HOME</a></li>
-			<li><a href="#datastories">DATA STORIES</a></li>
-			<li><a href="#exploratory">EXPLORATORY TOOLS</a>
-		  </li>
-			  <li><a href="#aboutus">ABOUT US</a></li>
+			<li><a href="#datastories" style='color: white; font-weight: 900'>Data Stories</a></li>
+			<li><a href="https://hbwater.org/watershed_exploration/" style='color: white; font-weight: 900'>Public Portal</a></li>
+            <li><a href="https://hbwater.org/restricted_QAQC" style='color: white; font-weight: 900'>HBEF Team Data Portal</a></li>
+            <li><a href="archive_explore/archive_explore.html" style='color: white; font-weight: 900'>Sample Archive</a></li>
+			<li><a href="http://hbwater.org:3838/data_exploration/data_explorer_dashboard" style='color: white; font-weight: 900'>The Original Portal</a></li>
+            <li><a href="#aboutus" style='color: white; font-weight: 900'>About Us</a></li>
 			</ul>	
 		</div>	
 	
-	<h3> contact@contact.com</h3>
-	 
 	</div>
 </section>
 </body>

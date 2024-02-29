@@ -20,7 +20,7 @@ library(plotly)
 library(lubridate)      # Does not work with shinyapps.io: https://stackoverflow.com/questions/28656683/r-script-working-locally-not-working-on-shinyapp-io
 library(RColorBrewer)
 library(RMariaDB)
-library(RMySQL)
+#library(RMySQL)
 library(rhandsontable)
 library(reshape2)
 library(shiny)
@@ -28,8 +28,14 @@ library(stringr)        # needed for str_extract function
 library(tidyr)
 library(xts)
 library(glue)
+library(purrr)
+#library(openxlsx)
+# library(glue)
 
 message("hello, I'm at the top of server.R")
+
+options(readr.show_progress = FALSE,
+        readr.show_col_types = FALSE)
 
 # **Database Password**
 # SWITCH DEPENDING ON LOCATION
@@ -67,9 +73,12 @@ removeCodes <- function(dataSet) {
     current_col_ofData <- codes123[i]
     if (current_col_ofData %in% names(dataSet)) {
       ind_col <- which(current_col_ofData == colnames(dataSet), arr.ind = TRUE)
-      dataSet[ind_col][dataSet[ind_col] == -1] <- NA
-      dataSet[ind_col][dataSet[ind_col] == -2] <- NA
-      dataSet[ind_col][dataSet[ind_col] == -3] <- NA
+      tryCatch({dataSet[ind_col][dataSet[ind_col] == -1] <- NA},
+               error = function(e) return())
+      tryCatch({dataSet[ind_col][dataSet[ind_col] == -2] <- NA},
+               error = function(e) return())
+      tryCatch({dataSet[ind_col][dataSet[ind_col] == -3] <- NA},
+               error = function(e) return())
     }
   }
 
@@ -150,6 +159,9 @@ shinyServer(function(input, output, session) {
   changesInData <- reactiveValues()
   changesInData$change_dataCurrent <- 0
   changesInData$change_dataAll <- 0
+  changesInData$stickytrap_upload_confirm <- TRUE
+  changesInData$bugsubmitgo2 <- 0
+  upl_filename = reactiveVal(NULL)
 
   # Make a reactive dataAll2 data frame, to be called whenever data is updated
   # (R in dataCurrentR stands for reactive)
@@ -157,12 +169,12 @@ shinyServer(function(input, output, session) {
 
     # Open database connection
     y = RMariaDB::MariaDB()
+    #y = RMySQL::MySQL()
     con = dbConnect(y,
                user = 'root',
                password = pass,
                host = 'localhost',
-               # dbname = 'hbef')
-               dbname = 'hbef20200415')
+               dbname = dbname)
 
     # Read current data and disconnect from table
     dataCurrentR <- dbReadTable(con, "current") %>%
@@ -170,11 +182,7 @@ shinyServer(function(input, output, session) {
             NO3_N=NO3_to_NO3N(NO3),
             NH4_N=NH4_to_NH4N(NH4)) %>%
         select(-NO3, -NH4)
-    message(print(class(dataCurrentR)))
-    message(head(dataCurrentR))
     dataCurrentR <- as.data.frame(dataCurrentR)
-    message(print(class(dataCurrentR)))
-    message(head(dataCurrentR))
     dbDisconnect(con)
 
     # Clean up data
@@ -190,7 +198,10 @@ shinyServer(function(input, output, session) {
       wy1_current <- c(wy1_current, wy_current[i])
     }
     #wy1 <- as.character(sort(as.numeric(wy1), decreasing=TRUE)) # sort so that recent years are first
-    wateryears_current <<- as.list(wy1_current) #assign it globally
+    #don't let this include years before 2013. those are "historical"
+    wy1_current = as.list(wy1_current)
+    wy1_current = wy1_current[sapply(wy1_current, function(x) as.numeric(x) > 2012)]
+    wateryears_current <<- wy1_current
 
     # Update Panel 5 user interface
     updateSelectInput(session, "WATERYEAR5", label = "Water Year", choices = wateryears_current)
@@ -232,7 +243,6 @@ shinyServer(function(input, output, session) {
                 step = 30)
 
     dataAllR
-
   })
 
   # *Upload Tab* ####
@@ -243,17 +253,33 @@ shinyServer(function(input, output, session) {
 
       #for testing
       #dataNew <-read.csv("data/tests/test_current.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
-      message("in dataNew() because of FILE_UPLOAD.")
+      message("in dataNew()")
       dataNew <- read.csv(input$FILE_UPLOAD$datapath,
                     header = input$HEADER,
                     stringsAsFactors = FALSE,
                     na.strings=c(""," ","NA"))
       dataNew <- dataNew[rowSums(is.na(dataNew)) !=ncol(dataNew),] # remove rows with all NA's
       if ("date" %in% names(dataNew)) {
-        dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
+          if(grepl('[0-9]+/[0-9]+/[0-9]{4}', dataNew$date[1])){
+            dataNew$date <- as.Date(dataNew$date, "%m/%d/%Y")
+          } else if(grepl('[0-9]+/[0-9]+/[0-9]{2}', dataNew$date[1])){
+            dataNew$date <- as.Date(dataNew$date, "%m/%d/%y")
+          }
       }
       # message(paste("Head of dataNew:",print(head(dataNew))))
       return(dataNew)
+   })
+  
+  stickytrap_up <- eventReactive(input$BUG_UPLOAD,{
+
+      # bug <- read.csv("data/tests/sticky_trap_orig.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) %>% as_tibble()
+      # bug <- read.csv("data/tests/sticky_trap_upload_new.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) %>% as_tibble()
+      bug <- read.csv(input$BUG_UPLOAD$datapath,
+                    header = input$HEADER,
+                    stringsAsFactors = FALSE,
+                    na.strings=c(""," ","NA", "N/A")) %>% as_tibble()
+      
+      return(bug)
    })
 
   # Upon pressing submit, transfer uploaded file content to 'current' table in database
@@ -262,16 +288,36 @@ shinyServer(function(input, output, session) {
     message("in submit")
     # opening connection to database
     con = dbConnect(MariaDB(),
+    #con = dbConnect(MySQL(),
                user = 'root',
                password = pass,
                host = 'localhost',
-               # dbname = 'hbef')
-               dbname = 'hbef20200415')
+               dbname = dbname)
 
     # make needed data type changes to data before uploading
     dataNew <- standardizeClasses(dataNew())
+    dataNew = dataNew %>%
+        group_by(uniqueID) %>%
+        summarize_each(list(~if(is.numeric(.)) mean(., na.rm=TRUE) else first(.))) %>%
+        ungroup()
 
-    # upload data
+    # upload data prep
+    uid = unname(unlist(dbGetQuery(con, 'select uniqueID from current;')))
+    nrecords_submit = nrow(dataNew)
+    dataNew = dataNew[! dataNew$uniqueID %in% uid, ]
+    nomits = nrecords_submit - nrow(dataNew)
+    
+    #convert element-specific forms to ionic forms (as they are in the database)
+    if('NO3_N' %in% colnames(dataNew)){
+        dataNew$NO3 <- NO3N_to_NO3(dataNew$NO3_N)
+        dataNew$NO3_N <- NULL
+    }
+    if('NH4_N' %in% colnames(dataNew)){
+        dataNew$NH4 <- NH4N_to_NH4(dataNew$NH4_N)
+        dataNew$NH4_N <- NULL
+    }
+    
+    #upload
     dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
 
     # close connection to database
@@ -281,9 +327,237 @@ shinyServer(function(input, output, session) {
     # so that dataCurrent & dataAll are recalculated
     changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
 
-    showNotification("Submit Complete.", type='message')
+    if(nomits > 0){
+        msg = paste("Submit Complete. Omitted", nomits, "already held uniqueIDs.")
+    } else {
+        msg = paste("Submit Complete.")
+    }
+    showNotification(msg, type='message')
 
   })
+  
+  new_bug_records = eventReactive(input$BUG_SUBMIT, {
+      
+    changesInData$stickytrap_upload_confirm = TRUE 
+     
+    removeNotification(id = 'stickytraperr')
+    disable('BUG_SUBMIT')
+      
+    con = dbConnect(MariaDB(),
+               user = 'root',
+               password = pass,
+               host = 'localhost',
+               dbname = dbname)
+    
+    bug <- stickytrap_up()
+    
+    needed_colnames = c('sample_id', 'side_or_trapnum', 'watershed', 'date', 'dipteran_large', 'terrestrial_large', 'caddisfly_large', 'mayfly_large', 'stonefly_large', 'other_large', 'dipteran_small', 'terrestrial_small', 'caddisfly_small', 'other_small')
+    intsxn = intersect(colnames(bug), needed_colnames)
+    if(! (length(intsxn) == length(needed_colnames) && length(colnames(bug)) == length(needed_colnames))){
+        showNotification(paste('Upload CSV must have these exact columns:',
+                               'sample_id, side_or_trapnum, watershed, date, dipteran_large, terrestrial_large, caddisfly_large, mayfly_large, stonefly_large, other_large, dipteran_small, terrestrial_small, caddisfly_small, other_small'),
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    #colnames(bug) = tolower(colnames(bug))
+    #colnames(bug) = sub('sample.id', 'sample_id', colnames(bug))
+    #colnames(bug) = sub('side..trap..', 'side_or_trapnum', colnames(bug))
+    
+    bug$sample_id = as.character(bug$sample_id)
+    bug$side_or_trapnum = as.character(bug$side_or_trapnum)
+    
+    
+    if(any(! grepl('[0-9]{4}-[0-9]{2}-[0-9]{2}', bug$date))){
+        showNotification('All dates must be in YYYY-MM-DD format.',                               
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(is.na(bug$sample_id))){
+        showNotification('At least one missing sample_id detected. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(is.na(bug$side_or_trapnum))){
+        showNotification('At least one missing side_or_trapnum detected. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(is.na(bug$watershed))){
+        showNotification('At least one missing watershed value detected. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(is.na(bug$date))){
+        showNotification('At least one missing date value detected. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(nchar(bug$sample_id) != 8)){
+        showNotification('All sample_id values must be exactly 8 characters long. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(! bug$side_or_trapnum %in% c('A', 'B'))){
+        showNotification('All side_or_trapnum values must be either "A" or "B". Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    if(any(! bug$watershed %in% c(1:6, 9))){
+        showNotification('All watershed values must be in [1, 2, 3, 4, 5, 6, 9]. Resolve and reupload.',
+                         type='error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+  
+    bug$date = as.Date(bug$date, format = '%Y-%m-%d')
+
+    dataNew = bug %>% 
+    # dataNew <- stickytrap_up() %>% 
+        distinct() %>% 
+        filter(if_any(-all_of(c('sample_id', 'side_or_trapnum', 'watershed', 'date')),
+                      ~(! is.na(.))))
+    
+    dbd = DBI::dbReadTable(con, 'stickytrap') %>% as_tibble()
+    
+    repeat_keys = dataNew %>% 
+        semi_join(dbd, by = c('sample_id', 'side_or_trapnum')) %>% 
+        mutate(watershed = as.character(watershed))
+                  
+    exact_repeats = semi_join(repeat_keys, dbd) %>% nrow()
+    inexact_repeat_ids = anti_join(repeat_keys, dbd) %>%
+        mutate(id_and_side = paste0(sample_id, ' (side/trap ', side_or_trapnum, ')')) %>% 
+        pull(id_and_side)
+    
+    if(exact_repeats != 0){
+        showNotification(paste(exact_repeats, 'of these records have already been submitted. This is fine! Just letting you know they\'ll be omitted.'),
+                         type = 'message')
+    }
+    
+    if(length(inexact_repeat_ids)){
+        showNotification(HTML(paste('It looks like you\'ve re-counted the following traps:<br><br>',
+                               paste(inexact_repeat_ids, collapse = '<br>'),
+                               '<br><br>Please resolve and reupload!')),
+                         type = 'error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
+    
+    new_recs = anti_join(dataNew, repeat_keys, by = c('sample_id', 'side_or_trapnum'))
+    
+    max_counts_hist = apply(select(dbd, ends_with('_large'), ends_with('_small')), 2, max, na.rm = TRUE)
+    max_counts_new = apply(select(new_recs, ends_with('_large'), ends_with('_small')), 2, max, na.rm = TRUE)
+    new_max_counts = max_counts_new - max_counts_hist > 0
+    
+    if(any(new_max_counts)){
+        count_warn = paste('Count of', max_counts_new[new_max_counts], 'for',
+                           names(new_max_counts)[new_max_counts], 'exceeds the former max count of',
+                           max_counts_hist[new_max_counts])
+        
+        changesInData$stickytrap_upload_confirm = count_warn
+    }
+
+    dbDisconnect(con)
+    
+    enable('BUG_SUBMIT')
+    return(new_recs)
+  })
+  
+  bugmodal = function(){
+      
+      modalDialog(
+          title = 'That\'s a lot of bugs!',
+          HTML(paste0(paste(changesInData$stickytrap_upload_confirm, collapse = '.<br>'),
+                 '.<br><br>Are you sure these IDs are correct?')),
+          easyClose = FALSE,
+          footer = tagList(
+              modalButton('No. I\'ll go back and check.'),
+              actionButton('bugsubmitgo', 'Yes. Submit records.')
+          )
+      )
+  }
+  
+  observeEvent(new_bug_records(), {
+      
+      if(! is.logical(changesInData$stickytrap_upload_confirm)){
+          showModal(bugmodal())
+      } else {
+          changesInData$bugsubmitgo2 = changesInData$bugsubmitgo2 + 1
+      }
+      
+  })
+  
+  observeEvent(input$bugsubmitgo, {
+               changesInData$bugsubmitgo2 = changesInData$bugsubmitgo2 + 1})
+  
+  # observeEvent(c(input$bugsubmitgo, changesInData$bugsubmitgo2), {
+  observeEvent(changesInData$bugsubmitgo2, {
+      
+      removeModal()
+      
+      changesInData$stickytrap_upload_confirm = TRUE
+      
+      new_recs = new_bug_records()
+      
+      con = dbConnect(MariaDB(),
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = dbname)
+      
+      nrecords_submit = nrow(new_recs)
+      
+      dbWriteTable(con, "stickytrap", new_recs, append=TRUE, row.names=FALSE)
+      dbDisconnect(con)
+      
+      showNotification(paste('Submitted', nrecords_submit, 'new records.'), type='message')
+  }, ignoreInit = TRUE)
+               
 
   observeEvent(input$SUBMIT_NOTE, {
 
@@ -298,9 +572,256 @@ shinyServer(function(input, output, session) {
           return()
       }
 
-      file.copy(ff$datapath, file.path("field_notes", fn) )
+      file.copy(ff$datapath, file.path("field_notes", fn), overwrite=TRUE)
       showNotification(paste(length(fn), "file(s) submitted."),
           type='message')
+  })
+  
+  notes_parsed <- eventReactive(input$SUBMIT_FL1, {
+      
+      shinyjs::show("loading-icon")
+      ff = input$FIELD_AND_LAB_UPLOAD
+      if (is.null(ff)) return()
+      fn = ff$name
+      upl_filename(fn)
+      
+      pt1 <- all(grepl('^[0-9]{8}\\.xlsx$', fn))
+      # pt2 <- any(grepl('^[0-9]{8}_DIC\\.xlsx$', fn))
+
+      if(! pt1){
+          showNotification(paste('Filename(s) must match YYYYMMDD.xlsx.'),
+                           type='error', duration=NULL, closeButton=TRUE)
+          shinyjs::hide("loading-icon")
+          return()
+      }
+      # if(! pt1 && ! pt2){
+      #     showNotification(paste('Filename(s) must match either',
+      #         'YYYYMMDD.xlsx for Part 1 or YYYYMMDD_DIC.xlsx for Part 2.'), type='error', duration=NULL,
+      #         closeButton=TRUE)
+      #     return()
+      # }
+      
+      # if(pt1 && pt2){
+      #     stop('YYYYMMDD.xlsx and YYYYMMDD_DIC.xslx files must be uploaded separately')
+      # }
+      
+      # if(pt1){
+          
+      file.copy(ff$datapath, file.path("field_and_lab_note_collections", fn), overwrite=TRUE)
+      # file.copy(ff$datapath, file.path("field_and_lab_note_collections", 'part1', fn), overwrite=TRUE)
+    
+      # dates <- sub('.xlsx', '', fn)
+      # email_msg(subject = 'HBWatER data upload part 2 is ready',
+      #           text_body = paste0('Hi Jeff,\n\nThis is an automated message letting you ',
+      #                            'know that new lab and field notes have ',
+      #                            'been uploaded to http://hbwater.org:3838/restricted_QAQC ',
+      #                            'for sample collection dates:\n\n',
+      #                            paste(dates, collapse = '\n'),
+      #                            '\n\nDIC lab sheets can now be uploaded for those collection dates.'),
+      #           addr = gm_addr,
+      #           pw = gm_pass)
+      # browser()
+      
+      d_combined <- tibble()
+      for(f in rev(ff$name)){
+          
+          d_parsed <- try(parse_note_collection(file.path("field_and_lab_note_collections", f)),
+                          silent = TRUE)
+          
+          if(inherits(d_parsed, 'try-error') | is.null(d_parsed)){
+              
+              err_msg = as.character(d_parsed)
+              if(grepl('Unrecognized fieldCode', err_msg)){
+                  showNotification(paste0(f, ': ', str_extract(err_msg, 'Unrecognized fieldCode.*')),
+                                   type = 'warning', duration = NULL)
+              } else if(grepl('Detected illegal character', err_msg)){
+                  showNotification(paste0(f, ': ', str_extract(err_msg, 'Detected illegal.*')),
+                                   type = 'warning', duration = NULL)
+              } else {
+                  showNotification(glue("{f} failed to parse. Please try again or email Mike with the file(s) you're trying to upload."),
+                                   type = 'warning', duration = NULL)
+              }
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(nrow(d_parsed) == 0){
+              showNotification(glue("No records detected in {f}. Either something failed to parse, or this is a blank template."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(any(is.na(d_parsed$site))){
+              showNotification(glue("Missing or incorrect site name detected in {f}. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(any(is.na(d_parsed$date))){
+              showNotification(glue("Missing or incorrect date detected in {f}. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(any(is.na(d_parsed$timeEST) | ! nchar(d_parsed$timeEST) == 4)){
+              showNotification(glue("Missing or incorrect time detected in {f}. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          if(any(is.na(d_parsed$datetime))){
+              showNotification(glue("Incorrect date or time detected in {f}. Please try again or email Mike with the file(s) you're trying to upload."),
+                               type = 'warning', duration = NULL)
+              shinyjs::hide("loading-icon")
+              return()
+          }
+          
+          d_combined <- bind_rows(d_combined, d_parsed)
+      }
+      # }
+      
+      # if(pt2){
+      #     
+      #     orig <- sub('_DIC', '', fn)
+      #     ex <- sapply(file.path('field_and_lab_note_collections', 'part1', orig), file.exists)
+      #     
+      #     if(! all(ex)){
+      #         showNotification(paste('These Part-1 files have not been uploaded yet:',
+      #                                paste(orig[! ex], collapse = ', ')),
+      #                          type='error', duration=NULL, closeButton=TRUE)
+      #         return()
+      #     }
+      #   
+      #     fails <- list()
+      #     for(i in seq_along(orig)){
+      #         
+      #         fails[i] <- tryCatch({
+      #             wb <- loadWorkbook(file.path('field_and_lab_note_collections/part1', orig[i]))
+      #             addWorksheet(wb, 'DIC')
+      #             s5 <- read.xlsx(ff$datapath[i])
+      #             writeData(wb, 5, s5)
+      #             saveWorkbook(wb, file.path('field_and_lab_note_collections/complete', orig[i]), overwrite = TRUE)
+      #             FALSE
+      #             
+      #             # wb$sheet_names %>%
+      #             #     lapply(function(x) read.xlsx(wb,sheet=x)) |>
+      #             #     # combine the sheets into a single dataframe
+      #             #     do.call(what=rbind)|>
+      #             #     # Write into excel file and match formatting
+      #             #     write.xlsx("combinedSheets.xlsx",
+      #             #                colWidths="auto",
+      #             #                borders = "all",
+      #             #                headerStyle= createStyle(textDecoration = "Bold",
+      #             #                                         border=c("top", 
+      #             #                                                  "bottom", 
+      #             #                                                  "left", 
+      #             #                                                  "right")))
+      #         }, error = function(e) return(TRUE))
+      #     }
+      #     
+      #     fails <- unlist(fails)
+      #     
+      #     if(any(fails)){
+      #         
+      #         success_files <- paste(orig[! fails], collapse = ', ')
+      #         fail_files <- paste(orig[fails], collapse = ', ')
+      #         
+      #         if(nchar(success_files)){
+      #             msg <- paste('These files uploaded successfully:', success_files,
+      #                          '\nBut these failed:', fail_files,
+      #                          '\nPlease send Mike the files that failed.')
+      #             showNotification(msg, type='error', duration=NULL, closeButton=TRUE)
+      #         } else {
+      #             showNotification('Something went wrong. Please email Mike the files you tried to upload.',
+      #                              type='error', duration=NULL, closeButton=TRUE)
+      #         }
+      #         
+      #         return()
+      #         
+      #     }
+      # }
+      
+      shinyjs::hide("loading-icon")
+      return(d_combined)
+  })
+          
+  output$NOTE_PREUPLOAD <- renderRHandsontable({
+  # output$NOTE_PREUPLOAD <- DT::renderDataTable({
+      
+      d_parsed <- req(notes_parsed())
+      d_parsed <- d_parsed %>% 
+          # relocate(notes, .after = 'datetime') %>% 
+          # mutate(waterYr = as.integer(waterYr)) %>% 
+          # arrange(date, site, timeEST)
+          arrange(SampleDate, Site, MilitaryTime) %>% 
+          relocate(Remarks, .after = 'FieldCode')
+      
+      getmax <- function(colname){
+          mx <- max(d_parsed[[colname]], na.rm = TRUE)
+          mx <- as.numeric(mx)
+          if(is.infinite(mx)){
+              return(0)
+          } else {
+              return(mx)
+          }
+      }
+      
+      rendo <- function(vv){
+          custrend <- htmlwidgets::JS(sprintf("
+          function(instance, td, row, col, prop, value, cellProperties) {
+            Handsontable.renderers.TextRenderer.apply(this, arguments);
+            if (value == %s) {
+              td.style.color = 'red';  // Change the text color for maximum values
+            }
+          }
+        ", vv))
+          
+          return(custrend)
+      }
+      
+      rhandsontable(d_parsed, height = 400, readOnly = TRUE) %>%
+          hot_col('Temperature', renderer = rendo(getmax('Temperature'))) %>%
+          hot_col('GageHt', renderer = rendo(getmax('GageHt'))) %>%
+          hot_col('precipCatch', renderer = rendo(getmax('precipCatch'))) %>%
+          hot_col('phMet', renderer = rendo(getmax('phMet'))) %>%
+          hot_col('ANCMet', renderer = rendo(getmax('ANCMet'))) %>%
+          hot_col('3StarpH', renderer = rendo(getmax('3StarpH'))) %>%
+          hot_col('SpCond', renderer = rendo(getmax('SpCond'))) %>%
+          hot_col('DICRaw', renderer = rendo(getmax('DICRaw'))) %>%
+          hot_cols(fixedColumnsLeft = 3)
+          # hot_col('pH', renderer = rendo(getmax('pH'))) %>%
+          # hot_col('pHmetrohm', renderer = rendo(getmax('pHmetrohm'))) %>%
+          # hot_col('DIC', renderer = rendo(getmax('DIC'))) %>%
+          # hot_col('spCond', renderer = rendo(getmax('spCond'))) %>%
+          # hot_col('temp', renderer = rendo(getmax('temp'))) %>%
+          # hot_col('ANCMet', renderer = rendo(getmax('ANCMet'))) %>%
+          # hot_col('gageHt', renderer = rendo(getmax('gageHt'))) %>%
+          # hot_col('flowGageHt', renderer = rendo(getmax('flowGageHt'))) %>%
+          # hot_col('precipCatch', renderer = rendo(getmax('precipCatch'))) %>%
+          # hot_cols(fixedColumnsLeft = 4)
+  })
+  
+  observeEvent(input$SUBMIT_FL2, {
+              
+      shinyjs::show("loading-icon")
+      d_parsed <- req(notes_parsed())
+      fn <- upl_filename()
+      orig_file <- file.path("field_and_lab_note_collections", fn)
+      
+      email_body <- paste("A new batch of HBEF data has been submitted to the hbwater system.",
+                          "It has been formatted and attached to this email, along with the",
+                          "originally submitted XLSX file(s).")
+      
+      result <- try(email_data2(d_parsed, orig_file, fn, email_body,
+                                note_dest_email, note_dest_pwd))
+      
+      if(inherits(result, 'try-error')){
+          showNotification("Problem with sending email to Jeff. Please notify Mike.",
+                           type='error')
+      } else {
+          showNotification("File(s) uploaded successfully. Jeff has been notified.",
+                           type='message')
+      }
+      shinyjs::hide("loading-icon")
   })
 
   # *QA/QC Tab* ####
@@ -354,12 +875,10 @@ shinyServer(function(input, output, session) {
       if (input$SOLUTES1 == "ANCMet")  ylabel1 <- paste(mu, "eq/L")
       if (input$SOLUTES1 == "spCond") ylabel1 <- paste(mu, "S/cm")
       if (input$SOLUTES1 == "temp")   ylabel1 <- "Degrees Celsius"
-      if (input$SOLUTES1 %in% c("pH",
-                        "pHmetrohm",
-                        "cationCharge",
-                        "cnionCharge",
-                        "theoryCond",
-                        "ionBalance")) { ylabel1 <- "(No Units)" }
+      if (grepl('^chla_', input$SOLUTES1)) ylabel1 <- "mg/m^2"
+      if (input$SOLUTES1 %in% c("pH", "pHmetrohm", "cationCharge", "cnionCharge",
+          "theoryCond", "ionBalance")) { ylabel1 <- "(No Units)" }
+      if(input$SOLUTES1 %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel1 = 'Count'
 
       ylabel1 <- gsub(" ", "", ylabel1, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
       ylabel1
@@ -534,12 +1053,14 @@ shinyServer(function(input, output, session) {
       if (input$SOLUTES2[i] == "ANC960")  ylabel2[i] <- paste(mu, "eq/L")
       if (input$SOLUTES2[i] == "spCond") ylabel2[i] <- paste(mu, "S/cm")
       if (input$SOLUTES2[i] == "temp")   ylabel2[i] <- "Degrees Celsius"
+      if (grepl('^chla_', input$SOLUTES2[i])) ylabel2[i] <- "mg/m^2"
       if (input$SOLUTES2[i] %in% c("pH",
                         "pHmetrohm",
                         "cationCharge",
                         "anionCharge",
                         "theoryCond",
                         "ionBalance")) { ylabel2[i] <- "(No Units)" }
+      if(input$SOLUTES2[i] %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel2[i] = 'Count'
       test <- gsub(" ", "", ylabel2[i], fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
      }
      # Otherwise, label as 'default' mg/L
@@ -639,13 +1160,13 @@ shinyServer(function(input, output, session) {
         }
 
         # Open database connection
+        #y = RMySQL::MySQL()
         y = RMariaDB::MariaDB()
         con = dbConnect(y,
             user = 'root',
             password = pass,
             host = 'localhost',
-            # dbname = 'hbef')
-            dbname = 'hbef20200415')
+            dbname = dbname)
 
         wsID = substr(input$SITES2, 2, 3)
         dataSensRaw = dbGetQuery(con,
@@ -731,12 +1252,14 @@ shinyServer(function(input, output, session) {
      if (input$SOLUTES3 == "ANCMet")  ylabel3 <- paste(mu, "eq/L")
      if (input$SOLUTES3 == "spCond") ylabel3 <- paste(mu, "S/cm")
      if (input$SOLUTES3 == "temp")   ylabel3 <- "Degrees Celsius"
+     if (grepl('^chla_', input$SOLUTES3)) ylabel3 <- "mg/m^2"
      if (input$SOLUTES3 %in% c("pH",
                       "pHmetrohm",
                       "cationCharge",
                       "anionCharge",
                       "theoryCond",
                       "ionBalance")) { ylabel3 <- "(No Units)" }
+     if(input$SOLUTES3 %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel3 = 'Count'
      ylabel3 <- gsub(" ", "", ylabel3, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
      return(ylabel3)
     }
@@ -755,6 +1278,7 @@ shinyServer(function(input, output, session) {
 
   # filters data to only include data selected by inputs
   dataAll3 <- reactive({
+    
     # update data variable if underlying data was updated
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
     # do initial filter of data depending on whether water year or date range was chosen
@@ -770,11 +1294,17 @@ shinyServer(function(input, output, session) {
         dataAll3 <- filter(dataAll3, is.na(fieldCode) | fieldCode != '911')
     }
     dataAll3 <- dataAll3 %>%
-     select(one_of("date", "site", input$SOLUTES3)) %>% # Keep date, site, and solute data
+     select(one_of("date", "site", input$SOLUTES3))
+    if(any(input$SOLUTES3 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 3)
+      dataAll3 = full_join(dataAll3, stky, by = 'date', relationship = 'many-to-many')
+    }
+    dataAll3 = dataAll3 %>% 
+     filter(! is.na(site)) %>% 
      mutate(i = row_number()) %>%                # Create new columns of data of just row numbers. Necessary to prevent error message of duplicate values after next line of code, but inefficient because doesn't combine rows with duplicate columns.)
      spread_(key_col = "site", value_col = input$SOLUTES3, fill=NA) %>%  # Reshape data so that each place in "sites" is made into a unique column, with corresponding solute value as data
      select(-i)                            # Remove row name variable
-
+    return(dataAll3)
      }) # END of dataCurrent3()
 
 
@@ -846,6 +1376,9 @@ shinyServer(function(input, output, session) {
 
   # filters Original (recent water year) data to include data selected by inputs AND discharge/precip
   dataAllQ3 <- reactive({
+    if(any(input$SOLUTES3 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 3)
+    }
     dataAll3 = dataAll3()
     dataQ3 = Q3()
     if(class(dataQ3$date) != 'Date') dataAll3$date = as.POSIXct(dataAll3$date)
@@ -1001,6 +1534,8 @@ shinyServer(function(input, output, session) {
                     "Historical" = dataHistorical,
                     "Sensor" = dataSensor,
                     "All" = dataAll)
+
+    datasetInput <- arrange(datasetInput, site, date, timeEST)
   })
 
 
@@ -1026,6 +1561,14 @@ shinyServer(function(input, output, session) {
     },
     contentType = "text/csv"
   )
+  
+  output$DOWNLOAD_TEMPLATE_FIELDLAB <- downloadHandler(
+    filename = 'hubbard_brook_ecosystem_study_worksheets_v5.xlsx',
+    content = function(file) {
+      file.copy("documentation/hubbard_brook_ecosystem_study_worksheets_v5.xlsx", file)
+    },
+    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  )
 
   # *Upload Tab* #########################################
 
@@ -1045,6 +1588,10 @@ shinyServer(function(input, output, session) {
     # !!! Need to add in code to warn users if uniqueID will be duplicate with what's in MySQL
     # !!! Need to allow users to delete lines
 
+  })
+  
+  output$BUG_FILE_PREVIEW <- DT::renderDataTable({
+      stickytrap_up()
   })
 
   # *QA/QC Tab* #########################################
@@ -1066,7 +1613,11 @@ shinyServer(function(input, output, session) {
   # from input panel. Done in this manner because dygraph() cannot overlay plots, each
   # plot must be started from scratch because it graphs ALL the data within xts data.
   output$GRAPH1 <- renderDygraph({
-
+  
+    if(input$SOLUTES1 %in% emergence){
+      stky = prep_stickytrap_data(input = input, graphnum = 1)
+    }
+    
     ylabel <- ylabel1()
     if (input$HYDROLOGY1 == TRUE)  {
       if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (ft or L/s)'
@@ -1085,6 +1636,9 @@ shinyServer(function(input, output, session) {
           # Plots Default + Discharge + Historical data
           data1 <- dataAllQHist1()
           data1 <- removeCodes(data1)
+        # if(input$SOLUTES1 %in% emergence){
+        #   data1 = full_join(data1, stky, by = 'date')
+        # }
           data1.xts <- xts(data1[,-1], order.by = data1$date)
           #paste(c("XTS:", class(dataCur1$FieldCode)))
 
@@ -1131,6 +1685,9 @@ shinyServer(function(input, output, session) {
         # Plots Default + Discharge data
         data1 <- dataAllQ1()
         data1 <- removeCodes(data1)
+        if(input$SOLUTES1 %in% emergence){
+          data1 = full_join(data1, stky, by = 'date', relationship = 'many-to-many')
+        }
         data1.xts <- xts(data1[,-1], order.by = data1$date)
 
         dygraph1 <- dygraph(data1.xts) %>%
@@ -1139,14 +1696,15 @@ shinyServer(function(input, output, session) {
           dyAxis('y2',label=ylabel2, independentTicks=TRUE,
                axisLabelWidth = 70,
                axisLabelColor = "#3182bd",
-               axisLineColor = "#3182bd") %>% # color is light blue
-          dySeries(name = input$SOLUTES1,
-                color = "#black") %>%
-          dySeries(name = 'Flow_or_Precip',
-                drawPoints = FALSE,
-                fillGraph=T,
-                color = "#3182bd",
-                axis='y2') %>%
+               axisLineColor = "#3182bd")
+        if(input$SOLUTES1 %in% emergence){
+          dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
+                              drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+        } else {
+          dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black")
+        }
+          dygraph1 = dySeries(dygraph1, name = 'Flow_or_Precip',
+                drawPoints = FALSE, fillGraph=T, color = "#3182bd", axis='y2') %>%
           dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
           dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
           dyOptions(drawGrid = FALSE,
@@ -1230,27 +1788,24 @@ shinyServer(function(input, output, session) {
 
           data1 <- dataAll1()
           data1 <- removeCodes(data1)
+          if(input$SOLUTES1 %in% emergence){
+            data1 = full_join(data1, stky, by = 'date', relationship = 'many-to-many')
+          }
           data1.xts <- xts(data1, order.by = data1$date)
 
           #padrange <- c(min(data1.xts$input$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$input$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
 
           dygraph1 <- dygraph(data1.xts) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-            dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-            dySeries(name = input$SOLUTES1,
-                  color = "black",
-                  drawPoints = TRUE,
-                  strokeWidth = 1,
-                  pointSize = 3) %>%
-            # dySeries(name = "FieldCode",
-            #       color = "black",
-            #       drawPoints = TRUE,
-            #       strokeWidth = 0,
-            #       pointSize = 1) %>%
-            # for (i in 1:nrow(data1.xts)) {
-            #   dyAnnotation(index(i), data1.xts$FieldCode[i])
-            # } %>%
-            dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
+            dyAxis("y", label = ylabel, independentTicks=TRUE)
+          if(input$SOLUTES1 %in% emergence){
+            dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
+                                drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          } else {
+            dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
+                  drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
+          }
+            dygraph1 = dyLimit(dygraph1, limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
             dyOptions(drawGrid = FALSE,
                    connectSeparatedPoints=TRUE,
@@ -1258,7 +1813,6 @@ shinyServer(function(input, output, session) {
 
           dygraph1
         }
-      # }
     }
 
   }) # END of output$GRAPH1
@@ -1280,6 +1834,10 @@ shinyServer(function(input, output, session) {
 
   output$GRAPH2 <- renderDygraph({
 
+    if(any(input$SOLUTES2 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 2)
+    }
+    
     # determine x-axis label
     if(input$wateryearOrRange2 == 'wateryr'){
       xlabel <- paste("Water Year ", input$WATERYEAR2)
@@ -1287,6 +1845,7 @@ shinyServer(function(input, output, session) {
       xlabel = paste("Dates ", input$DATE2[1], " to ", input$DATE2[2])
     }
 
+    if (input$SITES2 == 'W0') return(stop('Only continuous temperature available for Mainstem'))
     if (input$HYDROLOGY2 == TRUE)  {
 
       #determine y2-axis labels
@@ -1295,69 +1854,67 @@ shinyServer(function(input, output, session) {
 
         # Plots Default + Discharge data
         data2 <- dataAllQ2()
-        # if (input$SHOWSENS2 && input$SENSORVAR2 != 'None') {
-        #    data2 = merge_sensor_data(data2, input$SENSORVAR2, input$SITES2,
-        #       input$DATE2)
-        # }
         data2 <- removeCodes(data2)
+        if(any(input$SOLUTES2 %in% emergence)){
+          data2 = full_join(data2, stky, by = 'date', relationship = 'many-to-many')
+        }
         data2.xts <- xts(data2[,-1], order.by = data2$date)
 
-        dygraph(data2.xts, group='group2') %>%
+        dg2 = dygraph(data2.xts, group='group2') %>%
           dyAxis("x", label=xlabel) %>%
           dyAxis("y", label = "(various units, dependent on input)",
               independentTicks=TRUE, valueRange=c(input$YLIMlo2, input$YLIMhi2)) %>%
           dyAxis('y2',label=ylabel2, independentTicks=TRUE,
               axisLabelWidth = 70,
               axisLabelColor = "#3182bd",
-              axisLineColor = "#3182bd") %>% # color is light blue
-          #dySeries(name = input$SOLUTES2) %>%
-          dySeries(name = 'Flow_or_Precip',
-                label = "Discharge/Precip",
-                drawPoints = FALSE,
-                fillGraph=T,
-                #color = "#3182bd",
-                axis='y2') %>%
+              axisLineColor = "#3182bd")
+        if(any(input$SOLUTES2 %in% emergence)){
+          for(emerg in intersect(input$SOLUTES2, emergence)){
+            dg2 = dySeries(dg2, name = emerg,
+                           drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          }
+        }
+        dg2 = dySeries(dg2, name = 'Flow_or_Precip', label = "Discharge/Precip",
+              drawPoints = FALSE, fillGraph=T, axis='y2') %>% 
           dyOptions(drawGrid = FALSE,
-                drawPoints = TRUE,
-                strokeWidth = 1,
-                pointSize = 3,
-                fillAlpha = 0.3,
-                connectSeparatedPoints=TRUE,
-                includeZero = TRUE)
-
+              drawPoints = TRUE,
+              strokeWidth = 1,
+              pointSize = 3,
+              fillAlpha = 0.3,
+              connectSeparatedPoints=TRUE,
+              includeZero = TRUE)
+        dg2
       } else {
 
         # Plots Default data
 
         data2 <- dataAll2()
         data2 <- removeCodes(data2)
-        # dd <<- data2
-        # svar <<- input$SENSORVAR2
-        # ssite <<- input$SITES2
-        # sdate <<- input$DATE2
-        # if (input$SHOWSENS2 && input$SENSORVAR2 != 'None') {
-        #    data2 = merge_sensor_data(data2, input$SENSORVAR2, input$SITES2,
-        #       input$DATE2)
-        # }
+        if(any(input$SOLUTES2 %in% emergence)){
+          data2 = full_join(data2, stky, by = 'date', relationship = 'many-to-many')
+        }
         data2.xts <- xts(data2, order.by = data2$date)
 
         # padrange <- c(min(data2.xts$input$SOLUTES2, na.rm=TRUE) - 1, max(data2.xts$input$SOLUTES2, na.rm=TRUE) + 1) # !!! attempt at resolving negative values issue
         # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
 
-        dygraph(data2.xts, group='group2') %>%
+        dg2 = dygraph(data2.xts, group='group2') %>%
           dyAxis("x", label = xlabel) %>%
           dyAxis("y", label = "(various units, dependent on input)",
-              independentTicks=TRUE, valueRange=c(input$YLIMlo2, input$YLIMhi2)) %>%
-          # dySeries(name = input$SOLUTES2,
-          #       drawPoints = TRUE,
-          #       strokeWidth = 1,
-          #       pointSize = 3) %>%
-          dyOptions(drawGrid = FALSE,
-                connectSeparatedPoints=TRUE,
-                includeZero = TRUE,
-                drawPoints = TRUE,
-                strokeWidth = 1,
-                pointSize = 3)
+              independentTicks=TRUE, valueRange=c(input$YLIMlo2, input$YLIMhi2))
+        if(any(input$SOLUTES2 %in% emergence)){
+          for(emerg in intersect(input$SOLUTES2, emergence)){
+            dg2 = dySeries(dg2, name = emerg,
+                           drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          }
+        }
+        dg2 = dyOptions(dg2, drawGrid = FALSE,
+              connectSeparatedPoints=TRUE,
+              includeZero = TRUE,
+              drawPoints = TRUE,
+              strokeWidth = 1,
+              pointSize = 3)
+        dg2
       }
 
   }) # END of output$GRAPH2
@@ -1428,7 +1985,8 @@ shinyServer(function(input, output, session) {
   })
 
   output$GRAPH3 <- renderDygraph({
-
+    
+    # if('caddisfly' %in% input$SOLUTES3) browser()
     # determine x-axis label
     if(input$wateryearOrRange3 == 'wateryr'){
       xlabel <- paste("Water Year ", input$WATERYEAR3)
@@ -1442,23 +2000,23 @@ shinyServer(function(input, output, session) {
       if (input$HYDROLOGY3 == "Discharge")  {
 
       data3 <- dataAllQ3()
-      #data3 <- removeCodes3(data3, input$SOLUTES3)
       data3.xts <- xts(data3[,-1], order.by = data3$date)
 
-      dygraph(data3.xts) %>%
+      dg3 = dygraph(data3.xts) %>%
         dyAxis("x", label = xlabel) %>%
         dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
         dyAxis('y2',label='Hydrology (ft or L/s)', independentTicks=TRUE,
            axisLabelWidth = 70,
            axisLabelColor = "#3182bd",
-           axisLineColor = "#3182bd") %>% # color is light blue
-        #dySeries(name = input$SOLUTES2) %>%
-        dySeries(name = 'Hydro.med',
-            label = "Discharge",
-            drawPoints = FALSE,
-            fillGraph=T,
-            #color = "#3182bd",
-            axis='y2') %>%
+           axisLineColor = "#3182bd")
+        if(any(input$SOLUTES3 %in% emergence)){
+          for(s in input$SITES3){
+            dg3 = dySeries(dg3, name = s,
+                           drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          }
+        }
+        dg3 = dySeries(dg3, name = 'Hydro.med', label = "Discharge",
+            drawPoints = FALSE, fillGraph=T, axis='y2') %>%
         dyLimit(limit = LOQ3(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
         dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
         dyOptions(drawGrid = FALSE,
@@ -1468,28 +2026,29 @@ shinyServer(function(input, output, session) {
              fillAlpha = 0.3,
              connectSeparatedPoints=TRUE,
              includeZero = TRUE)
+        dg3
       }
 
       else {
 
         data3 <- dataAllQ3()
-        #data3 <- removeCodes3(data3, input$SOLUTES3)
         data3.xts <- xts(data3[,-1], order.by = data3$date)
 
-        dygraph(data3.xts) %>%
+        dg3 = dygraph(data3.xts) %>%
          dyAxis("x", label = xlabel) %>%
          dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
          dyAxis('y2',label='Precipitation (mm)', independentTicks=TRUE,
               axisLabelWidth = 70,
               axisLabelColor = "#3182bd",
-              axisLineColor = "#3182bd") %>% # color is light blue
-         #dySeries(name = input$SOLUTES2) %>%
-         dySeries(name = 'Hydro.med',
-               label = "Precipitation",
-               drawPoints = FALSE,
-               fillGraph=T,
-               #color = "#3182bd",
-               axis='y2') %>%
+              axisLineColor = "#3182bd")
+        if(any(input$SOLUTES3 %in% emergence)){
+          for(s in input$SITES3){
+            dg3 = dySeries(dg3, name = s,
+                           drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
+          }
+        }
+         dg3 = dySeries(dg3, name = 'Hydro.med', label = "Precipitation",
+               drawPoints = FALSE, fillGraph=T, axis='y2') %>%
          dyLimit(limit = LOQ3(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
          dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
          dyOptions(drawGrid = FALSE,
@@ -1499,12 +2058,12 @@ shinyServer(function(input, output, session) {
                 fillAlpha = 0.3,
                 connectSeparatedPoints=TRUE,
                 includeZero = TRUE)
+         dg3
       }
 
     } else {
 
      # Plots Default data
-
      data3 <- dataAll3()
      data3 <- removeCodes3(data3, input$SOLUTES3)
      data3.xts <- xts(data3, order.by = data3$date)
@@ -1512,28 +2071,28 @@ shinyServer(function(input, output, session) {
      # padrange <- c(min(data3.xts$input$SOLUTES3, na.rm=TRUE) - 1, max(data3.xts$input$SOLUTES3, na.rm=TRUE) + 1) # !!! attempt at resolving negative values issue
      # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
 
-     dygraph(data3.xts) %>%
+     dg3 = dygraph(data3.xts) %>%
       dyAxis("x", label = xlabel) %>%
-      dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>%
-      # dySeries(name = input$SOLUTES3,
-      #       drawPoints = TRUE,
-      #       strokeWidth = 1,
-      #       pointSize = 3) %>%
+      dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>% 
       dyLimit(limit = LOQ3(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-      dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-      dyOptions(drawGrid = FALSE,
-             connectSeparatedPoints=TRUE,
-             includeZero = TRUE,
-             drawPoints = TRUE,
-             strokeWidth = 1,
-             pointSize = 3) # colors = RColorBrewer::brewer.pal(9, "Set1") [but yellow not good]
+      dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash")
+    if(any(input$SOLUTES3 %in% emergence)){
+      dg3 = dyOptions(dg3, drawGrid = FALSE, connectSeparatedPoints=FALSE,
+             includeZero = TRUE, drawPoints = TRUE, strokeWidth = 0, pointSize = 2)
+    } else {
+      dg3 = dyOptions(dg3, drawGrid = FALSE, connectSeparatedPoints=TRUE,
+             includeZero = TRUE, drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
     }
-
+    dg3
+    }
   }) # END of output$GRAPH3
 
   # For testing purposes (of data sorting):
   # ***************************************
   output$TABLE3 <- DT::renderDataTable({
+    if(any(input$SOLUTES3 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 3)
+    }
     if (input$HYDROLOGY3 == "None") dataAll3()
     else dataAllQ3()
   }) # end of output$TABLE3
@@ -1559,22 +2118,21 @@ shinyServer(function(input, output, session) {
       p
     }
   }, height = 100) # end of output$GRAPH_PRECIP4
+  
   output$GRAPH_MAIN4 <- renderPlot({
     data <- dataMain4()
+    if(any(input$SOLUTES4 %in% emergence)){
+      stky = prep_stickytrap_data(input = input, graphnum = 4) %>% 
+        pivot_longer(-c(date, site), names_to = 'solute', values_to = 'solute_value')
+      data = bind_rows(data, stky)
+    }
     if(input$OMIT_STORMS4 == TRUE){
         data <- filter(data, is.na(fieldCode) | fieldCode != '911')
     }
     x <- data$date
     y <- data$solute_value
-    # build ggplot function
-    # design <- my_theme +
-    #   geom_point(size = 2.5) +
-    #   geom_line(alpha = 0.5) +
-    #   scale_x_date(date_labels = "%Y-%b")+
-    #   coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
-    #   scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
-    #   labs(x = "", y = "Solutes")
-    if(input$SOLUTES4_COLOR == "Solutes") {
+
+    if(input$SOLUTES4_COLOR == "Factors") {
       m <- ggplot(data, aes(x, y, shape=data$site, color=data$solute)) +
         my_theme +
         geom_point(size = 2.5) +
@@ -1582,7 +2140,7 @@ shinyServer(function(input, output, session) {
         scale_x_date(date_labels = "%Y-%b")+
         coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
         scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
-        labs(x = "", y = "Solutes")
+        labs(x = "", y = "Factors")
     } else {
       m <- ggplot(data, aes(x, y, shape=data$solute, color=data$site)) +
         my_theme +
@@ -1591,7 +2149,7 @@ shinyServer(function(input, output, session) {
         scale_x_date(date_labels = "%Y-%b")+
         coord_cartesian(xlim = c(input$DATE4[1], input$DATE4[2])) +
         scale_color_manual(values = c("black", "#307975", "#691476", "#735E1F", "#6F0D2F", "#7F8D36", "#37096D", "#074670", "#0C2282", "#750D47")) +
-        labs(x = "", y = "Solutes")
+        labs(x = "", y = "Factors")
     }
 
     # If show field code is selected, add to ggplot
@@ -1659,11 +2217,11 @@ shinyServer(function(input, output, session) {
      message("inside SAVECHANGES5")
      # openning connection to database
      con = dbConnect(MariaDB(),
+     #con = dbConnect(MySQL(),
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                # dbname = 'hbef')
-                dbname = 'hbef20200415')
+                dbname = dbname)
 
       # make handsontable data object into R data frame
       dataChanged <- hot_to_r(input$HOT)
@@ -1671,24 +2229,42 @@ shinyServer(function(input, output, session) {
       # replace all commas with ";", as commas interfere with downloading csv's
       dataChanged$notes <- gsub(",", ";", dataChanged$notes)
       dataChanged$sampleType <- gsub(",", ";", dataChanged$sampleType)
-#      # split changed data table into dataInitial and dataChemistry
-#      dataInitialChanged <- dataChanged[, (names(dataChanged) %in% names(dataInitial))]
-#      dataChemistryChanged <- dataChanged[, (names(dataChanged) %in% c("uniqueID", names(dataChemistry)))]
+      
+      #convert element-specific forms to ionic forms (as they are in the database)
+      if('NO3_N' %in% colnames(dataChanged)){
+          dataChanged$NO3 <- NO3N_to_NO3(dataChanged$NO3_N)
+          dataChanged$NO3_N <- NULL
+      }
+      if('NH4_N' %in% colnames(dataChanged)){
+          dataChanged$NH4 <- NH4N_to_NH4(dataChanged$NH4_N)
+          dataChanged$NH4_N <- NULL
+      }
 
       # build MySQL queries, used to delete data that will be replaced
       wateryear5 <- input$WATERYEAR5
       site5 <- input$SITES5
 
-      queryDelete <- paste0('DELETE FROM current ',
-                         ' WHERE waterYr = ', wateryear5,
-                         ' AND site = "', site5,
-                         '" ORDER BY uniqueID;')
-
-      # delete old current data
-      dbExecute(con, queryDelete)
-
-      # add changed data
-      dbWriteTable(con, "current", dataChanged, append=TRUE, row.names=FALSE)
+      dbBegin(con)
+      
+      tryCatch({
+          queryDelete <- paste0('DELETE FROM current ',
+                             ' WHERE waterYr = ', wateryear5,
+                             ' AND site = "', site5,
+                             '" ORDER BY uniqueID;')
+    
+          # delete old current data
+          dbExecute(con, queryDelete)
+    
+          # add changed data
+          dbWriteTable(con, "current", dataChanged, append=TRUE, row.names=FALSE)
+          dbCommit(con)
+          
+      }, error = function(e) {
+          # Rollback Transaction on Error
+          dbRollback(con)
+          showNotification("Error writing to database. Please notify Mike.",
+                           type = 'error')
+      })
 
       # update reactive value to signal core data has changed
       changesInData$change_dataCurrent <- changesInData$change_dataCurrent + 1
@@ -1704,11 +2280,11 @@ shinyServer(function(input, output, session) {
   observeEvent(input$BUTTON_DELETE5,{
     message("inside BUTTON_DELETE5")
     con = dbConnect(MariaDB(),
+    #con = dbConnect(MySQL(),
                user = 'root',
                password = pass,
                host = 'localhost',
-               # dbname = 'hbef')
-               dbname = 'hbef20200415')
+               dbname = dbname)
     # check that rows exist; if so, delete, if not, send notification
     # !!! could make cleaner with validate()
 
@@ -1725,6 +2301,7 @@ shinyServer(function(input, output, session) {
         dateQuery <- paste0("date >= '", input$DELETE_DATERANGE5[1], "' AND
                       date <= '", input$DELETE_DATERANGE5[2], "'")
       }
+    
       query <- paste0("DELETE FROM current WHERE ", siteQuery, dateQuery, ";")
 
       #message(print(query))
@@ -1741,11 +2318,11 @@ shinyServer(function(input, output, session) {
   observeEvent(input$BUTTON_DELETEROW5,{
      message("inside BUTTON_DELETEROW5")
      con = dbConnect(MariaDB(),
+     #con = dbConnect(MySQL(),
                 user = 'root',
                 password = pass,
                 host = 'localhost',
-                # dbname = 'hbef')
-                dbname = 'hbef20200415')
+                dbname = dbname)
       # check that row exists; if so, delete, if not, send notification
       # !!! could make cleaner with validate()
       if (input$DELETE_UNIQUEID5 %in% dataCurrent$uniqueID) {
@@ -1820,6 +2397,85 @@ shinyServer(function(input, output, session) {
       contentType='application/zip'
   )
 
+  output$DOWNLOAD_NOTES2 = downloadHandler(
+
+      filename=function(dd=input$NOTE_DATES2){
+
+          dd = format.Date(sort(dd), '%Y%m%d')
+
+          if(length(dd) == 1){
+              fnpt1 = dd
+          } else {
+              fnpt1 = paste0(dd[1], '-', dd[length(dd)])
+          }
+
+          return(paste0(fnpt1, '_field_and_lab_notes.zip'))
+      },
+
+      content=function(file){
+          regex1 = paste(format.Date(input$NOTE_DATES2, '%Y%m%d'), collapse='|')
+          fns = list.files('field_and_lab_note_collections', pattern=paste0('(', regex1, ')'),
+          # fns = list.files('field_and_lab_note_collections/complete', pattern=paste0('(', regex1, ')'),
+              full.names=TRUE)
+          zip(file, fns)
+      },
+
+      contentType='application/zip'
+  )
+  
+  output$DOWNLOAD_BUGS = downloadHandler(
+
+      filename='sticky_trap_counts.csv',
+      content=function(file){
+          
+          con = dbConnect(MariaDB(),
+                          user = 'root',
+                          password = pass,
+                          host = 'localhost',
+                          dbname = dbname)
+          
+          bug_data = DBI::dbReadTable(con, 'stickytrap') %>% as_tibble()
+          bug_data$id = NULL
+          bug_data = arrange(bug_data, watershed, date, side_or_trapnum)
+          dbDisconnect(con)
+          
+          write.csv(bug_data, file, row.names = FALSE)
+      },
+
+      contentType='text/csv'
+  )
+
   #**** END of Output ****
+
+  # *Archive Tab* ########################################
+
+  # output$ARCHIVE_TABLE <- DT::renderDataTable({
+  # # output$ARCHIVE_TABLE <- renderRHandsontable({
+  #
+  #     DT::datatable(data = dataArchive,
+  #                   options = list(autoWidth = TRUE,
+  #                                  paging = FALSE,
+  #                                  deferRender = TRUE,
+  #                                  ordering = TRUE,
+  #                                  dom='firt',
+  #                                  searching = FALSE),
+  #                   filter = 'top')
+  #
+  # #     rhandsontable::rhandsontable(data = dataArchive,
+  # #                                  rowHeaders = NULL,
+  # #                                  search = TRUE,
+  # #                                  height = 800,
+  # #                                  readOnly = TRUE) %>%
+  # #         rhandsontable::hot_cols(colWidths = 100,
+  # #                                 columnSorting = TRUE,
+  # #                                 manualColumnMove = TRUE,
+  # #                                 manualColumnResize = TRUE,
+  # #                                 fixedColumnsLeft = 3) %>%
+  # #         rhandsontable::hot_rows(rowHeights = 50) %>%
+  # #         rhandsontable::hot_table(contextMenu = FALSE,
+  # #                                  # stretchH = 'all',
+  # #                                  overflow = 'visible',
+  # #                                  filters = TRUE)
+  # })
 
 }) # closes shinyServer

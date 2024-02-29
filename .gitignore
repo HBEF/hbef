@@ -2,8 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-restricted/
-HTML/restricted/
+HTML/restricted/*
+!HTML/restricted/archive_explore
+restricted/*
 streampulse_link_please_dont_modify
 restricted_QAQC/data
 restricted_QAQC/test.R
@@ -16,3 +17,10 @@ streampulse_diagnostic_plots
 streampulse_summary_plots
 restricted_QAQC/field_notes
 logs
+restricted_QAQC/field_notes_bak20200720
+RMySQL.config
+restricted_QAQC/config.txt
+restricted_QAQC/field_and_lab_note_collections
+watershed_exploration/www/old_reports
+restricted_QAQC/field_and_labnote_col_NOTES.txt
+restricted_QAQC/more_config

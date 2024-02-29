@@ -81,4 +81,3 @@ ggplotly(ggplot(data=data) +
         geom_point(aes(x = water_mm, y = concentration_ueq, color = water_year, frame = framey), alpha = 0.8) +
         labs(y = ""))
 ```
-

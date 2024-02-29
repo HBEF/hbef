@@ -1,0 +1,21 @@
+domain,pretty_domain,network,pretty_network,stream,site_code,full_name,site_type,latitude,longitude,CRS,ws_area_ha,in_workflow,notes,local_time_zone,includes_snow,ws_status,dev
+hbef,Hubbard Brook EF,lter,LTER,Stream 1,w1,Watershed 1,stream_gauge,43.952034,-71.726501,4326,14.0618677334717,1,NA,America/New_York,NA,exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Stream 2,w2,Watershed 2,stream_gauge,43.953358,-71.724174,4326,17.8911433030314,1,NA,America/New_York,NA,exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Stream 3,w3,Watershed 3,stream_gauge,43.954875,-71.722816,4326,40.1653224937898,1,NA,America/New_York,NA,non_exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Stream 4,w4,Watershed 4,stream_gauge,43.950176,-71.725792,4326,38.7510000052115,1,NA,America/New_York,NA,exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Stream 5,w5,Watershed 5,stream_gauge,43.948845,-71.731918,4326,20.7415065882178,1,NA,America/New_York,NA,exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Stream 6,w6,Watershed 6,stream_gauge,43.94994,-71.735641,4326,14.9349246393909,1,NA,America/New_York,NA,non_exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Stream 7,w7,Watershed 7,stream_gauge,43.927509,-71.767075,4326,76.4470035386992,1,NA,America/New_York,NA,non_exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Stream 8,w8,Watershed 8,stream_gauge,43.929436,-71.759521,4326,60.9231306446846,1,NA,America/New_York,NA,non_exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Stream 9,w9,Watershed 9,stream_gauge,43.926014,-71.747195,4326,70.1246453502661,1,NA,America/New_York,NA,non_exp,MS
+hbef,Hubbard Brook EF,lter,LTER,Hubbard Brook,HBK,Hubbard Brook Mainstem,stream_sampling_point,43.939763,-71.703585,4326,NA,1,NA,America/New_York,NA,NA,MS
+hbef,Hubbard Brook EF,lter,LTER,NA,ML70,Mirror Lake Outlet,stream_sampling_point,43.940567,-71.690937,4326,NA,1,NA,America/New_York,NA,NA,MS
+hbef,Hubbard Brook EF,lter,LTER,NA,RG1,Rain Gauge 1,rain_gauge,43.952120788912,-71.7248377271807,4326,NA,1,converted shapefile from lter using st_transform,America/New_York,1,NA,MS
+hbef,Hubbard Brook EF,lter,LTER,NA,RG11,Rain Gauge 11,rain_gauge,43.9502266292999,-71.7346124400276,4326,NA,1,converted shapefile from lter using st_transform,America/New_York,1,NA,MS
+hbef,Hubbard Brook EF,lter,LTER,NA,RG23,Rain Gauge 23,rain_gauge,43.9272011309167,-71.746926195465,4326,NA,1,converted shapefile from lter using st_transform,America/New_York,1,NA,MS
+hbef,Hubbard Brook EF,lter,LTER,NA,RG22,Rain Gauge 22,rain_gauge,43.9440218597392,-71.7012292563385,4326,NA,1,converted shapefile from lter using st_transform,America/New_York,1,NA,MS
+hbef,Hubbard Brook EF,lter,LTER,NA,N,NA,rain_gauge,44,-72,4326,NA,1,still need real coords for these,America/New_York,1,NA,MS
+hbef,Hubbard Brook EF,lter,LTER,NA,S,NA,rain_gauge,44,-72,4326,NA,1,still need real coords for these,America/New_York,1,NA,MS
+hbef,Hubbard Brook EF,lter,LTER,NA,SP,NA,rain_gauge,44,-72,4326,NA,1,still need real coords for these,America/New_York,1,NA,MS
+hbef,Hubbard Brook,lter,LTER,Hubbard Brook,HBK,Hubbard Brook Mainstem,stream_gauge,43.93974,-71.7002,4326,3174.5,1,NA,America/New_York,NA,NA,NA
+hbef,Hubbard Brook,lter,LTER,Stream 101,w101,Watershed 101,stream_sampling_point,43.93593,-71.73628,4326,12.1,1,NA,America/New_York,NA,NA,NA
