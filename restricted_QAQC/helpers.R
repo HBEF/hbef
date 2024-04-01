@@ -422,6 +422,14 @@ parse_note_collection <- function(notefile){
         select(-ends_with(c('.x', '.y'))) %>% 
         relocate(timeEST, .after = 'date')
     
+    if(nchar(addtl_comment)){
+        sleepers_notes <- d_flow[d_flow$site %in% c('SP', 'SW'), ]$notes
+        sleepers_notes <- sub(addtl_comment, '', sleepers_notes)
+        d_flow[d_flow$site %in% c('SP', 'SW'), ]$notes <- sleepers_notes
+    }
+    d_flow$notes <- sub(' -- NA', '', d_flow$notes)
+    d_flow$notes <- sub('^NA$', '', d_flow$notes)
+    
     if(length(sp_ind)){
         d_flow$timeEST[sp_ind] <- dt_sp$time
         d_flow$timeEST[sw_ind] <- dt_sw$time
