@@ -413,6 +413,7 @@ shinyUI(
                   column(width=6,
                       numericInput('YLIMhi2', label='', value=NULL)
                   )
+                  # sliderInput('YLIMhi2', label='', value=NULL)
                ),
 
               checkboxGroupInput("SOLUTES2",
