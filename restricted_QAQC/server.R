@@ -866,6 +866,7 @@ shinyServer(function(input, output, session) {
   # Solute unit
   # Finding appropriate units for selected solute and assigning to ylabel1
   ylabel1 <- reactive ({
+      
     # create the character mu with unicode
     mu <- "\U00B5"
     # If solute belong to group with different set of units, label depending on what it is
@@ -875,6 +876,7 @@ shinyServer(function(input, output, session) {
       if (input$SOLUTES1 == "ANCMet")  ylabel1 <- paste(mu, "eq/L")
       if (input$SOLUTES1 == "spCond") ylabel1 <- paste(mu, "S/cm")
       if (input$SOLUTES1 == "temp")   ylabel1 <- "Degrees Celsius"
+      if (grepl('ionCharge', input$SOLUTES1)) ylabel1 <- "ueq/mL"
       if (grepl('^chla_', input$SOLUTES1)) ylabel1 <- "mg/m^2"
       if (input$SOLUTES1 %in% c("pH", "pHmetrohm", "cationCharge", "cnionCharge",
           "theoryCond", "ionBalance")) { ylabel1 <- "(No Units)" }
@@ -1381,7 +1383,7 @@ shinyServer(function(input, output, session) {
     }
     dataAll3 = dataAll3()
     dataQ3 = Q3()
-    if(class(dataQ3$date) != 'Date') dataAll3$date = as.POSIXct(dataAll3$date)
+    if(! inherits(dataQ3$date, 'Date')) dataAll3$date = as.POSIXct(dataAll3$date)
     dataAllQ3 <- full_join(dataAll3, dataQ3, by = "date")
     return(dataAllQ3)
   }) # END of dataAllQ3()
