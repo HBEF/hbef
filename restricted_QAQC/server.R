@@ -2067,21 +2067,31 @@ shinyServer(function(input, output, session) {
      data3 <- dataAll3()
      data3 <- removeCodes3(data3, input$SOLUTES3)
      data3.xts <- xts(data3, order.by = data3$date)
-
-     # padrange <- c(min(data3.xts$input$SOLUTES3, na.rm=TRUE) - 1, max(data3.xts$input$SOLUTES3, na.rm=TRUE) + 1) # !!! attempt at resolving negative values issue
-     # add "valueRange = padrange" in dyAxis if working; currently returns warning that all arguments are missing
-
+     
+     min_val <- select(data3, -any_of(c('date', 'Hydro.med'))) %>% 
+       min(., na.rm = TRUE)
+     max_val <- select(data3, -any_of(c('date', 'Hydro.med'))) %>% 
+       max(., na.rm = TRUE)
+     
+     yValues = c(min_val - 2, max_val + 2)
+     includeZeroBoolean <- FALSE
+     
+     if(min_val >= 0 & max_val >= 0){
+       yValues = c(0, max_val + 2)
+       
+     }
+     
      dg3 = dygraph(data3.xts) %>%
       dyAxis("x", label = xlabel) %>%
-      dyAxis("y", label = ylabel3(), independentTicks=TRUE) %>% 
+      dyAxis("y", label = ylabel3(), valueRange = yValues, independentTicks=TRUE) %>% 
       dyLimit(limit = LOQ3(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
       dyLimit(limit = MDL3(), label = "MDL", color = "#de2d26", strokePattern = "dotdash")
     if(any(input$SOLUTES3 %in% emergence)){
       dg3 = dyOptions(dg3, drawGrid = FALSE, connectSeparatedPoints=FALSE,
-             includeZero = TRUE, drawPoints = TRUE, strokeWidth = 0, pointSize = 2)
+             includeZero = includeZeroBoolean, drawPoints = TRUE, strokeWidth = 0, pointSize = 2)
     } else {
       dg3 = dyOptions(dg3, drawGrid = FALSE, connectSeparatedPoints=TRUE,
-             includeZero = TRUE, drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
+             includeZero = includeZeroBoolean, drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
     }
     dg3
     }
