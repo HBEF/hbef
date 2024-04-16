@@ -6,7 +6,9 @@ HTML/restricted/*
 !HTML/restricted/archive_explore
 restricted/*
 streampulse_link_please_dont_modify
-restricted_QAQC/data
+restricted_QAQC/data/*
+!restricted_QAQC/data/Rclasses.csv
+!restricted_QAQC/data/RclassesSample.csv
 restricted_QAQC/test.R
 restricted_QAQC/SQL.txt
 .DS_Store
@@ -24,3 +26,4 @@ restricted_QAQC/field_and_lab_note_collections
 watershed_exploration/www/old_reports
 restricted_QAQC/field_and_labnote_col_NOTES.txt
 restricted_QAQC/more_config
+
