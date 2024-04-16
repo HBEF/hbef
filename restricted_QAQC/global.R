@@ -87,6 +87,7 @@ solutes_other <- list("pH (3 Star)" = "pH",
                       "Specific Conductivity" = "spCond",
                       "Theoretical Conductivity" = "theoryCond",
                       "Water Temperature" = "temp",
+                      "Stream Water Degree Days" = "swdd",
                       "Ion Balance" = "ionBalance",
                       "Chlorophyll-a (moss)" = "chla_M",
                       "Chlorophyll-a (tile)" = "chla_T",
@@ -97,7 +98,7 @@ solutes_other <- list("pH (3 Star)" = "pH",
                       "Emergence (other)" = "other")
 
 codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet",
-                "ionError", "ionBalance")
+                "ionError", "ionBalance","swdd")
 codes123 <- c("pH", "pHmetrohm", "spCond", "au254", "au275",
               "au295", "au350", "au400", "Ca", "Mg",
               "K", "Na", "TMAl", "OMAl", "Al_ICP", "NH4",
@@ -139,6 +140,7 @@ other_units <- c("pH",
                  "spCond",
                  "theoryCond",
                  "temp",
+                 "swdd",
                  "ionBalance",
                  "chla_M", "chla_T", "chla_MT", "chla_WM",
                  'caddisfly', 'mayfly', 'dipteran', 'stonefly', 'other')
@@ -154,19 +156,27 @@ standardizeClasses <- function(d) {
    # ColClasses :    vector of desired class types for the data.frame
    # message(paste("In standardizeClasses for", deparse(substitute(d))))
    r <- nrow(d)
+   d<-d %>% select(-year)
    cc <- ncol(d)
-   
+
    d$timeEST <- as.character(d$timeEST)
-
+   d$DIC <- as.numeric(d$DIC)
+   # is_na_chlaM <- sum(is.na(d$chla_M))
+   # is_not_na_ChlaM <-sum(!is.na(d$chla_M))
    # d = rename_all(d, recode, NH4='NH4_N', NO3='NO3_N')
-
    for (i in 1:cc) {
       # 1. Insert an additional row with a sample value for each column
          ## Find index in defClassesSample that corresponds to column in d, save that index
          current_col_ofData <- colnames(d[i])
          ind_col <- which(current_col_ofData == colnames(defClassesSample), arr.ind = TRUE)
-         ## Add corresponding sample value to last row of d
-         d[r+1,i] <- defClassesSample[1,ind_col]
+         # Add corresponding sample value to last row of d
+         #browser()
+         tryCatch({
+           d[r+1, i] <- defClassesSample[1, ind_col]
+         }, error = function(e) {
+           print(paste("error column:", current_col_ofData))
+         })
+   
       # 2. Define class of each column according to what you specified in defClasses
          ind_row <- which(current_col_ofData == defClasses$VariableName, arr.ind = TRUE)
          switch(defClasses$Class[ind_row],
@@ -196,7 +206,6 @@ dataLimits <- read.csv("data/Limits_MDL_LOQ.csv")
 defClasses <- read.csv("data/Rclasses.csv", header = TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 defClassesSample <- read.csv("data/RclassesSample.csv", header=TRUE, stringsAsFactors = FALSE, na.strings=c(""," ","NA"))
 defClassesSample$date <- as.Date(defClassesSample$date, "%m/%d/%y")
-
 # Grabbing Data from MySQL database ----
 # USE WHEN LIVE ON REMOTE SITE
 #**********************************************
@@ -210,33 +219,51 @@ con = dbConnect(y,
                 dbname = dbname)
 tables = dbListTables(con)
 
-# # Code for one-time use: to load data into mysql
-# dataCurrent <- read.csv("data/current_clean20181202.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
+# Code for one-time use: to load data into mysql
+# dataCurrent <- read.csv("data/current_clean.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
 #  dataCurrent$date <- as.Date(dataCurrent$date, "%m/%d/%y")
 #  dataCurrent <- standardizeClasses(dataCurrent)
 #  dbWriteTable(con, "current", dataCurrent, append = TRUE, row.names = FALSE)
-#
+# 
 # dataHistorical<- read.csv("data/historical.csv", stringsAsFactors = FALSE, na.strings=c(""," ", "NA"))
 #  dataHistorical$date <- as.POSIXct(dataHistorical$date, "%Y-%m-%d")
 #  dataHistorical <- standardizeClasses(dataHistorical)
 #  dbWriteTable(con, "historical", dataHistorical, append = TRUE, row.names = FALSE)
 
-# Get data from mysql
+calculate_SWDD <- function(data) {
+  data %>%
+    mutate(date = as.Date(date)) %>%  
+    arrange(site, date) %>%
+    group_by(site, year = lubridate::year(date)) %>%  
+    mutate(
+      temp_diff = temp - first(temp),
+      swdd = cumsum(if_else(is.na(temp_diff), 0, temp_diff)) 
+    ) %>%
+    ungroup() 
+    #select(-year)
+}
+
+# Applying the SWDD calculation to the dataset
 dataCurrent <- dbReadTable(con, "current") %>%
-    mutate(
-        NO3_N=NO3_to_NO3N(NO3),
-        NH4_N=NH4_to_NH4N(NH4)) %>%
-    select(-NO3, -NH4) %>%
-    filter(date >= as.Date('2013-06-01')) %>%
-    arrange(site, date, timeEST) %>%
-    mutate(timeEST = as.character(timeEST))
+  mutate(
+    NO3_N = NO3_to_NO3N(NO3),
+    NH4_N = NH4_to_NH4N(NH4)
+  ) %>%
+  select(-NO3, -NH4) %>%
+  filter(date >= as.Date('2013-06-01')) %>%
+  mutate(timeEST = as.character(timeEST)) %>%
+  calculate_SWDD()
+
 dataHistorical <- dbReadTable(con, "historical") %>%
-    filter(! (site == 'W6' & date == as.Date('2007-08-06'))) %>%
-    mutate(
-        NO3_N=NO3_to_NO3N(NO3),
-        NH4_N=NH4_to_NH4N(NH4)) %>%
-    select(-NO3, -NH4) %>%
-    mutate(timeEST = as.character(timeEST))
+  filter(!(site == 'W6' & date == as.Date('2007-08-06'))) %>%
+  mutate(
+    NO3_N = NO3_to_NO3N(NO3),
+    NH4_N = NH4_to_NH4N(NH4)
+  ) %>%
+  select(-NO3, -NH4) %>%
+  mutate(timeEST = as.character(timeEST)) %>%
+  calculate_SWDD()
+#browser()
 dataSensor <- dbReadTable(con, "sensor2")
 sensorvars = dbListFields(con, "sensor4")
 sensorvars = sub('S4__', '', sensorvars)
