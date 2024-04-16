@@ -875,6 +875,7 @@ shinyServer(function(input, output, session) {
       if (input$SOLUTES1 == "ANCMet")  ylabel1 <- paste(mu, "eq/L")
       if (input$SOLUTES1 == "spCond") ylabel1 <- paste(mu, "S/cm")
       if (input$SOLUTES1 == "temp")   ylabel1 <- "Degrees Celsius"
+      if (input$SOLUTES1 == "swdd") ylabel1 <- "Degrees Celsius"
       if (grepl('^chla_', input$SOLUTES1)) ylabel1 <- "mg/m^2"
       if (input$SOLUTES1 %in% c("pH", "pHmetrohm", "cationCharge", "cnionCharge",
           "theoryCond", "ionBalance")) { ylabel1 <- "(No Units)" }
@@ -1053,6 +1054,7 @@ shinyServer(function(input, output, session) {
       if (input$SOLUTES2[i] == "ANC960")  ylabel2[i] <- paste(mu, "eq/L")
       if (input$SOLUTES2[i] == "spCond") ylabel2[i] <- paste(mu, "S/cm")
       if (input$SOLUTES2[i] == "temp")   ylabel2[i] <- "Degrees Celsius"
+      if (input$SOLUTES2[i] == "swdd")   ylabel2[i] <- "Degrees Celsius"
       if (grepl('^chla_', input$SOLUTES2[i])) ylabel2[i] <- "mg/m^2"
       if (input$SOLUTES2[i] %in% c("pH",
                         "pHmetrohm",
@@ -1252,6 +1254,7 @@ shinyServer(function(input, output, session) {
      if (input$SOLUTES3 == "ANCMet")  ylabel3 <- paste(mu, "eq/L")
      if (input$SOLUTES3 == "spCond") ylabel3 <- paste(mu, "S/cm")
      if (input$SOLUTES3 == "temp")   ylabel3 <- "Degrees Celsius"
+     if (input$SOLUTES3 == "swdd")   ylabel3 <- "Degrees Celsius"
      if (grepl('^chla_', input$SOLUTES3)) ylabel3 <- "mg/m^2"
      if (input$SOLUTES3 %in% c("pH",
                       "pHmetrohm",
