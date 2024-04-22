@@ -6,21 +6,28 @@ library(glue)
 
 # config ####
 import_static_q_data = FALSE #also commented this section to be safe
+# runmode = 'test'
+runmode = 'live'
 
 # setup ####
 
-#NOTE: this script sources another (process_S.CAN_data.R) at bottom, using
-#an absolute path.
-
-# setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
-setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
+if(runmode == 'test'){
+  
+  # dbname = 'hbef20200415' #on E550
+  dbname = 'hbef' #on BM1
+  setwd('~/git/hbef/shiny/restricted_QAQC/data/unh_sensor_data')
+  pass = readLines('~/git/hbef/RMySQL.config')
+  
+} else if(runmode == 'live'){
+  
+  dbname = 'hbef'
+  setwd('/home/mike/shiny/restricted_QAQC/data/unh_sensor_data')
+  pass  = readLines('/home/mike/RMySQL.config')
+}
 
 logging::basicConfig()
 logging::addHandler(logging::writeToFile, logger='hbef',
     file='../../../logs/hbef_flowdata_retrieval.log')
-
-# pass = readLines('~/git/hbef/RMySQL.config')
-pass  = readLines('/home/mike/RMySQL.config')
 
 driver = MariaDB()
 con = dbConnect(driver, user='root', password=pass, host='localhost',
@@ -35,13 +42,13 @@ wqual9 = readr::read_csv('CR1000_HBF_W9_WQual.dat', skip=4, col_names=FALSE)
 colnames(wqual9) = header
 w9_colnames = c('Nitrate_mg', 'TempC', 'Conductivity',
                 'SpConductivity', 'pH', 'DepthMeter', 'ODOPerCent', 'ODOMGL',
-                'TurbidityFNU', 'TurbidityRaw', 'FDOMRFU', 'FDOMQSU',
+                'TurbidityFNU', 'TurbidityRaw', 'TurbidityRawNTU', 'FDOMRFU', 'FDOMQSU',
                 'LowEOSCO2_ppm_avg', 'HighEOSCO2_ppm_avg', 'EOSTempC',
                 'Chl_RFU', 'BGA_PC_RFU', 'BGA_PE_RFU', 'AqCO2_ppm_avg',
-                'AtmCO2_ppm_avg')
+                'AtmCO2_ppm_avg', 'Bromide', 'LightAverage', 'Absorbance_254', 'Absorbance_350')
 
 wqual9 = wqual9 %>%
-    select(datetime=TIMESTAMP, one_of(w9_colnames)) %>%
+    select(datetime=TIMESTAMP, any_of(w9_colnames)) %>%
     mutate(watershedID=9, id=1:nrow(wqual9))
 
 for(cn in w9_colnames){
@@ -58,6 +65,8 @@ wqual9 = rename(wqual9, datetime='S4__datetime',
     id='S4__id', watershedID='S4__watershedID') %>%
     select(datetime, everything()) %>%
     relocate(watershedID, id, .after = last_col())
+
+wqual9 <- relocate(wqual9, S4__TurbidityRawNTU, .after = 'S4__TurbidityRaw')
 
 # tables = RMariaDB::dbListTables(con)
 # if(! 'sensor4' %in% tables){
@@ -82,9 +91,10 @@ gc()
 
 # read and process w6 wqual data ####
 
-header = readr::read_csv('CR1000_HBF_W6_WQual.dat',
+# header = readr::read_csv('CR1000_HBF_W6_WQual.dat',
+header = readr::read_csv('Weir 6 Chem_WQual.dat', #filename changed to this ca. 2022
     skip=1, col_names=FALSE, n_max=1)
-wqual6 = readr::read_csv('CR1000_HBF_W6_WQual.dat', skip=4, col_names=FALSE)
+wqual6 = readr::read_csv('Weir 6 Chem_WQual.dat', skip=4, col_names=FALSE)
 colnames(wqual6) = header
 
 w6_colnames = c('TempC', 'Conductivity', 'SpConductivity', 'pH', 'DepthMeter',
@@ -94,7 +104,7 @@ w6_colnames = c('TempC', 'Conductivity', 'SpConductivity', 'pH', 'DepthMeter',
                 'LowEOSCO2_ppm_avg', 'HighEOSCO2_ppm_avg', 'EOSTempC')
 
 wqual6 = wqual6 %>%
-    select(datetime=TIMESTAMP, one_of(w6_colnames)) %>%
+    select(datetime=TIMESTAMP, any_of(w6_colnames)) %>%
     mutate(watershedID=6, datetime=with_tz(datetime, 'EST')) %>%
     filter(datetime > as.POSIXct('2020-04-23 14:00:00')) #some test records
 
@@ -117,25 +127,32 @@ gc()
 
 # read and process w3 wqual data ####
 
-header = readr::read_csv('CR1000_HBF_WQual.dat',
+# header = readr::read_csv('CR1000_HBF_WQual.dat', #i think this was actually mainstem data
+header = readr::read_csv('weir3_weir_3_WQual.dat', #filename changed ca. 2022
     skip=1, col_names=FALSE, n_max=1)
-wqual3 = readr::read_csv('CR1000_HBF_WQual.dat', skip=4, col_names=FALSE)
+wqual3 = readr::read_csv('weir3_weir_3_WQual.dat', skip=4, col_names=FALSE)
 colnames(wqual3) = header
 
-w3_colnames = c('Nitrate_mg', 'TempC', 'Conductivity', 'SpConductivity',
-                'pH', 'DepthMeter', 'ODOPerCent', 'ODOMGL', 'TurbidityFNU',
-                'TurbidityRaw', 'FDOMRFU', 'FDOMQSU', 'Chl_RFU', 'BGA_PC_RFU',
+w3_colnames = c('Nitrate_mgL', 'TempC', 'Conductivity', 'SpConductivity',
+                'pH', 'Depth', 'ODOPerCent', 'ODOMGL', 'TurbidityFNU',
+                'TurbidityRaw', 'FDOMRFU', 'FDOMQSU',
+                'Bromide', 'LightAverage', 'Absorbance_254', 'Absorbance_350',
+                #pretty sure these are discontinued
+                'Chl_RFU', 'BGA_PC_RFU',
                 'BGA_PE_RFU', 'AqCO2_ppm_avg', 'AtmCO2_ppm_avg')
 
 wqual3 = wqual3 %>%
-    select(datetime=TIMESTAMP, one_of(w3_colnames)) %>%
-    mutate(watershedID=3)
+    select(datetime=TIMESTAMP, any_of(w3_colnames)) %>%
+    mutate(watershedID=3) %>%
+    rename(DepthMeter = Depth, Nitrate_mg = Nitrate_mgL)
 
 for(cn in w3_colnames){
     if(! cn %in% colnames(wqual3)){
         wqual3[[cn]] = NA
     }
 }
+
+wqual3 <- select(wqual3, -Depth, -Nitrate_mgL) #setting names back to what they were originally
 
 wqual3[is.na(wqual3)] = NA
 
@@ -247,4 +264,4 @@ for(w in weirfiles){
 
 dbDisconnect(con)
 
-source('/home/mike/shiny/scheduled_scripts/process_S.CAN_data.R')
+source('../../../scheduled_scripts/process_S.CAN_data.R')

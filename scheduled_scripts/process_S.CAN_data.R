@@ -206,6 +206,29 @@ clean_SCAN_data <- function(fpath){
         select(datetime, Nitrate_mg, TurbidityRaw = TurbidityRawFTU) %>%
         arrange(datetime)
 }
+legit_flags <- c('VAL_ABOVE', 'VAL_BELOW')
+clean_SCAN_data_since20230724 <- function(fpath, end_of_previous){
+  
+  # library(cellranger)
+  # 
+  # cols <- as.cell_limits(ul = c(NA, 1), lr = c(NA, 12))$col
+  # selected_cols <- cols[c(1, 4, 5, 11, 12)]
+  # data <- read_xlsx("path_to_your_file.xlsx", range = cell_cols(selected_cols))
+  
+    read_xlsx(fpath, skip = 4, col_names = FALSE,
+              col_types = c('date', 'numeric', 'text', 'numeric', 'text',
+                            'numeric', 'text', 'numeric', 'numeric', 'text', 'numeric', 'text')) %>%
+        select(-c(2:3, 6:10)) %>% #ignore temperature and nitrate eq data. FTU is no longer
+        rename(datetime = 1, Nitrate_mg = 2, Nitrate_mg_status = 3, TurbidityRawNTU = 4,
+               TurbidityRawNTU_status = 5) %>%
+        mutate(datetime = as.POSIXct(datetime, tz = 'EST')) %>%
+        arrange(datetime) %>%
+        filter(datetime > end_of_previous,
+               is.na(TurbidityRawNTU_status) | TurbidityRawNTU_status %in% legit_flags,
+               is.na(Nitrate_mg_status) | Nitrate_mg_status %in% legit_flags) %>%
+        select(datetime, Nitrate_mg, TurbidityRawNTU = TurbidityRawNTU) %>%
+        arrange(datetime)
+}
 
 d2 <- clean_SCAN_data('SCAN 2021-4-30 thru 2022-10-12.xlsx')
 d3 <- clean_SCAN_data('SCAN 2022-10-12 thru 2022-12-12.xlsx') %>% 
@@ -214,10 +237,15 @@ d4 <- clean_SCAN_data('SCAN 2-12-2022 thru 2-27-2023.xlsx')
 d5 <- clean_SCAN_data('SCAN 2023-02-27 thru 2023-05-16.xlsx') %>% 
   slice(-(1:14))
 d6 <- clean_SCAN_data('SCAN 2023 05-16 thru 07-24.xlsx')
+d7 <- clean_SCAN_data_since20230724('SCAN 2023-7-24 thru 2024-3-1.xlsx',
+                                    end_of_previous = max(d6$datetime))
+#before adding d8, make sure clean_SCAN_data_since20230724 still checks out. 
+  #are they recording FTU again?
 
-#make sure there's no overlap
-range(d6$datetime)
-# range(d7$datetime)
+# plot(zz$datetime, zz$Nitrate_mg, type = 'b')
+# lines(d6$datetime, d6$Nitrate_mg, type = 'b')
+# plot(zz$datetime, zz$TurbidityRawNTU, type = 'b')
+# lines(d6$datetime, d6$TurbidityRaw, type = 'b')
 
 # bind dsets; get them ready for db; insert them into db ####
 
@@ -228,9 +256,11 @@ insert_df = select(dloan, -ends_with('status')) %>%
     bind_rows(d4) %>% 
     bind_rows(d5) %>% 
     bind_rows(d6) %>% 
+    bind_rows(d7) %>% 
+    # bind_rows(d8) %>% 
     arrange(datetime) %>%
     rename_with(.fn = ~ paste('S4', ., sep = '__'),
-                .cols = c('TurbidityRaw', 'Nitrate_mg')) %>%
+                .cols = c('TurbidityRaw', 'Nitrate_mg', 'TurbidityRawNTU')) %>%
     mutate(watershedID = 6)
 
 dbWriteTable(con,

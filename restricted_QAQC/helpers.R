@@ -78,7 +78,7 @@ get_sensor_data = function(svar, ssite, sdate){#, placeholder1, placeholder2){
            select(-Nitrate_mg)
    }
    
-   if(svar == 'TurbidityRaw'){
+   if(grepl('TurbidityRaw', svar)){
       dsens = slice(dsens, seq(1, n(), 8))
    }
 

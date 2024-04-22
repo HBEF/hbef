@@ -73,7 +73,8 @@ sensor_unit_map <- c('NO3-N' = 'Sensor value',
                      'Dissolved Oxygen %' = '',
                      'Dissolved Oxygen mg/l' = '',
                      'Turbidity FNU' = '',
-                     'Turbidity Raw' = '',
+                     'Turbidity Raw FTU' = '',
+                     'Turbidity Raw NTU' = '',
                      'FDOM RFU' = '',
                      'FDOM QSU' = '')
 
@@ -85,7 +86,8 @@ sensor_name_map <- c('NO3-N' = 'NO3_N_mg',
                      'Dissolved Oxygen %' = 'ODOPerCent',
                      'Dissolved Oxygen mg/l' = 'ODOMGL',
                      'Turbidity FNU' = 'TurbidityFNU',
-                     'Turbidity Raw' = 'TurbidityRaw',
+                     'Turbidity Raw FTU' = 'TurbidityRaw',
+                     'Turbidity Raw NTU' = 'TurbidityRawNTU',
                      'FDOM RFU' = 'FDOMRFU',
                      'FDOM QSU' = 'FDOMQSU')
 
