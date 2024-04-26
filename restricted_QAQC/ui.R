@@ -240,6 +240,7 @@ shinyUI(
                 choices = c(solutes_cations, solutes_anions, solutes_other),
                 selected = "Ca"
               ),
+              #browser(),
               helpText(textOutput("LIMITS1"),
                     style = "color:#fc9272; font-size:85%;"
               ),
@@ -413,6 +414,7 @@ shinyUI(
                   column(width=6,
                       numericInput('YLIMhi2', label='', value=NULL)
                   )
+                  # sliderInput('YLIMhi2', label='', value=NULL)
                ),
 
               checkboxGroupInput("SOLUTES2",
@@ -430,7 +432,7 @@ shinyUI(
               dygraphOutput("GRAPH2"),
 
               conditionalPanel(condition="input.SHOWSENS2 == true && input.SENSORVAR2 != 'None'",
-                 dygraphOutput("GRAPH2sens"),
+                 dygraphOutput("GRAPH2sens")
               ),
               #plotOutput("GRAPH")
               hr(),
