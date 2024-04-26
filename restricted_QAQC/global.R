@@ -156,9 +156,7 @@ standardizeClasses <- function(d) {
    # ColClasses :    vector of desired class types for the data.frame
    # message(paste("In standardizeClasses for", deparse(substitute(d))))
    r <- nrow(d)
-   d<-d %>% select(-year)
    cc <- ncol(d)
-
    d$timeEST <- as.character(d$timeEST)
    d$DIC <- as.numeric(d$DIC)
    # is_na_chlaM <- sum(is.na(d$chla_M))
@@ -230,17 +228,16 @@ tables = dbListTables(con)
 #  dataHistorical <- standardizeClasses(dataHistorical)
 #  dbWriteTable(con, "historical", dataHistorical, append = TRUE, row.names = FALSE)
 
-calculate_SWDD <- function(data) {
+calculate_SWDD <- function(data, base_temp_C = 4) {
   data %>%
     mutate(date = as.Date(date)) %>%  
     arrange(site, date) %>%
     group_by(site, year = lubridate::year(date)) %>%  
     mutate(
-      temp_diff = temp - first(temp),
-      swdd = cumsum(if_else(is.na(temp_diff), 0, temp_diff)) 
+      temp_diff = pmax(temp - base_temp_C, 0, na.rm = TRUE), # Only positive differences for heating degree days
+      swdd = cumsum(temp_diff)
     ) %>%
     ungroup() 
-    #select(-year)
 }
 
 # Applying the SWDD calculation to the dataset
@@ -251,8 +248,11 @@ dataCurrent <- dbReadTable(con, "current") %>%
   ) %>%
   select(-NO3, -NH4) %>%
   filter(date >= as.Date('2013-06-01')) %>%
+  arrange(site, date, timeEST) %>%
   mutate(timeEST = as.character(timeEST)) %>%
-  calculate_SWDD()
+  calculate_SWDD() %>%
+  select(-year)
+
 
 dataHistorical <- dbReadTable(con, "historical") %>%
   filter(!(site == 'W6' & date == as.Date('2007-08-06'))) %>%
@@ -261,8 +261,10 @@ dataHistorical <- dbReadTable(con, "historical") %>%
     NH4_N = NH4_to_NH4N(NH4)
   ) %>%
   select(-NO3, -NH4) %>%
+  arrange(site, date, timeEST) %>%
   mutate(timeEST = as.character(timeEST)) %>%
-  calculate_SWDD()
+  calculate_SWDD() %>%
+  select(-year)
 #browser()
 dataSensor <- dbReadTable(con, "sensor2")
 sensorvars = dbListFields(con, "sensor4")
