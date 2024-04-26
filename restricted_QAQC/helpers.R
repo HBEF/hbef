@@ -746,3 +746,20 @@ calculate_SWDD <- function(data, base_temp_C = 4){
         ungroup() %>% 
         select(date, site, swdd)
 }
+
+get_buffered_yrange <- function(d){
+    
+    print(colnames(d))
+    range_d <- select(d, -any_of(c('date', 'Hydro.med', 'Flow_or_Precip')))
+    min_val <- min(range_d, na.rm = TRUE)
+    max_val <- max(range_d, na.rm = TRUE)
+    
+    yValues <- c(min_val - (0.01 * (max_val - min_val)),
+                 max_val + (0.01 * (max_val - min_val)))
+    
+    if(min_val >= 0 & max_val >= 0){
+        yValues = c(0, max_val + (0.01 * (max_val - min_val)))
+    }
+    
+    return(yValues)
+}
