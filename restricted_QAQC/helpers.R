@@ -697,3 +697,52 @@ email_data2 <- function(df, orig_file, orig_name, msgs, addrs, pw){
     
     file.remove(tmpcsv)
 }
+
+calculate_SWDD <- function(data, base_temp_C = 4){
+    
+    #base_temp_C: numeric; the balance point from which to compute "heating degree days".
+    #   max degrees over this value on a given day are the heating degree days for that day.
+    #   if base_temp_C is not exceeded for a day, heating degree days are 0 for that day.
+    
+    #expects columns "date" (a Date column), "site" (with sitecodes/names), and
+    #"temp" (with numeric temperature data). computes cumulative heating degree days.
+    #fills in implicit missing days
+    #and interpolates temperature before accumulating.
+    #returns a tibble with columns date, site, swdd (surface water degree days).
+    #this output is intended to be joined to other tables.
+    
+    data %>%
+        filter(! is.na(date)) %>% 
+        group_by(site, date) %>% 
+        #warnings are for creation of -Inf values. these are handled below.
+        summarize(temp = suppressWarnings(max(temp, na.rm = TRUE)),
+                  .groups = 'drop') %>% 
+        mutate(temp = if_else(is.infinite(temp), NA, temp)) %>% 
+        group_by(site) %>% 
+        arrange(date) %>%
+        
+        #drop leading and trailing NAs in the temp column
+        mutate(
+            first_non_na = Position(function(z) !is.na(z), temp, right = FALSE),
+            last_non_na = Position(function(z) !is.na(z), temp, right = TRUE)
+        ) %>%
+        filter(row_number() >= first_non_na & row_number() <= last_non_na) %>%
+        select(-first_non_na, -last_non_na) %>% 
+        
+        #fill in any dates that are missing
+        tidyr::complete(date = seq(min(date, na.rm = TRUE),
+                                   max(date, na.rm = TRUE),
+                                   by = 'day')) %>% 
+        
+        #interpolate missing temp values
+        mutate(temp = zoo::na.approx(temp)) %>% 
+        
+        #compute heating degree days
+        group_by(site, year = lubridate::year(date)) %>%  
+        mutate(
+            temp_diff = pmax(temp - base_temp_C, 0, na.rm = TRUE), # Only positive differences for heating degree days
+            swdd = cumsum(temp_diff)
+        ) %>%
+        ungroup() %>% 
+        select(date, site, swdd)
+}
