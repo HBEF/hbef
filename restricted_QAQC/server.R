@@ -876,6 +876,7 @@ shinyServer(function(input, output, session) {
       if (input$SOLUTES1 == "spCond") ylabel1 <- paste(mu, "S/cm")
       if (input$SOLUTES1 == "temp")   ylabel1 <- "Degrees Celsius"
       if (grepl('^chla_', input$SOLUTES1)) ylabel1 <- "mg/m^2"
+      if (grepl('ionCharge', input$SOLUTES1)) ylabel1 <- "ueq/mL"
       if (input$SOLUTES1 %in% c("pH", "pHmetrohm", "cationCharge", "cnionCharge",
           "theoryCond", "ionBalance")) { ylabel1 <- "(No Units)" }
       if(input$SOLUTES1 %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel1 = 'Count'
@@ -1788,16 +1789,29 @@ shinyServer(function(input, output, session) {
 
           data1 <- dataAll1()
           data1 <- removeCodes(data1)
+          
+          selectGraph1 <- select(data1, -any_of(c('date', 'Hydro.med')))
+          min_valGraph1 <- selectGraph1 %>% 
+            min(., na.rm = TRUE)
+          max_valGraph1 <- selectGraph1 %>% 
+            max(., na.rm = TRUE)
+          
+          yValuesGraph1 = c(min_valGraph1 - (0.01 * (max_valGraph1 - min_valGraph1)), max_valGraph1 + (0.01 * (max_valGraph1 - min_valGraph1)))
+          includeZeroBooleanGraph1 <- FALSE
+          
+          if(min_valGraph1 >= 0 & max_valGraph1 >= 0){
+            yValuesGraph1 = c(0, max_valGraph1 + (0.01 * (max_valGraph1 - min_valGraph1)))
+            
+          }
+          
           if(input$SOLUTES1 %in% emergence){
             data1 = full_join(data1, stky, by = 'date', relationship = 'many-to-many')
           }
           data1.xts <- xts(data1, order.by = data1$date)
 
-          #padrange <- c(min(data1.xts$input$SOLUTES1, na.rm=TRUE) - 1, max(data1.xts$input$SOLUTES1, na.rm=TRUE) + 1) # !!! trying to resolve negative number issue (negative values plotting incorrectly)
-
           dygraph1 <- dygraph(data1.xts) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-            dyAxis("y", label = ylabel, independentTicks=TRUE)
+            dyAxis("y", label = ylabel, valueRange = yValuesGraph1, independentTicks=TRUE)
           if(input$SOLUTES1 %in% emergence){
             dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
                                 drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
@@ -1809,7 +1823,7 @@ shinyServer(function(input, output, session) {
             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
             dyOptions(drawGrid = FALSE,
                    connectSeparatedPoints=TRUE,
-                   includeZero = TRUE)
+                   includeZero = includeZeroBooleanGraph1)
 
           dygraph1
         }
@@ -2068,16 +2082,17 @@ shinyServer(function(input, output, session) {
      data3 <- removeCodes3(data3, input$SOLUTES3)
      data3.xts <- xts(data3, order.by = data3$date)
      
-     min_val <- select(data3, -any_of(c('date', 'Hydro.med'))) %>% 
+     select <- select(data3, -any_of(c('date', 'Hydro.med')))
+     min_val <- select %>% 
        min(., na.rm = TRUE)
-     max_val <- select(data3, -any_of(c('date', 'Hydro.med'))) %>% 
+     max_val <- select %>% 
        max(., na.rm = TRUE)
      
-     yValues = c(min_val - 2, max_val + 2)
+     yValues = c(min_val - (0.01 * (max_val - min_val)), max_val + (0.01 * (max_val - min_val)))
      includeZeroBoolean <- FALSE
      
      if(min_val >= 0 & max_val >= 0){
-       yValues = c(0, max_val + 2)
+       yValues = c(0, max_val + (0.01 * (max_val - min_val)))
        
      }
      
