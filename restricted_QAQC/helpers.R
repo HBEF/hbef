@@ -697,3 +697,20 @@ email_data2 <- function(df, orig_file, orig_name, msgs, addrs, pw){
     
     file.remove(tmpcsv)
 }
+
+get_buffered_yrange <- function(d){
+    
+    print(colnames(d))
+    range_d <- select(d, -any_of(c('date', 'Hydro.med', 'Flow_or_Precip')))
+    min_val <- min(range_d, na.rm = TRUE)
+    max_val <- max(range_d, na.rm = TRUE)
+    
+    yValues <- c(min_val - (0.01 * (max_val - min_val)),
+                 max_val + (0.01 * (max_val - min_val)))
+    
+    if(min_val >= 0 & max_val >= 0){
+        yValues = c(0, max_val + (0.01 * (max_val - min_val)))
+    }
+    
+    return(yValues)
+}
