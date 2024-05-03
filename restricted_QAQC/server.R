@@ -909,6 +909,15 @@ shinyServer(function(input, output, session) {
     if(input$OMIT_STORMS1 == TRUE){
         dataAll1 <- filter(dataAll1, is.na(fieldCode) | fieldCode != '911')
     }
+    if (input$factor_type == "composite") {
+      formula <- parse_composite_factor(input$composite_factor)
+      dataAll <- dataAll %>%
+        mutate(Composite = eval(parse(text = formula))) %>%
+        select(date, Composite)
+    } else {
+      dataAll <- dataAll %>%
+        select(date, one_of(input$SOLUTES1))
+    }
     dataAll1 <- dataAll1 %>%
      select(one_of("date", input$SOLUTES1))      # Select desired columns of data
     dataAll1 <- removeCodes(dataAll1)
@@ -919,6 +928,15 @@ shinyServer(function(input, output, session) {
   # Grab selected wateryear, site, solute, and sensor data from data
   dataAllQ1 <- reactive({
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
+    dataAll <- dataAll %>%
+      filter(waterYr %in% input$WATERYEAR1, site %in% input$SITES1)
+    
+    if (input$factor_type == "composite") {
+      formula <- parse_composite_factor(input$composite_factor)
+      dataAll <- dataAll %>%
+        mutate(Composite = eval(parse(text = formula)))
+    }
+    
     if (input$SITES1 %in% sites_streams) {
       if (input$Flow_or_Precip1 == 'gageHt'){
         dataAllQ1 <- dataAll %>%

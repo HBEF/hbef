@@ -763,3 +763,11 @@ get_buffered_yrange <- function(d){
     
     return(yValues)
 }
+
+parse_composite_factor <- function(composite_str) {
+  components <- str_split(composite_str, "\\s*[+\\-*/]\\s*", simplify = TRUE)
+  components <- sapply(components, function(x) {
+    paste("data$", x, sep = "")
+  })
+  paste(components, collapse = " + ") 
+}
