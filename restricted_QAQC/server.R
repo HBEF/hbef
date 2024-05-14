@@ -1835,7 +1835,7 @@ shinyServer(function(input, output, session) {
         dataHistorical1 <- reactive({
           # Selects appropriate historical data set (stream or precip) based on site selected
           if (input$SITES1 %in% sites_streams) siteGroup <- input$SOLUTES_HIST
-          if (input$SITES1 %in% sites_precip) siteGroup <- sites_precip
+          if (input$SITES1 %in% sites_precip) siteGroup <- input$SOLUTES_HIST
           # Filter historical data by stream/precip sites, date, and solute
           dataHistorical1 <- dataHistorical %>%
             filter(site %in% siteGroup) %>%
