@@ -262,7 +262,7 @@ shinyUI(
               #   hr()
               # ),
               # conditionalPanel(condition="input.SITES1 != 'W3'",
-
+              
                 checkboxInput(
                   "HYDROLOGY1",
                   label = "Hydrology",
@@ -287,13 +287,23 @@ shinyUI(
                   style = "color:#666666; font-size:85%;"
                 ),
               # ),
-              checkboxInput("SOLUTES_HIST1",
-                        label = "Historical Data",
-                        value = FALSE
-              ),
+              
+              selectInput(
+                 "SOLUTES_HIST",
+                 label = "Historical Data",
+                 choices = c("None", "All", sites_streams),
+                 selected = "None"
+               ), 
+              
+              # #Previous check box for historical data
+              # checkboxInput("SOLUTES_HIST1",
+              #             label = "Historical Data",
+              #             value = FALSE
+              #  ),
+              
               conditionalPanel(
-                # this panel appears when historical data is clicked
-                condition = "input.SOLUTES_HIST1 == true",
+                # this panel appears when the "All" option for historical data is clicked
+                condition = "input.SOLUTES_HIST == 'All'",
                 p("Although historical data are shown as continuous,
                   these lines are derived from median values per month."
                 ),
@@ -302,9 +312,11 @@ shinyUI(
                   precipitation sites when a rain gage site is selected."),
                 style = "color:#666666; font-size:85%;"
               ),
+              
+              
               checkboxInput("OMIT_STORMS1",
-                  label = "Omit Storm Data (Code 911)",
-                  value = FALSE
+                            label = "Omit Storm Data (Code 911)",
+                            value = FALSE
               ),
               width = 3
             ), #closes sidebarPanel
