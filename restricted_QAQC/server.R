@@ -2462,9 +2462,12 @@ shinyServer(function(input, output, session) {
                           dbname = dbname)
           
           bug_data = DBI::dbReadTable(con, 'stickytrap') %>% as_tibble()
+          dbDisconnect(con)
+          
           bug_data$id = NULL
           bug_data = arrange(bug_data, watershed, date, side_or_trapnum)
-          dbDisconnect(con)
+          bug_data$note = NA_character_
+          bug_data$note[between(bug_data$date, as.Date('2024-01-10'), as.Date('2024-05-09'))] = 'The "terrestrial" identification may include taxa other than Diptera. Please interpret exact counts with caution.'
           
           write.csv(bug_data, file, row.names = FALSE)
       },
