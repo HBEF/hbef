@@ -902,6 +902,7 @@ shinyServer(function(input, output, session) {
 
   # Grab selected wateryear, site, solute data from data
   dataAll1 <- reactive({
+    #browser()
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
     dataAll1 <- dataAll %>%
      filter(waterYr %in% input$WATERYEAR1) %>%    # Filter data to selected water year
@@ -910,19 +911,32 @@ shinyServer(function(input, output, session) {
         dataAll1 <- filter(dataAll1, is.na(fieldCode) | fieldCode != '911')
     }
     if (input$factor_type == "composite") {
-      formula <- parse_composite_factor(input$composite_factor)
-      dataAll <- dataAll %>%
-        mutate(Composite = eval(parse(text = formula))) %>%
-        select(date, Composite)
+      parsed_composite <- parse_composite_factor(input$composite_factor)
+      solutes <- parsed_composite$components
+      expression <- parsed_composite$expression
+      #print(paste("Solutes to be summed:", solutes))
+      missing_solutes <- solutes[!solutes %in% names(dataAll1)]
+      if (length(missing_solutes) > 0) {
+        stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
+      }
+      dataAll1 <- dataAll1 %>%
+        mutate(across(all_of(solutes), 
+                      ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .),
+                      .names = "interp_{col}")) %>%
+        mutate(is_interpolated = rowSums(is.na(select(dataAll1, all_of(solutes)))) > 0) %>%
+        rowwise() %>%
+        mutate(value = sum(c_across(all_of(paste0("interp_", solutes))), na.rm = TRUE)) %>%
+        ungroup() %>%
+        select(date, value, is_interpolated)
     } else {
-      dataAll <- dataAll %>%
-        select(date, one_of(input$SOLUTES1))
+      dataAll1 <- dataAll1 %>%
+        mutate(value = !!sym(input$SOLUTES1)) %>%
+        select(date, value) %>%
+        mutate(is_interpolated = FALSE)
     }
-    dataAll1 <- dataAll1 %>%
-     select(one_of("date", input$SOLUTES1))      # Select desired columns of data
-    dataAll1 <- removeCodes(dataAll1)
+   
+    dataAll1$value <- as.numeric(dataAll1$value)
     dataAll1
-
   }) # END of dataAll1
 
   # Grab selected wateryear, site, solute, and sensor data from data
@@ -930,12 +944,32 @@ shinyServer(function(input, output, session) {
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
     dataAll <- dataAll %>%
       filter(waterYr %in% input$WATERYEAR1, site %in% input$SITES1)
-    
+    dataAll <- dataAll %>%
+      mutate(across(c(input$SOLUTES1, "gageHt", "flowGageHt", "flowSens", "precipCatch"), 
+                    ~ na.approx(., na.rm = FALSE, maxgap = Inf)))
     if (input$factor_type == "composite") {
-      formula <- parse_composite_factor(input$composite_factor)
-      dataAll <- dataAll %>%
-        mutate(Composite = eval(parse(text = formula)))
+      parsed_composite <- parse_composite_factor(input$composite_factor)
+      solutes <- parsed_composite$components
+      expression <- parsed_composite$expression
+      print(paste("Solutes to be summed:", solutes))
+      missing_solutes <- solutes[!solutes %in% names(dataAllQ1)]
+      if (length(missing_solutes) > 0) {
+        stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
+      }
+      
+    dataAllQ1 <- dataAll %>%
+      rowwise() %>%
+      mutate(value = sum(c_across(all_of(solutes)), na.rm = TRUE)) %>%
+      ungroup() %>%
+      select(date, value)
+    } else {
+      dataAllQ1 <- dataAll %>%
+        mutate(value = !!sym(input$SOLUTES1)) %>%
+        select(date, value)
     }
+    
+    dataAllQ1$value <- as.numeric(dataAllQ1$value)
+    
     
     if (input$SITES1 %in% sites_streams) {
       if (input$Flow_or_Precip1 == 'gageHt'){
@@ -1035,6 +1069,7 @@ shinyServer(function(input, output, session) {
     return(dataAllQHist1)
   }) #END of dataAllQHist1
 
+  
   # END of PANEL 1
 
   # Panel 2 Reactivity ####
@@ -1668,7 +1703,7 @@ shinyServer(function(input, output, session) {
 
           yValues <- get_buffered_yrange(data1)
           
-          dygraph1 <- dygraph(data1.xts) %>%
+          dygraph1 <- dygraph(data1.xts, main = paste(if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
                  axisLabelColor = "black") %>%
             dyAxis("y", label = ylabel,
@@ -1680,11 +1715,12 @@ shinyServer(function(input, output, session) {
                  axisLabelColor = "#3182bd",
                  axisLabelWidth = 70,
                  axisLineColor = "#3182bd") %>%
-            dySeries(name = input$SOLUTES1,
-                  color = "black",
-                  drawPoints = TRUE,
-                  pointSize = 3,
-                  axis='y') %>%
+            dySeries(name = "value",
+                     label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+                     color = "black",
+                     drawPoints = TRUE,
+                     pointSize = 3,
+                     axis='y') %>%
             dySeries(name = 'Flow_or_Precip',
                   drawPoints = FALSE,
                   fillGraph=T,
@@ -1719,7 +1755,7 @@ shinyServer(function(input, output, session) {
         
         yValues <- get_buffered_yrange(data1)
 
-        dygraph1 <- dygraph(data1.xts) %>%
+        dygraph1 <- dygraph(data1.xts, main = paste(if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)) %>%
           dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
           dyAxis("y", label = ylabel, independentTicks=TRUE,
                  valueRange = yValues) %>%
@@ -1757,15 +1793,16 @@ shinyServer(function(input, output, session) {
 
         yValues <- get_buffered_yrange(data1)
         
-        dygraph1 <- dygraph(data1.xts) %>%
+        dygraph1 <- dygraph(data1.xts, main = paste(if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)) %>%
           dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
           dyAxis("y", label = ylabel, independentTicks=TRUE,
                  valueRange = yValues) %>%
-          dySeries(name = input$SOLUTES1,
-                color = "black",
-                drawPoints = TRUE,
-                pointSize = 3,
-                axis='y') %>%
+          dySeries(name = "value",
+                   label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+                   color = "black",
+                   drawPoints = TRUE,
+                   pointSize = 3,
+                   axis='y') %>%
           dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
                 strokePattern = c("dashed"),
                 color = "#A9A9A9",
@@ -1821,23 +1858,24 @@ shinyServer(function(input, output, session) {
 
           data1 <- dataAll1()
           data1 <- removeCodes(data1)
-          
           yValues <- get_buffered_yrange(data1)
           
           if(input$SOLUTES1 %in% emergence){
             data1 = full_join(data1, stky, by = 'date', relationship = 'many-to-many')
           }
-          data1.xts <- xts(data1, order.by = data1$date)
-
-          dygraph1 <- dygraph(data1.xts) %>%
+          data1.xts <- xts(data1$value, order.by = data1$date)
+          colnames(data1.xts) <- "value"
+          dygraph1 <- dygraph(data1.xts, main = paste(if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
             dyAxis("y", label = ylabel, valueRange = yValues, independentTicks=TRUE)
           if(input$SOLUTES1 %in% emergence){
             dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
                                 drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
           } else {
-            dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
-                  drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
+            dygraph1 <- dySeries(dygraph1, name = "value",
+                                 label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+                                 color = "black",
+                                 drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
           }
             dygraph1 = dyLimit(dygraph1, limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%

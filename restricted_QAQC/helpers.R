@@ -765,9 +765,10 @@ get_buffered_yrange <- function(d){
 }
 
 parse_composite_factor <- function(composite_str) {
-  components <- str_split(composite_str, "\\s*[+\\-*/]\\s*", simplify = TRUE)
-  components <- sapply(components, function(x) {
-    paste("data$", x, sep = "")
-  })
-  paste(components, collapse = " + ") 
+  components <- str_split(composite_str, "\\s*[+\\-*/]\\s*", simplify = TRUE)[1, ]
+  
+  list(
+    components = components,
+    expression = paste(sapply(components, function(x) paste("data$", x, sep = "")), collapse = " + ")
+  )
 }
