@@ -1665,7 +1665,11 @@ shinyServer(function(input, output, session) {
 
   # Print chart title, describing what's been selected
   output$TITLE1 <-  renderText({
-    paste(c(input$SOLUTES1, "from site", input$SITES1,"in water year", input$WATERYEAR1))
+    if (input$factor_type == "composite") {
+      paste(input$composite_factor, "from site", input$SITES1, "in water year", input$WATERYEAR1)
+    } else {
+      paste(input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)
+    }
   })
 
   # Main graph. A sequence of if/else statements, depending on what's been selected
@@ -1703,7 +1707,7 @@ shinyServer(function(input, output, session) {
 
           yValues <- get_buffered_yrange(data1)
           
-          dygraph1 <- dygraph(data1.xts, main = paste(if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)) %>%
+          dygraph1 <- dygraph(data1.xts)%>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
                  axisLabelColor = "black") %>%
             dyAxis("y", label = ylabel,
@@ -1755,7 +1759,7 @@ shinyServer(function(input, output, session) {
         
         yValues <- get_buffered_yrange(data1)
 
-        dygraph1 <- dygraph(data1.xts, main = paste(if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)) %>%
+        dygraph1 <- dygraph(data1.xts) %>%
           dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
           dyAxis("y", label = ylabel, independentTicks=TRUE,
                  valueRange = yValues) %>%
@@ -1793,7 +1797,7 @@ shinyServer(function(input, output, session) {
 
         yValues <- get_buffered_yrange(data1)
         
-        dygraph1 <- dygraph(data1.xts, main = paste(if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)) %>%
+        dygraph1 <- dygraph(data1.xts) %>%
           dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
           dyAxis("y", label = ylabel, independentTicks=TRUE,
                  valueRange = yValues) %>%
@@ -1865,7 +1869,7 @@ shinyServer(function(input, output, session) {
           }
           data1.xts <- xts(data1$value, order.by = data1$date)
           colnames(data1.xts) <- "value"
-          dygraph1 <- dygraph(data1.xts, main = paste(if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)) %>%
+          dygraph1 <- dygraph(data1.xts) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
             dyAxis("y", label = ylabel, valueRange = yValues, independentTicks=TRUE)
           if(input$SOLUTES1 %in% emergence){
