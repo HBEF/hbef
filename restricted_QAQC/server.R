@@ -1027,16 +1027,26 @@ shinyServer(function(input, output, session) {
     if (input$SITES1 %in% sites_streams) siteGroup <- sites_streams
     if (input$SITES1 %in% sites_precip) siteGroup <- sites_precip
     # Filter historical data by stream/precip sites, date, and solute
-    dataHistorical1 <- dataHistorical %>%
-      filter(site %in% siteGroup) %>%
-      select(one_of("date", input$SOLUTES1)) %>%  # Select desired columns of solute data
-      separate(date, c("y","m","d"))          # Separate date into year, month, and day (to use month in next code block)
+    if (input$SOLUTES_HIST1 == "None") {
+      return(data.frame(date = as.Date(character()), solute.IQRlower = numeric(), solute.median = numeric(), solute.IQRupper = numeric()))
+    } else if (input$SOLUTES_HIST1 == "All") {
+      filteredData <- dataHistorical %>%
+        filter(site %in% siteGroup)
+    } else {
+      filteredData <- dataHistorical %>%
+        filter(site == input$SOLUTES_HIST1)
+    }
+
+    dataHistorical1 <- filteredData %>%
+      select(date, input$SOLUTES1) %>%  # Select desired columns of solute data
+      separate(date, c("y","m","d"))          # Separate date into year, month, and day (to use month in second to next code block)
 
     # Calculate median and IQR values per month
     median <- tapply(dataHistorical1[,4], dataHistorical1$m, median, na.rm=TRUE)
     IQR <- tapply(dataHistorical1[,4], dataHistorical1$m, IQR, na.rm=TRUE)
     IQR.lower <- median - IQR
     IQR.upper <- median + IQR
+    
 
     # Create dates for display
     # Create list of dates in middle of the month, so that the median/IQR values are plotted in the middle of each month
@@ -1058,16 +1068,23 @@ shinyServer(function(input, output, session) {
   }) # END of dataHistorical1
 
   # combines site, solute data from recent water year data with historical data
-  dataAllHist1 <- reactive ({
-    dataAllHist1 <- full_join(dataAll1(), dataHistorical1(), by = "date")
+  dataAllHist1 <- reactive({
+    current_dates <- dataAll1()$date
+    print(current_dates)
+    filteredHistorical <- dataHistorical1() %>%
+      filter(date %in% current_dates)
+    print(filteredHistorical)
+    dataAllHist1 <- full_join(dataAll1(), filteredHistorical, by = "date")
     return(dataAllHist1)
-  }) #END of dataAllHist1
-
-  # combines site, solute, and discharge data from recent water year dataset with historical data
-  dataAllQHist1 <- reactive ({
-    dataAllQHist1 <- full_join(dataAllQ1(), dataHistorical1(), by = "date")
+  }) # END of dataAllHist1
+  
+  dataAllQHist1 <- reactive({
+    current_dates <- dataAllQ1()$date
+    filteredHistorical <- dataHistorical1() %>%
+      filter(date %in% currentdates)
+    dataAllQHist1 <- full_join(dataAllQ1(), filteredHistorical, by = "date")
     return(dataAllQHist1)
-  }) #END of dataAllQHist1
+  }) # END of dataAllQHist1
 
   
   # END of PANEL 1
@@ -1685,7 +1702,7 @@ shinyServer(function(input, output, session) {
     if (input$HYDROLOGY1 == TRUE)  {
       if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (ft or L/s)'
       if (input$SITES1 %in% sites_precip) ylabel2 <- 'Precipitation (mm)'
-      if (input$SOLUTES_HIST1 == TRUE) {
+      if (input$SOLUTES_HIST1 != "None") {
 
         if(input$Flow_or_Precip1 == 'flowSens'){
           dygraph(xts(c(NA,2,NA), order.by=as.Date(1:3))) %>%
@@ -1788,7 +1805,7 @@ shinyServer(function(input, output, session) {
       }
     } else {
 
-      if (input$SOLUTES_HIST1 == TRUE) {
+      if (input$SOLUTES_HIST1 != "None" ) {
 
         # Plots Default + Historical data
         data1 <- dataAllHist1()

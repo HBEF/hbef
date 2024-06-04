@@ -305,20 +305,11 @@ shinyUI(
                   style = "color:#666666; font-size:85%;"
                 ),
               # ),
-              checkboxInput("SOLUTES_HIST1",
-                        label = "Historical Data",
-                        value = FALSE
-              ),
-              conditionalPanel(
-                # this panel appears when historical data is clicked
-                condition = "input.SOLUTES_HIST1 == true",
-                p("Although historical data are shown as continuous,
-                  these lines are derived from median values per month."
-                ),
-                p("Historical data finds the median value of all stream sites
-                  when a watershed site is selected, and the median value of all
-                  precipitation sites when a rain gage site is selected."),
-                style = "color:#666666; font-size:85%;"
+              selectInput(
+                "SOLUTES_HIST1",
+                label = "Historical Data",
+                choices = c("None","All", sites_streams, sites_precip),
+                selected = "None"
               ),
               checkboxInput("OMIT_STORMS1",
                   label = "Omit Storm Data (Code 911)",
