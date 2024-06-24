@@ -749,7 +749,7 @@ calculate_SWDD <- function(data, base_temp_C = 4){
 
 get_buffered_yrange <- function(d){
     
-    print(colnames(d))
+    #print(colnames(d))
     range_d <- select(d, -any_of(c('date', 'Hydro.med', 'Flow_or_Precip')))
     min_val <- min(range_d, na.rm = TRUE)
     max_val <- max(range_d, na.rm = TRUE)
@@ -763,12 +763,21 @@ get_buffered_yrange <- function(d){
     
     return(yValues)
 }
-
 parse_composite_factor <- function(composite_str) {
-  components <- str_split(composite_str, "\\s*[+\\-*/]\\s*", simplify = TRUE)[1, ]
+  components <- strsplit(composite_str, "(?<=[A-Za-z0-9])\\s*(?=[+\\-*/])|(?<=[+\\-*/])\\s*(?=[A-Za-z0-9])", perl = TRUE)[[1]]
   
+  solutes <- components[seq(1, length(components), by = 2)]
+  operators <- components[seq(2, length(components), by = 2)]
+  
+  expression <- solutes[1]
+  if (length(operators) > 0) {
+    for (i in seq_along(operators)) {
+      expression <- paste(expression, operators[i], solutes[i + 1])
+    }
+  }
+
   list(
-    components = components,
-    expression = paste(sapply(components, function(x) paste("data$", x, sep = "")), collapse = " + ")
+    components = solutes,
+    expression = expression
   )
 }

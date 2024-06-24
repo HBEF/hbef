@@ -29,6 +29,7 @@ library(tidyr)
 library(xts)
 library(glue)
 library(purrr)
+library(zoo)
 #library(openxlsx)
 # library(glue)
 
@@ -914,26 +915,23 @@ shinyServer(function(input, output, session) {
       parsed_composite <- parse_composite_factor(input$composite_factor)
       solutes <- parsed_composite$components
       expression <- parsed_composite$expression
-      #print(paste("Solutes to be summed:", solutes))
+      
       missing_solutes <- solutes[!solutes %in% names(dataAll1)]
       if (length(missing_solutes) > 0) {
         stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
       }
       dataAll1 <- dataAll1 %>%
-        mutate(across(all_of(solutes), 
-                      ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .),
-                      .names = "interp_{col}")) %>%
-        mutate(is_interpolated = rowSums(is.na(select(dataAll1, all_of(solutes)))) > 0) %>%
+        mutate(across(all_of(solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .), .names = "interp_{col}")) %>%
         rowwise() %>%
-        mutate(value = sum(c_across(all_of(paste0("interp_", solutes))), na.rm = TRUE)) %>%
+        mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
         ungroup() %>%
-        select(date, value, is_interpolated)
+        select(date, value)
     } else {
       dataAll1 <- dataAll1 %>%
         mutate(value = !!sym(input$SOLUTES1)) %>%
-        select(date, value) %>%
-        mutate(is_interpolated = FALSE)
+        select(date, value) 
     }
+  
    
     dataAll1$value <- as.numeric(dataAll1$value)
     dataAll1
@@ -951,22 +949,23 @@ shinyServer(function(input, output, session) {
       parsed_composite <- parse_composite_factor(input$composite_factor)
       solutes <- parsed_composite$components
       expression <- parsed_composite$expression
-      print(paste("Solutes to be summed:", solutes))
+      #print(paste("Solutes to be summed:", solutes))
       missing_solutes <- solutes[!solutes %in% names(dataAllQ1)]
       if (length(missing_solutes) > 0) {
         stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
       }
       
-    dataAllQ1 <- dataAll %>%
-      rowwise() %>%
-      mutate(value = sum(c_across(all_of(solutes)), na.rm = TRUE)) %>%
-      ungroup() %>%
-      select(date, value)
+      dataAllQ1 <- dataAll %>%
+        rowwise() %>%
+        mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
+        ungroup() %>%
+        select(date, value)
     } else {
       dataAllQ1 <- dataAll %>%
         mutate(value = !!sym(input$SOLUTES1)) %>%
         select(date, value)
     }
+    
     
     dataAllQ1$value <- as.numeric(dataAllQ1$value)
     
@@ -1027,14 +1026,21 @@ shinyServer(function(input, output, session) {
     if (input$SITES1 %in% sites_streams) siteGroup <- sites_streams
     if (input$SITES1 %in% sites_precip) siteGroup <- sites_precip
     # Filter historical data by stream/precip sites, date, and solute
+    filteredData <- data.frame(date = as.Date(character()), solute.IQRlower = numeric(), solute.median = numeric(), solute.IQRupper = numeric())
     if (input$SOLUTES_HIST1 == "None") {
-      return(data.frame(date = as.Date(character()), solute.IQRlower = numeric(), solute.median = numeric(), solute.IQRupper = numeric()))
+      message("Selected solute is None")
     } else if (input$SOLUTES_HIST1 == "All") {
-      filteredData <- dataHistorical %>%
-        filter(site %in% siteGroup)
+      if (all(c("solute.IQRlower", "solute.median", "solute.IQRupper") %in% colnames(dataHistorical))) {
+        filteredData <- dataHistorical %>%
+          filter(site %in% siteGroup) %>%
+          select(date, solute.IQRlower, solute.median, solute.IQRupper)
+      }
     } else {
-      filteredData <- dataHistorical %>%
-        filter(site == input$SOLUTES_HIST1)
+      if (all(c("solute.IQRlower", "solute.median", "solute.IQRupper") %in% colnames(dataHistorical))) {
+        filteredData <- dataHistorical %>%
+          filter(site == input$SOLUTES_HIST1) %>%
+          select(date, solute.IQRlower, solute.median, solute.IQRupper)
+      }
     }
 
     dataHistorical1 <- filteredData %>%
@@ -1047,15 +1053,15 @@ shinyServer(function(input, output, session) {
     IQR.lower <- median - IQR
     IQR.upper <- median + IQR
     
-
+    if (is.null(median)) median <- numeric(12)
+    if (is.null(IQR)) IQR <- numeric(12)
+    
     # Create dates for display
     # Create list of dates in middle of the month, so that the median/IQR values are plotted in the middle of each month
     date <- NA
     wy <- as.numeric(input$WATERYEAR1)
-    wy.1 <- wy + 1
     for (i in 1:12) {
-      if (i<6) {date[i] <- paste((as.numeric(input$WATERYEAR1) + 1),"/", i, "/15", sep="")}
-      else {date[i] <- paste(input$WATERYEAR1,"/", i, "/15", sep="")}
+        date[i] <- if (i < 6) paste((wy + 1), "/", i, "/15", sep = "") else paste(wy, "/", i, "/15", sep = "")
     }
     date <- as.Date(date)
     # Create a data frame with the relevant data: date, median, upper and lower IQR
@@ -1063,27 +1069,23 @@ shinyServer(function(input, output, session) {
                     solute.IQRlower = IQR.lower,
                     solute.median = median,
                     solute.IQRupper = IQR.upper)
-
     dataHistorical1
   }) # END of dataHistorical1
 
   # combines site, solute data from recent water year data with historical data
   dataAllHist1 <- reactive({
     current_dates <- dataAll1()$date
-    print(current_dates)
     filteredHistorical <- dataHistorical1() %>%
       filter(date %in% current_dates)
-    print(filteredHistorical)
     dataAllHist1 <- full_join(dataAll1(), filteredHistorical, by = "date")
-    return(dataAllHist1)
+    dataAllHist1
   }) # END of dataAllHist1
-  
   dataAllQHist1 <- reactive({
     current_dates <- dataAllQ1()$date
     filteredHistorical <- dataHistorical1() %>%
       filter(date %in% currentdates)
     dataAllQHist1 <- full_join(dataAllQ1(), filteredHistorical, by = "date")
-    return(dataAllQHist1)
+    dataAllQHist1
   }) # END of dataAllQHist1
 
   
@@ -1143,11 +1145,11 @@ shinyServer(function(input, output, session) {
       ylabel2[i] <- "mg/L"
      }
      yabel2 <- (unique(ylabel2))
-     print(paste(c("unique:", ylabel2)))
+     #print(paste(c("unique:", ylabel2)))
      yabel2 <- paste(ylabel2, sep="", collapse="")
-     print(ylabel2)
-     print(paste(c("paste/collapse:", ylabel2)))
-     print(class(ylabel2))
+     #print(ylabel2)
+     #print(paste(c("paste/collapse:", ylabel2)))
+     #print(class(ylabel2))
     } # end of for loop
 
   })
