@@ -920,8 +920,9 @@ shinyServer(function(input, output, session) {
       if (length(missing_solutes) > 0) {
         stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
       }
+      
       dataAll1 <- dataAll1 %>%
-        mutate(across(all_of(solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .), .names = "interp_{col}")) %>%
+        mutate(across(all_of(solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
         rowwise() %>%
         mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
         ungroup() %>%
@@ -929,8 +930,9 @@ shinyServer(function(input, output, session) {
     } else {
       dataAll1 <- dataAll1 %>%
         mutate(value = !!sym(input$SOLUTES1)) %>%
-        select(date, value) 
+        select(date, value)
     }
+  
   
    
     dataAll1$value <- as.numeric(dataAll1$value)
@@ -949,19 +951,20 @@ shinyServer(function(input, output, session) {
       parsed_composite <- parse_composite_factor(input$composite_factor)
       solutes <- parsed_composite$components
       expression <- parsed_composite$expression
-      #print(paste("Solutes to be summed:", solutes))
+      
       missing_solutes <- solutes[!solutes %in% names(dataAllQ1)]
       if (length(missing_solutes) > 0) {
         stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
       }
       
-      dataAllQ1 <- dataAll %>%
+      dataAllQ1 <- dataAllQ1 %>%
+        mutate(across(all_of(solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
         rowwise() %>%
         mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
         ungroup() %>%
         select(date, value)
     } else {
-      dataAllQ1 <- dataAll %>%
+      dataAll1 <- dataAllQ1 %>%
         mutate(value = !!sym(input$SOLUTES1)) %>%
         select(date, value)
     }

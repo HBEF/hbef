@@ -766,18 +766,43 @@ get_buffered_yrange <- function(d){
 parse_composite_factor <- function(composite_str) {
   components <- strsplit(composite_str, "(?<=[A-Za-z0-9])\\s*(?=[+\\-*/])|(?<=[+\\-*/])\\s*(?=[A-Za-z0-9])", perl = TRUE)[[1]]
   
-  solutes <- components[seq(1, length(components), by = 2)]
-  operators <- components[seq(2, length(components), by = 2)]
+  solutes <- character()
+  constants <- numeric()
+  operators <- character()
   
-  expression <- solutes[1]
-  if (length(operators) > 0) {
-    for (i in seq_along(operators)) {
-      expression <- paste(expression, operators[i], solutes[i + 1])
+  for (component in components) {
+    if (str_detect(component, "[+\\-*/]")) {
+      operators <- c(operators, component)
+    } else {
+      if (str_detect(component, "^[0-9]+[A-Za-z]+$")) {
+        matches <- str_match(component, "^([0-9]+)([A-Za-z]+)$")
+        constant <- as.numeric(matches[2])
+        variable <- matches[3]
+        constants <- c(constants, constant)
+        solutes <- c(solutes, variable)
+      } else {
+        constants <- c(constants, 1)
+        solutes <- c(solutes, component)
+      }
     }
   }
-
+  
+  expression <- paste(constants[1], "*", solutes[1], sep = "")
+  if (length(operators) > 0) {
+    for (i in seq_along(operators)) {
+      expression <- paste(expression, operators[i], constants[i + 1], "*", solutes[i + 1], sep = "")
+    }
+  }
+  
+  print(paste("Components: ", toString(components)))
+  print(paste("Solutes: ", toString(solutes)))
+  print(paste("Constants: ", toString(constants)))
+  print(paste("Operators: ", toString(operators)))
+  print(paste("Expression: ", expression))
+  
   list(
     components = solutes,
+    constants = constants,
     expression = expression
   )
 }
