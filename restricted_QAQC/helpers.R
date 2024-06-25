@@ -780,17 +780,20 @@ parse_composite_factor <- function(composite_str) {
         variable <- matches[3]
         constants <- c(constants, constant)
         solutes <- c(solutes, variable)
-      } else {
+      } else if (str_detect(component, "^[A-Za-z]+$")) {
         constants <- c(constants, 1)
         solutes <- c(solutes, component)
+      } else {
+        constants <- c(constants, as.numeric(component))
+        solutes <- c(solutes, "1")  
       }
     }
   }
   
-  expression <- paste(constants[1], "*", solutes[1], sep = "")
+  expression <- paste(constants[1], "*", solutes[1])
   if (length(operators) > 0) {
     for (i in seq_along(operators)) {
-      expression <- paste(expression, operators[i], constants[i + 1], "*", solutes[i + 1], sep = "")
+      expression <- paste(expression, operators[i], constants[i + 1], "*", solutes[i + 1])
     }
   }
   
@@ -801,8 +804,7 @@ parse_composite_factor <- function(composite_str) {
   print(paste("Expression: ", expression))
   
   list(
-    components = solutes,
-    constants = constants,
+    components = solutes[solutes != "1"],
     expression = expression
   )
 }

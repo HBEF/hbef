@@ -916,7 +916,9 @@ shinyServer(function(input, output, session) {
       solutes <- parsed_composite$components
       expression <- parsed_composite$expression
       
-      missing_solutes <- solutes[!solutes %in% names(dataAll1)]
+      actual_solutes <- solutes[solutes != "1"]
+      
+      missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll1)]
       if (length(missing_solutes) > 0) {
         stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
       }
@@ -950,27 +952,29 @@ shinyServer(function(input, output, session) {
     if (input$factor_type == "composite") {
       parsed_composite <- parse_composite_factor(input$composite_factor)
       solutes <- parsed_composite$components
+      constants <- parsed_composite$constants
       expression <- parsed_composite$expression
       
-      missing_solutes <- solutes[!solutes %in% names(dataAllQ1)]
+      actual_solutes <- solutes[solutes != "1"]
+      
+      missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll)]
       if (length(missing_solutes) > 0) {
         stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
       }
       
-      dataAllQ1 <- dataAllQ1 %>%
-        mutate(across(all_of(solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
+      dataAll <- dataAll %>%
+        mutate(across(all_of(actual_solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
         rowwise() %>%
         mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
         ungroup() %>%
         select(date, value)
     } else {
-      dataAll1 <- dataAllQ1 %>%
+      dataAll <- dataAll %>%
         mutate(value = !!sym(input$SOLUTES1)) %>%
         select(date, value)
     }
     
-    
-    dataAllQ1$value <- as.numeric(dataAllQ1$value)
+    dataAll$value <- as.numeric(dataAll$value)
     
     
     if (input$SITES1 %in% sites_streams) {
