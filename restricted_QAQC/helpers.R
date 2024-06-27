@@ -797,12 +797,6 @@ parse_composite_factor <- function(composite_str) {
     }
   }
   
-  print(paste("Components: ", toString(components)))
-  print(paste("Solutes: ", toString(solutes)))
-  print(paste("Constants: ", toString(constants)))
-  print(paste("Operators: ", toString(operators)))
-  print(paste("Expression: ", expression))
-  
   list(
     components = solutes[solutes != "1"],
     expression = expression
