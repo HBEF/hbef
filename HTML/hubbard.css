@@ -501,6 +501,15 @@ color: #fafafa;
 	background-size: cover;
 }
 
+.emergence {
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.15), 
+		rgba(25, 25, 25, 0.15)), 
+		url("images/emergence.jpg") no-repeat;
+	background-size: 120%;
+	background-position: 0px -130px;
+}
+
 .blank {
 	color: #363229;
 }
