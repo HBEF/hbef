@@ -3,7 +3,7 @@
 # -Import all data from hbef (mysql) database upon startup
 # -Create variables and functions that can be accessed by ui.R and server.R
 
-# options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
+#options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
 
 #NOTES:
 #tables sensor and sensor3 are not in use.
@@ -28,7 +28,7 @@ library(DT) #shiny's DataTable functions broke. loading them from here fixed it.
 library(shinyjs)
 # library(readr)
 
-# options(shiny.fullstacktrace=TRUE)
+#options(shiny.fullstacktrace=TRUE)
 
 message("hello, I'm in global.R")
 
