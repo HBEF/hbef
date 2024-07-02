@@ -749,7 +749,7 @@ calculate_SWDD <- function(data, base_temp_C = 4){
 
 get_buffered_yrange <- function(d){
     
-    print(colnames(d))
+    #print(colnames(d))
     range_d <- select(d, -any_of(c('date', 'Hydro.med', 'Flow_or_Precip')))
     min_val <- min(range_d, na.rm = TRUE)
     max_val <- max(range_d, na.rm = TRUE)
@@ -762,4 +762,44 @@ get_buffered_yrange <- function(d){
     }
     
     return(yValues)
+}
+
+parse_composite_factor <- function(composite_str) {
+  components <- strsplit(composite_str, "(?<=[A-Za-z0-9])\\s*(?=[+\\-*/])|(?<=[+\\-*/])\\s*(?=[A-Za-z0-9])", perl = TRUE)[[1]]
+  
+  solutes <- character()
+  constants <- numeric()
+  operators <- character()
+  
+  for (component in components) {
+    if (str_detect(component, "[+\\-*/]")) {
+      operators <- c(operators, component)
+    } else {
+      if (str_detect(component, "^[0-9]+[A-Za-z]+$")) {
+        matches <- str_match(component, "^([0-9]+)([A-Za-z]+)$")
+        constant <- as.numeric(matches[2])
+        variable <- matches[3]
+        constants <- c(constants, constant)
+        solutes <- c(solutes, variable)
+      } else if (str_detect(component, "^[A-Za-z]+$")) {
+        constants <- c(constants, 1)
+        solutes <- c(solutes, component)
+      } else {
+        constants <- c(constants, as.numeric(component))
+        solutes <- c(solutes, "1")  
+      }
+    }
+  }
+  
+  expression <- paste(constants[1], "*", solutes[1])
+  if (length(operators) > 0) {
+    for (i in seq_along(operators)) {
+      expression <- paste(expression, operators[i], constants[i + 1], "*", solutes[i + 1])
+    }
+  }
+  
+  list(
+    components = solutes[solutes != "1"],
+    expression = expression
+  )
 }

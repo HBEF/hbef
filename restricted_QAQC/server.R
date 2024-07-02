@@ -29,6 +29,7 @@ library(tidyr)
 library(xts)
 library(glue)
 library(purrr)
+library(zoo)
 #library(openxlsx)
 # library(glue)
 
@@ -902,6 +903,7 @@ shinyServer(function(input, output, session) {
 
   # Grab selected wateryear, site, solute data from data
   dataAll1 <- reactive({
+    #browser()
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
     dataAll1 <- dataAll %>%
      filter(waterYr %in% input$WATERYEAR1) %>%    # Filter data to selected water year
@@ -909,16 +911,76 @@ shinyServer(function(input, output, session) {
     if(input$OMIT_STORMS1 == TRUE){
         dataAll1 <- filter(dataAll1, is.na(fieldCode) | fieldCode != '911')
     }
-    dataAll1 <- dataAll1 %>%
-     select(one_of("date", input$SOLUTES1))      # Select desired columns of data
-    dataAll1 <- removeCodes(dataAll1)
+    if (input$factor_type == "composite") {
+      parsed_composite <- parse_composite_factor(input$composite_factor)
+      solutes <- parsed_composite$components
+      expression <- parsed_composite$expression
+      
+      actual_solutes <- solutes[solutes != "1"]
+      
+      suppressWarnings({
+        missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll1)]
+        if (length(missing_solutes) > 0) {
+          stop(paste("The following are not recognized solutes:", paste(missing_solutes, collapse = ", ")))
+        }
+      })
+      
+      dataAll1 <- dataAll1 %>%
+        mutate(across(all_of(solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
+        rowwise() %>%
+        mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
+        ungroup() %>%
+        select(date, value)
+    } else {
+      dataAll1 <- dataAll1 %>%
+        mutate(value = !!sym(input$SOLUTES1)) %>%
+        select(date, value)
+    }
+  
+  
+   
+    dataAll1$value <- as.numeric(dataAll1$value)
     dataAll1
-
-  }) # END of dataAll1
+  }) %>% debounce(1000) # END of dataAll1
 
   # Grab selected wateryear, site, solute, and sensor data from data
   dataAllQ1 <- reactive({
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
+    dataAll <- dataAll %>%
+      filter(waterYr %in% input$WATERYEAR1, site %in% input$SITES1)
+    dataAll <- dataAll %>%
+      mutate(across(c(input$SOLUTES1, "gageHt", "flowGageHt", "flowSens", "precipCatch"), 
+                    ~ na.approx(., na.rm = FALSE, maxgap = Inf)))
+    if (input$factor_type == "composite") {
+      parsed_composite <- parse_composite_factor(input$composite_factor)
+      solutes <- parsed_composite$components
+      constants <- parsed_composite$constants
+      expression <- parsed_composite$expression
+      
+      actual_solutes <- solutes[solutes != "1"]
+      
+      suppressWarnings({
+        missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll1)]
+        if (length(missing_solutes) > 0) {
+          stop(paste("The following are not recognized solutes:", paste(missing_solutes, collapse = ", ")))
+        }
+      })
+      
+      dataAll <- dataAll %>%
+        mutate(across(all_of(actual_solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
+        rowwise() %>%
+        mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
+        ungroup() %>%
+        select(date, value)
+    } else {
+      dataAll <- dataAll %>%
+        mutate(value = !!sym(input$SOLUTES1)) %>%
+        select(date, value)
+    }
+    
+    dataAll$value <- as.numeric(dataAll$value)
+    
+    
     if (input$SITES1 %in% sites_streams) {
       if (input$Flow_or_Precip1 == 'gageHt'){
         dataAllQ1 <- dataAll %>%
@@ -967,7 +1029,7 @@ shinyServer(function(input, output, session) {
     }
 
     dataAllQ1
-  }) # END of dataCurrentQ1
+  }) %>% debounce(1000) # END of dataCurrentQ1
 
   # filters historical data; i.e. site, solute, from historical data
   dataHistorical1 <- reactive({
@@ -975,25 +1037,42 @@ shinyServer(function(input, output, session) {
     if (input$SITES1 %in% sites_streams) siteGroup <- sites_streams
     if (input$SITES1 %in% sites_precip) siteGroup <- sites_precip
     # Filter historical data by stream/precip sites, date, and solute
-    dataHistorical1 <- dataHistorical %>%
-      filter(site %in% siteGroup) %>%
-      select(one_of("date", input$SOLUTES1)) %>%  # Select desired columns of solute data
-      separate(date, c("y","m","d"))          # Separate date into year, month, and day (to use month in next code block)
+    filteredData <- data.frame(date = as.Date(character()), solute.IQRlower = numeric(), solute.median = numeric(), solute.IQRupper = numeric())
+    if (input$SOLUTES_HIST1 == "None") {
+      message("Selected solute is None")
+    } else if (input$SOLUTES_HIST1 == "All") {
+      if (all(c("solute.IQRlower", "solute.median", "solute.IQRupper") %in% colnames(dataHistorical))) {
+        filteredData <- dataHistorical %>%
+          filter(site %in% siteGroup) %>%
+          select(date, solute.IQRlower, solute.median, solute.IQRupper)
+      }
+    } else {
+      if (all(c("solute.IQRlower", "solute.median", "solute.IQRupper") %in% colnames(dataHistorical))) {
+        filteredData <- dataHistorical %>%
+          filter(site == input$SOLUTES_HIST1) %>%
+          select(date, solute.IQRlower, solute.median, solute.IQRupper)
+      }
+    }
+
+    dataHistorical1 <- filteredData %>%
+      select(date, input$SOLUTES1) %>%  # Select desired columns of solute data
+      separate(date, c("y","m","d"))          # Separate date into year, month, and day (to use month in second to next code block)
 
     # Calculate median and IQR values per month
     median <- tapply(dataHistorical1[,4], dataHistorical1$m, median, na.rm=TRUE)
     IQR <- tapply(dataHistorical1[,4], dataHistorical1$m, IQR, na.rm=TRUE)
     IQR.lower <- median - IQR
     IQR.upper <- median + IQR
-
+    
+    if (is.null(median)) median <- numeric(12)
+    if (is.null(IQR)) IQR <- numeric(12)
+    
     # Create dates for display
     # Create list of dates in middle of the month, so that the median/IQR values are plotted in the middle of each month
     date <- NA
     wy <- as.numeric(input$WATERYEAR1)
-    wy.1 <- wy + 1
     for (i in 1:12) {
-      if (i<6) {date[i] <- paste((as.numeric(input$WATERYEAR1) + 1),"/", i, "/15", sep="")}
-      else {date[i] <- paste(input$WATERYEAR1,"/", i, "/15", sep="")}
+        date[i] <- if (i < 6) paste((wy + 1), "/", i, "/15", sep = "") else paste(wy, "/", i, "/15", sep = "")
     }
     date <- as.Date(date)
     # Create a data frame with the relevant data: date, median, upper and lower IQR
@@ -1001,22 +1080,26 @@ shinyServer(function(input, output, session) {
                     solute.IQRlower = IQR.lower,
                     solute.median = median,
                     solute.IQRupper = IQR.upper)
-
     dataHistorical1
   }) # END of dataHistorical1
 
   # combines site, solute data from recent water year data with historical data
-  dataAllHist1 <- reactive ({
-    dataAllHist1 <- full_join(dataAll1(), dataHistorical1(), by = "date")
-    return(dataAllHist1)
-  }) #END of dataAllHist1
+  dataAllHist1 <- reactive({
+    current_dates <- dataAll1()$date
+    filteredHistorical <- dataHistorical1() %>%
+      filter(date %in% current_dates)
+    dataAllHist1 <- full_join(dataAll1(), filteredHistorical, by = "date")
+    dataAllHist1
+  }) # END of dataAllHist1
+  dataAllQHist1 <- reactive({
+    current_dates <- dataAllQ1()$date
+    filteredHistorical <- dataHistorical1() %>%
+      filter(date %in% currentdates)
+    dataAllQHist1 <- full_join(dataAllQ1(), filteredHistorical, by = "date")
+    dataAllQHist1
+  }) %>% debounce(1000) # END of dataAllQHist1
 
-  # combines site, solute, and discharge data from recent water year dataset with historical data
-  dataAllQHist1 <- reactive ({
-    dataAllQHist1 <- full_join(dataAllQ1(), dataHistorical1(), by = "date")
-    return(dataAllQHist1)
-  }) #END of dataAllQHist1
-
+  
   # END of PANEL 1
 
   # Panel 2 Reactivity ####
@@ -1073,11 +1156,11 @@ shinyServer(function(input, output, session) {
       ylabel2[i] <- "mg/L"
      }
      yabel2 <- (unique(ylabel2))
-     print(paste(c("unique:", ylabel2)))
+     #print(paste(c("unique:", ylabel2)))
      yabel2 <- paste(ylabel2, sep="", collapse="")
-     print(ylabel2)
-     print(paste(c("paste/collapse:", ylabel2)))
-     print(class(ylabel2))
+     #print(ylabel2)
+     #print(paste(c("paste/collapse:", ylabel2)))
+     #print(class(ylabel2))
     } # end of for loop
 
   })
@@ -1612,7 +1695,11 @@ shinyServer(function(input, output, session) {
 
   # Print chart title, describing what's been selected
   output$TITLE1 <-  renderText({
-    paste(c(input$SOLUTES1, "from site", input$SITES1,"in water year", input$WATERYEAR1))
+    if (input$factor_type == "composite") {
+      paste(input$composite_factor, "from site", input$SITES1, "in water year", input$WATERYEAR1)
+    } else {
+      paste(input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)
+    }
   })
 
   # Main graph. A sequence of if/else statements, depending on what's been selected
@@ -1628,7 +1715,7 @@ shinyServer(function(input, output, session) {
     if (input$HYDROLOGY1 == TRUE)  {
       if (input$SITES1 %in% sites_streams) ylabel2 <- 'Discharge (ft or L/s)'
       if (input$SITES1 %in% sites_precip) ylabel2 <- 'Precipitation (mm)'
-      if (input$SOLUTES_HIST1 == TRUE) {
+      if (input$SOLUTES_HIST1 != "None") {
 
         if(input$Flow_or_Precip1 == 'flowSens'){
           dygraph(xts(c(NA,2,NA), order.by=as.Date(1:3))) %>%
@@ -1650,7 +1737,7 @@ shinyServer(function(input, output, session) {
 
           yValues <- get_buffered_yrange(data1)
           
-          dygraph1 <- dygraph(data1.xts) %>%
+          dygraph1 <- dygraph(data1.xts)%>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
                  axisLabelColor = "black") %>%
             dyAxis("y", label = ylabel,
@@ -1662,11 +1749,12 @@ shinyServer(function(input, output, session) {
                  axisLabelColor = "#3182bd",
                  axisLabelWidth = 70,
                  axisLineColor = "#3182bd") %>%
-            dySeries(name = input$SOLUTES1,
-                  color = "black",
-                  drawPoints = TRUE,
-                  pointSize = 3,
-                  axis='y') %>%
+            dySeries(name = "value",
+                     label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+                     color = "black",
+                     drawPoints = TRUE,
+                     pointSize = 3,
+                     axis='y') %>%
             dySeries(name = 'Flow_or_Precip',
                   drawPoints = FALSE,
                   fillGraph=T,
@@ -1730,7 +1818,7 @@ shinyServer(function(input, output, session) {
       }
     } else {
 
-      if (input$SOLUTES_HIST1 == TRUE) {
+      if (input$SOLUTES_HIST1 != "None" ) {
 
         # Plots Default + Historical data
         data1 <- dataAllHist1()
@@ -1743,11 +1831,12 @@ shinyServer(function(input, output, session) {
           dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
           dyAxis("y", label = ylabel, independentTicks=TRUE,
                  valueRange = yValues) %>%
-          dySeries(name = input$SOLUTES1,
-                color = "black",
-                drawPoints = TRUE,
-                pointSize = 3,
-                axis='y') %>%
+          dySeries(name = "value",
+                   label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+                   color = "black",
+                   drawPoints = TRUE,
+                   pointSize = 3,
+                   axis='y') %>%
           dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
                 strokePattern = c("dashed"),
                 color = "#A9A9A9",
@@ -1803,14 +1892,13 @@ shinyServer(function(input, output, session) {
 
           data1 <- dataAll1()
           data1 <- removeCodes(data1)
-          
           yValues <- get_buffered_yrange(data1)
           
           if(input$SOLUTES1 %in% emergence){
             data1 = full_join(data1, stky, by = 'date', relationship = 'many-to-many')
           }
-          data1.xts <- xts(data1, order.by = data1$date)
-
+          data1.xts <- xts(data1$value, order.by = data1$date)
+          colnames(data1.xts) <- "value"
           dygraph1 <- dygraph(data1.xts) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
             dyAxis("y", label = ylabel, valueRange = yValues, independentTicks=TRUE)
@@ -1818,8 +1906,10 @@ shinyServer(function(input, output, session) {
             dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
                                 drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
           } else {
-            dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
-                  drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
+            dygraph1 <- dySeries(dygraph1, name = "value",
+                                 label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+                                 color = "black",
+                                 drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
           }
             dygraph1 = dyLimit(dygraph1, limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
             dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
