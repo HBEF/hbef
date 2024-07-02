@@ -763,6 +763,7 @@ get_buffered_yrange <- function(d){
     
     return(yValues)
 }
+
 parse_composite_factor <- function(composite_str) {
   components <- strsplit(composite_str, "(?<=[A-Za-z0-9])\\s*(?=[+\\-*/])|(?<=[+\\-*/])\\s*(?=[A-Za-z0-9])", perl = TRUE)[[1]]
   

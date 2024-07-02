@@ -918,10 +918,12 @@ shinyServer(function(input, output, session) {
       
       actual_solutes <- solutes[solutes != "1"]
       
-      missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll1)]
-      if (length(missing_solutes) > 0) {
-        stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
-      }
+      suppressWarnings({
+        missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll1)]
+        if (length(missing_solutes) > 0) {
+          stop(paste("The following are not recognized solutes:", paste(missing_solutes, collapse = ", ")))
+        }
+      })
       
       dataAll1 <- dataAll1 %>%
         mutate(across(all_of(solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
@@ -939,7 +941,7 @@ shinyServer(function(input, output, session) {
    
     dataAll1$value <- as.numeric(dataAll1$value)
     dataAll1
-  }) # END of dataAll1
+  }) %>% debounce(1000) # END of dataAll1
 
   # Grab selected wateryear, site, solute, and sensor data from data
   dataAllQ1 <- reactive({
@@ -957,10 +959,12 @@ shinyServer(function(input, output, session) {
       
       actual_solutes <- solutes[solutes != "1"]
       
-      missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll)]
-      if (length(missing_solutes) > 0) {
-        stop(paste("The following solutes are missing in the dataframe:", paste(missing_solutes, collapse = ", ")))
-      }
+      suppressWarnings({
+        missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll1)]
+        if (length(missing_solutes) > 0) {
+          stop(paste("The following are not recognized solutes:", paste(missing_solutes, collapse = ", ")))
+        }
+      })
       
       dataAll <- dataAll %>%
         mutate(across(all_of(actual_solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
@@ -1025,7 +1029,7 @@ shinyServer(function(input, output, session) {
     }
 
     dataAllQ1
-  }) # END of dataCurrentQ1
+  }) %>% debounce(1000) # END of dataCurrentQ1
 
   # filters historical data; i.e. site, solute, from historical data
   dataHistorical1 <- reactive({
@@ -1093,7 +1097,7 @@ shinyServer(function(input, output, session) {
       filter(date %in% currentdates)
     dataAllQHist1 <- full_join(dataAllQ1(), filteredHistorical, by = "date")
     dataAllQHist1
-  }) # END of dataAllQHist1
+  }) %>% debounce(1000) # END of dataAllQHist1
 
   
   # END of PANEL 1
