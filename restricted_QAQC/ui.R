@@ -263,7 +263,7 @@ shinyUI(
               #   hr()
               # ),
               # conditionalPanel(condition="input.SITES1 != 'W3'",
-
+              
                 checkboxInput(
                   "HYDROLOGY1",
                   label = "Hydrology",
@@ -284,28 +284,33 @@ shinyUI(
                  style = "color:#3182bd;"
                 ),
                 p("Hydrology shows discharge for watershed sites,
-                  and precipitation for rain gage sites." ,
-                  style = "color:#666666; font-size:85%;"
-                ),
+                  and precipitation for rain gage sites.",
+                  style = "color:#666666; font-size:85%;"),
+              p('Hydrology overlay currently incompatible with historical data overlay',
+                style = 'color:red; font-size:85%'),
               # ),
-              checkboxInput("SOLUTES_HIST1",
-                        label = "Historical Data",
-                        value = FALSE
-              ),
+              
+              selectInput(
+                 "SOLUTES_HIST",
+                 label = "Historical Data",
+                 choices = c("None", "All",
+                             Filter(function(x) ! x %in% c('SP', 'SW'),
+                                    sites_streams), sites_precip),
+                 selected = "None"
+               ), 
+              
               conditionalPanel(
-                # this panel appears when historical data is clicked
-                condition = "input.SOLUTES_HIST1 == true",
-                p("Although historical data are shown as continuous,
-                  these lines are derived from median values per month."
-                ),
-                p("Historical data finds the median value of all stream sites
-                  when a watershed site is selected, and the median value of all
-                  precipitation sites when a rain gage site is selected."),
+                # this panel appears when the "All" option for historical data is clicked
+                condition = "input.SOLUTES_HIST == 'All'",
+                p("Historical interquartile statistics are computed per month."),
+                p('"All" uses stream sites when a watershed is selected above; otherwise precip gauges.'),
                 style = "color:#666666; font-size:85%;"
               ),
+              
+              
               checkboxInput("OMIT_STORMS1",
-                  label = "Omit Storm Data (Code 911)",
-                  value = FALSE
+                            label = "Omit Storm Data (Code 911)",
+                            value = FALSE
               ),
               width = 3
             ), #closes sidebarPanel
