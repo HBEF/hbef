@@ -1804,7 +1804,8 @@ shinyServer(function(input, output, session) {
           if (input$SITES1 %in% sites_streams) siteGroup <- input$SOLUTES_HIST
           if (input$SITES1 %in% sites_precip) siteGroup <- input$SOLUTES_HIST
           # Filter historical data by stream/precip sites, date, and solute
-          dataHistorical1 <- dataHistorical %>%
+          # dataHistorical1 <- dataHistorical %>%
+          dataHistorical1 <- dataAll %>%
             filter(site %in% siteGroup) %>%
             select(one_of("date", input$SOLUTES1)) %>%  # Select desired columns of solute data
             separate(date, c("y","m","d"))          # Separate date into year, month, and day (to use month in next code block)
@@ -1900,7 +1901,7 @@ shinyServer(function(input, output, session) {
       xlabel = paste("Dates ", input$DATE2[1], " to ", input$DATE2[2])
     }
     
-    if (input$SITES2 == 'W0') return(stop('Only continuous temperature available for Mainstem'))
+    if (input$SITES2 == 'HBK') return(stop('Only continuous temperature available for Mainstem'))
     if (input$HYDROLOGY2 == TRUE)  {
       
       #determine y2-axis labels

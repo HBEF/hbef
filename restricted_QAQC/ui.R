@@ -291,7 +291,9 @@ shinyUI(
               selectInput(
                  "SOLUTES_HIST",
                  label = "Historical Data",
-                 choices = c("None", "All", sites_streams, sites_precip),
+                 choices = c("None", "All",
+                             Filter(function(x) ! x %in% c('SP', 'SW'),
+                                    sites_streams), sites_precip),
                  selected = "None"
                ), 
               

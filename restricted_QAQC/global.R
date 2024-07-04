@@ -108,7 +108,7 @@ emergence = c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')
 
 # Lists of Sites
 #***************
-sites_streams <- list("Mainstem" = "W0",
+sites_streams <- list("Mainstem" = "HBK",
                       "Watershed 1" = "W1",
                       "Watershed 2" = "W2",
                       "Watershed 3" = "W3",
@@ -118,13 +118,13 @@ sites_streams <- list("Mainstem" = "W0",
                       "Watershed 7" = "W7",
                       "Watershed 8" = "W8",
                       "Watershed 9" = "W9",
-                      "HBK",
                       "ML70",
-                      "SW")
+                      "SW",
+                      "SP")
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
-sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP", "RG19",
+sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "RG19",
                      "W7-Precip")
 
 # wateryears ----> see list after data import
