@@ -287,8 +287,10 @@ insert_df = select(dloan, -ends_with('status')) %>%
     arrange(watershedID, datetime) %>% 
     distinct() %>% 
     group_by(datetime, watershedID) %>% 
-    summarize(across(everything(), ~ if(all(is.na(.))) NA_real_ else mean(., na.rm = TRUE)),
-              .groups = 'drop')
+    # summarize(across(everything(), ~ if(all(is.na(.))) NA_real_ else mean(., na.rm = TRUE)),
+    #           .groups = 'drop')
+    summarize(across(everything(), ~ mean(., na.rm = TRUE)), .groups = 'drop') %>% 
+    mutate(across(everything(), ~ ifelse(is.nan(.), NA_real_, .)))
 
 if(any(duplicated(select(insert_df, watershedID, datetime)))) stop('still dupes')
 

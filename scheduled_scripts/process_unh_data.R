@@ -89,7 +89,6 @@ dbWriteTable(con, 'sensor4', wqual9, append=TRUE)
 rm(wqual9)
 gc()
 
-message('made it through w9')
 # read and process w6 wqual data ####
 
 # header = readr::read_csv('CR1000_HBF_W6_WQual.dat',
@@ -126,7 +125,6 @@ dbWriteTable(con, 'sensor4', wqual6, append=TRUE)
 rm(wqual6)
 gc()
 
-message('made it through w6')
 # read and process w3 wqual data ####
 
 # header = readr::read_csv('CR1000_HBF_WQual.dat', #i think this was actually mainstem data
@@ -167,7 +165,6 @@ dbWriteTable(con, 'sensor4', wqual3, append=TRUE)
 rm(wqual3)
 gc()
 
-message('made it through w3')
 # read and process mainstem temperature data ####
 
 header = readr::read_csv('HB%20Mainstem_HB_mainstem.dat',
@@ -191,7 +188,6 @@ dbWriteTable(con, 'sensor4', mainstem, append=TRUE)
 rm(mainstem)
 gc()
 
-message('made it through mainstem')
 # read and process static raw files of flow data for w1-9 (from Nina) ####
 
 
@@ -268,5 +264,4 @@ for(w in weirfiles){
 
 dbDisconnect(con)
 
-message('done with UNH data. moving on to S:CAN data')
 source('../../../scheduled_scripts/process_S.CAN_data.R')
