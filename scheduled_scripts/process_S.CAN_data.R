@@ -34,7 +34,10 @@ con = dbConnect(driver, user='root', password=pass, host='localhost',
 
 # 1. read raw sensor data table ####
 s4 = dbReadTable(con, 'sensor4') %>%
-    as_tibble()
+    as_tibble() %>% 
+    select(-id) %>% 
+    mutate(S4__FDOMQSU = if_else(S4__FDOMQSU > 9000, NA_real_, S4__FDOMQSU)) %>% 
+    distinct()
 
 # 2. read "loaner" S:CAN dataset from Lisle ####
 
@@ -229,6 +232,22 @@ clean_SCAN_data_since20230724 <- function(fpath, end_of_previous){
         select(datetime, Nitrate_mg, TurbidityRawNTU = TurbidityRawNTU) %>%
         arrange(datetime)
 }
+clean_SCAN_data_since20240610 <- function(fpath, end_of_previous){
+  
+    read_xlsx(fpath, skip = 4, col_names = FALSE,
+              col_types = c('date', 'numeric', 'text', 'numeric', 'text',
+                            'numeric', 'text')) %>%
+        select(-(4:5)) %>% #ignore temperature data
+        rename(datetime = 1, Nitrate_mg = 2, Nitrate_mg_status = 3, TurbidityRawNTU = 4,
+               TurbidityRawNTU_status = 5) %>%
+        mutate(datetime = as.POSIXct(datetime, tz = 'EST')) %>%
+        arrange(datetime) %>%
+        filter(datetime > end_of_previous,
+               is.na(TurbidityRawNTU_status) | TurbidityRawNTU_status %in% legit_flags,
+               is.na(Nitrate_mg_status) | Nitrate_mg_status %in% legit_flags) %>%
+        select(datetime, Nitrate_mg, TurbidityRawNTU) %>%
+        arrange(datetime)
+}
 
 d2 <- clean_SCAN_data('SCAN 2021-4-30 thru 2022-10-12.xlsx')
 d3 <- clean_SCAN_data('SCAN 2022-10-12 thru 2022-12-12.xlsx') %>% 
@@ -239,8 +258,11 @@ d5 <- clean_SCAN_data('SCAN 2023-02-27 thru 2023-05-16.xlsx') %>%
 d6 <- clean_SCAN_data('SCAN 2023 05-16 thru 07-24.xlsx')
 d7 <- clean_SCAN_data_since20230724('SCAN 2023-7-24 thru 2024-3-1.xlsx',
                                     end_of_previous = max(d6$datetime))
-#before adding d8, make sure clean_SCAN_data_since20230724 still checks out. 
-  #are they recording FTU again?
+d8 <- clean_SCAN_data_since20240610('SCAN 3-1-2024 thru 6-10-2024.xlsx',
+                                    end_of_previous = max(d7$datetime))
+#before adding d9, make sure clean_SCAN_data_since20240610 still checks out. 
+  #are they recording FTU again? (pretty sure they were last time, but i didn't ask).
+  #also possible i looked these up and they're equivalent.
 
 # plot(zz$datetime, zz$Nitrate_mg, type = 'b')
 # lines(d6$datetime, d6$Nitrate_mg, type = 'b')
@@ -249,7 +271,7 @@ d7 <- clean_SCAN_data_since20230724('SCAN 2023-7-24 thru 2024-3-1.xlsx',
 
 # bind dsets; get them ready for db; insert them into db ####
 
-insert_df = select(dloan, -ends_with('status')) %>%
+data_by_year = select(dloan, -ends_with('status')) %>%
     bind_rows(select(d1, -ends_with('status'))) %>%
     bind_rows(d2) %>% 
     bind_rows(d3) %>% 
@@ -257,15 +279,35 @@ insert_df = select(dloan, -ends_with('status')) %>%
     bind_rows(d5) %>% 
     bind_rows(d6) %>% 
     bind_rows(d7) %>% 
-    # bind_rows(d8) %>% 
+    bind_rows(d8) %>%
+    # bind_rows(d9) %>% 
     arrange(datetime) %>%
     rename_with(.fn = ~ paste('S4', ., sep = '__'),
                 .cols = c('TurbidityRaw', 'Nitrate_mg', 'TurbidityRawNTU')) %>%
-    mutate(watershedID = 6)
+    mutate(watershedID = 6) %>% 
+    bind_rows(s4) %>% 
+    arrange(watershedID, datetime) %>% 
+    distinct() %>% 
+    mutate(year = year(datetime)) %>%
+    split(.$year)
+
+process_year <- function(df){
+  #not enough memory on server to do this all at once
+  df %>%
+    select(-year) %>% 
+    group_by(datetime, watershedID) %>%
+    summarize(across(everything(), ~ if(all(is.na(.))) NA_real_ else mean(., na.rm = TRUE)),
+              .groups = 'drop')
+}
+
+result_list <- lapply(data_by_year, process_year)
+insert_df <- bind_rows(result_list)
+
+if(any(duplicated(select(insert_df, watershedID, datetime)))) stop('still dupes')
 
 dbWriteTable(con,
              'sensor4',
              insert_df,
-             append = TRUE)
+             append = TRUE) # do not set to FALSE! read the first comment in this script
 
 dbDisconnect(con)

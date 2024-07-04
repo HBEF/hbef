@@ -203,6 +203,10 @@ p{font-size: 12pt;}}
 	color: #fafafa;
 }
 
+/*use for dark fonts */
+.light_background {
+	color: #383110;
+}
 
 
 /* horizontal buttons */
@@ -394,6 +398,20 @@ nav{
 		rgba(25, 25, 25, 0.45)), 
 		url("images/forest3.jpg");
 }
+/*#hubtitle{
+    background-image: url('images/stickytrap.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+	background-position: center;
+    #background-position: calc(50% + 50px) calc(50% - 40px);
+    background-attachment: fixed; 
+    color: #f1e39f; 
+    text-shadow: 
+        -1px -1px 0 #f1e39f,  
+         1px -1px 0 #f1e39f,
+        -1px  1px 0 #f1e39f,
+         1px  1px 0 #f1e39f;
+}*/
 
 #hubbard{
 	background: linear-gradient(
@@ -481,6 +499,15 @@ color: #fafafa;
 		rgba(25, 25, 25, 0.15)), 
 		url("images/calcium.jpg");
 	background-size: cover;
+}
+
+.emergence {
+	background: linear-gradient(
+		rgba(25, 25, 25, 0.15), 
+		rgba(25, 25, 25, 0.15)), 
+		url("images/emergence.jpg") no-repeat;
+	background-size: 120%;
+	background-position: 0px -130px;
 }
 
 .blank {
