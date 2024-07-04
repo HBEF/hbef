@@ -3,7 +3,7 @@
 # -Import all data from hbef (mysql) database upon startup
 # -Create variables and functions that can be accessed by ui.R and server.R
 
-# options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
+#options(shiny.reactlog = TRUE) # Enabling shiny reactivity log
 
 #NOTES:
 #tables sensor and sensor3 are not in use.
@@ -30,7 +30,7 @@ library(tidyr)
 library(xts)
 # library(readr)
 
-# options(shiny.fullstacktrace=TRUE)
+#options(shiny.fullstacktrace=TRUE)
 
 message("hello, I'm in global.R")
 
@@ -111,7 +111,7 @@ emergence = c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')
 
 # Lists of Sites
 #***************
-sites_streams <- list("Mainstem" = "W0",
+sites_streams <- list("Mainstem" = "HBK",
                       "Watershed 1" = "W1",
                       "Watershed 2" = "W2",
                       "Watershed 3" = "W3",
@@ -121,13 +121,13 @@ sites_streams <- list("Mainstem" = "W0",
                       "Watershed 7" = "W7",
                       "Watershed 8" = "W8",
                       "Watershed 9" = "W9",
-                      "HBK",
                       "ML70",
-                      "SW")
+                      "SW",
+                      "SP")
 
 #Precipitation sites
 # If you update this list, also update conditional panel below
-sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "SP", "RG19",
+sites_precip <- list("RG1", "RG11", "RG23", "RG22", "N", "S", "RG19",
                      "W7-Precip")
 
 # wateryears ----> see list after data import
