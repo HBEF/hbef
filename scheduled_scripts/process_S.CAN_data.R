@@ -9,7 +9,7 @@ library(ggplot2)
 library(lubridate)
 library(readxl)
 
-runmode = 'test'
+# runmode = 'test'
 runmode = 'live'
 
 # 0. setup ####
@@ -34,7 +34,10 @@ con = dbConnect(driver, user='root', password=pass, host='localhost',
 
 # 1. read raw sensor data table ####
 s4 = dbReadTable(con, 'sensor4') %>%
-    as_tibble()
+    as_tibble() %>% 
+    select(-id) %>% 
+    mutate(S4__FDOMQSU = if_else(S4__FDOMQSU > 9000, NA_real_, S4__FDOMQSU)) %>% 
+    distinct()
 
 # 2. read "loaner" S:CAN dataset from Lisle ####
 
@@ -268,7 +271,7 @@ d8 <- clean_SCAN_data_since20240610('SCAN 3-1-2024 thru 6-10-2024.xlsx',
 
 # bind dsets; get them ready for db; insert them into db ####
 
-insert_df = select(dloan, -ends_with('status')) %>%
+data_by_year = select(dloan, -ends_with('status')) %>%
     bind_rows(select(d1, -ends_with('status'))) %>%
     bind_rows(d2) %>% 
     bind_rows(d3) %>% 
@@ -282,15 +285,23 @@ insert_df = select(dloan, -ends_with('status')) %>%
     rename_with(.fn = ~ paste('S4', ., sep = '__'),
                 .cols = c('TurbidityRaw', 'Nitrate_mg', 'TurbidityRawNTU')) %>%
     mutate(watershedID = 6) %>% 
-    bind_rows(select(s4, -id)) %>% 
-    mutate(S4__FDOMQSU = if_else(S4__FDOMQSU > 9000, NA_real_, S4__FDOMQSU)) %>% 
+    bind_rows(s4) %>% 
     arrange(watershedID, datetime) %>% 
     distinct() %>% 
-    group_by(datetime, watershedID) %>% 
-    # summarize(across(everything(), ~ if(all(is.na(.))) NA_real_ else mean(., na.rm = TRUE)),
-    #           .groups = 'drop')
-    summarize(across(everything(), ~ mean(., na.rm = TRUE)), .groups = 'drop') %>% 
-    mutate(across(everything(), ~ ifelse(is.nan(.), NA_real_, .)))
+    mutate(year = year(datetime)) %>%
+    split(.$year)
+
+process_year <- function(df){
+  #not enough memory on server to do this all at once
+  df %>%
+    select(-year) %>% 
+    group_by(datetime, watershedID) %>%
+    summarize(across(everything(), ~ if(all(is.na(.))) NA_real_ else mean(., na.rm = TRUE)),
+              .groups = 'drop')
+}
+
+result_list <- lapply(data_by_year, process_year)
+insert_df <- bind_rows(result_list)
 
 if(any(duplicated(select(insert_df, watershedID, datetime)))) stop('still dupes')
 
