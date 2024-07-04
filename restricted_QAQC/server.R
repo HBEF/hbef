@@ -1792,78 +1792,6 @@ shinyServer(function(input, output, session) {
                     includeZero = includeZeroBooleanGraph1)
         
         dygraph1
-      } else if(input$SOLUTES_HIST == 'ML70') {
-        
-        # Plotting historical data for the ML70 watershed
-        
-        # filters historical data; i.e. site, solute, from historical data
-        dataHistorical1 <- reactive({
-          # Selects appropriate historical data set (stream or precip) based on site selected
-          if (input$SITES1 %in% sites_streams) siteGroup <- input$SOLUTES_HIST
-          if (input$SITES1 %in% sites_precip) siteGroup <- input$SOLUTES_HIST
-          # Filter historical data by stream/precip sites, date, and solute
-          dataHistorical1 <- dataHistorical %>%
-            filter(site %in% siteGroup) %>%
-            select(one_of("date", input$SOLUTES1)) %>%  # Select desired columns of solute data
-            separate(date, c("y","m","d"))          # Separate date into year, month, and day (to use month in next code block)
-          
-          # Calculate median and IQR values per month
-          median <- tapply(dataHistorical1[,4], dataHistorical1$m, median, na.rm=TRUE)
-          IQR <- tapply(dataHistorical1[,4], dataHistorical1$m, IQR, na.rm=TRUE)
-          IQR.lower <- median - IQR
-          IQR.upper <- median + IQR
-          
-          # Create dates for display
-          # Create list of dates in middle of the month, so that the median/IQR values are plotted in the middle of each month
-          date <- NA
-          wy <- as.numeric(input$WATERYEAR1)
-          wy.1 <- wy + 1
-          for (i in 1:15) {
-            if (i<6) {date[i] <- paste((as.numeric(input$WATERYEAR1) + 1),"/", i, "/15", sep="")}
-            else {date[i] <- paste(input$WATERYEAR1,"/", i, "/15", sep="")}
-          }
-          date <- as.Date(date)
-          # Create a data frame with the relevant data: date, median, upper and lower IQR
-          dataHistorical1 <- data.frame(date = date,
-                                        solute.IQRlower = IQR.lower,
-                                        solute.median = median,
-                                        solute.IQRupper = IQR.upper)
-          
-        }) # END of dataHistorical1
-        
-        # combines site, solute data from recent water year data with historical data
-        dataAllHist1 <- reactive ({
-          dataAllHist1 <- full_join(dataAll1(), dataHistorical1(), by = "date")
-          return(dataAllHist1)
-        }) #END of dataAllHist1
-        
-        #Graphing
-        data1 <- dataAllHist1()
-        data1 <- removeCodes(data1)
-        data1.xts <- xts(data1[,-1], order.by = data1$date)
-        
-        dygraph1 <- dygraph(data1.xts) %>%
-          dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
-          dyAxis("y", label = ylabel, independentTicks=TRUE) %>%
-          dySeries(name = input$SOLUTES1,
-                   color = "black",
-                   drawPoints = TRUE,
-                   pointSize = 3,
-                   axis='y') %>%
-          dySeries(c('solute.IQRlower', 'solute.median', 'solute.IQRupper'),
-                   strokePattern = c("dashed"),
-                   color = "#A9A9A9",
-                   label = 'median + IQR',
-                   axis='y') %>%
-          dyLimit(limit = LOQ1(), label = "LOQ", color = "#fc9272", strokePattern = "dotdash") %>%
-          dyLimit(limit = MDL1(), label = "MDL", color = "#de2d26", strokePattern = "dotdash") %>%
-          dyOptions(drawGrid = FALSE,
-                    strokeWidth = 1,
-                    fillAlpha = 0.3,
-                    connectSeparatedPoints=TRUE,
-                    includeZero = TRUE)
-        
-        dygraph1
       } else {
         
         # Plots data for specific site
@@ -1902,7 +1830,6 @@ shinyServer(function(input, output, session) {
                                         solute.IQRlower = IQR.lower,
                                         solute.median = median,
                                         solute.IQRupper = IQR.upper)
-          
           dataHistorical1
         }) # END of dataHistorical1
         
