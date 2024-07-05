@@ -867,7 +867,7 @@ shinyServer(function(input, output, session) {
   # Solute unit
   # Finding appropriate units for selected solute and assigning to ylabel1
   ylabel1 <- reactive ({
-      
+    
     # create the character mu with unicode
     mu <- "\U00B5"
     # If solute belong to group with different set of units, label depending on what it is
@@ -903,7 +903,7 @@ shinyServer(function(input, output, session) {
   
   # Grab selected wateryear, site, solute data from data
   dataAll1 <- reactive({
-    #browser()
+    
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
     dataAll1 <- dataAll %>%
       filter(waterYr %in% input$WATERYEAR1) %>%    # Filter data to selected water year
@@ -911,76 +911,15 @@ shinyServer(function(input, output, session) {
     if(input$OMIT_STORMS1 == TRUE){
       dataAll1 <- filter(dataAll1, is.na(fieldCode) | fieldCode != '911')
     }
-
-    if (input$factor_type == "composite") {
-      parsed_composite <- parse_composite_factor(input$composite_factor)
-      solutes <- parsed_composite$components
-      expression <- parsed_composite$expression
-      
-      actual_solutes <- solutes[solutes != "1"]
-      
-      suppressWarnings({
-        missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll1)]
-        if (length(missing_solutes) > 0) {
-          stop(paste("The following are not recognized solutes:", paste(missing_solutes, collapse = ", ")))
-        }
-      })
-      
-      dataAll1 <- dataAll1 %>%
-        mutate(across(all_of(solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
-        rowwise() %>%
-        mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
-        ungroup() %>%
-        select(date, value)
-    } else {
-      dataAll1 <- dataAll1 %>%
-        mutate(value = !!sym(input$SOLUTES1)) %>%
-        select(date, value)
-    }
-  
-  
-   
-    dataAll1$value <- as.numeric(dataAll1$value)
+    dataAll1 <- dataAll1 %>%
+      select(one_of("date", input$SOLUTES1))      # Select desired columns of data
+    dataAll1 <- removeCodes(dataAll1)
     dataAll1
-  }) %>% debounce(1000) # END of dataAll1
-
+  }) # END of dataAll1
+  
   # Grab selected wateryear, site, solute, and sensor data from data
   dataAllQ1 <- reactive({
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
-    dataAll <- dataAll %>%
-      filter(waterYr %in% input$WATERYEAR1, site %in% input$SITES1)
-    dataAll <- dataAll %>%
-      mutate(across(c(input$SOLUTES1, "gageHt", "flowGageHt", "flowSens", "precipCatch"), 
-                    ~ na.approx(., na.rm = FALSE, maxgap = Inf)))
-    if (input$factor_type == "composite") {
-      parsed_composite <- parse_composite_factor(input$composite_factor)
-      solutes <- parsed_composite$components
-      constants <- parsed_composite$constants
-      expression <- parsed_composite$expression
-      
-      actual_solutes <- solutes[solutes != "1"]
-      
-      suppressWarnings({
-        missing_solutes <- actual_solutes[!actual_solutes %in% names(dataAll1)]
-        if (length(missing_solutes) > 0) {
-          stop(paste("The following are not recognized solutes:", paste(missing_solutes, collapse = ", ")))
-        }
-      })
-      
-      dataAll <- dataAll %>%
-        mutate(across(all_of(actual_solutes), ~ ifelse(is.na(.), zoo::na.approx(., na.rm = FALSE, maxgap = Inf), .))) %>%
-        rowwise() %>%
-        mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
-        ungroup() %>%
-        select(date, value)
-    } else {
-      dataAll <- dataAll %>%
-        mutate(value = !!sym(input$SOLUTES1)) %>%
-        select(date, value)
-    }
-    
-    dataAll$value <- as.numeric(dataAll$value)
-    
     
     if (input$SITES1 %in% sites_streams) {
       if (input$Flow_or_Precip1 == 'gageHt'){
@@ -1030,20 +969,20 @@ shinyServer(function(input, output, session) {
     }
     
     dataAllQ1
-  }) %>% debounce(1000) # END of dataCurrentQ1
-
+  }) # END of dataCurrentQ1
+  
   # filters historical data; i.e. site, solute, from historical data
   dataHistorical1 <- reactive({
     # Selects appropriate historical data set (stream or precip) based on site selected
     if (input$SITES1 %in% sites_streams) siteGroup <- sites_streams
     if (input$SITES1 %in% sites_precip) siteGroup <- sites_precip
     # Filter historical data by stream/precip sites, date, and solute
-
+    
     dataHistorical1 <- dataHistorical %>%
       filter(site %in% siteGroup) %>%
       select(one_of("date", input$SOLUTES1)) %>%  # Select desired columns of solute data
       separate(date, c("y","m","d"))          # Separate date into year, month, and day (to use month in next code block)
-
+    
     # Calculate median and IQR values per month
     median <- tapply(dataHistorical1[,4], dataHistorical1$m, median, na.rm=TRUE)
     IQR <- tapply(dataHistorical1[,4], dataHistorical1$m, IQR, na.rm=TRUE)
@@ -1055,7 +994,7 @@ shinyServer(function(input, output, session) {
     date <- NA
     wy <- as.numeric(input$WATERYEAR1)
     for (i in 1:12) {
-        date[i] <- if (i < 6) paste((wy + 1), "/", i, "/15", sep = "") else paste(wy, "/", i, "/15", sep = "")
+      date[i] <- if (i < 6) paste((wy + 1), "/", i, "/15", sep = "") else paste(wy, "/", i, "/15", sep = "")
     }
     date <- as.Date(date)
     # Create a data frame with the relevant data: date, median, upper and lower IQR
@@ -1112,35 +1051,35 @@ shinyServer(function(input, output, session) {
     ylabel2 <- NA #establish variable
     mu <- "\U00B5"
     for (i in 1:length(input$SOLUTES2)) {
-
-    # create the character mu with unicode
-     # If solute belong to group with different set of units, label depending on what it is
-     if(input$SOLUTES2[i] %in% other_units) {
-      if (input$SOLUTES2[i] == "DIC")    ylabel2[i] <- paste(mu,"M/L") # !!! see code from MatthewRss&Aaron to try their way of printing mu
-      if (input$SOLUTES2[i] == "ANC960")  ylabel2[i] <- paste(mu, "eq/L")
-      if (input$SOLUTES2[i] == "spCond") ylabel2[i] <- paste(mu, "S/cm")
-      if (input$SOLUTES2[i] == "temp")   ylabel2[i] <- "Degrees Celsius"
-      if (input$SOLUTES2[i] == "swdd")   ylabel2[i] <- "Degrees Celsius"
-      if (grepl('^chla_', input$SOLUTES2[i])) ylabel2[i] <- "mg/m^2"
-      if (input$SOLUTES2[i] %in% c("pH",
-                        "pHmetrohm",
-                        "cationCharge",
-                        "anionCharge",
-                        "theoryCond",
-                        "ionBalance")) { ylabel2[i] <- "(No Units)" }
-      if(input$SOLUTES2[i] %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel2[i] = 'Count'
-      test <- gsub(" ", "", ylabel2[i], fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
-     }
-     # Otherwise, label as 'default' mg/L
-     else {
-      ylabel2[i] <- "mg/L"
-     }
-     yabel2 <- (unique(ylabel2))
-     #print(paste(c("unique:", ylabel2)))
-     yabel2 <- paste(ylabel2, sep="", collapse="")
-     #print(ylabel2)
-     #print(paste(c("paste/collapse:", ylabel2)))
-     #print(class(ylabel2))
+      
+      # create the character mu with unicode
+      # If solute belong to group with different set of units, label depending on what it is
+      if(input$SOLUTES2[i] %in% other_units) {
+        if (input$SOLUTES2[i] == "DIC")    ylabel2[i] <- paste(mu,"M/L") # !!! see code from MatthewRss&Aaron to try their way of printing mu
+        if (input$SOLUTES2[i] == "ANC960")  ylabel2[i] <- paste(mu, "eq/L")
+        if (input$SOLUTES2[i] == "spCond") ylabel2[i] <- paste(mu, "S/cm")
+        if (input$SOLUTES2[i] == "temp")   ylabel2[i] <- "Degrees Celsius"
+        if (input$SOLUTES2[i] == "swdd")   ylabel2[i] <- "Degrees Celsius"
+        if (grepl('^chla_', input$SOLUTES2[i])) ylabel2[i] <- "mg/m^2"
+        if (input$SOLUTES2[i] %in% c("pH",
+                                     "pHmetrohm",
+                                     "cationCharge",
+                                     "anionCharge",
+                                     "theoryCond",
+                                     "ionBalance")) { ylabel2[i] <- "(No Units)" }
+        if(input$SOLUTES2[i] %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel2[i] = 'Count'
+        test <- gsub(" ", "", ylabel2[i], fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
+      }
+      # Otherwise, label as 'default' mg/L
+      else {
+        ylabel2[i] <- "mg/L"
+      }
+      yabel2 <- (unique(ylabel2))
+      #print(paste(c("unique:", ylabel2)))
+      yabel2 <- paste(ylabel2, sep="", collapse="")
+      #print(ylabel2)
+      #print(paste(c("paste/collapse:", ylabel2)))
+      #print(class(ylabel2))
     } # end of for loop
     
   })
@@ -1315,23 +1254,23 @@ shinyServer(function(input, output, session) {
     mu <- "\U00B5"
     # If input$SOLUTES2 belong to group with different set of units, label depending on what it is
     if(input$SOLUTES3 %in% other_units) {
-
-     if (input$SOLUTES3 == "DIC")    ylabel3 <- paste(mu,"M/L")
-     if (input$SOLUTES3 == "ANC960")  ylabel3 <- paste(mu, "eq/L")
-     if (input$SOLUTES3 == "ANCMet")  ylabel3 <- paste(mu, "eq/L")
-     if (input$SOLUTES3 == "spCond") ylabel3 <- paste(mu, "S/cm")
-     if (input$SOLUTES3 == "temp")   ylabel3 <- "Degrees Celsius"
-     if (input$SOLUTES3 == "swdd")   ylabel3 <- "Degrees Celsius"
-     if (grepl('^chla_', input$SOLUTES3)) ylabel3 <- "mg/m^2"
-     if (input$SOLUTES3 %in% c("pH",
-                      "pHmetrohm",
-                      "cationCharge",
-                      "anionCharge",
-                      "theoryCond",
-                      "ionBalance")) { ylabel3 <- "(No Units)" }
-     if(input$SOLUTES3 %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel3 = 'Count'
-     ylabel3 <- gsub(" ", "", ylabel3, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
-     return(ylabel3)
+      
+      if (input$SOLUTES3 == "DIC")    ylabel3 <- paste(mu,"M/L")
+      if (input$SOLUTES3 == "ANC960")  ylabel3 <- paste(mu, "eq/L")
+      if (input$SOLUTES3 == "ANCMet")  ylabel3 <- paste(mu, "eq/L")
+      if (input$SOLUTES3 == "spCond") ylabel3 <- paste(mu, "S/cm")
+      if (input$SOLUTES3 == "temp")   ylabel3 <- "Degrees Celsius"
+      if (input$SOLUTES3 == "swdd")   ylabel3 <- "Degrees Celsius"
+      if (grepl('^chla_', input$SOLUTES3)) ylabel3 <- "mg/m^2"
+      if (input$SOLUTES3 %in% c("pH",
+                                "pHmetrohm",
+                                "cationCharge",
+                                "anionCharge",
+                                "theoryCond",
+                                "ionBalance")) { ylabel3 <- "(No Units)" }
+      if(input$SOLUTES3 %in% c('mayfly', 'stonefly', 'caddisfly', 'dipteran', 'other')) ylabel3 = 'Count'
+      ylabel3 <- gsub(" ", "", ylabel3, fixed = TRUE) # removes spaces in expression: https://stackoverflow.com/questions/5992082/how-to-remove-all-whitespace-from-a-string
+      return(ylabel3)
     }
     # Otherwise, label as 'default' mg/L
     else {
@@ -1346,6 +1285,8 @@ shinyServer(function(input, output, session) {
       paste(input$SITES3, sep=", ") }
   })
   
+  input_compfac_deb <- debounce(reactive(input$composite_factor), millis = 1000)
+  
   # filters data to only include data selected by inputs
   dataAll3 <- reactive({
     
@@ -1359,23 +1300,69 @@ shinyServer(function(input, output, session) {
                           date < input$DATE3[2])
     }
     dataAll3 <- dataAll3 %>%
-      filter(site %in% input$SITES3)            # Filter data to selected sites
+      filter(site %in% input$SITES3) %>%      # Filter data to selected sites
+      as_tibble() %>% 
+      distinct(site, date, .keep_all = TRUE)
     if(input$OMIT_STORMS3 == TRUE){
       dataAll3 <- filter(dataAll3, is.na(fieldCode) | fieldCode != '911')
     }
-    dataAll3 <- dataAll3 %>%
-      select(one_of("date", "site", input$SOLUTES3))
+    
     if(any(input$SOLUTES3 %in% emergence)){
       stky = prep_stickytrap_data(input = input, graphnum = 3)
-      dataAll3 = full_join(dataAll3, stky, by = 'date', relationship = 'many-to-many')
+      dataAll3 = full_join(dataAll3, stky,
+                           by = c('date', 'site'),
+                           relationship = 'many-to-many')
     }
-    dataAll3 = dataAll3 %>% 
-      filter(! is.na(site)) %>% 
-      mutate(i = row_number()) %>%                # Create new columns of data of just row numbers. Necessary to prevent error message of duplicate values after next line of code, but inefficient because doesn't combine rows with duplicate columns.)
-      spread_(key_col = "site", value_col = input$SOLUTES3, fill=NA) %>%  # Reshape data so that each place in "sites" is made into a unique column, with corresponding solute value as data
-      select(-i)                            # Remove row name variable
+    
+    if (input$factor_type == "composite") {
+      
+      if(any(input_compfac_deb() %in% emergence)){
+        stop('Emergence data incompatible with Composite Factor selection')
+      }
+      
+      parsed_composite <- parse_composite_factor(input_compfac_deb())
+      solutes <- parsed_composite$solutes
+      expression <- parsed_composite$expression
+      
+      suppressWarnings({
+        missing_solutes <- solutes[!solutes %in% names(dataAll3)]
+        missing_solutes <- setdiff(solutes, all_factors)
+        if (length(missing_solutes)) {
+          stop(paste("The following are not recognized factors:", paste(missing_solutes, collapse = ", ")))
+        }
+      })
+      
+      dataAll3 <- dataAll3 %>%
+        select(date, site, all_of(solutes)) %>% 
+        rowwise() %>%
+        mutate(value = rlang::eval_tidy(rlang::parse_expr(expression))) %>%
+        # mutate(value = rlang::eval_tidy(rlang::parse_expr(expression), data = cur_data())) %>%
+        ungroup() %>%
+        select(date, site, value)
+      
+    } else {
+      
+      dataAll3 <- dataAll3 %>%
+        select(date, site, all_of(input$SOLUTES3)) %>% 
+        rename(value := !!input$SOLUTES3)
+    }
+    
+    if(any(input$SOLUTES3 %in% emergence)){
+      dataAll3 = dataAll3 %>%
+        filter(! is.na(site)) %>%
+        mutate(i = row_number()) %>%
+        pivot_wider(names_from = site, values_from = value) %>% 
+        select(-i) %>% 
+        arrange(date)
+    } else {
+      dataAll3 = dataAll3 %>%
+        filter(! is.na(site)) %>%
+        pivot_wider(names_from = site, values_from = value) %>% 
+        arrange(date)
+    }
+    
     return(dataAll3)
-  }) # END of dataCurrent3()
+  })
   
   
   # gathers hydrology data and calculates median hydrology values
@@ -1676,11 +1663,7 @@ shinyServer(function(input, output, session) {
   
   # Print chart title, describing what's been selected
   output$TITLE1 <-  renderText({
-    if (input$factor_type == "composite") {
-      paste(input$composite_factor, "from site", input$SITES1, "in water year", input$WATERYEAR1)
-    } else {
-      paste(input$SOLUTES1, "from site", input$SITES1, "in water year", input$WATERYEAR1)
-    }
+    paste(c(input$SOLUTES1, "from site", input$SITES1,"in water year", input$WATERYEAR1))
   })
   
   # Main graph. A sequence of if/else statements, depending on what's been selected
@@ -1715,23 +1698,22 @@ shinyServer(function(input, output, session) {
           # }
           data1.xts <- xts(data1[,-1], order.by = data1$date)
           #paste(c("XTS:", class(dataCur1$FieldCode)))
-
+          
           yValues <- get_buffered_yrange(data1)
           
           dygraph1 <- dygraph(data1.xts) %>%
             dyAxis("x", label = paste("Water Year", input$WATERYEAR1),
                    axisLabelColor = "black") %>%
             dyAxis("y", label = ylabel,
-                 independentTicks=TRUE,
-                 axisLabelColor = "black",
-                 valueRange = yValues) %>%
+                   independentTicks=TRUE,
+                   axisLabelColor = "black",
+                   valueRange = yValues) %>%
             dyAxis('y2',label=ylabel2,
-                 independentTicks=TRUE,
-                 axisLabelColor = "#3182bd",
-                 axisLabelWidth = 70,
-                 axisLineColor = "#3182bd") %>%
-            dySeries(name = "value",
-                     label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+                   independentTicks=TRUE,
+                   axisLabelColor = "#3182bd",
+                   axisLabelWidth = 70,
+                   axisLineColor = "#3182bd") %>%
+            dySeries(name = input$SOLUTES1,
                      color = "black",
                      drawPoints = TRUE,
                      pointSize = 3,
@@ -1769,7 +1751,7 @@ shinyServer(function(input, output, session) {
         data1.xts <- xts(data1[,-1], order.by = data1$date)
         
         yValues <- get_buffered_yrange(data1)
-
+        
         dygraph1 <- dygraph(data1.xts) %>%
           dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
           dyAxis("y", label = ylabel, independentTicks=TRUE,
@@ -1798,22 +1780,21 @@ shinyServer(function(input, output, session) {
         dygraph1
       }
     } else {
-
+      
       if (input$SOLUTES_HIST == 'All') {
         
         # Plots default + historical data for all sites
         data1 <- dataAllHist1()
         data1 <- removeCodes(data1)
         data1.xts <- xts(data1[,-1], order.by = data1$date)
-
+        
         yValues <- get_buffered_yrange(data1)
         
         dygraph1 <- dygraph(data1.xts) %>%
           dyAxis("x", label = paste("Water Year", input$WATERYEAR1)) %>%
           dyAxis("y", label = ylabel, independentTicks=TRUE,
                  valueRange = yValues) %>%
-          dySeries(name = "value",
-                   label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+          dySeries(name = input$SOLUTES1,
                    color = "black",
                    drawPoints = TRUE,
                    pointSize = 3,
@@ -1854,11 +1835,9 @@ shinyServer(function(input, output, session) {
           dygraph1 = dySeries(dygraph1, name = input$SOLUTES1, color = "black",
                               drawPoints = TRUE, pointSize = 2, strokeWidth = 0)
         } else {
-
+          
           dygraph1 = dySeries(dygraph1,
-                              name = 'value',
-                              # name = input$SOLUTES1,
-                              label = if(input$factor_type == "composite") input$composite_factor else input$SOLUTES1,
+                              name = input$SOLUTES1,
                               color = "black",
                               drawPoints = TRUE, strokeWidth = 1, pointSize = 3)
         }
@@ -2109,10 +2088,13 @@ shinyServer(function(input, output, session) {
   #********************
   
   output$TITLE3 <-  renderText({
+    vv = ifelse(input$factor_type == "composite",
+                input_compfac_deb(),
+                input$SOLUTES3)
     if(input$wateryearOrRange3 == 'wateryr'){
-      paste(c(input$SOLUTES3, "from site(s)", title.Sites3(),"in water year", input$WATERYEAR3))
+      paste(c(vv, "from site(s)", title.Sites3(),"in water year", input$WATERYEAR3))
     } else {
-      paste(c(input$SOLUTES3, "from site(s)", title.Sites3(),"from range of dates"))
+      paste(c(vv, "from site(s)", title.Sites3(),"from range of dates"))
     }
   })
   
@@ -2135,21 +2117,21 @@ shinyServer(function(input, output, session) {
     if (input$HYDROLOGY3 == "Discharge" | input$HYDROLOGY3 == "Precipitation") {
       
       if (input$HYDROLOGY3 == "Discharge")  {
-
-      data3 <- dataAllQ3()
-      data3.xts <- xts(data3[,-1], order.by = data3$date)
-      
-      yValues <- get_buffered_yrange(data3)
-
-      dg3 = dygraph(data3.xts) %>%
-        dyAxis("x", label = xlabel) %>%
-        dyAxis("y", label = ylabel3(), independentTicks=TRUE,
-               valueRange = yValues) %>%
-        dyAxis('y2',label='Hydrology (ft or L/s)', independentTicks=TRUE,
-           axisLabelWidth = 70,
-           axisLabelColor = "#3182bd",
-           axisLineColor = "#3182bd")
-
+        
+        data3 <- dataAllQ3()
+        data3.xts <- xts(data3[,-1], order.by = data3$date)
+        
+        yValues <- get_buffered_yrange(data3)
+        
+        dg3 = dygraph(data3.xts) %>%
+          dyAxis("x", label = xlabel) %>%
+          dyAxis("y", label = ylabel3(), independentTicks=TRUE,
+                 valueRange = yValues) %>%
+          dyAxis('y2',label='Hydrology (ft or L/s)', independentTicks=TRUE,
+                 axisLabelWidth = 70,
+                 axisLabelColor = "#3182bd",
+                 axisLineColor = "#3182bd")
+        
         if(any(input$SOLUTES3 %in% emergence)){
           for(s in input$SITES3){
             dg3 = dySeries(dg3, name = s,
@@ -2174,16 +2156,16 @@ shinyServer(function(input, output, session) {
         data3.xts <- xts(data3[,-1], order.by = data3$date)
         
         yValues <- get_buffered_yrange(data3)
-
+        
         dg3 = dygraph(data3.xts) %>%
-         dyAxis("x", label = xlabel) %>%
-         dyAxis("y", label = ylabel3(), independentTicks=TRUE,
-                valueRange = yValues) %>%
-         dyAxis('y2',label='Precipitation (mm)', independentTicks=TRUE,
-              axisLabelWidth = 70,
-              axisLabelColor = "#3182bd",
-              axisLineColor = "#3182bd")
-
+          dyAxis("x", label = xlabel) %>%
+          dyAxis("y", label = ylabel3(), independentTicks=TRUE,
+                 valueRange = yValues) %>%
+          dyAxis('y2',label='Precipitation (mm)', independentTicks=TRUE,
+                 axisLabelWidth = 70,
+                 axisLabelColor = "#3182bd",
+                 axisLineColor = "#3182bd")
+        
         if(any(input$SOLUTES3 %in% emergence)){
           for(s in input$SITES3){
             dg3 = dySeries(dg3, name = s,
@@ -2203,7 +2185,7 @@ shinyServer(function(input, output, session) {
                     includeZero = TRUE)
         dg3
       }
-
+      
     } else {
       
       # Plots Default data
@@ -2566,28 +2548,28 @@ shinyServer(function(input, output, session) {
   )
   
   output$DOWNLOAD_BUGS = downloadHandler(
-
-      filename='sticky_trap_counts.csv',
-      content=function(file){
-          
-          con = dbConnect(MariaDB(),
-                          user = 'root',
-                          password = pass,
-                          host = 'localhost',
-                          dbname = dbname)
-          
-          bug_data = DBI::dbReadTable(con, 'stickytrap') %>% as_tibble()
-          dbDisconnect(con)
-          
-          bug_data = arrange(bug_data, watershed, date, side_or_trapnum)
-          bug_data$note = NA_character_
-          bug_data$note[between(bug_data$id, 11788, 12801)] = 'The "terrestrial" identification may include taxa other than Diptera. Please interpret exact counts with caution.'
-          bug_data$id = NULL
-          
-          write.csv(bug_data, file, row.names = FALSE)
-      },
-
-      contentType='text/csv'
+    
+    filename='sticky_trap_counts.csv',
+    content=function(file){
+      
+      con = dbConnect(MariaDB(),
+                      user = 'root',
+                      password = pass,
+                      host = 'localhost',
+                      dbname = dbname)
+      
+      bug_data = DBI::dbReadTable(con, 'stickytrap') %>% as_tibble()
+      dbDisconnect(con)
+      
+      bug_data = arrange(bug_data, watershed, date, side_or_trapnum)
+      bug_data$note = NA_character_
+      bug_data$note[between(bug_data$id, 11788, 12801)] = 'The "terrestrial" identification may include taxa other than Diptera. Please interpret exact counts with caution.'
+      bug_data$id = NULL
+      
+      write.csv(bug_data, file, row.names = FALSE)
+    },
+    
+    contentType='text/csv'
   )
   
   #**** END of Output ****

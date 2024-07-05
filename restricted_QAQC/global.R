@@ -99,6 +99,10 @@ solutes_other <- list("pH (3 Star)" = "pH",
                       "Emergence (stonefly)" = "stonefly",
                       "Emergence (other)" = "other")
 
+all_factors <- c(unlist(solutes_cations, use.names = FALSE),
+                 unlist(solutes_anions, use.names = FALSE),
+                 unlist(solutes_other, use.names = FALSE))
+
 codes999.9 <- c("timeEST", "temp", "ANC960", "ANCMet",
                 "ionError", "ionBalance","swdd")
 codes123 <- c("pH", "pHmetrohm", "spCond", "au254", "au275",

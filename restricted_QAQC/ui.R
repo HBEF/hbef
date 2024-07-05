@@ -234,30 +234,12 @@ shinyUI(
               #   )
               # ),
               hr(),
-              # selectInput(
-              #   "SOLUTES1",
-              #   label = "Factor",
-              #   choices = c(solutes_cations, solutes_anions, solutes_other),
-              #   selected = "Ca"
-              # ),
-              radioButtons("factor_type", "Select Factor Type:",
-                           choices = list("Single Factor" = "single", "Composite Factor" = "composite"),
-                           selected = "single"),
-              conditionalPanel(
-                condition = "input.factor_type == 'single'",
-                selectInput(
-                  "SOLUTES1",
-                  label = "Factor",
-                  choices = c(solutes_cations, solutes_anions, solutes_other),
-                  selected = "Ca"
-                )
+              selectInput(
+                "SOLUTES1",
+                label = "Factor",
+                choices = c(solutes_cations, solutes_anions, solutes_other),
+                selected = "Ca"
               ),
-              conditionalPanel(
-                condition = "input.factor_type == 'composite'",
-                textInput("composite_factor", "Enter Composite Factor", value = "Ca+Na+Mg")
-              ),
-              
-              #browser(),
               helpText(textOutput("LIMITS1"),
                     style = "color:#fc9272; font-size:85%;"
               ),
@@ -501,17 +483,30 @@ shinyUI(
                   dragRange = TRUE
                 )
               ),
-              # selectInput(
-              #  "WATERYEAR3",
-              #  label = "Water Year",
-              #  choices = wateryears,
-              #  selected = wateryears[1]
-              # ),
-              selectInput("SOLUTES3",
-                      label = "Factor",
-                      choices = c(solutes_cations, solutes_anions, solutes_other),
-                      selected = "Ca"
+
+              radioButtons("factor_type", "Select Factor Type:",
+                           choices = list("Single Factor" = "single", "Composite Factor" = "composite"),
+                           selected = "single"),
+              conditionalPanel(
+                condition = "input.factor_type == 'single'",
+                selectInput(
+                  "SOLUTES3",
+                  label = "Factor",
+                  choices = c(solutes_cations, solutes_anions, solutes_other),
+                  selected = "Ca"
+                )
               ),
+              conditionalPanel(
+                condition = "input.factor_type == 'composite'",
+                textInput("composite_factor", "Enter Composite Factor", value = "Ca + Na + Mg"),
+                p('Allowed operators: +, -, *, /', style = "color:gray; font-size:85%;")
+              ),
+              # selectInput("SOLUTES3",
+              #         label = "Factor",
+              #         choices = c(solutes_cations, solutes_anions, solutes_other),
+              #         selected = "Ca"
+              # ),
+              
               helpText(textOutput("LIMITS3"),
                     style = "color:#fc9272; font-size:85%;"),
               radioButtons("HYDROLOGY3",
