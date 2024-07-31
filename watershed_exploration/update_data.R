@@ -158,6 +158,8 @@ hbef_sheds <- sf::st_read('~/git/macrosheds/portal/data/general/shed_boundary/sh
 
 #TODO:
 #1. update the annual report pdf in www/ (if available)
+#1.5	separate the first page with: `pdftk watershed_report_full.pdf cat 1-1 output watershed_report_page1.pdf`
 #2. update most portal files through github
 #3. update primary data via `rsync -avhPz hbef/ mike@165.22.183.247:shiny/watershed_exploration/data/hbef/`
 #   This will only overwrite individual files that have updated, leaving intact old files, including gauge locs and stuff
+#4. on server, run `sudo systemctl restart shiny-server.service`
