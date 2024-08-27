@@ -1957,8 +1957,8 @@ shinyServer(function(input, output, session) {
       xlabel = paste("Dates ", input$DATE2[1], " to ", input$DATE2[2])
     }
     
-    if (input$SITES2 == 'HBK') return(stop('Only continuous temperature available for Mainstem'))
-    if (input$HYDROLOGY2 == TRUE)  {
+    # if (input$SITES2 == 'HBK') return(stop('Only continuous temperature available for Mainstem'))
+    if (input$HYDROLOGY2 == TRUE) {
       
       #determine y2-axis labels
       if (input$SITES2 %in% sites_streams) ylabel2 <- 'Discharge (ft or L/s)'
