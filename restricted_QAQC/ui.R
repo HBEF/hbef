@@ -524,11 +524,10 @@ shinyUI(
                            selected = "gageHt",
                            inline = FALSE)), style = "color:#3182bd;"
               ),
-              p("Discharge shows daily median of all watershed sites." ,
-                style = "color:#666666; font-size:85%;"
-              ),
-              p("Precipitation shows daily median of all rain gage sites." ,
-                style = "color:#666666; font-size:85%;"
+              tags$ul(
+                  tags$li("Discharge shows daily median of all watershed sites."),
+                  tags$li("Precipitation shows daily median of all rain gage sites."),
+                  style = "color:tomato; font-size:85%;"
               ),
               checkboxInput("OMIT_STORMS3",
                   label = "Omit Storm Data (Code 911)",
