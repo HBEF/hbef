@@ -1367,6 +1367,7 @@ shinyServer(function(input, output, session) {
   
   # gathers hydrology data and calculates median hydrology values
   Q3 <- reactive({
+
     # update data variable if underlying data was updated
     if (changesInData$change_dataCurrent > 0) dataAll <- dataAllR()
     # do initial filter of data depending on whether water year or date range was chosen
@@ -2116,7 +2117,7 @@ shinyServer(function(input, output, session) {
     # Plots Default + Discharge data
     if (input$HYDROLOGY3 == "Discharge" | input$HYDROLOGY3 == "Precipitation") {
       
-      if (input$HYDROLOGY3 == "Discharge")  {
+      if (input$HYDROLOGY3 == "Discharge") {
         
         data3 <- dataAllQ3()
         data3.xts <- xts(data3[,-1], order.by = data3$date)
