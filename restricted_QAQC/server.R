@@ -351,18 +351,25 @@ shinyServer(function(input, output, session) {
                     dbname = dbname)
     
     bug <- stickytrap_up()
-    
     needed_colnames = c('sample_id', 'side_or_trapnum', 'watershed', 'date', 'dipteran_large', 'terrestrial_large', 'caddisfly_large', 'mayfly_large', 'stonefly_large', 'other_large', 'dipteran_small', 'terrestrial_small', 'caddisfly_small', 'other_small')
     intsxn = intersect(colnames(bug), needed_colnames)
-    if(! (length(intsxn) == length(needed_colnames) && length(colnames(bug)) == length(needed_colnames))){
-      showNotification(paste('Upload CSV must have these exact columns:',
+    ignored_cols = setdiff(colnames(bug), needed_colnames)
+    bug = select(bug, -any_of(ignored_cols))
+    if(! length(intsxn) == length(needed_colnames)){
+    # if(! (length(intsxn) == length(needed_colnames) && length(colnames(bug)) == length(needed_colnames))){
+      showNotification(paste('Upload CSV must have these columns:',
                              'sample_id, side_or_trapnum, watershed, date, dipteran_large, terrestrial_large, caddisfly_large, mayfly_large, stonefly_large, other_large, dipteran_small, terrestrial_small, caddisfly_small, other_small'),
-                       type='error',
+                       type = 'error',
                        duration = NULL,
                        id = 'stickytraperr')
       enable('BUG_SUBMIT')
       dbDisconnect(con)
       return()
+    }
+    
+    if(length(ignored_cols)){
+        showNotification(paste('Ignoring unrecognized columns:', paste(ignored_cols, collapse = ', ')),
+                         type = 'warning')
     }
     
     #colnames(bug) = tolower(colnames(bug))
@@ -372,15 +379,37 @@ shinyServer(function(input, output, session) {
     bug$sample_id = as.character(bug$sample_id)
     bug$side_or_trapnum = as.character(bug$side_or_trapnum)
     
+    if(grepl('[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}', bug$date[1])){
+        date_fmt <- '%m/%d/%Y'
+    } else if(grepl('[0-9]{4}-[0-9]{2}-[0-9]{2}', bug$date[1])){
+        date_fmt <- '%Y-%m-%d'
+    } else if(grepl('[0-9]{5}', bug$date[1])){
+        date_fmt <- 'excel_bogus'
+    } else {
+        showNotification('Dates must be in YYYY-MM-DD, MM/DD/YYYY, or Excel (5-digit) format.',
+                         type = 'error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
+    }
     
-    if(any(! grepl('[0-9]{4}-[0-9]{2}-[0-9]{2}', bug$date))){
-      showNotification('All dates must be in YYYY-MM-DD format.',                               
-                       type='error',
-                       duration = NULL,
-                       id = 'stickytraperr')
-      enable('BUG_SUBMIT')
-      dbDisconnect(con)
-      return()
+    if(date_fmt == 'excel_bogus'){
+        bug$date = as.Date(bug$date, origin = '1899-12-30')
+    } else {
+        bug$date = as.Date(bug$date, format = date_fmt)
+    }
+    
+    if(any(is.na(bug$date))){
+        dev_ind <- which(is.na(bug$date))[1] + 1
+        showNotification(paste('All dates must have the same format. Deviation in row', dev_ind),
+                         type = 'error',
+                         duration = NULL,
+                         id = 'stickytraperr')
+        enable('BUG_SUBMIT')
+        dbDisconnect(con)
+        return()
     }
     
     if(any(is.na(bug$sample_id))){
@@ -452,8 +481,6 @@ shinyServer(function(input, output, session) {
       dbDisconnect(con)
       return()
     }
-    
-    bug$date = as.Date(bug$date, format = '%Y-%m-%d')
     
     dataNew = bug %>% 
       # dataNew <- stickytrap_up() %>% 
