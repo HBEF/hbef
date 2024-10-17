@@ -539,7 +539,7 @@ parse_note_collection <- function(notefile){
                Remarks = if_else(Remarks == 'NA', NA_character_, Remarks),
                SampleDate = format(SampleDate, '%m/%d/%Y'))
     
-    allowed_fieldcodes = as.character(c(319, 888, 905, 907, 920, 923, 911, 912, 955, 960, 966, 969, 970))
+    allowed_fieldcodes = as.character(c(319, 888, 905, 907, 920, 922, 923, 911, 912, 955, 960, 966, 969, 970))
     fc_split = strsplit(d$FieldCode, ' ')
     illegal_codes = lapply(fc_split, function(x){
         x[! is.na(x) & ! x %in% allowed_fieldcodes]
