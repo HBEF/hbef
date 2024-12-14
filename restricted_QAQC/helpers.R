@@ -404,8 +404,10 @@ parse_note_collection <- function(notefile){
         }
         
         dt_sp <- fix_datetime('SP')
+        if(any(sapply(dt_sp, is.na))) stop('SPerr')
         d_flow_$date[sp_ind] <- dt_sp$date
         dt_sw <- fix_datetime('SW')
+        if(any(sapply(dt_sw, is.na))) stop('SWerr')
         d_flow_$date[sw_ind] <- dt_sw$date
     }
     

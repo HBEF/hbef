@@ -648,7 +648,6 @@ shinyServer(function(input, output, session) {
     #                            '\n\nDIC lab sheets can now be uploaded for those collection dates.'),
     #           addr = gm_addr,
     #           pw = gm_pass)
-    # browser()
     
     d_combined <- tibble()
     for(f in rev(ff$name)){
@@ -664,6 +663,12 @@ shinyServer(function(input, output, session) {
                            type = 'warning', duration = NULL)
         } else if(grepl('Detected illegal character', err_msg)){
           showNotification(paste0(f, ': ', str_extract(err_msg, 'Detected illegal.*')),
+                           type = 'warning', duration = NULL)
+        } else if(grepl('SPerr', err_msg)){
+          showNotification(glue('Error in formatting for site SP in the lab worksheet'),
+                           type = 'warning', duration = NULL)
+        } else if(grepl('SWerr', err_msg)){
+          showNotification(glue('Error in formatting for site SW in the lab worksheet'),
                            type = 'warning', duration = NULL)
         } else {
           showNotification(glue("{f} failed to parse. Please try again or email Mike with the file(s) you're trying to upload."),
