@@ -15,8 +15,7 @@
 #   same with NO3
 #sensor NH4 and NO3 are already in N equivalents
 
-# dbname = 'hbef20200415' #for local testing
-dbname = 'hbef' #for reals
+dbname = 'hbef'
 # setwd('~/git/hbef/shiny/restricted_QAQC/') #only for testing
 
 library(dplyr)
