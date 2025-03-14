@@ -319,6 +319,7 @@ shinyServer(function(input, output, session) {
     }
     
     #upload
+    dataNew$notes <- iconv(dataNew$notes, from="UTF-8", to="ASCII//TRANSLIT", sub="?")
     dbWriteTable(con, "current", dataNew, append=TRUE, row.names=FALSE)
     
     # close connection to database
