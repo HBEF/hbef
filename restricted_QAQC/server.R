@@ -671,6 +671,21 @@ shinyServer(function(input, output, session) {
         } else if(grepl('SWerr', err_msg)){
           showNotification(glue('Error in formatting for site SW in the lab worksheet'),
                            type = 'warning', duration = NULL)
+        } else if(grepl('precip_error', err_msg)){
+          showNotification(glue('Error somewhere on the precipitation notes tab'),
+                           type = 'warning', duration = NULL)
+        } else if(grepl('field_notes_error', err_msg)){
+          showNotification(glue('Error somewhere on the field notes tab'),
+                           type = 'warning', duration = NULL)
+        } else if(grepl('lab_worksheet_error', err_msg)){
+          showNotification(glue('Error somewhere on the lab worksheet tab'),
+                           type = 'warning', duration = NULL)
+        } else if(grepl('dic_error', err_msg)){
+          showNotification(glue('Error somewhere on the DIC tab'),
+                           type = 'warning', duration = NULL)
+        } else if(grepl('grab_error', err_msg)){
+          showNotification(glue('Error somewhere on the grab sample tab'),
+                           type = 'warning', duration = NULL)
         } else {
           showNotification(glue("{f} failed to parse. Please try again or email Mike with the file(s) you're trying to upload."),
                            type = 'warning', duration = NULL)

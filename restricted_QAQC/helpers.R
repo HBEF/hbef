@@ -276,6 +276,7 @@ parse_note_collection <- function(notefile){
     
     #precip ####
     
+    catch = try({
     d = readxl::read_xlsx(notefile,
                           sheet = 1, col_names = FALSE, col_types = 'text') %>% 
         as.matrix()
@@ -301,9 +302,12 @@ parse_note_collection <- function(notefile){
         relocate(date, .before = 'timeEST')
     
     d_precip = field_code_handler(d_precip, 1)
+    })
+    if(inherits(catch, 'try-error')) stop('precip_error')
     
     #flow ####
     
+    catch = try({
     d = readxl::read_xlsx(notefile,
                           sheet = 2, col_names = FALSE, col_types = 'text') %>% 
         as.matrix()
@@ -328,10 +332,13 @@ parse_note_collection <- function(notefile){
         mutate(flowGageHt = NA_real_)
     
     d_flow = field_code_handler(d_flow, 2)
+    })
+    if(inherits(catch, 'try-error')) stop('field_notes_error')
     
     
     #chem ####
     
+    catch = try({
     d = readxl::read_xlsx(notefile,
                           sheet = 3, col_names = FALSE, col_types = 'text') %>% 
         as.matrix()
@@ -382,6 +389,8 @@ parse_note_collection <- function(notefile){
         mutate(date = as.Date(as.numeric(date), origin = '1899-12-30'),
                across(3:6, as.numeric),
                archived = ifelse(toupper(archived) == 'Y', TRUE, FALSE))
+    })
+    if(inherits(catch, 'try-error')) stop('lab_worksheet_error')
     
     sp_ind <- which(d_flow_$site == 'SP')
     if(length(sp_ind)){
@@ -439,6 +448,7 @@ parse_note_collection <- function(notefile){
     
     #DIC ####
     
+    catch = try({
     d = readxl::read_xlsx(notefile,
                           sheet = 4, col_names = FALSE, col_types = 'text') %>% 
         as.matrix()
@@ -456,9 +466,12 @@ parse_note_collection <- function(notefile){
                site = sitename_map$sheets123_fmt[match(site, sitename_map$sheets45_fmt)]) %>%
         full_join(d_flow, by = c('site', 'date')) %>% 
         relocate(DIC, .before = 'notes')
+    })
+    if(inherits(catch, 'try-error')) stop('dic_error')
     
     #grab ####
     
+    catch = try({
     d = readxl::read_xlsx(notefile,
                           sheet = 5, col_names = FALSE, col_types = 'text') %>% 
         as.matrix()
@@ -525,6 +538,8 @@ parse_note_collection <- function(notefile){
                ANCMet, gageHt, hydroGraph, flowGageHt, precipCatch, fieldCode,
                notes, archived, uniqueID, waterYr, datetime) %>% 
         arrange(site, date, timeEST)
+    })
+    if(inherits(catch, 'try-error')) stop('grab_error')
     
     #nvm, actually it should be set up like this:
     d = d %>% 
