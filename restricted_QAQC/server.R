@@ -277,8 +277,11 @@ shinyServer(function(input, output, session) {
     # bug <- read.csv("data/tests/sticky_trap_upload_new.csv", stringsAsFactors = FALSE, na.strings=c(""," ","NA")) %>% as_tibble()
     bug <- read.csv(input$BUG_UPLOAD$datapath,
                     header = input$HEADER,
+                    # colClasses = c('character', 'character', 'integer', 'character', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer'),
                     stringsAsFactors = FALSE,
-                    na.strings=c(""," ","NA", "N/A")) %>% as_tibble()
+                    na.strings=c(""," ","NA", "N/A")) %>%
+      as_tibble() %>% 
+      mutate(across(dipteran_large:other_small, as.integer))
     
     return(bug)
   })
