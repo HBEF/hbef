@@ -197,198 +197,213 @@ fecal_coliform,fecal coliform,#/mL,UNKNOWN,bio,Other,expression(UNKNOWN),NA,0,NA
 turbid_FNU,turbidity (FNU),FNU,UNKNOWN,phys,Other,expression(UNKNOWN),NA,0,NA,NA,0,NA
 turbid_NTU,trurbidity (NTU),NTU,UNKNOWN,phys,Other,expression(UNKNOWN),NA,0,NA,NA,NA,NA
 VSS,"suspended sediment, volatile",mg/L,UNKNOWN,phys,Other,expression(UNKNOWN),NA,0,NA,NA,0,1000000
-vb_fpar_min,watershed min FPAR (fraction of absorbed photosynthetically active radiation),%,UNKNOWN,ws_char,Fraction of Absorbed Photosynthetically Active Radiation,NA,NA,NA,NA,NA,NA,NA
-vb_fpar_max,watershed max FPAR (fraction of absorbed photosynthetically active radiation),%,UNKNOWN,ws_char,Fraction of Absorbed Photosynthetically Active Radiation,NA,NA,NA,NA,NA,NA,NA
-vb_fpar_mean,watershed mean FPAR (fraction of absorbed photosynthetically active radiation),%,UNKNOWN,ws_char,Fraction of Absorbed Photosynthetically Active Radiation,NA,NA,NA,NA,NA,NA,NA
-vb_fpar_median,watershed median FPAR (fraction of absorbed photosynthetically active radiation),%,UNKNOWN,ws_char,Fraction of Absorbed Photosynthetically Active Radiation,NA,NA,0,NA,NA,NA,NA
-vb_fpar_sd,standard deviation of watershed FPAR (fraction of absorbed photosynthetically active radiation),%,UNKNOWN,ws_char,Fraction of Absorbed Photosynthetically Active Radiation,NA,NA,0,NA,NA,NA,NA
-pd_geo_Al2O3_mean,watershed aluminum oxide mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_Al2O3_sd,watershed aluminum oxide standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_CaO_mean,watershed calcium oxide mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_CaO_sd,watershed calcium oxide standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_CompressStrength_mean,watershed uniaxial compressive strength mean (surface or near surface geology),MPa,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_CompressStrength_sd,watershed uniaxial compressive strength standard deviation (surface or near surface geology),MPa,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_Fe2O3_mean,watershed ferric oxide mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_Fe2O3_sd,watershed ferric oxide standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_HydaulicCond_mean,watershed hydraulic conductivity mean (surface or near surface geology),um/s,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_HydaulicCond_sd,watershed hydraulic conductivity standard deviation (surface or near surface geology),um/s,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_K2O_mean,watershed potassium oxide mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_K2O_sd,watershed potassium oxide standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_MgO_mean,watershed magnesium oxide mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_MgO_sd,watershed magnesium oxide standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_N_mean,watershed nitrogen mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_N_sd,watershed nitrogen standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_Na2O_mean,watershed sodium oxide mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_Na2O_sd,watershed sodium oxide standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_P2O5_mean,watershed phosphorus pentoxide mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_P2O5_sd,watershed phosphorus pentoxide standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_S_mean,watershed sulfur mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_S_sd,watershed sulfur standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_SiO2_mean,watershed silicon dioxide mean (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-pd_geo_SiO2_sd,watershed silicon dioxide standard deviation (surface or near surface geology),%,UNKNOWN,ws_char,Geochemistry,NA,NA,0,NA,NA,NA,NA
-ck_et_ref_mean,watershed mean annual evapotranspiration (grass reference),mm,UNKNOWN,ws_char,GRIDMET,NA,NA,NA,NA,NA,NA,NA
-ck_et_ref_median,daily median of watershed evapotranspiration (grass reference),mm,UNKNOWN,ws_char,GRIDMET,NA,NA,0,NA,NA,NA,NA
-ck_et_ref_sd,daily standard deviation of watershed evapotranspiration (grass reference),mm,UNKNOWN,ws_char,GRIDMET,NA,NA,0,NA,NA,NA,NA
-va_gpp_median,daily watershed median terrestrial gross primary production,kg*C/m^2,UNKNOWN,ws_char,Gross Primary Production,NA,NA,0,NA,NA,NA,NA
-va_gpp_sd,daily standard deviation of terrestrial gross primary production,kg*C/m^2,UNKNOWN,ws_char,Gross Primary Production,NA,NA,0,NA,NA,NA,NA
-hd_bfi_mean,mean baseflow index (ratio of base flow to total flow),%,UNKNOWN,ws_char,Hydrology,NA,NA,0,NA,NA,NA,NA
-hd_bfi_sd,baseflow index standard deviation,%,UNKNOWN,ws_char,Hydrology,NA,NA,0,NA,NA,NA,NA
-vb_lai_median,watershed median LAI (leaf area index),unitless,UNKNOWN,ws_char,Leaf Area Index,NA,NA,0,NA,NA,NA,NA
-vb_lai_sd,standard deviation of watershed LAI (leaf area index),unitless,UNKNOWN,ws_char,Leaf Area Index,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_EV,watershed underlying geologic class: evaporites,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_IG,watershed underlying geologic class: ice and glaciers,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_MT,watershed underlying geologic class: metamorphic rocks,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_ND,watershed underlying geologic class: no data,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_PA,watershed underlying geologic class: acid plutonic rocks,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_PB,watershed underlying geologic class: basic plutonic rocks,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_PI,watershed underlying geologic class: intermediate plutonic rock,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_PY,watershed underlying geologic class: pyroclastics,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_SC,watershed underlying geologic class: carbonate sedimentary rocks,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_SM,watershed underlying geologic class: mixed sedimentary rocks,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_SS,watershed underlying geologic class: siliciclastic sedimentary rock,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_SU,watershed underlying geologic class: unconsolidated sediments,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_VA,watershed underlying geologic class: acid volcanic rocks,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_VB,watershed underlying geologic class: basic volcanic rocks,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_VI,watershed underlying geologic class: intermediate volcanic rock,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-pn_geol_class_WB,watershed underlying geologic class: water bodies,%,UNKNOWN,ws_char,Lithology,NA,NA,0,NA,NA,NA,NA
-lb_igbp_barren,MODIS IGBP landcover classification: Barren or sparsely vegetated,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_closed_shrub,MODIS IGBP landcover classification: Closed shrublands,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_crop_natural_mos,MODIS IGBP landcover classification: Cropland / natural vegetation mosaic,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_cropland,MODIS IGBP landcover classification: Croplands,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_decid_broad_for,MODIS IGBP landcover classification: Deciduous broadleaf forest,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_decid_need_for,MODIS IGBP landcover classification: Deciduous needleleaf forest,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_ev_broad_for,MODIS IGBP landcover classification: Evergreen broadleaf forest,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_ev_need_for,MODIS IGBP landcover classification: Evergreen needleleaf forest,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_grassland,MODIS IGBP landcover classification: Grasslands,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_mixed_for,MODIS IGBP landcover classification: Mixed forest,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_open_shrub,MODIS IGBP landcover classification: Open shrublands,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_per_wetland,MODIS IGBP landcover classification: Permanent wetlands,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_perm_snow,MODIS IGBP landcover classification: Snow and ice,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_savanna,MODIS IGBP landcover classification: Savannah,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_unclassified,MODIS IGBP landcover classification: Unclassified,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_urban,MODIS IGBP landcover classification: Urban and builtup areas,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_water,MODIS IGBP landcover classification: Water,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-lb_igbp_woody_sav,MODIS IGBP landcover classification: Woody savannah,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-vb_bare_cover_median,median of MODIS GFCC vegetation classification: bare cover,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-vb_bare_cover_sd,standard deviation of MODIS GFCC vegetation classification: bare cover,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-vb_tree_cover_median,median of MODIS GFCC vegetation classification: tree cover,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-vb_tree_cover_sd,standard deviation of MODIS GFCC vegetation classification: tree cover,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-vb_veg_cover_median,median of MODIS GFCC vegetation classification: non-tree vegetation,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-vb_veg_cover_sd,standard deviation of MODIS GFCC vegetation classification: non-tree vegetation,%,UNKNOWN,ws_char,MODIS Land Cover,NA,NA,0,NA,NA,NA,NA
-ch_annual_Ca_flux_mean,watershed mean annual atmospheric calcium flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_Ca_flux_sd_space,watershed annual atmospheric calcium flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_Cl_flux_mean,watershed mean annual atmospheric chlorine flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_Cl_flux_sd_space,watershed annual atmospheric chlorine flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_H_flux_mean,watershed mean annual atmospheric hydrogen ion flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_H_flux_sd_space,watershed annual atmospheric hydrogen ion flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_K_flux_mean,watershed mean annual atmospheric potassium flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_K_flux_sd_space,watershed annual atmospheric potassium flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_Mg_flux_mean,watershed mean annual atmospheric magnesium flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_Mg_flux_sd_space,watershed annual atmospheric magnesium flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_N_flux_mean,watershed mean annual atmospheric inorganic nitrogen flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_N_flux_sd_space,watershed annual atmospheric inorganic nitrogen flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_Na_flux_mean,watershed mean annual atmospheric sodium flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_Na_flux_sd_space,watershed annual atmospheric sodium flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_NH4_flux_mean,watershed mean annual atmospheric ammonium flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_NH4_flux_sd_space,watershed annual atmospheric ammonium flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_NO3_flux_mean,watershed mean annual atmospheric nitrate flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_NO3_flux_sd_space,watershed annual atmospheric nitrate flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_S_N_flux_mean,watershed mean annual atmospheric nitrogen+sulfur flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_S_N_flux_sd_space,watershed annual atmospheric nitrogen+sulfur flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_SO4_flux_mean,watershed mean annual atmospheric sulfate flux,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-ch_annual_SO4_flux_sd_space,watershed annual atmospheric sulfate flux standard deviation,kg/ha/yr,UNKNOWN,ws_char,NADP,NA,NA,0,NA,NA,NA,NA
-vb_ndvi_median,watershed median NDVI (normalized difference vegetation index),unitless,UNKNOWN,ws_char,NDVI,NA,NA,0,NA,NA,NA,NA
-vb_ndvi_sd,standard deviation of watershed NDVI (normalized difference vegetation index),unitless,UNKNOWN,ws_char,NDVI,NA,NA,0,NA,NA,NA,NA
-va_npp_median,daily watershed median terrestrial net primary production,kg*C/m^2,UNKNOWN,ws_char,Net Primary Production,NA,NA,0,NA,NA,NA,NA
-va_npp_sd,daily standard deviation of terrestrial net primary production,kg*C/m^2,UNKNOWN,ws_char,Net Primary Production,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_barren,NLCD 1992 class: bare rock/sand/clay,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_barren_tran,NLCD 1992 class: transitional barren,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_commercial,NLCD 1992 class: commercial/industrial/transportation,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_fallow,NLCD 1992 class: fallow,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_forest_dec,NLCD 1992 class: deciduous forest,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_forest_evr,NLCD 1992 class: evergreen forest,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_forest_mix,NLCD 1992 class: mixed forest,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_grass,NLCD 1992 class: grassland/herbaceous,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_ice_snow,NLCD 1992 class: perennial ice/snow,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_mines,NLCD 1992 class: quarries/strip minds/gravel pits,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_orchards,NLCD 1992 class: orchards/vineyards/other,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_pasture,NLCD 1992 class: pasture/hay,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_res_hi,NLCD 1992 class: high intensity residential,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_res_low,NLCD 1992 class: low intensity residential,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_row_crop,NLCD 1992 class: row crops,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_shrub,NLCD 1992 class: shrubland,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_small_grains,NLCD 1992 class: small grains,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_urban_grass,NLCD 1992 class: urban/recreational grasses,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_water,NLCD 1992 class: open water,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_wetland_herb,NLCD 1992 class: emergent herbaceous wetland,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_1992_wetland_wood,NLCD 1992 class: woody wetland,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_barren,NLCD class: barren land,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_crop,NLCD class: cultivated crops,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_dev_hi,"NLCD class: developed, high intensity",%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_dev_low,"NLCD class: developed, low intensity",%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_dev_med,"NLCD class: developed, medium intensity",%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_dev_open,"NLCD class: developed, open space",%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_forest_dec,NLCD class: deciduous forest,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_forest_evr,NLCD class: evergreen forest,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_forest_mix,NLCD class: mixed forest,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_grass,NLCD class: grassland/herbaceous,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_ice_snow,NLCD class: perennial ice/snow,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_lichens,NLCD class: lichens,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_moss,NLCD class: moss,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_pasture,NLCD class: pasture/hay,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_sedge,NLCD class: sedge/herbaceous,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_shrub,NLCD class: shrub/scrub,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_shrub_dwr,NLCD class: dwarf scrub,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_water,NLCD class: open water,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_wetland_herb,NLCD class: emergent herbaceous wetland,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-lg_nlcd_wetland_wood,NLCD class: woody wetland,%,UNKNOWN,ws_char,NLCD,NA,NA,0,NA,NA,NA,NA
-pm_sub_surf_permeability_mean,watershed mean subsurface permeability (log10),m^2,UNKNOWN,ws_char,Other,NA,NA,0,NA,NA,NA,NA
-pm_sub_surf_permeability_perm_mean,watershed mean subsurface permeability with permafrost (log10),m^2,UNKNOWN,ws_char,Other,NA,NA,0,NA,NA,NA,NA
-pm_sub_surf_permeability_perm_sd,watershed subsurface permeability with permafrost standard deviation,m^2,UNKNOWN,ws_char,Other,NA,NA,0,NA,NA,NA,NA
-pm_sub_surf_permeability_sd,watershed subsurface permeability standard deviation,m^2,UNKNOWN,ws_char,Other,NA,NA,0,NA,NA,NA,NA
-pm_sub_surf_porosity_mean,watershed mean subsurface porosity,%,UNKNOWN,ws_char,Other,NA,NA,0,NA,NA,NA,NA
-pm_sub_surf_porosity_sd,watershed subsurface porosity standard deviation,%,UNKNOWN,ws_char,Other,NA,NA,0,NA,NA,NA,NA
-vd_eos_mean,watershed mean end of growing season as day of year,DOY,UNKNOWN,ws_char,Phenology,NA,NA,0,NA,NA,NA,NA
-vd_eos_sd,watershed standard deviation of end of growing season,DOY,UNKNOWN,ws_char,Phenology,NA,NA,0,NA,NA,NA,NA
-vd_los_mean,watershed mean length of growing season as day of year,DOY,UNKNOWN,ws_char,Phenology,NA,NA,0,NA,NA,NA,NA
-vd_los_sd,watershed standard deviation of length of growing season,DOY,UNKNOWN,ws_char,Phenology,NA,NA,0,NA,NA,NA,NA
-vd_mos_mean,watershed mean maximum day of photosynthesis in the canopy as day of year,DOY,UNKNOWN,ws_char,Phenology,NA,NA,0,NA,NA,NA,NA
-vd_mos_sd,watershed standard deviation of maximum day of canopy photosynthesis,DOY,UNKNOWN,ws_char,Phenology,NA,NA,0,NA,NA,NA,NA
-vd_sos_mean,watershed mean start of growing season,DOY,UNKNOWN,ws_char,Phenology,NA,NA,0,NA,NA,NA,NA
-vd_sos_sd,watershed standard deviation of start of growing season,DOY,UNKNOWN,ws_char,Phenology,NA,NA,0,NA,NA,NA,NA
-cc_cumulative_precip,watershed annual cumulative precip,mm,UNKNOWN,ws_char,PRISM Precipitation,NA,NA,NA,NA,NA,NA,NA
-cc_temp_mean,watershed annual mean temp,C,UNKNOWN,ws_char,PRISM Temperature,NA,NA,NA,NA,NA,NA,NA
-cc_precip_median,daily median of watershed precipitation,mm,UNKNOWN,ws_char,PRISM Precipitation,NA,NA,0,NA,NA,NA,NA
-cc_precip_sd,daily standard deviation of watershed precipitation,mm,UNKNOWN,ws_char,PRISM Precipitation,NA,NA,0,NA,NA,NA,NA
-cc_temp_mean_median,daily median of watershed air temperature,C,UNKNOWN,ws_char,PRISM Temperature,NA,NA,0,NA,NA,NA,NA
-cc_temp_mean_sd,daily standard deviation of watershed air temperature,C,UNKNOWN,ws_char,PRISM Temperature,NA,NA,0,NA,NA,NA,NA
-cl_snow_depth_mean,daily mean of watershed snow depth,mm,UNKNOWN,ws_char,Snow,NA,NA,0,NA,NA,NA,NA
-cl_snow_depth_sd,daily standard deviation of watershed snow depth,mm,UNKNOWN,ws_char,Snow,NA,NA,0,NA,NA,NA,NA
-cl_swe_mean,daily mean of snow water equivalent,mm,UNKNOWN,ws_char,Snow,NA,NA,0,NA,NA,NA,NA
-cl_swe_sd,daily standard deviation of snow water equivalent,mm,UNKNOWN,ws_char,Snow,NA,NA,0,NA,NA,NA,NA
-pf_soil_awc,watershed mean soil available water content,cm/cm,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_cat_exchange_7,watershed mean cation-exchange capacity,meq,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_clay,watershed soil clay content,%,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_org,watershed soil organic matter content,%,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_ph,watershed mean soil pH,unitless,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_sand,watershed soil sand content,%,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_silt,watershed soil silt content,%,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_water_0.1bar,watershed soil water content at 1/10 bar,%,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_water_0.33bar,watershed soil water content at 1/3 bar,%,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_water_0bar,watershed soil water content at 0 bar,%,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pf_soil_water_15bar,watershed soil water content at 15 bar,%,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-pi_soil_thickness,watershed mean soil thinkness,m,UNKNOWN,ws_char,Soil,NA,NA,0,NA,NA,NA,NA
-vj_tcw_median,watershed median TCW (tesselated cap wetness),unitless,UNKNOWN,ws_char,Tesselated Cap Wetness,NA,NA,0,NA,NA,NA,NA
-vj_tcw_sd,standard deviation of watershed TCW (tesselated cap wetness),unitless,UNKNOWN,ws_char,Tesselated Cap Wetness,NA,NA,0,NA,NA,NA,NA
-area,watershed area,ha,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
-te_aspect_mean,watershed mean aspect,degrees,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
-te_aspect_sd,watershed aspect standard deviation,degrees,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
-te_elev_max,watershed maximum elevation,m,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
-te_elev_mean,watershed mean elevation,m,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
-te_elev_min,watershed minimum elevation,m,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
-te_elev_sd,watershed elevation standard deviation,m,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
-te_slope_mean,watershed mean slope,%,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
-te_slope_sd,watershed slope standard deviation,%,UNKNOWN,ws_char,Terrain,NA,NA,0,NA,NA,NA,NA
+cc_precip_median,daily watershed-median precipitation,mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cc_precip_mean,multi-year mean of annual precip_median,mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cc_precip_sd,daily standard deviation of watershed precipitation,mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cc_temp_median,daily watershed-median air temperature,C,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cc_temp_mean,multi-year mean of annual temp_median,C,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cc_temp_sd,daily standard deviation of watershed air temperature,C,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+ck_et_ref_median,daily watershed-median evapotranspiration (grass reference),mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+ck_et_ref_mean,multi-year mean of annual et_ref_median,mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+ck_et_ref_sd,daily standard deviation of watershed evapotranspiration (grass reference),mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cl_snow_depth_mean,"daily mean watershed snow depth (or multi-year, annual mean thereof)",mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cl_snow_depth_sd,daily standard deviation of watershed snow depth,mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cl_swe_mean,"daily mean snow water equivalent (or multi-year, annual mean thereof)",mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+cl_swe_sd,daily standard deviation of snow water equivalent,mm,UNKNOWN,ws_char,climate,NA,NA,0,NA,NA,NA,NA
+ch_Ca_flux_mean,watershed-mean annual atmospheric calcium flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_Ca_flux_sd,watershed standard deviation of annual atmospheric calcium flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_Cl_flux_mean,watershed-mean annual atmospheric chlorine flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_Cl_flux_sd,watershed standard deviation of annual atmospheric chlorine flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_H_flux_mean,watershed-mean annual atmospheric hydrogen ion flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_H_flux_sd,watershed standard deviation of annual atmospheric hydrogen ion flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_K_flux_mean,watershed-mean annual atmospheric potassium flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_K_flux_sd,watershed standard deviation of annual atmospheric potassium flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_Mg_flux_mean,watershed-mean annual atmospheric magnesium flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_Mg_flux_sd,watershed standard deviation of annual atmospheric magnesium flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_N_flux_mean,watershed-mean annual atmospheric inorganic nitrogen flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_N_flux_sd,watershed standard deviation of annual atmospheric inorganic nitrogen flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_Na_flux_mean,watershed-mean annual atmospheric sodium flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_Na_flux_sd,watershed standard deviation of annual atmospheric sodium flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_NH4_flux_mean,watershed-mean annual atmospheric ammonium flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_NH4_flux_sd,watershed standard deviation of annual atmospheric ammonium flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_NO3_flux_mean,watershed-mean annual atmospheric nitrate flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_NO3_flux_sd,watershed standard deviation of annual atmospheric nitrate flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_S_N_flux_mean,watershed-mean annual atmospheric nitrogen+sulfur flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_S_N_flux_sd,watershed standard deviation of annual atmospheric nitrogen+sulfur flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_SO4_flux_mean,watershed-mean annual atmospheric sulfate flux (or multi-year mean thereof),kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+ch_SO4_flux_sd,watershed standard deviation of annual atmospheric sulfate flux,kg/ha/yr,UNKNOWN,ws_char,deposition,NA,NA,0,NA,NA,NA,NA
+hd_bfi_mean,"mean baseflow index (ratio of base flow to total flow, USGS gridded product)",%,UNKNOWN,ws_char,hydrology,NA,NA,0,NA,NA,NA,NA
+hd_bfi_sd,baseflow index standard deviation,%,UNKNOWN,ws_char,hydrology,NA,NA,0,NA,NA,NA,NA
+lb_igbp_barren,MODIS IGBP landcover classification: Barren or sparsely vegetated,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_closed_shrub,MODIS IGBP landcover classification: Closed shrublands,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_crop_natural_mos,MODIS IGBP landcover classification: Cropland / natural vegetation mosaic,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_cropland,MODIS IGBP landcover classification: Croplands,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_decid_broad_for,MODIS IGBP landcover classification: Deciduous broadleaf forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_decid_need_for,MODIS IGBP landcover classification: Deciduous needleleaf forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_ev_broad_for,MODIS IGBP landcover classification: Evergreen broadleaf forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_ev_need_for,MODIS IGBP landcover classification: Evergreen needleleaf forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_grassland,MODIS IGBP landcover classification: Grasslands,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_mixed_for,MODIS IGBP landcover classification: Mixed forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_open_shrub,MODIS IGBP landcover classification: Open shrublands,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_per_wetland,MODIS IGBP landcover classification: Permanent wetlands,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_perm_snow,MODIS IGBP landcover classification: Snow and ice,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_savanna,MODIS IGBP landcover classification: Savannah,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_unclassified,MODIS IGBP landcover classification: Unclassified,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_urban,MODIS IGBP landcover classification: Urban and builtup areas,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_water,MODIS IGBP landcover classification: Water,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lb_igbp_woody_sav,MODIS IGBP landcover classification: Woody savannah,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_barren,NLCD 1992 class: bare rock/sand/clay,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_barren_tran,NLCD 1992 class: transitional barren,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_commercial,NLCD 1992 class: commercial/industrial/transportation,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_fallow,NLCD 1992 class: fallow,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_forest_dec,NLCD 1992 class: deciduous forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_forest_evr,NLCD 1992 class: evergreen forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_forest_mix,NLCD 1992 class: mixed forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_grass,NLCD 1992 class: grassland/herbaceous,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_ice_snow,NLCD 1992 class: perennial ice/snow,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_mines,NLCD 1992 class: quarries/strip minds/gravel pits,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_orchards,NLCD 1992 class: orchards/vineyards/other,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_pasture,NLCD 1992 class: pasture/hay,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_res_hi,NLCD 1992 class: high intensity residential,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_res_low,NLCD 1992 class: low intensity residential,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_row_crop,NLCD 1992 class: row crops,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_shrub,NLCD 1992 class: shrubland,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_small_grains,NLCD 1992 class: small grains,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_urban_grass,NLCD 1992 class: urban/recreational grasses,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_water,NLCD 1992 class: open water,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_wetland_herb,NLCD 1992 class: emergent herbaceous wetland,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_1992_wetland_wood,NLCD 1992 class: woody wetland,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_barren,NLCD class: barren land,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_crop,NLCD class: cultivated crops,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_dev_hi,"NLCD class: developed, high intensity",%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_dev_low,"NLCD class: developed, low intensity",%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_dev_med,"NLCD class: developed, medium intensity",%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_dev_open,"NLCD class: developed, open space",%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_forest_dec,NLCD class: deciduous forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_forest_evr,NLCD class: evergreen forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_forest_mix,NLCD class: mixed forest,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_grass,NLCD class: grassland/herbaceous,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_ice_snow,NLCD class: perennial ice/snow,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_lichens,NLCD class: lichens,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_moss,NLCD class: moss,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_pasture,NLCD class: pasture/hay,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_sedge,NLCD class: sedge/herbaceous,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_shrub,NLCD class: shrub/scrub,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_shrub_dwr,NLCD class: dwarf scrub,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_water,NLCD class: open water,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_wetland_herb,NLCD class: emergent herbaceous wetland,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+lg_nlcd_wetland_wood,NLCD class: woody wetland,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_bare_cover_median,median of MODIS VCF vegetation classification: bare cover (sub-pixel product),%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_bare_cover_mean,multi-year mean of bare_cover_median,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_bare_cover_sd,standard deviation of MODIS VCF vegetation classification: bare cover (sub-pixel product),%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_tree_cover_median,median of MODIS VCF vegetation classification: tree cover (sub-pixel product),%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_tree_cover_mean,multi-year mean of tree_cover_median,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_tree_cover_sd,standard deviation of MODIS VCF vegetation classification: tree cover (sub-pixel product),%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_veg_cover_median,median of MODIS VCF vegetation classification: non-tree vegetation (sub-pixel product),%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_veg_cover_mean,multi-year mean of veg_cover_median,%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+vb_veg_cover_sd,standard deviation of MODIS VCF vegetation classification: non-tree vegetation (sub-pixel product),%,UNKNOWN,ws_char,landcover,NA,NA,0,NA,NA,NA,NA
+pd_geo_Al2O3_mean,watershed-mean aluminum oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_Al2O3_sd,watershed standard deviation of aluminum oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_CaO_mean,watershed-mean calcium oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_CaO_sd,watershed standard deviation of calcium oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_CompressStrength_mean,watershed-mean uniaxial compressive strength (surface or near surface geology),MPa,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_CompressStrength_sd,watershed standard deviation of uniaxial compressive strength (surface or near surface geology),MPa,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_Fe2O3_mean,watershed-mean ferric oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_Fe2O3_sd,watershed standard deviation of ferric oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_HydaulicCond_mean,watershed-mean hydraulic conductivity (surface or near surface geology),um/s,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_HydaulicCond_sd,watershed standard deviation of hydraulic conductivity (surface or near surface geology),um/s,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_K2O_mean,watershed-mean potassium oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_K2O_sd,watershed standard deviation of potassium oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_MgO_mean,watershed-mean magnesium oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_MgO_sd,watershed standard deviation of magnesium oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_N_mean,watershed-mean nitrogen (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_N_sd,watershed standard deviation of nitrogen (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_Na2O_mean,watershed-mean sodium oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_Na2O_sd,watershed standard deviation of sodium oxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_P2O5_mean,watershed-mean phosphorus pentoxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_P2O5_sd,watershed standard deviation of phosphorus pentoxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_S_mean,watershed-mean sulfur (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_S_sd,watershed standard deviation of sulfur (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_SiO2_mean,watershed-mean silicon dioxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pd_geo_SiO2_sd,watershed standard deviation of silicon dioxide (surface or near surface geology),%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_awc,watershed-mean available water content of soil,cm/cm,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_cat_exchange_7,watershed-mean cation-exchange capacity of soil,meq,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_clay,watershed soil clay content,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_org,watershed soil organic matter content,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_ph,watershed-mean soil pH,unitless,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_sand,watershed soil sand content,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_silt,watershed soil silt content,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_water_0.1bar,watershed soil water content at 1/10 bar,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_water_0.33bar,watershed soil water content at 1/3 bar,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_water_0bar,watershed soil water content at 0 bar,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pf_soil_water_15bar,watershed soil water content at 15 bar,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pi_soil_thickness,watershed-mean soil thinkness,m,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pm_sub_surf_permeability_mean,watershed-mean subsurface permeability (log10),m^2,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pm_sub_surf_permeability_perm_mean,watershed-mean subsurface permeability with permafrost (log10),m^2,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pm_sub_surf_permeability_perm_sd,watershed standard deviation of subsurface permeability with permafrost,m^2,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pm_sub_surf_permeability_sd,watershed standard deviation of subsurface permeability,m^2,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pm_sub_surf_porosity_mean,watershed-mean subsurface porosity,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pm_sub_surf_porosity_sd,watershed standard deviation of subsurface porosity,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_EV,watershed underlying geologic class: evaporites,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_IG,watershed underlying geologic class: ice and glaciers,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_MT,watershed underlying geologic class: metamorphic rocks,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_ND,watershed underlying geologic class: no data,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_PA,watershed underlying geologic class: acid plutonic rocks,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_PB,watershed underlying geologic class: basic plutonic rocks,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_PI,watershed underlying geologic class: intermediate plutonic rock,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_PY,watershed underlying geologic class: pyroclastics,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_SC,watershed underlying geologic class: carbonate sedimentary rocks,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_SM,watershed underlying geologic class: mixed sedimentary rocks,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_SS,watershed underlying geologic class: siliciclastic sedimentary rock,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_SU,watershed underlying geologic class: unconsolidated sediments,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_VA,watershed underlying geologic class: acid volcanic rocks,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_VB,watershed underlying geologic class: basic volcanic rocks,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_VI,watershed underlying geologic class: intermediate volcanic rock,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+pn_geol_class_WB,watershed underlying geologic class: water bodies,%,UNKNOWN,ws_char,parent material,NA,NA,0,NA,NA,NA,NA
+vd_eos_mean,watershed-mean end of growing season as day of year (or multi-year mean thereof),DOY,UNKNOWN,ws_char,phenology,NA,NA,0,NA,NA,NA,NA
+vd_eos_sd,watershed standard deviation of end of growing season,days,UNKNOWN,ws_char,phenology,NA,NA,0,NA,NA,NA,NA
+vd_los_mean,watershed-mean length of growing season as day of year (or multi-year mean thereof),DOY,UNKNOWN,ws_char,phenology,NA,NA,0,NA,NA,NA,NA
+vd_los_sd,watershed standard deviation of length of growing season,days,UNKNOWN,ws_char,phenology,NA,NA,0,NA,NA,NA,NA
+vd_mos_mean,watershed-mean maximum day of photosynthesis in the canopy as day of year (or multi-year mean thereof),DOY,UNKNOWN,ws_char,phenology,NA,NA,0,NA,NA,NA,NA
+vd_mos_sd,watershed standard deviation of maximum day of canopy photosynthesis,days,UNKNOWN,ws_char,phenology,NA,NA,0,NA,NA,NA,NA
+vd_sos_mean,watershed-mean start of growing season (or multi-year mean thereof),DOY,UNKNOWN,ws_char,phenology,NA,NA,0,NA,NA,NA,NA
+vd_sos_sd,watershed standard deviation of start of growing season,days,UNKNOWN,ws_char,phenology,NA,NA,0,NA,NA,NA,NA
+vb_gpp_global_500m_median,watershed-median annual terrestrial gross primary production (global product),kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+vb_gpp_global_500m_mean,multi-year mean of gpp_global_500m_median,kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+vb_gpp_global_500m_sd,watershed standard deviation of annual terrestrial gross primary production (global product),kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+vb_npp_global_500m_median,watershed-median annual terrestrial net primary production (global product),kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+vb_npp_global_500m_mean,multi-year mean of npp_global_500m_median,kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+vb_npp_global_500m_sd,watershed standard deviation of annual terrestrial net primary production (global product),kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+va_gpp_CONUS_30m_median,watershed-median 16-day terrestrial gross primary production (CONUS product),kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+va_gpp_CONUS_30m_mean,multi-year mean of annual gpp_CONUS_30m_median,kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+va_gpp_CONUS_30m_sd,watershed standard deviation of 16-day terrestrial gross primary production (CONUS product),kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+va_npp_CONUS_250m_median,watershed-median 16-day terrestrial net primary production (CONUS product),kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+va_npp_CONUS_250m_mean,multi-year mean of annual npp_CONUS_250m_median,kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+va_npp_CONUS_250m_sd,watershed standard deviation of 16-day terrestrial net primary production (CONUS product),kg*C/m^2,UNKNOWN,ws_char,productivity,NA,NA,0,NA,NA,NA,NA
+area,watershed area,ha,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+te_aspect_mean,watershed-mean aspect,degrees,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+te_aspect_sd,watershed standard deviation of aspect,degrees,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+te_elev_max,watershed-maximum elevation,m,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+te_elev_mean,watershed-mean elevation,m,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+te_elev_min,watershed-minimum elevation,m,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+te_elev_sd,watershed standard deviation of elevation,m,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+te_slope_mean,watershed-mean slope,%,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+te_slope_sd,watershed standard deviation of slope,%,UNKNOWN,ws_char,terrain,NA,NA,0,NA,NA,NA,NA
+vb_evi_median,watershed-median 16-day EVI (enhanced vegetation index),unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_evi_mean,multi-year mean of annual evi_median,unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_evi_sd,watershed standard deviation of 16-day EVI (enhanced vegetation index),unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_fpar_median,watershed-median 8-day FPAR (fraction of absorbed photosynthetically active radiation),%,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_fpar_mean,multi-year mean of annual fpar_median,%,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_fpar_sd,watershed standard deviation of 8-day FPAR (fraction of absorbed photosynthetically active radiation),%,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_lai_median,watershed-median 8-day LAI (leaf area index),unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_lai_mean,multi-year mean of annual lai_median,unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_lai_sd,watershed standard deviation of 8-day LAI (leaf area index),unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_ndvi_median,watershed-median 16-day NDVI (normalized difference vegetation index),unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_ndvi_mean,multi-year mean of annual ndvi_median,unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vb_ndvi_sd,watershed standard deviation of 16-day NDVI (normalized difference vegetation index),unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vj_tcw_median,watershed-median monthly wetness (tesselated cap method),unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vj_tcw_mean,multi-year mean of annual tcw_median,unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
+vj_tcw_sd,watershed standard deviation of monthly wetness (tesselated cap method),unitless,UNKNOWN,ws_char,vegetation,NA,NA,0,NA,NA,NA,NA
 model_GPP,daily average areal rate of primary production,g O2 m^-2 d^-1,streamMetabolizer,bio,Other,expression(UNKNOWN),NA,0,NA,streampulse derived daily results,NA,NA
 model_ER,daily avearge areal rate of respiration,g O2 m^-2 d^-1,streamMetabolizer,bio,Other,expression(UNKNOWN),NA,0,NA,streampulse derived daily results,NA,NA
 model_k600,gas exchange rate coeffecient,d^-1,streamMetabolizer,bio,Other,expression(UNKNOWN),NA,0,NA,"streampulse derived daily results, after normalization, 600 Schmidt number",NA,NA
