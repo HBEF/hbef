@@ -11,7 +11,7 @@ library(lubridate)
 #see additional todos at bottom
 
 #NOTES: also copy helpers.R (not global.R) [forreal? why risk it?]
-#server/nSiteNVar_server.R and ui/nSiteNVar_ui.R have been modified to allow precip gauge viewing (and some little stuff)
+#server/nSiteNVar_server.R and ui/nSiteNVar_ui.R have been modified to 'allow precip gauge viewing (and some little stuff)
 #might have to copy css and js too. if so, remove biplot-related stuff from js
 #note that map_server.R is slightly modified
 
@@ -30,8 +30,9 @@ file.copy(from = '../../../macrosheds/portal/data/general/variables.csv',
 #           overwrite = TRUE)
 
 for(p in c('discharge', 'precip_flux_inst_scaled', 'stream_chemistry',
-           'stream_flux_inst_scaled', 'ws_boundary', 'precip_chemistry',
-           'precipitation', 'stream_gauge_locations')){
+           'stream_flux_inst_scaled', #'ws_boundary',
+           'precip_chemistry',
+           'precipitation')){#'stream_gauge_locations')){
 
     file.copy(from = paste0('../../../macrosheds/portal/data/hbef/', p),
               to = 'data/hbef/',
@@ -84,7 +85,7 @@ for(p in c('discharge', 'precip_flux_inst_scaled', 'stream_chemistry',
 #     filter(domain == 'hbef') %>%
 #     distinct() %>%
 #     write_csv('data/general/site_data.csv')
-# 
+#
 # tibble(network = c('lter'),#, 'lter'),
 #        domain = c('hbef'),#, 'hbef'),
 #        site_code = c('HBK')) %>% #, 'w101')) %>%
@@ -128,11 +129,11 @@ mainstem %>%
 #     as_tibble() %>%
 #     filter(site_code == 'w101')
 
-sited <- read_csv('data/general/site_data.csv') %>% 
+sited <- read_csv('data/general/site_data.csv') %>%
     filter(domain == 'hbef',
            site_type == 'stream_gauge')
-hbef_sheds <- sf::st_read('~/git/macrosheds/portal/data/general/shed_boundary/shed_boundary.shp') %>% 
-    # as.data.frame() %>% 
+hbef_sheds <- sf::st_read('~/git/macrosheds/portal/data/general/shed_boundary/shed_boundary.shp') %>%
+    # as.data.frame() %>%
     filter(site_code %in% sited$site_code)
 
 #only re-enable this if you need to change sheds (like add w101 back in)
@@ -156,10 +157,11 @@ hbef_sheds <- sf::st_read('~/git/macrosheds/portal/data/general/shed_boundary/sh
 
 # file.copy(from = '../../../macrosheds/data_acquisition/data/lter/hbef/munged/precipitation__13/')
 
-#TODO:
+#TODO every time:
 #1. update the annual report pdf in www/ (if available)
 #1.5	separate the first page with: `pdftk watershed_report_full.pdf cat 1-1 output watershed_report_page1.pdf`
 #2. update most portal files through github
+#2.5 cd hbef/shiny/watershed_exploration/data/
 #3. update primary data via `rsync -avhPz hbef/ mike@165.22.183.247:shiny/watershed_exploration/data/hbef/`
 #   This will only overwrite individual files that have updated, leaving intact old files, including gauge locs and stuff
 #4. on server, run `sudo systemctl restart shiny-server.service`
