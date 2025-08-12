@@ -395,8 +395,13 @@ nav{
 #hubtitle{
   background: linear-gradient(
 		rgba(25, 25, 25, 0.45), 
-		rgba(25, 25, 25, 0.45)), 
-		url("images/forest3.jpg");
+		rgba(25, 25, 25, 0.45)
+  ),
+  url("images/forest3.jpg");
+  /*background-size: cover;*/
+  /*background-repeat: no-repeat;*/
+  /*background-repeat: repeat-x;*/
+  /*background-position: center center;*/
 }
 /*#hubtitle{
     background-image: url('images/stickytrap.jpg');

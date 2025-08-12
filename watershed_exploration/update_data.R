@@ -158,7 +158,7 @@ hbef_sheds <- sf::st_read('~/git/macrosheds/portal/data/general/shed_boundary/sh
 # file.copy(from = '../../../macrosheds/data_acquisition/data/lter/hbef/munged/precipitation__13/')
 
 #TODO every time:
-#1. update the annual report pdf in www/ (if available)
+#1. update the annual report (watershed report) pdf in www/ (if available)
 #1.5	separate the first page with: `pdftk watershed_report_full.pdf cat 1-1 output watershed_report_page1.pdf`
 #2. update most portal files through github
 #2.5 cd hbef/shiny/watershed_exploration/data/

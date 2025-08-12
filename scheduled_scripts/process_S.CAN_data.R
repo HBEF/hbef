@@ -344,6 +344,10 @@ d10 <- clean_SCAN_data_since20240610("scan 8-5-24 thru 11-4-24.xlsx",
 d11 <- clean_SCAN_data_since20240610("SCAN 2024-11-04 thru 2025-05-01.xlsx",
   end_of_previous = max(d10$datetime)
 )
+d12 <- clean_SCAN_data_since20240610(
+  "SCAN 2025-05-01 through 2025-08-08.xlsx",
+  end_of_previous = max(d11$datetime)
+)
 
 # are they recording FTU again? (pretty sure they were last time, but i didn't ask).
 # also possible i looked these up and they're equivalent.
@@ -367,7 +371,8 @@ data_by_year <- select(dloan, -ends_with("status")) %>%
   bind_rows(d9) %>%
   bind_rows(d10) %>%
   bind_rows(d11) %>%
-  # bind_rows(d12) %>%
+  bind_rows(d12) %>%
+  # bind_rows(d13) %>%
   arrange(datetime) %>%
   rename_with(
     .fn = ~ paste("S4", ., sep = "__"),
