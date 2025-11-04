@@ -689,6 +689,9 @@ shinyServer(function(input, output, session) {
         } else if(grepl('grab_error', err_msg)){
           showNotification(glue('Error somewhere on the grab sample tab'),
                            type = 'warning', duration = NULL)
+        } else if(grepl('combine_error', err_msg)){
+          showNotification(glue('Error during combine. is there a misformatted date somewhere? if not, contact Mike!'),
+                           type = 'warning', duration = NULL)
         } else {
           showNotification(glue("{f} failed to parse. Please try again or email Mike with the file(s) you're trying to upload."),
                            type = 'warning', duration = NULL)

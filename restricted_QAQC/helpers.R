@@ -502,10 +502,13 @@ parse_note_collection <- function(notefile){
         d_grab = tibble()
         # d_flow$gageHt = NA_real_
     }
+    })
+    if(inherits(catch, 'try-error')) stop('grab_error')
     
     
     # resolve, combine ####
     
+    catch = try({
     #RG-4 data are only used if RG-1 is contaminated (code 923)
     d_precip = split(d_precip, as.factor(d_precip$date)) %>% 
         purrr::map(function(x){
@@ -523,6 +526,7 @@ parse_note_collection <- function(notefile){
             }
         }) %>% 
         purrr::reduce(bind_rows)
+        # purrr::reduce(bind_rows, .init = tibble()) #fixes some errors, but might let typos through
     
     d_precip = filter(d_precip, site != 'RG-4')
     
@@ -539,7 +543,7 @@ parse_note_collection <- function(notefile){
                notes, archived, uniqueID, waterYr, datetime) %>% 
         arrange(site, date, timeEST)
     })
-    if(inherits(catch, 'try-error')) stop('grab_error')
+    if(inherits(catch, 'try-error')) stop('combine_error')
     
     #nvm, actually it should be set up like this:
     d = d %>% 
