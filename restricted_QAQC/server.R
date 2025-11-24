@@ -476,8 +476,8 @@ shinyServer(function(input, output, session) {
       return()
     }
     
-    if(any(! bug$watershed %in% c(1:6, 9))){
-      showNotification('All watershed values must be in [1, 2, 3, 4, 5, 6, 9]. Resolve and reupload.',
+    if(any(! bug$watershed %in% c('HBK', as.character(c(1:6, 9))))){
+      showNotification('All watershed values must be in [1, 2, 3, 4, 5, 6, 9, HBK]. Resolve and reupload.',
                        type='error',
                        duration = NULL,
                        id = 'stickytraperr')
