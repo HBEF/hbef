@@ -21,6 +21,10 @@ server <- function(input, output, session){
     init_vals$enable_unitconvert <- FALSE
     init_vals$recent_domain <- 'hbef'
 
+	session$onFlushed(function() {
+	  init_vals$enable_unitconvert <- TRUE
+	}, once = TRUE)
+
     observeEvent(input$COLLAPSE_SIDEBAR, {
 
         shinyjs::toggleClass(selector = '.sidebar-sub',
