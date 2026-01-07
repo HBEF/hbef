@@ -165,7 +165,7 @@ pchemvars_display <- generate_dropdown_varlist(chemvars,
                                                                    pchemvars))
 
 conc_vars <- variables %>%
-    filter(variable_type %in% c('chem_discrete', 'gas')) %>% #TODO: allow the 4 gas variables to be displayed in ppx OR x/L, xM, xeq
+    filter(variable_type %in% c('chem_discrete', 'gas', 'chem_mix')) %>% #TODO: allow the 4 gas variables to be displayed in ppx OR x/L, xM, xeq
     pull(variable_code)
 
 #these are the available selections for the unit conversion menus

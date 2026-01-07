@@ -109,7 +109,7 @@ parse_molecular_formulae = function(formulae){
     # formulae = 'BCH10He10PLi2'
     # formulae='Mn'
 
-    conc_vars = str_match(formulae, '^(?:OM|TM|DO|TD|UT|UTK|TK)?([A-Za-z0-9]+)_?')[,2]
+    conc_vars = str_match(formulae, '^(?:OM|TM|DO|TD|UT|UTK|TK|DI|DO)?([A-Za-z0-9]+)_?')[,2]
     two_let_symb_num = str_extract_all(conc_vars, '([A-Z][a-z][0-9]+)')
     conc_vars = str_remove_all(conc_vars, '([A-Z][a-z][0-9]+)')
     one_let_symb_num = str_extract_all(conc_vars, '([A-Z][0-9]+)')
