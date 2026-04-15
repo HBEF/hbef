@@ -41,6 +41,7 @@ suppressPackageStartupMessages({
 # conf <- jsonlite::fromJSON('config.json')
 
 # #uncomment and run this (without saving script) to allow pushing of app to our shinyapps account
+# #but note this is app is self-hosted now
 # rsconnect::setAccountInfo(name = 'cuahsi',
 #                           token = conf$shinyapps_cuahsi_token,
 #                           secret = conf$shinyapps_cuahsi_secret)
