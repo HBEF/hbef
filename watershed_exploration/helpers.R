@@ -325,7 +325,7 @@ left_forward_rolljoin = function(l, r){
 }
 
 sites_from_feathers = function(directory){
-    sitenames = unlist(strsplit(list.files(directory), '.feather'))
+    sitenames = unlist(strsplit(list.files(directory), '.rds'))
     return(sitenames)
 }
 
@@ -371,7 +371,8 @@ get_sitelist <- function(domain, type){
 
 try_read_feather <- function(path){
 
-    out <- try(feather::read_feather(path),
+    # out <- try(feather::read_feather(path),
+    out <- try(readRDS(path),
                silent = TRUE)
 
     if('try-error' %in% class(out)){
@@ -403,7 +404,7 @@ read_combine_feathers <- function(var, dmns, sites = NULL){
     combined_data <- tibble()
     for(i in 1:nrow(dmn_sites)){
 
-        filestr <- glue('data/{d}/{v}/{s}.feather',
+        filestr <- glue('data/{d}/{v}/{s}.rds',
                         d = dmn_sites$domain[i],
                         v = var,
                         s = dmn_sites$site_code[i])
@@ -1128,7 +1129,8 @@ ms_read_portalsite <- function(domain,
     #(error/uncertainty is handled by the errors package as an attribute,
     #so it must be written/read as a separate column).
 
-    d <- read_feather(glue('data/{dmn}/{p}/{s}.feather',
+    # d <- read_feather(glue('data/{dmn}/{p}/{s}.feather',
+    d <- readRDS(glue('data/{dmn}/{p}/{s}.rds',
                            dmn = domain,
                            p = prodname,
                            s = site_code))

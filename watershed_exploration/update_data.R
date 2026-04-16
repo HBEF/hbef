@@ -2,6 +2,8 @@ library(tidyverse)
 library(feather)
 library(lubridate)
 
+### NOW USING RDS INSTEAD OF ARROW. if you change anything in global.R, etc., make sure it's not trying to use feather###
+
 #TODO: HBK will be properly included in macrosheds after the 2025 run, so
 # some of the HBK stuff below should be re-enabled.
 # ...wait a minute. no. should it be considered a stream gauge site in ms?
@@ -155,7 +157,18 @@ hbef_sheds <- sf::st_read('~/git/macrosheds/portal/data/general/shed_boundary/sh
 
 #insert rain gauge data into the filstructure as if gauges are watershed sites ####
 
+#this is 90% a red herring. 
 # file.copy(from = '../../../macrosheds/data_acquisition/data/lter/hbef/munged/precipitation__13/')
+
+#rewrite feather files as rds
+feather_files <- list.files("data/hbef", pattern = "\\.feather$", recursive = TRUE, full.names = TRUE)
+
+for (f in feather_files) {
+  rds_path <- sub("\\.feather$", ".rds", f)
+  df <- read_feather(f)
+  saveRDS(df, rds_path)#, version = 2)
+  file.remove(f)
+}
 
 #TODO every time:
 #1. update the annual report (watershed report) pdf in www/ (if available)
