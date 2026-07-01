@@ -31,3 +31,5 @@ scheduled_scripts/*.log
 */.vscode/
 HTML/images/forest3_tinted.jpg
 *.swp
+Rprofile*
+.Rprofile
