@@ -456,8 +456,8 @@ shinyServer(function(input, output, session) {
       return()
     }
     
-    if(any(nchar(bug$sample_id) != 8)){
-      showNotification('All sample_id values must be exactly 8 characters long. Resolve and reupload.',
+    if(any(nchar(bug$sample_id) < 8 | nchar(bug$sample_id) > 10)){
+      showNotification('All sample_id values must be between 8 and 10 characters, e.g. XXXXYYMMDD. Resolve and reupload.',
                        type='error',
                        duration = NULL,
                        id = 'stickytraperr')
