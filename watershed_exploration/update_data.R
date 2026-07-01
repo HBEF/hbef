@@ -165,8 +165,9 @@ feather_files <- list.files("data/hbef", pattern = "\\.feather$", recursive = TR
 
 for (f in feather_files) {
   rds_path <- sub("\\.feather$", ".rds", f)
-  df <- read_feather(f)
-  saveRDS(df, rds_path)#, version = 2)
+  cat("Converting:", f, "->", rds_path, "\n")
+  df <- as.data.frame(read_feather(f))
+  saveRDS(df, rds_path, version = 2)
   file.remove(f)
 }
 
