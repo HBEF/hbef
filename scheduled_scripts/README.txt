@@ -16,6 +16,7 @@ to incorporate a new S.CAN file from Tammy:
     probably safest to: sudo systemctl restart shiny-server
 
 archive_merger.R is not actually scheduled (yet). Amey sends per-watershed xlsx files (e.g. "w6 sample archive collection through 2026.xlsx"). Put them, unmodified, in restricted_QAQC/data/archive_data/stream_updates/ on the server; each replaces that watershed's rows from "HB physical archives stream samples.csv" (see header of archive_merger.R). Then run:
-    Rscript /home/mike/git/hbef/shiny/scheduled_scripts/archive_merger.R
-    That will overwrite the archive table in MariaDB with the new version. Note that this table isn't even used. The archive data get merged with the field sample data in R and then get written as raw text into archive_explore.html.
+    Rscript /home/mike/shiny/scheduled_scripts/archive_merger.R
+    It merges the archive bottles with chemistry from the hbef database and writes HTML/archive_explore/archive_data.js (gitignored; loaded by archive_explore.html, so the page updates without a commit) and ../misc/edi_prep_files/archive_samples.csv (barcodes for edi_upload_prep.R).
+    restricted_QAQC/data/ is gitignored, so the archive files (HB physical archives stream samples.csv, HB precipitation.csv, stream_updates/) must be copied to the server by hand, e.g. after a rebuild.
 After running archive_merger.R, run sudo systemctl restart shiny-server.

@@ -4,8 +4,12 @@ library(readxl)
 library(RMariaDB)
 library(DBI)
 
-#WARNING: run this for reals on server, not local. local test is fine, but
-#you'll need to set up a copy of the MySQL database
+#run this on the server, where the hbef database lives (a local test needs a
+#local copy of the database). outputs:
+#   HTML/archive_explore/archive_data.js: the portal's data, loaded by
+#       archive_explore.html. gitignored, so regenerating it never blocks a git pull
+#   ../misc/edi_prep_files/archive_samples.csv: bottle barcodes for
+#       edi_upload_prep.R; comes down with the "get *" in edi_upload_preR_steps.txt
 
 #stream archive data come from two places:
 #1. restricted_QAQC/data/archive_data/HB physical archives stream samples.csv
@@ -17,8 +21,8 @@ library(DBI)
 
 # setup ####
 
-# setwd('~/git/hbef/shiny/'); misc_dir = 'hbef_misc'
-setwd('/home/mike/shiny/'); misc_dir = 'misc'
+# setwd('~/git/hbef/shiny/'); edi_dir = '../hbef_misc/edi_upload'
+setwd('/home/mike/shiny/'); edi_dir = '../misc/edi_prep_files'
 
 source('restricted_QAQC/helpers.R')
 
@@ -224,10 +228,10 @@ wonky_timeEST_ind = which(sapply(strsplit(arch2$timeEST, ':'),
                                  function(x) any(x == 'NA')))
 arch2$timeEST[wonky_timeEST_ind] = NA
 
-if(misc_dir == 'hbef_misc') stop('on local machine? make sure you are using the most recent version of the database and archive dataset')
+if(edi_dir == '../hbef_misc/edi_upload') stop('on local machine? make sure you are using the most recent version of the database and archive dataset')
 #this file is used by edi_upload_prep.R
 write_csv(rename(bind_rows(arch, arch2), date = sample_date), na = '',
-          file.path('..', misc_dir, 'edi_upload/archive_samples.csv'))
+          file.path(edi_dir, 'archive_samples.csv'))
 
 # (over)write archive table in hbef database OBSOLETE ####
 
@@ -308,12 +312,8 @@ arch = arch %>%
            NH4_N = round(NH4_N, 2))
 
 
-#embed data in HTML ####
+#write portal data (loaded by archive_explore.html) ####
 
-htmlf = read_lines('HTML/archive_explore/archive_explore.html')
-# insert_ind = grep("<div id='archive_hot'></div>", htmlf)
-insert_ind_start = grep("<script id='archive_script'>", htmlf)
-insert_ind_end = grep("\\s?const container =", htmlf, perl=TRUE)
 arch2 = mutate(arch, across(everything(), as.character))
 classvec = unname(sapply(arch, class))
 enquote = rep(TRUE, length(classvec))
@@ -343,11 +343,4 @@ arch2_js = gsub(',NA,', ',null,', arch2_js)
 arch2_js = gsub(',NA,', ',null,', arch2_js)
 arch2_js = gsub(',NA]', ',null]', arch2_js)
 
-htmlf = c(htmlf[1:insert_ind_start],
-          '',
-          arch2_js,
-          '',
-          htmlf[(insert_ind_end):length(htmlf)])
-
-readr::write_lines(htmlf, 'HTML/archive_explore/archive_explore.html')
-# readr::write_csv(arch, 'restricted_QAQC/data/archive_data/archive_merged.csv')
+write_lines(arch2_js, 'HTML/archive_explore/archive_data.js')
