@@ -15,7 +15,7 @@ to incorporate a new S.CAN file from Tammy:
     execute Rscript process_unh_data.R on the server (or wait for it to run as a cron job)
     probably safest to: sudo systemctl restart shiny-server
 
-archive_merger.R is not actually scheduled (yet). Amey will just send a new version of "HB physical archives stream samples.csv" periodically, and then you can run:
+archive_merger.R is not actually scheduled (yet). Amey sends per-watershed xlsx files (e.g. "w6 sample archive collection through 2026.xlsx"). Put them, unmodified, in restricted_QAQC/data/archive_data/stream_updates/ on the server; each replaces that watershed's rows from "HB physical archives stream samples.csv" (see header of archive_merger.R). Then run:
     Rscript /home/mike/git/hbef/shiny/scheduled_scripts/archive_merger.R
     That will overwrite the archive table in MariaDB with the new version. Note that this table isn't even used. The archive data get merged with the field sample data in R and then get written as raw text into archive_explore.html.
 After running archive_merger.R, run sudo systemctl restart shiny-server.
