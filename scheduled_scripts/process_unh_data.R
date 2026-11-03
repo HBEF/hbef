@@ -167,11 +167,23 @@ gc()
 
 # read and process mainstem temperature data ####
 
-header = readr::read_csv('HB%20Mainstem_HB_mainstem.dat',
-                         skip=1, col_names=FALSE, n_max=1)
-mainstem = readr::read_csv('HB%20Mainstem_HB_mainstem.dat', skip=4,
-                           col_names=FALSE)
-colnames(mainstem) = header
+#the loggernet mainstem file gets rotated, so earlier records are kept as static
+#copies in mainstem_archive/ (gitignored, like the rest of data/):
+#  HB_mainstem_20191031-20210803.dat  (hbrsensor realtime_data/...dat.backup)
+#  HB_mainstem_20210804-20230809.dat  (an old local download)
+#records from 2023-08-09 to 2024-11-01 appear to be lost.
+mainstem_files = c(list.files('mainstem_archive', '\\.dat$', full.names=TRUE),
+                   'HB%20Mainstem_HB_mainstem.dat')
+
+mainstem = lapply(mainstem_files, function(f){
+    header = readr::read_csv(f, skip=1, col_names=FALSE, n_max=1)
+    readr::read_csv(f, skip=4, col_names=unlist(header),
+        col_types=readr::cols_only(TIMESTAMP='T', Sensor1tempC='d'),
+        na=c('', 'NA', 'NAN'))
+}) %>%
+    bind_rows() %>%
+    filter(! is.na(TIMESTAMP)) %>%
+    distinct(TIMESTAMP, .keep_all=TRUE)
 
 mainstem = mainstem %>%
     select(datetime=TIMESTAMP, TempC=Sensor1tempC) %>%

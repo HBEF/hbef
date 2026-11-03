@@ -23,3 +23,4 @@ After running archive_merger.R, run sudo systemctl restart shiny-server.
 
 20261103
 weir files renamed by UNH: weirN_Ws_Nb.dat -> LoggerNetDir/weirN_weir_N.dat (Q column is now pressure1_Q, still ft^3/s, computed on the logger incl. flume equation at high flow). the mainstem file is still realtime_data/HB Mainstem_HB_mainstem.dat (not in LoggerNetDir). weirfiles.txt now lists every file get_usfs_weirfiles.sh pulls, as paths relative to loggernetfiles_complete/. the script resolves paths relative to itself, uses https (http redirects and drops auth -> 401), and won't overwrite a good file on a failed download. get_usfs_weirfiles_local.sh is now just a wrapper.
+mainstem history: the loggernet mainstem file rotates. older records live in restricted_QAQC/data/unh_sensor_data/mainstem_archive/ (gitignored; copy by hand on a rebuild) and are read alongside the live file by process_unh_data.R. 2023-08-09 to 2024-11-01 is missing.
