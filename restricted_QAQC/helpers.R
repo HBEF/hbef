@@ -793,6 +793,21 @@ thin_minmax <- function(d, valcol, max_bins = 5000, min_width_s = 300){
     d[keep, , drop = FALSE]
 }
 
+# dygraph axis ticker/valueFormatter for a series plotted as log10(value):
+# ticks at 1, 2, 5 x 10^k (decades only if the range spans > 3), labeled in
+# original units
+log10_ticker_js <- "function(min, max, pixels, opts, dygraph, vals) {
+  var ticks = [], mults = (max - min) > 3 ? [1] : [1, 2, 5];
+  for (var e = Math.floor(min); e <= Math.ceil(max); e++) {
+    for (var i = 0; i < mults.length; i++) {
+      var v = Math.log10(mults[i]) + e;
+      if (v >= min && v <= max) ticks.push({v: v, label: String(+Math.pow(10, v).toPrecision(2))});
+    }
+  }
+  return ticks;
+}"
+log10_value_formatter_js <- "function(v) { return String(+Math.pow(10, v).toPrecision(3)); }"
+
 get_buffered_yrange <- function(d){
     
     

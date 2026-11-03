@@ -2035,22 +2035,32 @@ shinyServer(function(input, output, session) {
       if(any(input$SOLUTES2 %in% emergence)){
         data2 = full_join(data2, stky, by = 'date', relationship = 'many-to-many')
       }
+      # log scale for raw sensor Q (y2 only). dygraphs 1.1.1's own logscale
+      # can't be applied to y2 alone (points aren't drawn, or values <= 0 are
+      # dropped from every series), so plot log10(Q) on a linear axis and label
+      # the ticks/legend in L/s. Q <= 0 isn't drawn.
+      logQ2 <- isTRUE(input$LOGQ2) && input$SITES2 %in% sites_streams &&
+        input$Flow_or_Precip2 == 'flowSensProv'
+      if(logQ2){
+        data2$Flow_or_Precip <- ifelse(data2$Flow_or_Precip > 0,
+                                       log10(data2$Flow_or_Precip), NA)
+      }
+
       data2.xts <- xts(data2[,-1], order.by = data2$date)
 
       yValues <- get_buffered_yrange(data2)
       if(! is.na(input$YLIMlo2)) yValues[1] <- input$YLIMlo2
       if(! is.na(input$YLIMhi2)) yValues[2] <- input$YLIMhi2
 
-      # log scale for raw sensor Q (y2 only); values <= 0 aren't drawn
-      logQ2 <- isTRUE(input$LOGQ2) && input$SITES2 %in% sites_streams &&
-        input$Flow_or_Precip2 == 'flowSensProv'
-
       dg2 = dygraph(data2.xts, group='group2') %>%
         dyAxis("x", label=xlabel) %>%
         dyAxis("y", label = "(various units, dependent on input)",
                independentTicks=TRUE, valueRange=yValues) %>%
-        dyAxis('y2',label=ylabel2, independentTicks=TRUE,
-               logscale = logQ2,
+        dyAxis('y2',
+               label = if(logQ2) 'Discharge (L/s, log scale)' else ylabel2,
+               independentTicks=TRUE,
+               ticker = if(logQ2) log10_ticker_js else NULL,
+               valueFormatter = if(logQ2) log10_value_formatter_js else NULL,
                axisLabelWidth = 70,
                axisLabelColor = "#3182bd",
                axisLineColor = "#3182bd")
@@ -2068,7 +2078,9 @@ shinyServer(function(input, output, session) {
                   pointSize = 3,
                   fillAlpha = 0.3,
                   connectSeparatedPoints=TRUE,
-                  includeZero = ! logQ2)
+                  includeZero = TRUE)
+      # 0 on the log10 axis is 1 L/s; don't force it into range
+      if(logQ2) dg2$x$attrs$axes$y2$includeZero <- FALSE
       dg2
     } else {
       
