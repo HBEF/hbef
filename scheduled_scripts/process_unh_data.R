@@ -82,6 +82,8 @@ fieldtypes[fieldnames == 'id'] = 'INT(11) primary key auto_increment'
 names(fieldtypes) = fieldnames
 
 dbCreateTable(con, 'sensor4', fieldtypes)
+#the app queries sensor4 by watershedID and datetime range
+dbExecute(con, 'create index ws_dt on sensor4 (watershedID, datetime);')
 # }
 
 dbWriteTable(con, 'sensor4', wqual9, append=TRUE)

@@ -768,6 +768,31 @@ calculate_SWDD <- function(data, base_temp_C = 4){
         select(date, site, swdd)
 }
 
+thin_minmax <- function(d, valcol, max_bins = 5000, min_width_s = 300){
+
+    # Thin a time series (rows ordered by `datetime`) for plotting: split the
+    # time span into at most `max_bins` equal bins and keep, from each, the
+    # rows holding its min and max of `valcol`. Peaks, troughs, and spikes are
+    # preserved. Bins are never narrower than `min_width_s` (one 5-min sample),
+    # so short ranges come back at full resolution. Bins whose values are all
+    # NA are dropped.
+
+    if(nrow(d) <= 2 * max_bins) return(d)
+
+    t = as.numeric(d$datetime)
+    width = max(min_width_s, diff(range(t, na.rm = TRUE)) / max_bins)
+    v = d[[valcol]]
+
+    bin = floor((t - min(t, na.rm = TRUE)) / width)
+    o = order(bin, v, na.last = NA)          # NA values dropped
+    b = bin[o]
+    first = ! duplicated(b)                  # bin min
+    last = ! duplicated(b, fromLast = TRUE)  # bin max
+    keep = sort(unique(o[first | last]))
+
+    d[keep, , drop = FALSE]
+}
+
 get_buffered_yrange <- function(d){
     
     

@@ -389,6 +389,12 @@ shinyUI(
                           selected = "gageHt",
                           inline = FALSE)
                 ),
+                conditionalPanel(
+                  condition = "input.Flow_or_Precip2 == 'flowSensProv'",
+                  checkboxInput("LOGQ2", label = "Log scale (raw sensor Q)", value = FALSE),
+                  p("Long date ranges are thinned to each interval's min and max.",
+                    style = "color:#666666; font-size:85%;")
+                ),
                 style = "color:#3182bd;"
               ),
               p("Hydrology shows discharge for watershed sites,

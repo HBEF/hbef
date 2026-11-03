@@ -1082,7 +1082,7 @@ shinyServer(function(input, output, session) {
     
     current_selection = input$Flow_or_Precip2
     ws_site_selected = grepl("^W[0-9]+$", input$SITES2)
-    if(! ws_site_selected && current_selection == 'flowSens'){
+    if(! ws_site_selected && current_selection %in% c('flowSens', 'flowSensProv')){
       current_selection = 'flowGageHt'
     }
     
@@ -1163,6 +1163,35 @@ shinyServer(function(input, output, session) {
     dataAll2
   }) # END of dataAll2()
   
+  # Raw sensor Q (sensorQraw) for the selected watershed and dates, in L/s.
+  # Kept separate from dataAllQ2 so that changing factors, y-limits, or the log
+  # toggle doesn't re-query the db. Long ranges are thinned (see thin_minmax).
+  dataSensQraw2 <- reactive({
+    if(input$wateryearOrRange2 == 'wateryr'){
+      yrstart = as.POSIXct(paste0(input$WATERYEAR2, '-06-01'))
+      yrend = as.POSIXct(paste0(as.numeric(input$WATERYEAR2) + 1, '-05-31'))
+    } else {
+      yrstart = as.POSIXct(input$DATE2[1])
+      yrend = as.POSIXct(input$DATE2[2])
+    }
+    wsID = suppressWarnings(as.integer(substr(input$SITES2, 2, 3)))
+    req(! is.na(wsID))
+
+    con = dbConnect(RMariaDB::MariaDB(), user = 'root', password = pass,
+                    host = 'localhost', dbname = dbname)
+    on.exit(dbDisconnect(con))
+
+    # uses index ws_dt (watershedID, datetime)
+    d = dbGetQuery(con,
+                   glue('select datetime, Q_Ls, watershedID from sensorQraw ',
+                        'where watershedID = {ws} and datetime >= "{dt1}" ',
+                        'and datetime <= "{dt2}" order by datetime;',
+                        ws=wsID, dt1=yrstart, dt2=yrend))
+    d = mutate(d, watershedID=paste0('W', watershedID),
+               Q_Ls=Q_Ls * 28.316846592)
+    thin_minmax(d, 'Q_Ls')
+  })
+
   # Grab selected wateryear, site, solute, and discharge data from recent data
   dataAllQ2 <- reactive({
     # update data variable if underlying data was updated
@@ -1219,25 +1248,9 @@ shinyServer(function(input, output, session) {
           yrstart = as.POSIXct(input$DATE2[1])
           yrend = as.POSIXct(input$DATE2[2])
         }
-        
-        # Open database connection
-        #y = RMySQL::MySQL()
-        y = RMariaDB::MariaDB()
-        con = dbConnect(y,
-                        user = 'root',
-                        password = pass,
-                        host = 'localhost',
-                        dbname = dbname)
-        
-        wsID = substr(input$SITES2, 2, 3)
-        dataSensRaw = dbGetQuery(con,
-                                 glue('select * from sensorQraw where watershedID= "{ws}" ',
-                                      'and datetime >= "{dt1}" and datetime <="{dt2}";', ws=wsID,
-                                      dt1=yrstart, dt2=yrend))
-        dataSensRaw = mutate(dataSensRaw,
-                             watershedID=paste0('W', watershedID),
-                             Q_Ls=Q_Ls * 28.316846592)
-        
+
+        dataSensRaw = dataSensQraw2() # db read; cached until site or dates change
+
         dataAllQ2 <- dataAllQ2 %>%
           filter(site %in% input$SITES2) %>%             # Filter data to selected site
           select(-flowGageHt) %>%
@@ -1251,8 +1264,6 @@ shinyServer(function(input, output, session) {
           select(one_of("date", input$SOLUTES2, "flowGageHt")) %>%    # Selected desired columns of data
           rename(Flow_or_Precip = flowGageHt)                  # Rename Q to standard name, so that don't have
         #  to create alternative graphs
-        
-        dbDisconnect(con)
       }
     }
     if (input$SITES2 %in% sites_precip) {
@@ -2025,16 +2036,21 @@ shinyServer(function(input, output, session) {
         data2 = full_join(data2, stky, by = 'date', relationship = 'many-to-many')
       }
       data2.xts <- xts(data2[,-1], order.by = data2$date)
-      
+
       yValues <- get_buffered_yrange(data2)
       if(! is.na(input$YLIMlo2)) yValues[1] <- input$YLIMlo2
       if(! is.na(input$YLIMhi2)) yValues[2] <- input$YLIMhi2
-      
+
+      # log scale for raw sensor Q (y2 only); values <= 0 aren't drawn
+      logQ2 <- isTRUE(input$LOGQ2) && input$SITES2 %in% sites_streams &&
+        input$Flow_or_Precip2 == 'flowSensProv'
+
       dg2 = dygraph(data2.xts, group='group2') %>%
         dyAxis("x", label=xlabel) %>%
         dyAxis("y", label = "(various units, dependent on input)",
                independentTicks=TRUE, valueRange=yValues) %>%
         dyAxis('y2',label=ylabel2, independentTicks=TRUE,
+               logscale = logQ2,
                axisLabelWidth = 70,
                axisLabelColor = "#3182bd",
                axisLineColor = "#3182bd")
@@ -2045,14 +2061,14 @@ shinyServer(function(input, output, session) {
         }
       }
       dg2 = dySeries(dg2, name = 'Flow_or_Precip', label = "Discharge/Precip",
-                     drawPoints = FALSE, fillGraph=T, axis='y2') %>% 
+                     drawPoints = FALSE, fillGraph = ! logQ2, axis='y2') %>%
         dyOptions(drawGrid = FALSE,
                   drawPoints = TRUE,
                   strokeWidth = 1,
                   pointSize = 3,
                   fillAlpha = 0.3,
                   connectSeparatedPoints=TRUE,
-                  includeZero = TRUE)
+                  includeZero = ! logQ2)
       dg2
     } else {
       
