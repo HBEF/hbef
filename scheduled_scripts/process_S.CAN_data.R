@@ -400,6 +400,11 @@ insert_df <- bind_rows(result_list)
 
 if (any(duplicated(select(insert_df, watershedID, datetime)))) stop("still dupes")
 
+# insert_df already contains every row of sensor4 (s4 was bound in above), so
+# clear the table first; otherwise every non-S:CAN row ends up in it twice.
+# (DELETE rather than overwrite=TRUE, to keep the table schema.)
+dbExecute(con, "DELETE FROM sensor4;")
+
 dbWriteTable(con,
   "sensor4",
   insert_df,
