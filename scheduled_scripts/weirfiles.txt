@@ -1,9 +1,12 @@
-weir1_weir_1.dat
-weir2_weir_2.dat
-weir3_weir_3.dat
-weir4_weir_4.dat
-weir5_weir_5.dat
-weir6_weir_6.dat
-weir7_weir_7.dat
-weir8_weir_8.dat
-weir9_weir_9.dat
+LoggerNetDir/weir1_weir_1.dat
+LoggerNetDir/weir2_weir_2.dat
+LoggerNetDir/weir3_weir_3.dat
+LoggerNetDir/weir4_weir_4.dat
+LoggerNetDir/weir5_weir_5.dat
+LoggerNetDir/weir6_weir_6.dat
+LoggerNetDir/weir7_weir_7.dat
+LoggerNetDir/weir8_weir_8.dat
+LoggerNetDir/weir9_weir_9.dat
+realtime_data/HB%20Mainstem_HB_mainstem.dat
+LoggerNetDir/weir3_weir_3_WQual.dat
+LoggerNetDir/Weir 6 Chem_WQual.dat

@@ -221,7 +221,21 @@ gc()
 #that is appropriately configured and populated with static data from Nina
 #(unless qa/qc'd data have surpassed those static files, which extend to 20200316)
 
-weirfiles = list.files('.', '^weir[0-9]_Ws_[0-9]b.dat$')
+#Late 2021, the loggers were reprogrammed and the files renamed from
+#weirN_Ws_Nb.dat to weirN_weir_N.dat (column Q -> pressure1_Q). The new files
+#begin 2021-12-02, where the old ones end.
+#
+#pressure1_Q is computed on the logger, in ft^3/s (same units as the old Q
+#column; despite the name, Q_Ls in sensorQraw holds ft^3/s and is converted to
+#L/s in restricted_QAQC/server.R). flow_equation == 1 marks records above the
+#top of the v-notch; for W5, W7, and W8 (small v-notches), pressure1_Q is then
+#derived from flume stage on the logger, so no rating curve is needed here.
+#W6 was reprogrammed 2024-12-10 and has no flow_equation/flume columns.
+#
+#The files contain exact duplicate records (re-collection, Nov 2024), which
+#are dropped.
+
+weirfiles = list.files('.', '^weir[0-9]_weir_[0-9]\\.dat$')
 
 if(length(weirfiles) != 9){
     logging::logerror('weir filenames have changed', logger='hbef.module')
@@ -233,16 +247,25 @@ for(w in weirfiles){
     err = FALSE
     tryCatch({
         header = readr::read_csv(w, skip=1, col_names=FALSE, n_max=1)
-        flowd = readr::read_csv(w, skip=4, col_names=FALSE)
-        colnames(flowd) = header
+        flowd = readr::read_csv(w, skip=4, col_names=unlist(header),
+            col_types=readr::cols_only(TIMESTAMP='T', pressure1_Q='d'),
+            na=c('', 'NA', 'NAN'))
 
-        id = stringr::str_match(w, '^weir(.)_Ws_.b\\.dat$')[,2]
+        id = stringr::str_match(w, '^weir(.)_weir_.\\.dat$')[,2]
 
         flowd = flowd %>%
-            select(datetime=TIMESTAMP, Q_Ls=Q) %>%
+            select(datetime=TIMESTAMP, Q_Ls=pressure1_Q) %>%
+            #a few records carry bogus logger-clock times (e.g. 1958, 1998)
+            filter(! is.na(datetime),
+                   datetime >= as.POSIXct('2021-12-01', tz='UTC'),
+                   datetime <= Sys.time() + 86400) %>%
+            distinct(datetime, .keep_all=TRUE) %>%
             mutate(watershedID=id)
+
+        if(nrow(flowd) == 0) stop('no rows')
     }, error=function(e){
-        logging::logerror('missing Q in weir file', logger='hbef.module')
+        logging::logerror(glue('could not read pressure1_Q from {w}: ',
+            conditionMessage(e)), logger='hbef.module')
         err <<- TRUE
     })
 
@@ -251,13 +274,14 @@ for(w in weirfiles){
         stop()
     }
 
-    # held_data = dbReadTable(con, 'sensorQraw')
     held_datemax = dbGetQuery(con,
         glue('select max(datetime) from sensorQraw where watershedID={id};',
             id=id))[[1]] %>%
         lubridate::with_tz('EST')
 
-    flowd = filter(flowd, datetime > held_datemax)
+    if(! is.na(held_datemax)){
+        flowd = filter(flowd, datetime > held_datemax)
+    }
 
     dbWriteTable(con, 'sensorQraw', flowd, append=TRUE)
 }

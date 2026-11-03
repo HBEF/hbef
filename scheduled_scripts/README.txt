@@ -20,3 +20,6 @@ archive_merger.R is not actually scheduled (yet). Amey sends per-watershed xlsx 
     It merges the archive bottles with chemistry from the hbef database and writes HTML/archive_explore/archive_data.js (gitignored; loaded by archive_explore.html, so the page updates without a commit) and ../misc/edi_prep_files/archive_samples.csv (barcodes for edi_upload_prep.R).
     restricted_QAQC/data/ is gitignored, so the archive files (HB physical archives stream samples.csv, HB precipitation.csv, stream_updates/) must be copied to the server by hand, e.g. after a rebuild.
 After running archive_merger.R, run sudo systemctl restart shiny-server.
+
+20261103
+weir files renamed by UNH: weirN_Ws_Nb.dat -> LoggerNetDir/weirN_weir_N.dat (Q column is now pressure1_Q, still ft^3/s, computed on the logger incl. flume equation at high flow). the mainstem file is still realtime_data/HB Mainstem_HB_mainstem.dat (not in LoggerNetDir). weirfiles.txt now lists every file get_usfs_weirfiles.sh pulls, as paths relative to loggernetfiles_complete/. the script resolves paths relative to itself, uses https (http redirects and drops auth -> 401), and won't overwrite a good file on a failed download. get_usfs_weirfiles_local.sh is now just a wrapper.
