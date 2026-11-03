@@ -4,7 +4,7 @@ loggernet_pw=$(< /home/mike/shiny/scheduled_scripts/lognet_pw)
 cd '/home/mike/shiny/scheduled_scripts'
 
 while read l; do
-wget -O "../restricted_QAQC/data/unh_sensor_data/$l"  "http://hbrsensor.sr.unh.edu/data/hbrloggernet/loggernetfiles_complete/realtime_data/$l" --user="hbrsensor" --password="$loggernet_pw"
+wget -O "../restricted_QAQC/data/unh_sensor_data/$l"  "http://hbrsensor.sr.unh.edu/data/hbrloggernet/loggernetfiles_complete/LoggerNetDir/$l" --user="hbrsensor" --password="$loggernet_pw"
 done < /home/mike/shiny/scheduled_scripts/weirfiles.txt
 #done < /home/mike/git/hbef/shiny/scheduled_scripts/weirfiles.txt
 
